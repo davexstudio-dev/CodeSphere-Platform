@@ -1,6 +1,6 @@
 import { createApp } from "./app";
 import { ENV } from "./env.server";
-import { auth, db, logger, notifications } from "./services";
+import { auth, db, logger, notifications, social } from "./services";
 import { startTelemetry } from "./telemetry";
 
 const stopTelemetry = startTelemetry();
@@ -21,6 +21,7 @@ const app = createApp({
 	release: { version: ENV.APP_VERSION, commit: ENV.GIT_SHA },
 	apiDocs: ENV.NODE_ENV !== "production",
 	notifications,
+	social,
 	resendWebhookSecret: ENV.RESEND_WEBHOOK_SECRET,
 });
 

@@ -6,6 +6,7 @@ import {
 	BarChart3Icon,
 	LogOutIcon,
 	ScrollTextIcon,
+	ShareIcon,
 	ShieldIcon,
 	TagIcon,
 	TrophyIcon,
@@ -23,6 +24,7 @@ const NAV = [
 	{ key: "moderation.title", href: "/admin", icon: ShieldIcon },
 	{ key: "hackathons.title", href: "/admin/hackathons", icon: TrophyIcon },
 	{ key: "tags.title", href: "/admin/tags", icon: TagIcon },
+	{ key: "social.title", href: "/admin/social", icon: ShareIcon },
 	{ key: "audit.title", href: "/admin/audit", icon: ScrollTextIcon },
 ] as const;
 

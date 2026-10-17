@@ -2,12 +2,18 @@ import { type contract, MEMBER_SUSPENDED_MESSAGE } from "@codesphere/contract";
 import { auditLog } from "@codesphere/db/schema/audit";
 import { user } from "@codesphere/db/schema/auth";
 import { questions } from "@codesphere/db/schema/questions";
+import { SocialConnectError } from "@codesphere/social";
 import type { RouterContractClient } from "@orpc/contract";
 import { ORPCError } from "@orpc/server";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { updateHackathon } from "../admin-hackathons";
 import { kpiReport } from "../admin-kpi";
 import { listMembers, setSuspension } from "../admin-members";
+import {
+	createShareTargetLoader,
+	createSocialPostStore,
+	publishShare,
+} from "../admin-social";
 import { createTag, deleteTag, listTags, renameTag } from "../admin-tags";
 import { createAgentsHandlers } from "../agents/handlers";
 import { agentPreset } from "../agents/service";
@@ -28,6 +34,7 @@ import {
 	createVotesHandlers,
 } from "../questions/handlers";
 import { createQuestionService, QuestionError } from "../questions/service";
+import { consume, socialLimiter } from "../rate-limit";
 import { isSuspended } from "../suspension";
 import {
 	followedTags,
@@ -77,6 +84,16 @@ const tagRefusal = (
 	code: "NOT_FOUND" | "CONFLICT",
 	errors: { NOT_FOUND: () => Error; CONFLICT: () => Error },
 ) => (code === "NOT_FOUND" ? errors.NOT_FOUND() : errors.CONFLICT());
+
+// A failed OAuth connection (#266) is a CONFLICT carrying a message safe to show an Admin; anything
+// else is a real error and is rethrown.
+const connectRefusal = (
+	error: unknown,
+	errors: { CONFLICT: (options: { message: string }) => Error },
+) =>
+	error instanceof SocialConnectError
+		? errors.CONFLICT({ message: error.message })
+		: error;
 
 // A key over its 120 requests per minute is refused with 429 and the wait (spec §3), never
 // treated as anonymous: an agent must back off, not re-authenticate (#50).
@@ -361,6 +378,99 @@ export const appRouter = impl
 							throw tagRefusal(outcome.code, errors);
 						}
 						return { success: true };
+					}),
+			},
+			social: {
+				status: impl.admin.social.status
+					.use(isAdmin)
+					.handler(async ({ context }) => ({
+						platforms: context.social?.siteUrl
+							? [...(context.social.publisher?.platforms ?? [])]
+							: [],
+						accounts: context.social?.accounts
+							? (await context.social.accounts.status()).map((account) => ({
+									...account,
+									expiresAt: account.expiresAt?.toISOString() ?? null,
+									connectedAt: account.connectedAt?.toISOString() ?? null,
+								}))
+							: [],
+					})),
+				connect: impl.admin.social.connect
+					.use(isAdmin)
+					.handler(async ({ context, input, errors }) => {
+						const actorId = actorOf(context.session);
+						await consume(socialLimiter, actorId);
+						if (!context.social?.accounts) {
+							throw errors.SERVICE_UNAVAILABLE();
+						}
+						try {
+							return {
+								authorizationUrl: await context.social.accounts.begin(
+									input.platform,
+									actorId,
+								),
+							};
+						} catch (error) {
+							throw connectRefusal(error, errors);
+						}
+					}),
+				completeConnect: impl.admin.social.completeConnect
+					.use(isAdmin)
+					.handler(async ({ context, input, errors }) => {
+						const actorId = actorOf(context.session);
+						await consume(socialLimiter, actorId);
+						if (!context.social?.accounts) {
+							throw errors.SERVICE_UNAVAILABLE();
+						}
+						try {
+							return await context.social.accounts.complete(
+								actorId,
+								input.callbackUrl,
+							);
+						} catch (error) {
+							throw connectRefusal(error, errors);
+						}
+					}),
+				disconnect: impl.admin.social.disconnect
+					.use(isAdmin)
+					.handler(async ({ context, input, errors }) => {
+						if (!context.social?.accounts) {
+							throw errors.SERVICE_UNAVAILABLE();
+						}
+						const removed = await context.social.accounts.disconnect(
+							input.platform,
+							actorOf(context.session),
+						);
+						if (!removed) {
+							throw errors.NOT_FOUND();
+						}
+						return { success: true };
+					}),
+				publish: impl.admin.social.publish
+					.use(isAdmin)
+					.handler(async ({ context, input, errors }) => {
+						const actorId = actorOf(context.session);
+						await consume(socialLimiter, actorId);
+						const outcome = await publishShare(
+							{
+								store: createSocialPostStore(context.db),
+								publisher: context.social?.publisher ?? null,
+								siteUrl: context.social?.siteUrl,
+								loadTarget: createShareTargetLoader(context.db),
+							},
+							actorId,
+							input,
+						);
+						if (!outcome.ok) {
+							if (outcome.code === "UNAVAILABLE") {
+								throw errors.SERVICE_UNAVAILABLE();
+							}
+							if (outcome.code === "NOT_FOUND") {
+								throw errors.NOT_FOUND();
+							}
+							throw errors.CONFLICT({ message: outcome.message });
+						}
+						return outcome.publication;
 					}),
 			},
 			auditLog: {

@@ -83,6 +83,8 @@ jobs:
         working-directory: apps/web
         env:
           NEXT_PUBLIC_SERVER_URL: ${{ env.ORIGIN }}
+          # Inlined at build time; must match EMAIL_OTP_SIGNIN on the Worker (set at deploy below).
+          NEXT_PUBLIC_EMAIL_OTP_SIGNIN: "true"
         run: bunx opennextjs-cloudflare build
       - uses: actions/upload-artifact@v4
         with:
@@ -229,6 +231,7 @@ jobs:
             --var "BETTER_AUTH_URL:$ORIGIN" \
             --var "CORS_ORIGIN:$ORIGIN" \
             --var "OAUTH_PROXY_PRODUCTION_URL:$ORIGIN" \
+            --var "EMAIL_OTP_SIGNIN:true" \
             --var "GIT_SHA:${GITHUB_SHA::7}" \
             --secrets-file staging-secrets.json
           rm -f staging-secrets.json

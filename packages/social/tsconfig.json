@@ -1,0 +1,7 @@
+{
+	"extends": "@codesphere/config/tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": true
+	},
+	"include": ["src/**/*.ts"]
+}
