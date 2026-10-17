@@ -65,3 +65,24 @@ Publier depuis le compte du Member exige OAuth par plateforme, stockage chiffré
 4. Publication Admin (contrat, procédure, audit, table, idempotence), puis passage par l'outbox (#259).
 
 Terme à ajouter à `CONTEXT.md` si adopté : **Partage** (lien d'un contenu public vers un réseau) distinct de **Publication sociale** (envoi par un Admin vers un compte officiel).
+
+## Résultat du spike (#264) : go, avec réserves
+
+Mesuré le 2026-10-17 sur `@opencoredev/social-sdk@0.5.0` (épinglée exactement dans `packages/social`).
+
+**Constaté**
+- Publié sur npm (version `0.5.0`, dernière modification 2026-09-24), MIT, **aucune dépendance d'exécution**, 1,4 Mo, ESM seul, `engines: node >=22.12`. Pré-1.0 : l'API peut changer, d'où l'épinglage et la couche `SocialPublisher`.
+- **Bun 1.4.2 : OK.** Le vrai adaptateur Bluesky tourne sous Bun contre un faux serveur (connexion, puis un seul `createRecord` avec le jeton porteur) et le `mockBackend` aussi : 10 tests dans `packages/social`.
+- L'idempotence du SDK est **optionnelle** : sans `idempotencyStore`, rien n'empêche un double envoi. Avec `MemoryIdempotencyStore`, une même clé n'envoie qu'une fois. Le magasin en mémoire se perd au redémarrage : la carte #265 doit fournir un magasin adossé à la base (`social_posts`).
+- **Bluesky** : l'adaptateur veut un `accessJwt` de courte durée et ne le renouvelle pas. `packages/social` ouvre donc une session (mot de passe d'application) à chaque publication, sans conserver de jeton. Acceptable pour un clic d'Admin.
+- Les résultats `unknown` / `cancelled` du SDK sont rendus comme `unknown` : ne jamais renvoyer sans vérifier. Un échec `rate-limited` est marqué réessayable.
+
+**Choix de la première plateforme : Bluesky.** Mot de passe d'application sans revue d'application ni API payante ; contrairement à X (payant), LinkedIn, Instagram et TikTok (revue). Threads est la suite logique.
+
+**Non vérifié (à faire avant la production)**
+- Aucune publication réelle : il faut un compte Bluesky officiel et un mot de passe d'application pour un essai bout en bout.
+- Le serveur de production est sous Docker : l'image Bun n'a pas été reconstruite avec ce paquet.
+- Le comportement exact de Bluesky pour la détection des liens dans le texte (aperçu cliquable) n'a pas été observé sur le vrai service.
+- Le code de l'adaptateur n'a pas été audité ligne à ligne ; seuls son API, ses types et son comportement sur un faux serveur l'ont été.
+
+**Variables d'environnement prévues** (optionnelles, fonction désactivée si absentes) : `BLUESKY_SERVICE`, `BLUESKY_IDENTIFIER`, `BLUESKY_APP_PASSWORD`. Elles ne sont pas encore dans `apps/server/.env.schema` : c'est la carte #265.

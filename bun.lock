@@ -213,6 +213,17 @@
         "typescript": "catalog:",
       },
     },
+    "packages/social": {
+      "name": "@codesphere/social",
+      "dependencies": {
+        "@opencoredev/social-sdk": "0.5.0",
+      },
+      "devDependencies": {
+        "@codesphere/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/ui": {
       "name": "@codesphere/ui",
       "version": "0.0.0",
@@ -520,6 +531,8 @@
 
     "@codesphere/logger": ["@codesphere/logger@workspace:packages/logger"],
 
+    "@codesphere/social": ["@codesphere/social@workspace:packages/social"],
+
     "@codesphere/ui": ["@codesphere/ui@workspace:packages/ui"],
 
     "@corvu/utils": ["@corvu/utils@0.4.2", "", { "dependencies": { "@floating-ui/dom": "^1.6.11" }, "peerDependencies": { "solid-js": "^1.8" } }, "sha512-Ox2kYyxy7NoXdKWdHeDEjZxClwzO4SKM8plAaVwmAJPxHMqA0rLOoAsa+hBDwRLpctf+ZRnAd/ykguuJidnaTA=="],
@@ -675,6 +688,8 @@
     "@openapi-spec/downgrader": ["@openapi-spec/downgrader@0.1.0", "", { "dependencies": { "@openapi-spec/types": "^0.1.0" } }, "sha512-za2h8wGa4BFy2+AiKJHutt8BS2ua7Fw7vgNMmAtLyFbreozWHkXRVBRVA86sczyLY1ZN9Gw4rITygs90ehztQg=="],
 
     "@openapi-spec/types": ["@openapi-spec/types@0.1.0", "", {}, "sha512-5m9GUj5ekwmJ5uXH0yctarqLGckGc8X7pX65dirukZDUAGmrUx5lKovvWA7YvEBKd480Q7R2oG3nE5C+SoVgNw=="],
+
+    "@opencoredev/social-sdk": ["@opencoredev/social-sdk@0.5.0", "", { "bin": { "social-sdk": "dist/cli.js" } }, "sha512-M+l6t/FRBH81NYPDtDQs8LqFjbIXsINZJhdsrirYq478z0lZHQobYOTAxuTcdxOYp7NVh6kgtn1Wcteal5I1Mg=="],
 
     "@opennextjs/aws": ["@opennextjs/aws@4.1.9", "", { "dependencies": { "@ast-grep/napi": "^0.45.3", "@aws-sdk/client-cloudfront": "3.984.0", "@aws-sdk/client-dynamodb": "3.984.0", "@aws-sdk/client-lambda": "3.984.0", "@aws-sdk/client-s3": "3.984.0", "@aws-sdk/client-sqs": "3.984.0", "@node-minify/core": "^9.0.2", "@node-minify/terser": "^9.0.1", "@tsconfig/node18": "^18.2.7", "aws4fetch": "^1.0.20", "chalk": "^5.6.2", "cookie": "^1.1.1", "esbuild": "0.28.2", "express": "^5.2.1", "path-to-regexp": "^6.3.0", "urlpattern-polyfill": "^10.1.0", "yaml": "^2.9.1" }, "peerDependencies": { "next": ">=15.5.27 <16 || >=16.3.8" }, "bin": { "open-next": "dist/index.js" } }, "sha512-FUG9mpB9lrFDgwh2zpl9nRHvQtRwYgoc3kdk1r79OgTBhROlW1J7gfchSLu93sAJlohnO6mDVaKgwLg2+AyPFw=="],
 
