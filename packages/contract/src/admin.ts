@@ -190,9 +190,27 @@ export const SocialPublication = z.object({
 	retryable: z.boolean(),
 });
 
+export const SocialOAuthPlatform = z.enum(["linkedin", "x"]);
+
+/** An official account as the back-office sees it: never a token, only who and until when. */
+export const SocialAccount = z.object({
+	platform: SocialOAuthPlatform,
+	/** The OAuth application of this platform is set up on this deployment. */
+	configured: z.boolean(),
+	connected: z.boolean(),
+	accountName: z.string().nullable(),
+	/** When the access token expires; it renews by itself before, when the platform allows. */
+	expiresAt: Timestamp.nullable(),
+	/** `reconnect-required`: the platform refused the stored grant; connect the account again. */
+	status: z.enum(["connected", "reconnect-required"]).nullable(),
+	connectedAt: Timestamp.nullable(),
+});
+
 export const SocialStatus = z.object({
 	/** Platforms that have credentials on this deployment; empty when the feature is off. */
 	platforms: z.array(SocialPlatform),
+	/** X and LinkedIn accounts an Admin connects through OAuth (#266); empty where it is not set up. */
+	accounts: z.array(SocialAccount),
 });
 
 const socialErrors = {
@@ -232,6 +250,21 @@ export const adminContract = {
 			.output(z.object({ success: z.boolean() })),
 	},
 	social: {
+		// Not exposed over REST or MCP: connecting an account is an Admin's decision.
+		connect: base
+			.errors(socialErrors)
+			.input(z.object({ platform: SocialOAuthPlatform }))
+			.output(z.object({ authorizationUrl: z.string() })),
+		completeConnect: base
+			.errors(socialErrors)
+			.input(z.object({ callbackUrl: z.string().max(2048) }))
+			.output(
+				z.object({ platform: SocialOAuthPlatform, accountName: z.string() }),
+			),
+		disconnect: base
+			.errors(socialErrors)
+			.input(z.object({ platform: SocialOAuthPlatform }))
+			.output(z.object({ success: z.boolean() })),
 		status: base
 			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
 			.input(z.object({}))

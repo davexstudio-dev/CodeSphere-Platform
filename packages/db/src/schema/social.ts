@@ -1,6 +1,7 @@
 import {
 	boolean,
 	index,
+	integer,
 	pgTable,
 	text,
 	timestamp,
@@ -45,3 +46,50 @@ export const socialPost = pgTable(
 		index("social_post_target_idx").on(table.targetType, table.targetId),
 	],
 );
+
+export type SocialCredentialStatus = "connected" | "reconnect-required";
+
+// The tokens of CodeSphere's official X and LinkedIn accounts (#266, ADR 0001). `sealed` is the
+// AES-GCM encrypted credential: nothing readable lives here besides the account's public name.
+// `revision` is the compare-and-set counter: a renewal saves only if nobody changed the row
+// since it read it.
+export const socialCredential = pgTable("social_credential", {
+	platform: text("platform").$type<"linkedin" | "x">().primaryKey(),
+	sealed: text("sealed").notNull(),
+	revision: integer("revision").default(1).notNull(),
+	accountId: text("account_id").notNull(),
+	accountName: text("account_name").notNull(),
+	// When the access token expires; null when the platform gives none.
+	expiresAt: timestamp("expires_at", { precision: 3 }),
+	status: text("status")
+		.$type<SocialCredentialStatus>()
+		.default("connected")
+		.notNull(),
+	connectedBy: text("connected_by").references(() => user.id, {
+		onDelete: "set null",
+	}),
+	connectedAt: timestamp("connected_at", { precision: 3 })
+		.defaultNow()
+		.notNull(),
+	updatedAt: timestamp("updated_at", { precision: 3 }).defaultNow().notNull(),
+});
+
+// One renewal at a time per platform: a lease that expires by itself if its holder dies.
+export const socialCredentialLock = pgTable("social_credential_lock", {
+	key: text("key").primaryKey(),
+	token: text("token").notNull(),
+	expiresAt: timestamp("expires_at", { precision: 3 }).notNull(),
+});
+
+// An OAuth authorization in progress: the `state` is the callback's single-use proof, the PKCE
+// verifier is sealed, and only the Admin who started it may finish it.
+export const socialConnectAttempt = pgTable("social_connect_attempt", {
+	state: text("state").primaryKey(),
+	platform: text("platform").$type<"linkedin" | "x">().notNull(),
+	sealedVerifier: text("sealed_verifier").notNull(),
+	requestedBy: text("requested_by")
+		.notNull()
+		.references(() => user.id, { onDelete: "cascade" }),
+	expiresAt: timestamp("expires_at", { precision: 3 }).notNull(),
+	createdAt: timestamp("created_at", { precision: 3 }).defaultNow().notNull(),
+});

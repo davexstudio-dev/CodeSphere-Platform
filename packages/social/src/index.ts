@@ -14,6 +14,9 @@ import {
 } from "@opencoredev/social-sdk/testing";
 import { x } from "@opencoredev/social-sdk/x";
 
+import type { CredentialSource } from "./credentials";
+import { SocialSignInError } from "./errors";
+
 /**
  * Publishing to CodeSphere's own social accounts (ADR 0001, phase 2).
  *
@@ -53,6 +56,11 @@ export type PublishReport = {
 	message?: string;
 	/** A failure the caller may retry later with the same key. */
 	retryable?: boolean;
+	/**
+	 * The platform refused the account's token: nothing was posted, and the account must be
+	 * connected again before a retry can succeed (#266). Never a publication.
+	 */
+	authFailure?: boolean;
 };
 
 export interface SocialPublisher {
@@ -124,13 +132,19 @@ function toReport(
 		case "processing":
 		case "scheduled":
 			return { platform, state: "processing" };
-		case "failed":
+		case "failed": {
+			// A token the platform rejects posts nothing: retrying after a reconnection is safe.
+			const authFailure =
+				outcome.code === "reconnect_required" ||
+				outcome.retryDisposition.kind === "after-reconnect";
 			return {
 				platform,
 				state: "failed",
 				message: outcome.message,
 				retryable: outcome.retryDisposition.kind !== "never",
+				...(authFailure ? { authFailure: true } : {}),
 			};
+		}
 		case "not-submitted":
 			return {
 				platform,
@@ -188,17 +202,6 @@ function publisherOf(
 			return route(post);
 		},
 	};
-}
-
-/**
- * Signing in failed before anything was sent: nothing was published, retrying is safe.
- * Any other error thrown by a publisher leaves the post's fate unknown.
- */
-export class SocialSignInError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = "SocialSignInError";
-	}
 }
 
 type Common = { idempotencyStore?: IdempotencyStore; fetch?: typeof fetch };
@@ -290,45 +293,89 @@ function blueskyRoute(config: BlueskyConfig) {
 }
 
 export type LinkedInConfig = Common & {
-	/** A member access token with the `w_member_social` (person) or `w_organization_social` scope. */
-	accessToken: string;
-	/** `urn:li:person:…` or `urn:li:organization:…`: the account the post is published as. */
-	author: string;
 	/** LinkedIn's monthly API version, e.g. 202609. Upgrade after reading their migration notes. */
 	apiVersion: string;
-};
+} & (
+		| {
+				/** A member access token with the `w_member_social` (person) or `w_organization_social` scope. */
+				accessToken: string;
+				/** `urn:li:person:…` or `urn:li:organization:…`: the account the post is published as. */
+				author: string;
+		  }
+		| {
+				/** The stored, renewed credential of the connected account (#266). */
+				credentials: CredentialSource;
+		  }
+	);
+
+const LINKEDIN_AUTHOR = /^urn:li:(person|organization):.+/;
 
 function linkedinRoute(config: LinkedInConfig) {
-	const author = config.author;
-	if (!/^urn:li:(person|organization):.+/.test(author)) {
-		throw new Error(
-			"LinkedIn author must be a urn:li:person or urn:li:organization",
-		);
+	let resolve: CredentialSource;
+	if ("credentials" in config) {
+		resolve = config.credentials;
+	} else {
+		const { accessToken, author } = config;
+		if (!LINKEDIN_AUTHOR.test(author)) {
+			throw new Error(
+				"LinkedIn author must be a urn:li:person or urn:li:organization",
+			);
+		}
+		resolve = async () => ({ accessToken, accountId: author });
 	}
-	const adapter = linkedin({
-		auth: {
-			accessToken: config.accessToken,
-			author: author as `urn:li:person:${string}`,
-		},
-		apiVersion: config.apiVersion,
-		...(config.fetch ? { fetch: config.fetch } : {}),
-	}) as SocialAdapter<unknown>;
-	return publishVia("linkedin", adapter, author, config.idempotencyStore);
+	// One adapter per publication: the token may have been renewed since the last one.
+	return async (post: SharePost) => {
+		const { accessToken, accountId } = await resolve();
+		if (!LINKEDIN_AUTHOR.test(accountId)) {
+			throw new SocialSignInError("The connected LinkedIn account is invalid.");
+		}
+		const adapter = linkedin({
+			auth: {
+				accessToken,
+				author: accountId as `urn:li:person:${string}`,
+			},
+			apiVersion: config.apiVersion,
+			...(config.fetch ? { fetch: config.fetch } : {}),
+		}) as SocialAdapter<unknown>;
+		return publishVia(
+			"linkedin",
+			adapter,
+			accountId,
+			config.idempotencyStore,
+		)(post);
+	};
 }
 
-export type XConfig = Common & {
-	/** Numeric id of the official X account. */
-	userId: string;
-	/** An OAuth 2.0 user access token with `tweet.write` and `users.read`. */
-	accessToken: string;
-};
+export type XConfig = Common &
+	(
+		| {
+				/** Numeric id of the official X account. */
+				userId: string;
+				/** An OAuth 2.0 user access token with `tweet.write` and `users.read`. */
+				accessToken: string;
+		  }
+		| {
+				/** The stored, renewed credential of the connected account (#266). */
+				credentials: CredentialSource;
+		  }
+	);
 
 function xRoute(config: XConfig) {
-	const adapter = x({
-		auth: { userId: config.userId, accessToken: config.accessToken },
-		...(config.fetch ? { fetch: config.fetch } : {}),
-	}) as SocialAdapter<unknown>;
-	return publishVia("x", adapter, config.userId, config.idempotencyStore);
+	let resolve: CredentialSource;
+	if ("credentials" in config) {
+		resolve = config.credentials;
+	} else {
+		const { accessToken, userId } = config;
+		resolve = async () => ({ accessToken, accountId: userId });
+	}
+	return async (post: SharePost) => {
+		const { accessToken, accountId } = await resolve();
+		const adapter = x({
+			auth: { userId: accountId, accessToken },
+			...(config.fetch ? { fetch: config.fetch } : {}),
+		}) as SocialAdapter<unknown>;
+		return publishVia("x", adapter, accountId, config.idempotencyStore)(post);
+	};
 }
 
 export type SocialConfig = {
@@ -368,38 +415,88 @@ export const DEFAULT_LINKEDIN_API_VERSION = "202609";
 /**
  * The publisher over every platform whose credentials are all set, or null when none is (the
  * feature is off). A platform with only some of its variables is left out, never half-configured.
+ *
+ * LinkedIn and X use `options.credentials` when given: the stored accounts an Admin connected,
+ * renewed before they expire (#266). Without it they fall back to a static token from the
+ * environment, which only suits a quick trial (X's lasts about two hours).
  */
 export function publisherFromEnv(
 	env: SocialEnv,
-	options: { idempotencyStore?: IdempotencyStore } = {},
+	options: {
+		idempotencyStore?: IdempotencyStore;
+		credentials?: { linkedin?: CredentialSource; x?: CredentialSource };
+	} = {},
 ): SocialPublisher | null {
+	const common = options.idempotencyStore
+		? { idempotencyStore: options.idempotencyStore }
+		: {};
 	const config: SocialConfig = {};
 	if (env.BLUESKY_IDENTIFIER && env.BLUESKY_APP_PASSWORD) {
 		config.bluesky = {
 			service: env.BLUESKY_SERVICE || "https://bsky.social",
 			identifier: env.BLUESKY_IDENTIFIER,
 			appPassword: env.BLUESKY_APP_PASSWORD,
-			...options,
+			...common,
 		};
 	}
-	if (env.LINKEDIN_ACCESS_TOKEN && env.LINKEDIN_AUTHOR) {
+	const linkedinVersion =
+		env.LINKEDIN_API_VERSION || DEFAULT_LINKEDIN_API_VERSION;
+	if (options.credentials?.linkedin) {
+		config.linkedin = {
+			credentials: options.credentials.linkedin,
+			apiVersion: linkedinVersion,
+			...common,
+		};
+	} else if (env.LINKEDIN_ACCESS_TOKEN && env.LINKEDIN_AUTHOR) {
 		config.linkedin = {
 			accessToken: env.LINKEDIN_ACCESS_TOKEN,
 			author: env.LINKEDIN_AUTHOR,
-			apiVersion: env.LINKEDIN_API_VERSION || DEFAULT_LINKEDIN_API_VERSION,
-			...options,
+			apiVersion: linkedinVersion,
+			...common,
 		};
 	}
-	if (env.X_USER_ID && env.X_ACCESS_TOKEN) {
+	if (options.credentials?.x) {
+		config.x = { credentials: options.credentials.x, ...common };
+	} else if (env.X_USER_ID && env.X_ACCESS_TOKEN) {
 		config.x = {
 			userId: env.X_USER_ID,
 			accessToken: env.X_ACCESS_TOKEN,
-			...options,
+			...common,
 		};
 	}
 	const publisher = createPublisher(config);
 	return publisher.platforms.length > 0 ? publisher : null;
 }
 
+export type {
+	CredentialLease,
+	CredentialLock,
+	StoredCredential,
+} from "@opencoredev/social-sdk/server";
 export { MemoryIdempotencyStore } from "@opencoredev/social-sdk/testing";
+export {
+	type AccountCredential,
+	type CredentialPort,
+	type CredentialSource,
+	type CredentialSourceOptions,
+	createCredentialSource,
+	waitingLock,
+} from "./credentials";
+export {
+	SocialAuthError,
+	type SocialAuthReason,
+	SocialConnectError,
+	SocialSignInError,
+} from "./errors";
+export {
+	beginAuthorization,
+	type ConnectedAccount,
+	completeAuthorization,
+	createPkce,
+	OAUTH_PLATFORMS,
+	type OAuthApp,
+	type OAuthPlatform,
+	oauthRefresher,
+} from "./oauth";
+export { createVault, type Vault, VaultError } from "./vault";
 export type { BackendRegistry, IdempotencyStore };

@@ -2,6 +2,7 @@
 import { describe, expect, test } from "bun:test";
 import {
 	type PublishReport,
+	SocialAuthError,
 	type SocialPublisher,
 	SocialSignInError,
 } from "@codesphere/social";
@@ -188,6 +189,46 @@ describe("publishShare", () => {
 			publication: { state: "published" },
 		});
 		expect(publisher.sent).toBe(2);
+	});
+
+	test("an account to reconnect is a retryable failure that says so, never published (#266)", async () => {
+		const publisher = publisherOf(async () => {
+			throw new SocialAuthError(
+				"reconnect-required",
+				"The account must be connected again.",
+			);
+		});
+		const d = deps(publisher);
+		const outcome = await publishShare(d, "a1", input);
+		expect(outcome).toMatchObject({
+			ok: true,
+			publication: {
+				state: "failed",
+				retryable: true,
+				message: "The account must be connected again.",
+			},
+		});
+	});
+
+	test("a token the platform refused (401) is a failure that asks to connect again (#266)", async () => {
+		const publisher = publisherOf(async () => [
+			{
+				platform: "bluesky",
+				state: "failed",
+				retryable: true,
+				authFailure: true,
+				message: "401",
+			},
+		]);
+		const outcome = await publishShare(deps(publisher), "a1", input);
+		expect(outcome).toMatchObject({
+			ok: true,
+			publication: {
+				state: "failed",
+				message: "The platform refused the account's token; connect it again.",
+			},
+		});
+		expect(outcome.ok && outcome.publication.state).not.toBe("published");
 	});
 
 	test("a non-retryable failure is not claimed again", async () => {

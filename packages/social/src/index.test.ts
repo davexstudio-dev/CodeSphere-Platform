@@ -242,6 +242,31 @@ describe("linkedin and x adapters", () => {
 		expect(report?.state).not.toBe("published");
 	});
 
+	test("a refused token is flagged as an auth failure, never published", async () => {
+		const { fetch } = recorder(() =>
+			Response.json({ message: "expired" }, { status: 401 }),
+		);
+		const publisher = createPublisher({
+			x: {
+				credentials: async () => ({ accessToken: "revoked", accountId: "42" }),
+				fetch,
+			},
+		});
+		const [report] = await publisher.publish(post, "x");
+		expect(report?.state).toBe("failed");
+		expect(report?.authFailure).toBe(true);
+	});
+
+	test("an ordinary failure is not flagged as an auth failure", async () => {
+		const { fetch } = recorder(() => Response.json({}, { status: 500 }));
+		const publisher = createPublisher({
+			x: { userId: "42", accessToken: "t", fetch },
+		});
+		const [report] = await publisher.publish(post, "x");
+		expect(report?.state).not.toBe("published");
+		expect(report?.authFailure).not.toBe(true);
+	});
+
 	test("a malformed LinkedIn author is refused at configuration", () => {
 		expect(() =>
 			createPublisher({

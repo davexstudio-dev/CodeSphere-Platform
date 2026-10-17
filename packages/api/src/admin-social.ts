@@ -2,6 +2,7 @@ import type { Database } from "@codesphere/db";
 import { type SocialPostState, socialPost } from "@codesphere/db/schema/social";
 import {
 	type PublishReport,
+	SocialAuthError,
 	type SocialPlatform,
 	type SocialPublisher,
 	SocialSignInError,
@@ -206,6 +207,12 @@ export async function publishShare(
 			input.platform,
 		);
 		outcome = settle(reports);
+		if (reports.some((report) => report.authFailure)) {
+			outcome = {
+				...outcome,
+				message: "The platform refused the account's token; connect it again.",
+			};
+		}
 	} catch (error) {
 		// Only a sign-in failure proves nothing was sent. Anything else: the post may be live.
 		outcome =
@@ -213,7 +220,12 @@ export async function publishShare(
 				? {
 						state: "failed",
 						postUrl: null,
-						message: "The social account refused the sign-in.",
+						// Nothing was sent: an auth failure is never shown as published, and the message
+						// tells the Admin what to do (it carries no token nor provider response).
+						message:
+							error instanceof SocialAuthError
+								? error.message
+								: "The social account refused the sign-in.",
 						retryable: true,
 					}
 				: {
