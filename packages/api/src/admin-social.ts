@@ -2,6 +2,7 @@ import type { Database } from "@codesphere/db";
 import { type SocialPostState, socialPost } from "@codesphere/db/schema/social";
 import {
 	type PublishReport,
+	type SocialPlatform,
 	type SocialPublisher,
 	SocialSignInError,
 } from "@codesphere/social";
@@ -21,7 +22,7 @@ import { createQuestionService, QuestionError } from "./questions/service";
  */
 
 export type ShareType = "question" | "hackathon";
-export type SharePlatform = "bluesky";
+export type SharePlatform = SocialPlatform;
 
 export type ShareInput = {
 	type: ShareType;
@@ -196,11 +197,14 @@ export async function publishShare(
 
 	let outcome: ReturnType<typeof settle>;
 	try {
-		const reports = await publisher.publish({
-			text,
-			url: `${siteUrl.replace(/\/$/, "")}${target.path}`,
-			idempotencyKey: key,
-		});
+		const reports = await publisher.publish(
+			{
+				text,
+				url: `${siteUrl.replace(/\/$/, "")}${target.path}`,
+				idempotencyKey: key,
+			},
+			input.platform,
+		);
 		outcome = settle(reports);
 	} catch (error) {
 		// Only a sign-in failure proves nothing was sent. Anything else: the post may be live.

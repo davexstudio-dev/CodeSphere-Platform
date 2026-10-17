@@ -28,7 +28,7 @@ export const socialPost = pgTable(
 		targetType: text("target_type").$type<"question" | "hackathon">().notNull(),
 		// A Question's id or a Hackathon's slug.
 		targetId: text("target_id").notNull(),
-		platform: text("platform").$type<"bluesky">().notNull(),
+		platform: text("platform").$type<"bluesky" | "linkedin" | "x">().notNull(),
 		state: text("state").$type<SocialPostState>().notNull(),
 		text: text("text").notNull(),
 		// Public URL of the post once published.

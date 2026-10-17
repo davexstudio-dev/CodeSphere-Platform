@@ -166,7 +166,7 @@ export const KpiReport = z.object({
 	metrics: z.array(KpiMetric),
 });
 
-export const SocialPlatform = z.enum(["bluesky"]);
+export const SocialPlatform = z.enum(["bluesky", "linkedin", "x"]);
 
 /** What an Admin shares to the official accounts: a public Question (by id) or Hackathon (by slug). */
 export const SocialPublishInput = z.object({

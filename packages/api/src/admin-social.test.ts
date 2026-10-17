@@ -60,7 +60,7 @@ function publisherOf(
 	respond: () => Promise<PublishReport[]>,
 ): SocialPublisher & { sent: number } {
 	const p = {
-		platforms: ["bluesky"] as const,
+		platforms: ["bluesky", "linkedin", "x"] as const,
 		sent: 0,
 		async publish() {
 			p.sent += 1;

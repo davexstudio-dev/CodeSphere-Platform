@@ -95,3 +95,19 @@ Mesuré le 2026-10-17 sur `@opencoredev/social-sdk@0.5.0` (épinglée exactement
 - **Audit** : `social.publish` à la réclamation, `social.retry` à une reprise.
 - **Désactivé par défaut** : sans `BLUESKY_IDENTIFIER`, `BLUESKY_APP_PASSWORD` **et** `PUBLIC_SITE_URL`, la procédure répond `SERVICE_UNAVAILABLE`.
 - **Pas encore fait** : envoi asynchrone via l'outbox (#259, l'appel est donc synchrone), câblage dans le Worker Cloudflare (le SDK n'y a pas été testé : seul le serveur Bun est branché), écran d'administration, suivi du statut des posts `processing`.
+
+## LinkedIn et X (ajoutés à #265)
+
+`SocialPlatform` vaut maintenant `bluesky | linkedin | x`. Le publisher route chaque post vers la plateforme demandée (`publish(post, platform)`) ; seules les plateformes dont **toutes** les variables sont présentes sont actives, une configuration partielle est ignorée.
+
+| Plateforme | Variables | Identifiant du compte | Longueur |
+|---|---|---|---|
+| Bluesky | `BLUESKY_IDENTIFIER`, `BLUESKY_APP_PASSWORD` (`BLUESKY_SERVICE`) | DID | 300 caractères, lien compris |
+| LinkedIn | `LINKEDIN_ACCESS_TOKEN`, `LINKEDIN_AUTHOR` (`urn:li:person:…` ou `urn:li:organization:…`), `LINKEDIN_API_VERSION` (défaut 202609) | l'URN | 3000 caractères |
+| X | `X_ACCESS_TOKEN`, `X_USER_ID` | id numérique | 280, lien compté 23, emoji et texte non latin comptés double |
+
+Vérifié : les vrais adaptateurs LinkedIn et X du SDK tournent sous Bun contre un faux serveur (une seule requête de publication, jeton porteur, lien dans le texte ; un jeton refusé n'est pas « publié »).
+
+**Limite importante** : ces deux plateformes utilisent des jetons OAuth qui expirent (à ma connaissance : ~2 h pour X, ~60 jours pour LinkedIn ; non revérifié). Un jeton statique en variable d'environnement ne suffit donc pas pour X au-delà d'un essai. Le stockage chiffré et le renouvellement sont la carte #266.
+
+**Non vérifié** : aucune publication réelle sur ces deux réseaux ; les droits (`w_member_social` / `w_organization_social` chez LinkedIn, `tweet.write` chez X), l'éventuelle revue d'application de LinkedIn et le coût d'accès à l'API X ne sont pas confirmés ici.
