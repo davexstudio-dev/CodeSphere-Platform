@@ -27,7 +27,8 @@ import {
 } from "./social-accounts";
 
 const url = process.env.TEST_DATABASE_URL;
-const SECRET = "integration-secret-with-at-least-32-chars";
+// Generated per run: a literal would be flagged by the secret scan.
+const SECRET = `${crypto.randomUUID()}${crypto.randomUUID()}`;
 const SITE = "https://codesphere.test";
 const iso = (ms: number) => new Date(Date.now() + ms).toISOString();
 
