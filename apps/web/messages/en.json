@@ -403,6 +403,21 @@
 			}
 		}
 	},
+	"share": {
+		"trigger": "Share",
+		"menu": "Share this page",
+		"native": "Share…",
+		"copy": "Copy link",
+		"copied": "Link copied",
+		"copyFailed": "Could not copy the link",
+		"targets": {
+			"whatsapp": "WhatsApp",
+			"x": "X",
+			"linkedin": "LinkedIn",
+			"telegram": "Telegram",
+			"facebook": "Facebook"
+		}
+	},
 	"question": {
 		"notFound": {
 			"title": "Question not found",
