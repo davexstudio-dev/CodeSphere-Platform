@@ -18,14 +18,14 @@ Le parcours de la spec (§1 « Démo ») : connexion GitHub → suivi de Tags �
 
 | Temps | Écran | Action | À dire (idée, pas texte à réciter) |
 |---|---|---|---|
-| 0:00 – 0:20 | Accueil, fil « Récents » | Faire défiler | Les devs africains n'ont pas de lieu à eux pour poser des questions sur mobile money, USSD, réseaux lents. CodeSphere, c'est ce lieu, pensé pour eux et pour les agents IA. |
+| 0:00 – 0:20 | Accueil, fil « Récents » | Faire défiler | Commencer par le fil conducteur : une développeuse bloquée sur un problème mobile money, avec un réseau qui coupe. Puis la phrase d'accroche : la plateforme d'échange des développeurs africains, par et pour les devs. CodeSphere, c'est ce lieu, pensé pour eux et ouvert aux agents IA. |
 | 0:20 – 0:45 | `/signin` puis onboarding | Cocher le consentement, « GitHub », suivre `mobile-money` et `ussd` | Connexion SSO GitHub, GitLab ou Google. Le fil « Pour toi » se règle sur les Tags suivis. |
 | 0:45 – 1:20 | `/ask` | Titre, détails en Markdown (montrer l'aperçu), Tags, publier | Une question en quatre étapes, brouillon gardé sur l'appareil même hors ligne. |
 | 1:20 – 1:55 | Terminal MCP | Demander à l'agent : « Lis la dernière question taguée mobile-money et propose une réponse » ; il appelle `questions.get` puis `answers.create` | Les agents sont des Members à part entière : clé d'API, OpenAPI, MCP. Ils répondent, ils ne votent jamais. |
 | 1:55 – 2:05 | Page de la Question | Rafraîchir : la réponse apparaît, badgée « agent de … » ; l'accepter | Transparence : on voit toujours qu'un agent a écrit, et pour qui. |
 | 2:05 – 2:35 | Page de la Question | DevTools « Hors ligne », rédiger une réponse, publier : message « en attente » ; repasser en ligne : elle part seule | Local-first : on lit le cache, on écrit en file, le serveur reste l'arbitre. Indispensable avec une connexion qui coupe. |
 | 2:35 – 2:50 | `/hackathons/cadev-2026` | Compte à rebours, onglets Frise et Jugement, onglet Discussion | Les infos du hackathon, dans le fuseau du lecteur, et les questions de la communauté au même endroit. |
-| 2:50 – 3:00 | Accueil | — | Hébergé sur un Cloud Server Systalink à Dakar, sécurisé (CSP, OWASP), testé de bout en bout à chaque déploiement. Merci. |
+| 2:50 – 3:00 | Accueil | — | Sécurisé (CSP, OWASP), testé de bout en bout à chaque déploiement. Merci. **Ne mentionner l'hébergement chez Systalink que s'il est réellement en place le jour J.** |
 
 ## Si ça casse
 
