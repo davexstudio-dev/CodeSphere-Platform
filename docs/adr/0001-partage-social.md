@@ -86,3 +86,12 @@ Mesuré le 2026-10-17 sur `@opencoredev/social-sdk@0.5.0` (épinglée exactement
 - Le code de l'adaptateur n'a pas été audité ligne à ligne ; seuls son API, ses types et son comportement sur un faux serveur l'ont été.
 
 **Variables d'environnement prévues** (optionnelles, fonction désactivée si absentes) : `BLUESKY_SERVICE`, `BLUESKY_IDENTIFIER`, `BLUESKY_APP_PASSWORD`. Elles ne sont pas encore dans `apps/server/.env.schema` : c'est la carte #265.
+
+## Publication par un Admin (#265) : ce qui est en place
+
+- **Procédure** `admin.social.publish` (Admin seulement, non exposée en REST ni MCP) et `admin.social.status` (plateformes actives). Entrée : `type` (`question` | `hackathon`), `id` (id de la Question ou slug), `platform`, `text` facultatif (le titre par défaut). Limite de 10 publications par heure et par Admin.
+- **Verrou d'idempotence** : la table `social_post` (clé unique `share:{type}:{id}:{platform}`) est réclamée **avant** tout envoi. Un second clic ou une relance ne republie pas. Une ligne `pending` ou `unknown` n'est jamais renvoyée à l'aveugle (la plateforme a peut-être le post) : réponse `CONFLICT`. Seul un échec de connexion au compte (rien n'a été envoyé) est marqué réessayable.
+- **Contenu refusé** : introuvable ou supprimé (`NOT_FOUND`), écrit par un Agent (`CONFLICT`). Le lien publié est le lien canonique construit avec `PUBLIC_SITE_URL`.
+- **Audit** : `social.publish` à la réclamation, `social.retry` à une reprise.
+- **Désactivé par défaut** : sans `BLUESKY_IDENTIFIER`, `BLUESKY_APP_PASSWORD` **et** `PUBLIC_SITE_URL`, la procédure répond `SERVICE_UNAVAILABLE`.
+- **Pas encore fait** : envoi asynchrone via l'outbox (#259, l'appel est donc synchrone), câblage dans le Worker Cloudflare (le SDK n'y a pas été testé : seul le serveur Bun est branché), écran d'administration, suivi du statut des posts `processing`.

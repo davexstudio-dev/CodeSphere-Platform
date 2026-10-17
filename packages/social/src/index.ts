@@ -164,6 +164,17 @@ export type BlueskyConfig = {
 type Session = { did: string; accessJwt: string };
 
 /**
+ * Signing in failed before anything was sent: nothing was published, retrying is safe.
+ * Any other error thrown by a publisher leaves the post's fate unknown.
+ */
+export class SocialSignInError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "SocialSignInError";
+	}
+}
+
+/**
  * Bluesky signs in with an app password and gets a short-lived access token; the SDK does not
  * refresh it. So a session is opened for each publish: low volume (an Admin's click), no token kept.
  */
@@ -184,11 +195,13 @@ export function createBlueskyPublisher(config: BlueskyConfig): SocialPublisher {
 			},
 		);
 		if (!response.ok) {
-			throw new Error(`Bluesky sign-in failed (${response.status})`);
+			throw new SocialSignInError(
+				`Bluesky sign-in failed (${response.status})`,
+			);
 		}
 		const body = (await response.json()) as Partial<Session>;
 		if (!body.did || !body.accessJwt) {
-			throw new Error("Bluesky sign-in returned no session");
+			throw new SocialSignInError("Bluesky sign-in returned no session");
 		}
 		return { did: body.did, accessJwt: body.accessJwt };
 	}

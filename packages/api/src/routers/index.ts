@@ -8,6 +8,11 @@ import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { updateHackathon } from "../admin-hackathons";
 import { kpiReport } from "../admin-kpi";
 import { listMembers, setSuspension } from "../admin-members";
+import {
+	createShareTargetLoader,
+	createSocialPostStore,
+	publishShare,
+} from "../admin-social";
 import { createTag, deleteTag, listTags, renameTag } from "../admin-tags";
 import { createAgentsHandlers } from "../agents/handlers";
 import { agentPreset } from "../agents/service";
@@ -28,6 +33,7 @@ import {
 	createVotesHandlers,
 } from "../questions/handlers";
 import { createQuestionService, QuestionError } from "../questions/service";
+import { consume, socialLimiter } from "../rate-limit";
 import { isSuspended } from "../suspension";
 import {
 	followedTags,
@@ -361,6 +367,41 @@ export const appRouter = impl
 							throw tagRefusal(outcome.code, errors);
 						}
 						return { success: true };
+					}),
+			},
+			social: {
+				status: impl.admin.social.status
+					.use(isAdmin)
+					.handler(async ({ context }) => ({
+						platforms: context.social?.siteUrl
+							? [...(context.social.publisher?.platforms ?? [])]
+							: [],
+					})),
+				publish: impl.admin.social.publish
+					.use(isAdmin)
+					.handler(async ({ context, input, errors }) => {
+						const actorId = actorOf(context.session);
+						await consume(socialLimiter, actorId);
+						const outcome = await publishShare(
+							{
+								store: createSocialPostStore(context.db),
+								publisher: context.social?.publisher ?? null,
+								siteUrl: context.social?.siteUrl,
+								loadTarget: createShareTargetLoader(context.db),
+							},
+							actorId,
+							input,
+						);
+						if (!outcome.ok) {
+							if (outcome.code === "UNAVAILABLE") {
+								throw errors.SERVICE_UNAVAILABLE();
+							}
+							if (outcome.code === "NOT_FOUND") {
+								throw errors.NOT_FOUND();
+							}
+							throw errors.CONFLICT({ message: outcome.message });
+						}
+						return outcome.publication;
 					}),
 			},
 			auditLog: {

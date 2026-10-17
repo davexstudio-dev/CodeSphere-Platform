@@ -38,3 +38,11 @@ export async function consume(
 		throw new ORPCError("TOO_MANY_REQUESTS", { data: { retryAfter } });
 	}
 }
+
+/** Posts to the official social accounts, per Admin: a slow, deliberate action (ADR 0001). */
+export const SOCIAL_PUBLISHES_PER_HOUR = 10;
+
+export const socialLimiter = new MemoryRateLimiter({
+	maxRequests: SOCIAL_PUBLISHES_PER_HOUR,
+	window: HOUR,
+});

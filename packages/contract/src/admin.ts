@@ -166,6 +166,43 @@ export const KpiReport = z.object({
 	metrics: z.array(KpiMetric),
 });
 
+export const SocialPlatform = z.enum(["bluesky"]);
+
+/** What an Admin shares to the official accounts: a public Question (by id) or Hackathon (by slug). */
+export const SocialPublishInput = z.object({
+	type: z.enum(["question", "hackathon"]),
+	/** A Question's id, or a Hackathon's slug. */
+	id: z.string().trim().min(1).max(120),
+	platform: SocialPlatform,
+	/** The sentence before the link; the title of the content when omitted. */
+	text: z.string().trim().min(1).max(200).optional(),
+});
+
+export const SocialPublication = z.object({
+	platform: SocialPlatform,
+	type: z.enum(["question", "hackathon"]),
+	id: z.string(),
+	/** `processing` and `unknown` mean the platform may already hold the post: never re-sent blindly. */
+	state: z.enum(["published", "processing", "failed", "unknown"]),
+	postUrl: z.string().nullable(),
+	message: z.string().nullable(),
+	/** A failed post nothing was sent for: publishing it again is safe. */
+	retryable: z.boolean(),
+});
+
+export const SocialStatus = z.object({
+	/** Platforms that have credentials on this deployment; empty when the feature is off. */
+	platforms: z.array(SocialPlatform),
+});
+
+const socialErrors = {
+	UNAUTHORIZED: {},
+	FORBIDDEN: {},
+	NOT_FOUND: {},
+	CONFLICT: {},
+	SERVICE_UNAVAILABLE: {},
+};
+
 const tagErrors = {
 	UNAUTHORIZED: {},
 	FORBIDDEN: {},
@@ -193,6 +230,17 @@ export const adminContract = {
 			.errors(tagErrors)
 			.input(z.object({ id: Id }))
 			.output(z.object({ success: z.boolean() })),
+	},
+	social: {
+		status: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
+			.input(z.object({}))
+			.output(SocialStatus),
+		// Not exposed over REST or MCP: a publication is an Admin's decision, made from the back-office.
+		publish: base
+			.errors(socialErrors)
+			.input(SocialPublishInput)
+			.output(SocialPublication),
 	},
 	kpi: base
 		.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
