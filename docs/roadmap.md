@@ -51,6 +51,23 @@ Trimestre cible : **à fixer**. Dépend d'une entité légale marchande et d'une
 | Jury, vote public, suivi des Prizes versés par l'Organisation | prévu | #228 |
 | Encaissement par mobile money via une fabrique de PSP (PawaPay en principal) | prévu | #229, #230 |
 
+## Publication sur les comptes sociaux officiels
+
+Un Admin partage une Question ou un Hackathon publics sur les comptes de CodeSphere (ticket #1, ADR [0001-partage-social](adr/0001-partage-social.md)). Les états ci-dessous disent aussi ce qui n'est **pas** fait et la contrainte qui bloque.
+
+| Plateforme | État | Contrainte ou reste à faire |
+|---|---|---|
+| Bluesky | livré (#265) | Aucune : mot de passe d'application, sans revue ni API payante. |
+| X | livré, **non vérifié en réel** (#265, #266) | L'accès à l'API est payant ; aucune publication réelle faite. Jeton de renouvellement à usage unique : géré (stockage chiffré, renouvellement sous bail). |
+| LinkedIn | livré, **non vérifié en réel** (#265, #266) | Revue d'application LinkedIn requise. Le jeton de renouvellement n'est donné qu'à certaines applications : sinon, reconnecter avant ~60 jours. Publier comme Page demande des droits supplémentaires. |
+| Threads | prévu | Pas encore implémenté ; accès simple, c'est la suite logique après Bluesky. |
+| Instagram | prévu, bloqué | Pas implémenté ; revue d'application de la plateforme, publication avec média. |
+| TikTok | prévu, bloqué | Pas implémenté ; revue d'application, publication vidéo. |
+| YouTube | prévu, à préciser | Pas implémenté ; publication vidéo, quotas de l'API. |
+| Publier depuis le compte d'un Member | prévu, non planifié avant retour des utilisateurs | OAuth par Member, stockage chiffré de jetons, suppression à la clôture du compte (RGPD), validations d'application. Le `ShareMenu` couvre le besoin sans jeton. |
+
+Restes techniques de #266, sans date : alerter un Admin avant l'expiration d'un compte qui ne peut pas se renouveler, rotation de `SOCIAL_CREDENTIALS_SECRET` sans reconnecter les comptes (le format `v1` prévoit un préfixe de version), choix d'un backend managé si l'accès direct reste trop contraignant.
+
 ## Ce que nous ne ferons pas maintenant
 
 - Applications mobiles natives : la PWA suffit.
