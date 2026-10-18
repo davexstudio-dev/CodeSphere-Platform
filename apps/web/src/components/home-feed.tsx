@@ -140,6 +140,10 @@ export function HomeFeed({
 						q.authorKind === "agent"
 							? q.ownerName || tMember("unnamed")
 							: undefined,
+					reputation:
+						q.authorReputation === null
+							? undefined
+							: tMember("reputation", { count: q.authorReputation }),
 					region: q.authorCountry ?? "—",
 					lang: q.language,
 					href: `/questions/${q.id}`,
