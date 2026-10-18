@@ -18,6 +18,18 @@ const KEYS = [
 	// Not a secret, but "Name <address>" cannot go on the command line: opennextjs-cloudflare
 	// re-runs wrangler through /bin/sh, which reads the "<" as a redirection.
 	"EMAIL_FROM",
+	// Official social accounts (#265, #266): only the staging workflow exports them. The OAuth
+	// client ids and the LinkedIn settings are not secret but travel the same way, so an unset
+	// one is simply left out instead of being sent as an empty string.
+	"SOCIAL_CREDENTIALS_SECRET",
+	"X_CLIENT_ID",
+	"X_CLIENT_SECRET",
+	"LINKEDIN_CLIENT_ID",
+	"LINKEDIN_CLIENT_SECRET",
+	"LINKEDIN_API_VERSION",
+	"LINKEDIN_AUTHOR",
+	"BLUESKY_IDENTIFIER",
+	"BLUESKY_APP_PASSWORD",
 ];
 
 // DATABASE_URL is optional: a preview without the `preview-db` label has no database (#150).
