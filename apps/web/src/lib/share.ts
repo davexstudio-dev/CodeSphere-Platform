@@ -82,7 +82,7 @@ type PreviewInput = {
 	imageUrl: string;
 };
 
-export const SITE_NAME = "CodeSphere";
+export const SITE_NAME = "CodeSphere Platform";
 
 /** Static card image served from `public/`, 1200x630 (#262). */
 export const OG_IMAGE_PATH = "/og-default.png";

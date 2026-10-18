@@ -30,18 +30,18 @@ const DESCRIPTION = "Plateforme d'échange pour développeurs africains";
 export async function generateMetadata(): Promise<Metadata> {
 	const imageUrl = await publicPageUrl(OG_IMAGE_PATH);
 	return {
-		title: "CodeSphere Platform",
+		title: SITE_NAME,
 		description: DESCRIPTION,
 		openGraph: {
 			type: "website",
-			title: "CodeSphere Platform",
+			title: SITE_NAME,
 			description: DESCRIPTION,
 			siteName: SITE_NAME,
 			images: [ogImage(imageUrl)],
 		},
 		twitter: {
 			card: "summary_large_image",
-			title: "CodeSphere Platform",
+			title: SITE_NAME,
 			description: DESCRIPTION,
 			images: [imageUrl],
 		},
