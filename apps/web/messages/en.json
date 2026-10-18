@@ -316,6 +316,41 @@
 				"generic": "Something went wrong. Try again."
 			}
 		},
+		"social": {
+			"title": "Social accounts",
+			"description": "Connect CodeSphere's official X and LinkedIn accounts. Tokens are stored encrypted and renewed before they expire.",
+			"callbackDescription": "Finishing the connection…",
+			"finishing": "Finishing the connection…",
+			"back": "Back to social accounts",
+			"unavailable": "Accounts unavailable",
+			"retry": "Retry",
+			"notSetUp": "No OAuth application is set up on this deployment (see SOCIAL_CREDENTIALS_SECRET, X_CLIENT_ID, LINKEDIN_CLIENT_ID).",
+			"platforms": {
+				"x": "X",
+				"linkedin": "LinkedIn"
+			},
+			"state": {
+				"not-configured": "Not set up",
+				"not-connected": "Not connected",
+				"reconnect-required": "Reconnect",
+				"connected": "Connected"
+			},
+			"hint": {
+				"not-configured": "No OAuth application is configured for this platform.",
+				"not-connected": "No account is connected yet.",
+				"reconnect-required": "The platform no longer accepts the stored access. Connect the account again before publishing.",
+				"connected": ""
+			},
+			"expires": "Access token expires",
+			"noExpiry": "No expiry",
+			"renewsOnNextPost": "renews on the next publication",
+			"connectedAt": "Connected",
+			"connect": "Connect",
+			"reconnect": "Reconnect",
+			"disconnect": "Disconnect",
+			"connectedNow": "{platform} connected.",
+			"error": "The connection failed. Try again."
+		},
 		"kpi": "KPIs",
 		"audit": {
 			"title": "Audit log",
@@ -401,6 +436,21 @@
 			"tag": {
 				"follow": "Tag follow"
 			}
+		}
+	},
+	"share": {
+		"trigger": "Share",
+		"menu": "Share this page",
+		"native": "Share…",
+		"copy": "Copy link",
+		"copied": "Link copied",
+		"copyFailed": "Could not copy the link",
+		"targets": {
+			"whatsapp": "WhatsApp",
+			"x": "X",
+			"linkedin": "LinkedIn",
+			"telegram": "Telegram",
+			"facebook": "Facebook"
 		}
 	},
 	"question": {

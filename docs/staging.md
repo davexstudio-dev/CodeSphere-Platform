@@ -39,7 +39,9 @@ ou Actions › Staging › Run workflow, branche `develop`. Le bouton n'apparaî
 | `RESEND_API_KEY` | Envoi d'e-mails (staging seulement) | optionnel |
 | `RESEND_WEBHOOK_SECRET` | Secret de signature du webhook Resend (`whsec_…`). Déclarer `https://<staging>/webhooks/resend` dans Resend, événements `email.bounced`, `email.suppressed`, `email.complained` (#200) | optionnel |
 
-Les secrets passent au Worker par un fichier (`scripts/preview-secrets.mjs`), jamais par la ligne de commande ; une valeur absente est ignorée. Le workflow ajoute en `--var` : `BETTER_AUTH_URL`, `CORS_ORIGIN`, `OAUTH_PROXY_PRODUCTION_URL` (l'origine de staging) et `GIT_SHA`.
+Les secrets passent au Worker par un fichier (`scripts/preview-secrets.mjs`), jamais par la ligne de commande ; une valeur absente est ignorée. Le workflow ajoute en `--var` : `BETTER_AUTH_URL`, `CORS_ORIGIN`, `OAUTH_PROXY_PRODUCTION_URL` (l'origine de staging), `EMAIL_OTP_SIGNIN=true` et `GIT_SHA`.
+
+**Connexion par code e-mail.** Elle est active en staging : `EMAIL_OTP_SIGNIN=true` sur le Worker (`--var`) et `NEXT_PUBLIC_EMAIL_OTP_SIGNIN=true` au build, les deux doivent concorder (le second est inlined dans le bundle). Le code part par Resend : sans `RESEND_API_KEY` et `EMAIL_FROM`, la demande échoue avec « The sign-in code could not be sent. » (le code n'est journalisé qu'en développement). La production garde `EMAIL_OTP_SIGNIN=false`.
 
 ## Vérification `/api/v1/health`
 

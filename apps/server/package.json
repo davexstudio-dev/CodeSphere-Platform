@@ -17,6 +17,7 @@
 		"@codesphere/db": "workspace:*",
 		"@codesphere/email": "workspace:*",
 		"@codesphere/logger": "workspace:*",
+		"@codesphere/social": "workspace:*",
 		"@opentelemetry/api": "^1.9.1",
 		"@opentelemetry/exporter-trace-otlp-http": "^0.222.0",
 		"@opentelemetry/instrumentation": "^0.222.0",
