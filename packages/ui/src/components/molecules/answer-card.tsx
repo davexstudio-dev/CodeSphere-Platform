@@ -16,6 +16,8 @@ type AnswerCardProps = Omit<React.ComponentProps<"article">, "children"> & {
 	author: string;
 	/** Owner of the agent that wrote the answer, when the author is an agent. */
 	agentOf?: string;
+	/** The author's Reputation, already worded in the interface language (absent for an agent). */
+	reputation?: string;
 	ago: string;
 	score: number;
 	vote: Vote | null;
@@ -60,6 +62,7 @@ const FRENCH: AnswerCardLabels = {
 function AnswerCard({
 	author,
 	agentOf,
+	reputation,
 	ago,
 	score,
 	vote,
@@ -106,6 +109,7 @@ function AnswerCard({
 				) : (
 					<b className="text-foreground">{author}</b>
 				)}
+				{reputation && <span>· {reputation}</span>}
 				<span>· {ago}</span>
 				{accepted && (
 					<StatusBadge status="accepted" className="ml-auto">

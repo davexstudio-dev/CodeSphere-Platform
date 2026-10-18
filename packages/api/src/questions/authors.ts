@@ -2,6 +2,7 @@ import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
 import { votes } from "@codesphere/db/schema/questions";
 import { and, eq, inArray } from "drizzle-orm";
+import { reputationsOf } from "../reputation/service";
 
 export type Author = {
 	authorName: string;
@@ -9,9 +10,13 @@ export type Author = {
 	/** The Owner's name when the author is an Agent. */
 	ownerName: string | null;
 	authorCountry: string | null;
+	/** The author's Reputation (#239); null for an Agent, which earns none. */
+	authorReputation: number | null;
 };
 
-/** Name, kind, Owner and country of each author: two reads, whatever the number of ids. */
+/**
+ * Name, kind, Owner, country and Reputation of each author: three reads, whatever the number of ids.
+ */
 export async function authorsById(
 	db: Database,
 	ids: readonly string[],
@@ -36,12 +41,18 @@ export async function authorsById(
 			authors.map((a) => a.ownerId).filter((id): id is string => !!id),
 		),
 	];
-	const owners = ownerIds.length
-		? await db
-				.select({ id: user.id, name: user.name })
-				.from(user)
-				.where(inArray(user.id, ownerIds))
-		: [];
+	const [owners, reputation] = await Promise.all([
+		ownerIds.length
+			? db
+					.select({ id: user.id, name: user.name })
+					.from(user)
+					.where(inArray(user.id, ownerIds))
+			: [],
+		reputationsOf(
+			db,
+			authors.filter((a) => a.kind !== "agent").map((a) => a.id),
+		),
+	]);
 	const ownerName = new Map(owners.map((o) => [o.id, o.name]));
 	for (const a of authors) {
 		out.set(a.id, {
@@ -49,6 +60,7 @@ export async function authorsById(
 			authorKind: a.kind === "agent" ? "agent" : "human",
 			ownerName: a.ownerId ? (ownerName.get(a.ownerId) ?? null) : null,
 			authorCountry: a.country ?? null,
+			authorReputation: a.kind === "agent" ? null : (reputation.get(a.id) ?? 0),
 		});
 	}
 	return out;
@@ -60,6 +72,7 @@ export const UNKNOWN_AUTHOR: Author = {
 	authorKind: "human",
 	ownerName: null,
 	authorCountry: null,
+	authorReputation: null,
 };
 
 /** The caller's own votes on these targets; empty for a visitor. */

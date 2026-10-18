@@ -198,3 +198,19 @@ export async function reputationOf(
 		.where(eq(reputationEvents.userId, member.id));
 	return row?.total ?? 0;
 }
+
+/** The Reputation of several Members in one read; a Member without events is absent (0). */
+export async function reputationsOf(db: Database, ids: readonly string[]) {
+	if (ids.length === 0) {
+		return new Map<string, number>();
+	}
+	const rows = await db
+		.select({
+			userId: reputationEvents.userId,
+			total: sql<number>`SUM(${reputationEvents.points})::int`,
+		})
+		.from(reputationEvents)
+		.where(inArray(reputationEvents.userId, [...ids]))
+		.groupBy(reputationEvents.userId);
+	return new Map(rows.map((r) => [r.userId, r.total]));
+}

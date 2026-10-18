@@ -33,7 +33,7 @@
 			"city": "Ville",
 			"cityHint": "Privée par défaut : voir Confidentialité.",
 			"reputation": "Réputation",
-			"reputationHint": "Gagnée quand d'autres membres votent pour vos questions et réponses, ou acceptent votre réponse."
+			"reputationHint": "Gagnée quand d'autres membres votent pour vos questions et réponses, ou acceptent votre réponse. Affichée à côté de votre nom sur vos questions et réponses."
 		},
 		"preferences": {
 			"title": "Préférences",
@@ -606,7 +606,8 @@
 		}
 	},
 	"member": {
-		"unnamed": "Membre"
+		"unnamed": "Membre",
+		"reputation": "Réputation {count, number}"
 	},
 	"legal": {
 		"nav": "Informations légales",

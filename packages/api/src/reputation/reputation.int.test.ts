@@ -297,6 +297,35 @@ describe.skipIf(!url)("Reputation journal on Postgres", () => {
 		});
 	});
 
+	test("the author's Reputation comes with the Question, the listing and the Answers", async () => {
+		await reset();
+		const q = await ask();
+		const a = await answer(q, helper);
+		await agentAnswer(q);
+		await asVoter.votes.cast({
+			targetType: "answer",
+			targetId: a.id,
+			value: "up",
+		});
+		await asVoter.votes.cast({
+			targetType: "question",
+			targetId: q,
+			value: "up",
+		});
+		expect((await anonymous.questions.get({ id: q })).authorReputation).toBe(5);
+		const listed = await anonymous.questions.list({ q: "index", limit: 50 });
+		expect(listed.items.find((item) => item.id === q)?.authorReputation).toBe(
+			5,
+		);
+		const { items } = await anonymous.answers.list({ questionId: q });
+		expect(items.map((i) => [i.authorId, i.authorReputation]).sort()).toEqual(
+			[
+				[helper, 10],
+				[robot, null],
+			].sort(),
+		);
+	});
+
 	// The migration that replays the Votes and acceptances written before the journal existed.
 	const backfill = async () => {
 		const file = new URL(
