@@ -35,6 +35,7 @@ import {
 } from "../questions/handlers";
 import { createQuestionService, QuestionError } from "../questions/service";
 import { consume, socialLimiter } from "../rate-limit";
+import { reputationOf } from "../reputation/service";
 import { isSuspended } from "../suspension";
 import {
 	followedTags,
@@ -174,7 +175,10 @@ export const appRouter = impl
 						and(eq(questions.authorId, userId), isNull(questions.deletedAt)),
 					)
 					.limit(1);
-				return { ...ownProfile(row), hasAskedQuestion: asked !== undefined };
+				return {
+					...ownProfile(row, await reputationOf(context.db, row)),
+					hasAskedQuestion: asked !== undefined,
+				};
 			}),
 			update: impl.members.update.handler(
 				async ({ context, input, errors }) => {
@@ -190,7 +194,7 @@ export const appRouter = impl
 					if (!row) {
 						throw errors.UNAUTHORIZED();
 					}
-					return ownProfile(row);
+					return ownProfile(row, await reputationOf(context.db, row));
 				},
 			),
 			export: impl.members.export.handler(async ({ context, errors }) => {
@@ -232,7 +236,7 @@ export const appRouter = impl
 				if (!row) {
 					throw errors.NOT_FOUND();
 				}
-				return publicProfile(row);
+				return publicProfile(row, await reputationOf(context.db, row));
 			}),
 		},
 		hackathons: {

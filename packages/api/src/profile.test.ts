@@ -19,30 +19,36 @@ const row: ProfileRow & { email: string } = {
 
 describe("publicProfile", () => {
 	test("never exposes the email", () => {
-		expect(JSON.stringify(publicProfile(row))).not.toContain("ada@example.com");
+		expect(JSON.stringify(publicProfile(row, 0))).not.toContain(
+			"ada@example.com",
+		);
 	});
 
 	test("hides the city until the member makes it public", () => {
-		expect(publicProfile(row).city).toBeNull();
-		expect(publicProfile({ ...row, cityPublic: true }).city).toBe(
+		expect(publicProfile(row, 0).city).toBeNull();
+		expect(publicProfile({ ...row, cityPublic: true }, 0).city).toBe(
 			"Ouagadougou",
 		);
 	});
 
 	test("shows the avatar", () => {
-		expect(publicProfile(row).image).toBe(
+		expect(publicProfile(row, 0).image).toBe(
 			"https://avatars.example.com/ada.png",
 		);
 	});
 
 	test("keeps the country public", () => {
-		expect(publicProfile(row).country).toBe("BF");
+		expect(publicProfile(row, 0).country).toBe("BF");
+	});
+
+	test("carries the Reputation it is given", () => {
+		expect(publicProfile(row, 42).reputation).toBe(42);
 	});
 });
 
 describe("ownProfile", () => {
 	test("shows the member their private city and settings, still without the email", () => {
-		const own = ownProfile(row);
+		const own = ownProfile(row, 0);
 		expect(own.city).toBe("Ouagadougou");
 		expect(own.cityPublic).toBe(false);
 		expect(JSON.stringify(own)).not.toContain("ada@example.com");

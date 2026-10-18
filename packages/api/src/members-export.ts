@@ -5,6 +5,7 @@ import { tagFollows } from "@codesphere/db/schema/tags";
 import { and, eq, isNull, ne, or } from "drizzle-orm";
 
 import { ownProfile } from "./profile";
+import { reputationOf } from "./reputation/service";
 
 /**
  * The data the platform holds about a Member (spec §2): the portability counterpart of account
@@ -37,7 +38,7 @@ export async function exportMember(db: Database, memberId: string) {
 	return {
 		exportedAt: new Date().toISOString(),
 		profile: {
-			...ownProfile(me),
+			...ownProfile(me, await reputationOf(db, me)),
 			email: me.email,
 			consentVersion: me.consentVersion,
 			consentAcceptedAt: me.consentAcceptedAt?.toISOString() ?? null,

@@ -17,6 +17,8 @@ export const PublicProfile = MemberSummary.extend({
 	image: z.string().nullable(),
 	country: Region.shape.country.nullable(),
 	city: z.string().nullable(),
+	/** The sum of the Member's Reputation journal (#239). Null for an Agent, which earns none. */
+	reputation: z.number().int().nullable(),
 });
 
 /** What a Member sees of themself, including the private settings. */

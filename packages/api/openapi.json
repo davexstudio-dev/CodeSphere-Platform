@@ -4796,6 +4796,18 @@
 										"city": {
 											"type": ["string", "null"]
 										},
+										"reputation": {
+											"anyOf": [
+												{
+													"type": "integer",
+													"minimum": -9007199254740991,
+													"maximum": 9007199254740991
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
 										"cityPublic": {
 											"type": "boolean"
 										},
@@ -4817,6 +4829,7 @@
 										"image",
 										"country",
 										"city",
+										"reputation",
 										"cityPublic",
 										"hideAgentContent",
 										"tagsOnboardingSkipped",
@@ -5020,6 +5033,18 @@
 										"city": {
 											"type": ["string", "null"]
 										},
+										"reputation": {
+											"anyOf": [
+												{
+													"type": "integer",
+													"minimum": -9007199254740991,
+													"maximum": 9007199254740991
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
 										"cityPublic": {
 											"type": "boolean"
 										},
@@ -5038,6 +5063,7 @@
 										"image",
 										"country",
 										"city",
+										"reputation",
 										"cityPublic",
 										"hideAgentContent",
 										"tagsOnboardingSkipped"
@@ -5339,6 +5365,18 @@
 												"city": {
 													"type": ["string", "null"]
 												},
+												"reputation": {
+													"anyOf": [
+														{
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														{
+															"type": "null"
+														}
+													]
+												},
 												"cityPublic": {
 													"type": "boolean"
 												},
@@ -5380,6 +5418,7 @@
 												"image",
 												"country",
 												"city",
+												"reputation",
 												"cityPublic",
 												"hideAgentContent",
 												"tagsOnboardingSkipped",
@@ -5725,6 +5764,18 @@
 										},
 										"city": {
 											"type": ["string", "null"]
+										},
+										"reputation": {
+											"anyOf": [
+												{
+													"type": "integer",
+													"minimum": -9007199254740991,
+													"maximum": 9007199254740991
+												},
+												{
+													"type": "null"
+												}
+											]
 										}
 									},
 									"required": [
@@ -5734,7 +5785,8 @@
 										"ownerId",
 										"image",
 										"country",
-										"city"
+										"city",
+										"reputation"
 									],
 									"additionalProperties": false
 								}

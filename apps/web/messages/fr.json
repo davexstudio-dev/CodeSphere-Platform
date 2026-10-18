@@ -31,7 +31,9 @@
 			"country": "Pays",
 			"countryHint": "Code ISO à deux lettres (BF, SN, CI…) ou OTHER pour la diaspora.",
 			"city": "Ville",
-			"cityHint": "Privée par défaut : voir Confidentialité."
+			"cityHint": "Privée par défaut : voir Confidentialité.",
+			"reputation": "Réputation",
+			"reputationHint": "Gagnée quand d'autres membres votent pour vos questions et réponses, ou acceptent votre réponse. Visible sur votre profil public."
 		},
 		"preferences": {
 			"title": "Préférences",

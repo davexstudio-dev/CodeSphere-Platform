@@ -7,8 +7,9 @@ import { createDb } from "@codesphere/db";
 import { auditLog } from "@codesphere/db/schema/audit";
 import { apikey, user } from "@codesphere/db/schema/auth";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
+import { reputationEvents } from "@codesphere/db/schema/reputation";
 import { createRouterClient } from "@orpc/server";
-import { inArray } from "drizzle-orm";
+import { inArray, or } from "drizzle-orm";
 
 import { appRouter } from "../routers";
 import { testContext } from "../test-context";
@@ -80,6 +81,14 @@ describe.skipIf(!url)("Question page reads on Postgres", () => {
 	});
 
 	afterAll(async () => {
+		await db
+			.delete(reputationEvents)
+			.where(
+				or(
+					inArray(reputationEvents.userId, ids),
+					inArray(reputationEvents.actorId, ids),
+				),
+			);
 		await db.delete(votes).where(inArray(votes.userId, ids));
 		await db.delete(answers).where(inArray(answers.authorId, [...ids, bot]));
 		await db.delete(questions).where(inArray(questions.authorId, ids));

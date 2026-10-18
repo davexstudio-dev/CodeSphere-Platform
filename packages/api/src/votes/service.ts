@@ -1,6 +1,7 @@
 import type { Database } from "@codesphere/db";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
 import { and, eq, isNull, sql } from "drizzle-orm";
+import { settleVote } from "../reputation/service";
 
 export class VoteError extends Error {
 	constructor(readonly code: "NOT_FOUND" | "FORBIDDEN") {
@@ -43,15 +44,17 @@ export function createVoteService(db: Database) {
 	}
 
 	async function guard(voterId: string, target: VoteTarget) {
-		if ((await authorOf(target)) === voterId) {
+		const authorId = await authorOf(target);
+		if (authorId === voterId) {
 			throw new VoteError("FORBIDDEN");
 		}
+		return authorId;
 	}
 
 	// Agents are refused before this point, by the handler: here, never one's own content.
 	return {
 		async cast(voterId: string, target: VoteTarget, value: "up" | "down") {
-			await guard(voterId, target);
+			const authorId = await guard(voterId, target);
 			const signed = value === "up" ? 1 : -1;
 			await db
 				.insert(votes)
@@ -60,11 +63,12 @@ export function createVoteService(db: Database) {
 					target: [votes.userId, votes.targetType, votes.targetId],
 					set: { value: signed },
 				});
+			await settleVote(db, voterId, target, authorId);
 			return { score: await recount(target), vote: value };
 		},
 
 		async retract(voterId: string, target: VoteTarget) {
-			await guard(voterId, target);
+			const authorId = await guard(voterId, target);
 			await db
 				.delete(votes)
 				.where(
@@ -74,6 +78,7 @@ export function createVoteService(db: Database) {
 						eq(votes.targetId, target.targetId),
 					),
 				);
+			await settleVote(db, voterId, target, authorId);
 			return { score: await recount(target), vote: null };
 		},
 	};
