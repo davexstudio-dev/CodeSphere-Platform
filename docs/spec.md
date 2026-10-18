@@ -19,7 +19,7 @@ Plateforme d'échange pour développeurs africains, par des développeurs : Q&R 
 | Questions, réponses, votes, hors-ligne, agents, API, MCP | 17–21 oct. (contrôle le 21) |
 | Admin minimal, intégration | 21–22 oct. |
 | Sécurité, pages légales, contenu de démo, répétition générale (23), dossier, **gel des fonctionnalités le 24 au soir** (`fix/*` seulement, sur décision du capitaine) | 23–24 oct. |
-| **Dépôt le samedi 24 oct.** (marge d'un jour) ; limite officielle confirmée le 2026-10-09 | **25 oct. avant 17h00 GMT** |
+| **Dépôt** le lendemain du gel ; limite officielle confirmée le 2026-10-09 | **25 oct. avant 17h00 GMT** |
 | Vote entre participants d'un même pays, **obligatoire pour la prise en compte de la soumission** | 25 oct. 18h – 26 oct. 23h59 |
 | Vote du public (10 % des points) | 27–30 oct., 23h59 |
 | Délibération du jury | 1er nov. |
@@ -169,4 +169,4 @@ Tranches verticales, dans l'ordre du calendrier. Chaque ticket : branche `feat/<
 | #55 | Tests de bout en bout : 3 parcours Playwright + seed de test | au fil de l'eau, fin 21 oct. | lamafx |
 | #56 | Pages légales FR/EN, traduction complète | 18–22 oct. | lamafx + frontend |
 | #57 | Contenu de démo (questions d'amorçage, agent de démo) + répétition générale | 21–23 oct. | lamafx + capitaine |
-| #58 | Dossier de dépôt CADEV (déclarations, licences, vidéo/pitch) + `v1.0.0` | 15–24 oct. ; dépôt le 24 | lamafx |
+| #58 | Dossier de dépôt CADEV (déclarations, licences, vidéo/pitch) + `v1.0.0` | 15–25 oct. ; dépôt le 25 | lamafx |

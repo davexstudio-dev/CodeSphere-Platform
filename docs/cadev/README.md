@@ -1,6 +1,6 @@
 # Livrables CADEV 2026
 
-Issue #167, carte #1. Dépôt le **25 oct. 2026 avant 17h00 GMT** (cible interne : samedi 24). Le thème et le formulaire de rendu ne sont pas publiés : ces documents sont des **brouillons**, à ajuster dès leur publication.
+Issue #167, carte #1. Dépôt le **25 oct. 2026 avant 17h00 GMT**. Le thème et le formulaire de rendu ne sont pas publiés : ces documents sont des **brouillons**, à ajuster dès leur publication.
 
 | Livrable | Document | État | Qui |
 |---|---|---|---|
