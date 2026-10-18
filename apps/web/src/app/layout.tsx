@@ -8,6 +8,8 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import "../index.css";
 import Providers from "@/components/providers";
 import { LEGAL_PAGES, legalHref } from "@/lib/legal";
+import { publicPageUrl } from "@/lib/page-url";
+import { OG_IMAGE_PATH, ogImage, SITE_NAME } from "@/lib/share";
 
 // Google Fonts only (CADEV rule), self-hosted at build time by next/font.
 const outfit = Outfit({
@@ -21,10 +23,30 @@ const jetbrainsMono = JetBrains_Mono({
 	display: "swap",
 });
 
-export const metadata: Metadata = {
-	title: "CodeSphere Platform",
-	description: "Plateforme d'échange pour développeurs africains",
-};
+const DESCRIPTION = "Plateforme d'échange pour développeurs africains";
+
+// Generic card (home, unknown or unreadable pages): the page-level previews of Questions and
+// Hackathons set their own `openGraph` and `twitter`, which replace these.
+export async function generateMetadata(): Promise<Metadata> {
+	const imageUrl = await publicPageUrl(OG_IMAGE_PATH);
+	return {
+		title: "CodeSphere Platform",
+		description: DESCRIPTION,
+		openGraph: {
+			type: "website",
+			title: "CodeSphere Platform",
+			description: DESCRIPTION,
+			siteName: SITE_NAME,
+			images: [ogImage(imageUrl)],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: "CodeSphere Platform",
+			description: DESCRIPTION,
+			images: [imageUrl],
+		},
+	};
+}
 
 export const viewport: Viewport = {
 	width: "device-width",

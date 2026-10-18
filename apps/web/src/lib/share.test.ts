@@ -63,11 +63,21 @@ describe("previewMetadata", () => {
 			title: "How to X?",
 			description: "A **long** body",
 			url: "https://a.dev/questions/1",
+			imageUrl: "https://a.dev/og-default.png",
 		});
 		expect(m.title).toBe("How to X? · CodeSphere");
 		expect(m.description).toBe("A long body");
 		expect(m.alternates.canonical).toBe("https://a.dev/questions/1");
 		expect(m.openGraph.title).toBe("How to X?");
-		expect(m.twitter.card).toBe("summary");
+		expect(m.twitter.card).toBe("summary_large_image");
+		expect(m.twitter.images).toEqual(["https://a.dev/og-default.png"]);
+		expect(m.openGraph.images).toEqual([
+			{
+				url: "https://a.dev/og-default.png",
+				width: 1200,
+				height: 630,
+				alt: "CodeSphere",
+			},
+		]);
 	});
 });

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { QuestionPage } from "@/components/question/question-page";
 import { publicPageUrl } from "@/lib/page-url";
-import { previewMetadata } from "@/lib/share";
+import { OG_IMAGE_PATH, previewMetadata } from "@/lib/share";
 import { client } from "@/utils/orpc";
 
 // Link preview (ADR 0001): the page itself is rendered in the browser, so the server reads the
@@ -19,6 +19,7 @@ export async function generateMetadata({
 			title: question.title,
 			description: question.body,
 			url: await publicPageUrl(`/questions/${encodeURIComponent(id)}`),
+			imageUrl: await publicPageUrl(OG_IMAGE_PATH),
 		});
 	} catch {
 		return {};
