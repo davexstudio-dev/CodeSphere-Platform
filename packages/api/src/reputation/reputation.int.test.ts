@@ -8,7 +8,7 @@ import { user } from "@codesphere/db/schema/auth";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
 import { reputationEvents } from "@codesphere/db/schema/reputation";
 import { createRouterClient } from "@orpc/server";
-import { and, asc, eq, inArray, or } from "drizzle-orm";
+import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
 
 import { appRouter } from "../routers";
 import { testContext } from "../test-context";
@@ -295,5 +295,58 @@ describe.skipIf(!url)("Reputation journal on Postgres", () => {
 			actorId: voter,
 			targetType: "question",
 		});
+	});
+
+	// The migration that replays the Votes and acceptances written before the journal existed.
+	const backfill = async () => {
+		const file = new URL(
+			"../../../db/src/migrations/20261018165348_reputation_backfill/migration.sql",
+			import.meta.url,
+		);
+		for (const statement of (await Bun.file(file).text()).split(
+			"--> statement-breakpoint",
+		)) {
+			await db.execute(sql.raw(statement));
+		}
+	};
+
+	test("the backfill replays earlier Votes and acceptances once, and settlements continue from it", async () => {
+		await reset();
+		// Only this test's Votes and acceptances: the backfill reads the whole database.
+		await db.delete(votes).where(inArray(votes.userId, ids));
+		await db
+			.update(questions)
+			.set({ acceptedAnswerId: null })
+			.where(inArray(questions.authorId, ids));
+		const q = await ask();
+		const a = await answer(q, helper);
+		const b = await agentAnswer(q);
+		// Written as before #239: rows in votes and an Accepted answer, no event.
+		await db.insert(votes).values([
+			{ userId: voter, targetType: "answer", targetId: a.id, value: 1 },
+			{ userId: voter, targetType: "question", targetId: q, value: -1 },
+			{ userId: owner, targetType: "answer", targetId: b.id, value: 1 },
+		]);
+		await db
+			.update(questions)
+			.set({ acceptedAnswerId: a.id })
+			.where(eq(questions.id, q));
+
+		await backfill();
+		expect(await reputation(helper)).toBe(10 + 15);
+		expect(await reputation(asker)).toBe(-2 + 2);
+		expect(await reputation(voter)).toBe(-1);
+		expect(await journal(robot)).toEqual([]);
+		expect(await reputation(owner)).toBe(0);
+
+		await backfill();
+		expect(await journal(helper)).toHaveLength(2);
+		expect(await journal(asker)).toHaveLength(2);
+
+		await asVoter.votes.retract({ targetType: "answer", targetId: a.id });
+		expect(await reputation(helper)).toBe(15);
+		await asAsker.answers.accept({ id: b.id });
+		expect(await reputation(helper)).toBe(0);
+		expect(await reputation(asker)).toBe(0);
 	});
 });
