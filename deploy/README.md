@@ -34,7 +34,7 @@ En production, le workflow écrit ces trois fichiers (`chmod 600`) à chaque dé
 
 1. Commander le Cloud Server (Business, Dakar, Linux) sur platform.systalink.com et appliquer le code promo CADEV (art. 9, -40 %). L'éligibilité à l'art. 6 est demandée à l'organisateur (#169).
 2. Acheter le domaine ; créer les enregistrements DNS `A` de `PUBLIC_HOST` et `ADMIN_HOST` vers l'IP du serveur, en DNS seul (pas de proxy Cloudflare, #168).
-3. Sur le serveur : installer Docker et le plugin Compose ; créer l'utilisateur `deploy` (`useradd -m -s /bin/bash -G docker deploy`, sans sudo) et y installer la clé publique SSH du déploiement. N'ouvrir que les ports 22, 80 et 443.
+3. Sur le serveur : `DEPLOY_PUBKEY="ssh-ed25519 …" bash prepare-server.sh` en root (installe Docker et Compose, crée l'utilisateur `deploy` sans sudo avec la clé publique du déploiement, n'ouvre que les ports 22, 80 et 443 et affiche l'empreinte de l'étape 4). Clé à générer en local : `ssh-keygen -t ed25519 -N '' -C codesphere-deploy -f deploy_key`.
 4. Relever l'empreinte de la clé d'hôte : `ssh-keyscan -t ed25519 <IP> | ssh-keygen -lf -` (la valeur `SHA256:…`).
 5. Dans GitHub, **Settings > Environments > `production`** : reviewers requis (capitaine et @lamafx), branche `main` seule ; puis les secrets et la variable ci-dessous.
 6. Lancer le premier déploiement (section suivante) et vérifier `https://<PUBLIC_HOST>/api/v1/ready`.
@@ -48,7 +48,7 @@ En production, le workflow écrit ces trois fichiers (`chmod 600`) à chaque dé
 | `DEPLOY_SSH_KEY` | secret | clé privée de l'utilisateur `deploy` (ed25519, propre à ce déploiement) |
 | `DEPLOY_HOST_FINGERPRINT` | secret | empreinte `SHA256:…` de l'étape 4 : le workflow refuse un autre serveur |
 | `PROD_COMPOSE_ENV` | secret | contenu de `.env` (modèle `../.env.prod.example`) |
-| `PROD_SERVER_ENV` | secret | contenu de `apps/server/.env` (secrets, identifiants SSO, Resend) |
+| `PROD_SERVER_ENV` | secret | contenu de `apps/server/.env` (secrets, identifiants SSO, Resend ; modèle `prod.server.env.example`) |
 | `PROD_WEB_ENV` | secret | contenu de `apps/web/.env` (valeurs publiques seulement) |
 
 Au niveau du dépôt (**Settings > Secrets and variables > Actions**), pour tirer sur le serveur les images publiées sous `ghcr.io/davexstudio-dev` :
@@ -89,7 +89,7 @@ Les pull requests qui touchent la pile (Dockerfiles, `docker-compose.prod.yml`, 
   17 3 * * *   cd ~/codesphere && deploy/backup.sh >> backups/backup.log 2>&1
   ```
 
-## Avant la démo CADEV (29 oct., début du gel)
+## Avant la démo CADEV (24 oct., début du gel)
 
 Faire une sauvegarde, vérifier sa présence sur R2, en rapatrier une copie et la restaurer dans une base locale (`pg_restore`, voir l'en-tête de `backup.sh`) pour s'assurer qu'elle est exploitable.
 

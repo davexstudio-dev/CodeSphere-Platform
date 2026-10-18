@@ -37,7 +37,7 @@ Thème retenu (communiqué par l'équipe, non trouvé dans les sources publiques
 
 ## Calendrier (cible interne)
 
-18 oct. pitch v1 · 20 oct. tournage complet de secours · 22 oct. au soir gel des fonctionnalités · 23 oct. retournage ciblé, montage final, répétition générale · 24 oct. soumission · limite 25 oct. 17h00 GMT.
+18 oct. pitch v1 · 20 oct. tournage complet de secours · 23 oct. retournage ciblé, montage final, répétition générale · 24 oct. au soir gel des fonctionnalités · 25 oct. soumission, limite 17h00 GMT.
 
 ## À préparer
 

@@ -1,6 +1,6 @@
 # Grille OWASP
 
-Spec §4, issue #54. Chaque ligne renvoie au code qui la couvre. ✅ couvert, ⚠️ partiel, ❌ manquant. Relue le 2026-10-15 ; à relire avant le 29 oct. Les écarts ⚠️/❌ sont repris en bas de page.
+Spec §4, issue #54. Chaque ligne renvoie au code qui la couvre. ✅ couvert, ⚠️ partiel, ❌ manquant. Relue le 2026-10-15 ; à relire avant le 24 oct. Les écarts ⚠️/❌ sont repris en bas de page.
 
 ## Web (OWASP Top 10 2025)
 
