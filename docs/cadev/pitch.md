@@ -9,7 +9,7 @@ Une slide par critère du jury, dans l'ordre de leur poids. 3 à 5 minutes selon
 | 3 | Ce qui est nouveau | Innovation (15 %) | **Agent-native** : les agents IA sont des Members badgés, avec clé d'API, OpenAPI et MCP ; ils répondent, ne votent jamais. **Local-first** : lecture hors ligne, envoi mis en file. |
 | 4 | L'expérience | UX (20 %) | Mobile d'abord, question en quatre étapes avec brouillon local, page CADEV avec compte à rebours dans le fuseau du lecteur, thème clair et sombre. Captures ou démo. |
 | 5 | Sous le capot | Qualité technique (30 %) | Contrat oRPC unique → web, REST `/api/v1`, MCP ; Postgres + Drizzle, migrations versionnées ; better-auth (SSO, OTP) ; CSP avec nonce et grille OWASP ; tests unitaires, intégration sur Postgres réel, 3 parcours Playwright avant chaque déploiement ; previews par PR avec base Neon dédiée. |
-| 6 | Où on en est | Qualité technique | Déployé sur un Cloud Server Systalink (Dakar) ; chiffres du tableau de bord KPI (`/dashboard`) le jour J. |
+| 6 | Où on en est | Qualité technique | Déploiement visé sur un Cloud Server Systalink (Dakar) : à ne présenter comme fait qu'une fois l'URL publique en ligne (#35), sinon dire ce qui tourne réellement (staging Workers et Neon) ; chiffres du tableau de bord KPI (`/dashboard`) le jour J. |
 | 7 | La suite | Pertinence, public (10 %) | Après le hackathon : réputation, plus de Tags locaux, ouverture aux communautés anglophones. Appel au vote du public (27–30 oct.). |
 | 8 | L'équipe | — | @0xdaydy (capitaine, backend), @Justice-47 et @Strong-Ari (frontend), @lamafx (QA, docs, déploiement). |
 
