@@ -26,6 +26,8 @@ export type AppDeps = {
 	release: { version: string; commit: string };
 	/** Emails the API sends on its own; left out where there is no mail provider. */
 	notifications?: ApiContext["notifications"];
+	/** Publishing to the official social accounts (#265); left out where it is not wired (the Worker). */
+	social?: ApiContext["social"];
 	/** Serve the OpenAPI spec and its reference UI under /api/v1. Off on the public deployments. */
 	apiDocs: boolean;
 	/** Signing secret of the Resend webhook (#200); without it, /webhooks/resend is not mounted. */

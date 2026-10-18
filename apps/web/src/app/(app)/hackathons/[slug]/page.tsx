@@ -1,7 +1,30 @@
 import { Skeleton } from "@codesphere/ui/components/atoms/skeleton";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { HackathonPage } from "@/components/hackathon/hackathon-page";
+import { publicPageUrl } from "@/lib/page-url";
+import { previewMetadata } from "@/lib/share";
+import { client } from "@/utils/orpc";
+
+// Link preview (ADR 0001). Unknown or unreadable: the site's generic metadata.
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+	const { slug } = await params;
+	try {
+		const hackathon = await client.hackathons.get({ slug });
+		return previewMetadata({
+			title: hackathon.name,
+			description: hackathon.summary,
+			url: await publicPageUrl(`/hackathons/${encodeURIComponent(slug)}`),
+		});
+	} catch {
+		return {};
+	}
+}
 
 // A Hackathon in tabs (#45). Rendered in the browser; `?tab=` keeps the open tab in the URL.
 export default async function Page({

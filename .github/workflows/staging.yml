@@ -83,6 +83,8 @@ jobs:
         working-directory: apps/web
         env:
           NEXT_PUBLIC_SERVER_URL: ${{ env.ORIGIN }}
+          # Inlined at build time; must match EMAIL_OTP_SIGNIN on the Worker (set at deploy below).
+          NEXT_PUBLIC_EMAIL_OTP_SIGNIN: "true"
         run: bunx opennextjs-cloudflare build
       - uses: actions/upload-artifact@v4
         with:
@@ -220,6 +222,17 @@ jobs:
           # Sender on the domain verified in Resend; unset = email stays disabled. Written to the
           # secrets file, not --var: its "<address>" breaks when wrangler is re-run by a shell.
           EMAIL_FROM: ${{ vars.EMAIL_FROM }}
+          # Official social accounts (#265, #266). Each one unset is left out; the feature stays
+          # off until the encryption secret AND an application's client id are set.
+          SOCIAL_CREDENTIALS_SECRET: ${{ secrets.SOCIAL_CREDENTIALS_SECRET }}
+          X_CLIENT_ID: ${{ vars.X_CLIENT_ID }}
+          X_CLIENT_SECRET: ${{ secrets.X_CLIENT_SECRET }}
+          LINKEDIN_CLIENT_ID: ${{ vars.LINKEDIN_CLIENT_ID }}
+          LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
+          LINKEDIN_API_VERSION: ${{ vars.LINKEDIN_API_VERSION }}
+          LINKEDIN_AUTHOR: ${{ vars.LINKEDIN_AUTHOR }}
+          BLUESKY_IDENTIFIER: ${{ vars.BLUESKY_IDENTIFIER }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
         run: |
           # Secrets go through a file, never the command line; removed right after.
           umask 077
@@ -229,6 +242,8 @@ jobs:
             --var "BETTER_AUTH_URL:$ORIGIN" \
             --var "CORS_ORIGIN:$ORIGIN" \
             --var "OAUTH_PROXY_PRODUCTION_URL:$ORIGIN" \
+            --var "EMAIL_OTP_SIGNIN:true" \
+            --var "PUBLIC_SITE_URL:$ORIGIN" \
             --var "GIT_SHA:${GITHUB_SHA::7}" \
             --secrets-file staging-secrets.json
           rm -f staging-secrets.json

@@ -36,6 +36,7 @@ import { toast } from "sonner";
 
 import { useOutbox } from "@/components/outbox-provider";
 import { RenderedMarkdown } from "@/components/rendered-markdown";
+import { ShareMenu } from "@/components/share-menu";
 import SsoLoginDialog from "@/components/sso-login-dialog";
 import { errorCodeOf } from "@/i18n/errors";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
@@ -182,12 +183,15 @@ function Loaded({
 						{question.title}
 					</h1>
 					<Byline question={question} />
-					{isAuthor && !editing && (
-						<AuthorActions
-							question={question}
-							onEdit={() => setEditing(true)}
-						/>
-					)}
+					<div className="flex flex-wrap items-center gap-2">
+						<ShareMenu title={question.title} />
+						{isAuthor && !editing && (
+							<AuthorActions
+								question={question}
+								onEdit={() => setEditing(true)}
+							/>
+						)}
+					</div>
 				</header>
 
 				{accepted ? (

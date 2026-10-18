@@ -26,6 +26,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { z } from "zod";
 
 import { FeedSkeleton, HomeFeed } from "@/components/home-feed";
+import { ShareMenu } from "@/components/share-menu";
 import { errorCodeOf } from "@/i18n/errors";
 import { HAS_DATABASE } from "@/lib/deployment";
 import {
@@ -179,9 +180,8 @@ function Header({ hackathon }: { hackathon: HackathonData }) {
 					{hackathon.name}
 				</h1>
 				<p className="max-w-2xl text-muted-foreground">{hackathon.summary}</p>
-				<div>
+				<div className="mt-2 flex flex-wrap items-center gap-2">
 					<Button
-						className="mt-2"
 						render={
 							<Link
 								href={`/ask?tag=${encodeURIComponent(hackathon.slug)}` as Route}
@@ -191,6 +191,7 @@ function Header({ hackathon }: { hackathon: HackathonData }) {
 					>
 						{t("ask")}
 					</Button>
+					<ShareMenu title={hackathon.name} />
 				</div>
 			</div>
 			{closesAt && (

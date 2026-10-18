@@ -51,14 +51,14 @@ En production, le workflow écrit ces trois fichiers (`chmod 600`) à chaque dé
 | `PROD_SERVER_ENV` | secret | contenu de `apps/server/.env` (secrets, identifiants SSO, Resend ; modèle `prod.server.env.example`) |
 | `PROD_WEB_ENV` | secret | contenu de `apps/web/.env` (valeurs publiques seulement) |
 
-Au niveau du dépôt (**Settings > Secrets and variables > Actions**), pour les images publiées sous `ghcr.io/davexstudio` :
+Au niveau du dépôt (**Settings > Secrets and variables > Actions**), pour tirer sur le serveur les images publiées sous `ghcr.io/davexstudio-dev` :
 
 | Nom | Type | Contenu |
 |---|---|---|
-| `GHCR_USERNAME` | variable | `davexstudio` (ou le compte membre de l'organisation davexstudio qui détient le jeton) |
-| `GHCR_TOKEN` | secret | jeton de ce compte (classique, `write:packages` et `read:packages`) : il pousse les images au build et les tire sur le serveur |
+| `GHCR_USERNAME` | variable | le compte membre de l'organisation davexstudio-dev qui détient le jeton |
+| `GHCR_TOKEN` | secret | jeton de ce compte (classique, `read:packages`) : il tire les images sur le serveur |
 
-Le jeton de la run GitHub ne peut publier que sous le propriétaire du dépôt (DASSED), d'où ce jeton dédié. Sur le serveur, il ne sert qu'au `pull` et est retiré (`docker logout`) juste après.
+Les images sont publiées sous le propriétaire du dépôt (davexstudio-dev) : le build les pousse avec le jeton de la run (`packages: write`), sans secret. Le jeton dédié ne sert qu'au `pull` sur le serveur, où le jeton de la run n'existe pas ; il est retiré (`docker logout`) juste après.
 
 ## Release (déploiement de production)
 
@@ -67,14 +67,14 @@ Workflow **Release** (`../.github/workflows/production.yml`), manuel : **Actions
 | Étape | Ce qui est vérifié | En cas d'échec |
 |---|---|---|
 | CI passed | branche `main`, version `vX.Y.Z` nouvelle, CI et licences vertes sur le commit | rien ne démarre |
-| Build | images web et server construites une fois, poussées sur `ghcr.io/davexstudio` (étiquette = commit) | pas de déploiement |
+| Build | images web et server construites une fois, poussées sur `ghcr.io/davexstudio-dev` (étiquette = commit) | pas de déploiement |
 | E2E | les parcours Playwright sur une pile locale | pas de déploiement |
 | Deploy production | approbation des reviewers, puis `deploy.sh` en SSH, puis HTTPS : `/api/v1/ready` à 200 et `/api/v1/health` qui rapporte ce commit | la production reste sur la version précédente si le pull ou le dump échoue |
 | GitHub Release | étiquette `vX.Y.Z` et notes, seulement une fois la production sur le commit | — |
 
 Les pull requests qui touchent la pile (Dockerfiles, `docker-compose.prod.yml`, `deploy/`, le workflow) construisent les images sans les pousser : un Dockerfile cassé se voit avant la fusion.
 
-**Rollback** : revenir sur `main` (revert) puis publier une nouvelle version. Les changements de schéma restent compatibles sur deux releases (#168) ; le dump pris avant la migration est dans `backups/`. En urgence, depuis le serveur, `deploy/deploy.sh <sha> <version>` relance une version déjà publiée sur GHCR (avec `REGISTRY=ghcr.io/davexstudio`, après `docker login ghcr.io` avec un jeton `read:packages`).
+**Rollback** : revenir sur `main` (revert) puis publier une nouvelle version. Les changements de schéma restent compatibles sur deux releases (#168) ; le dump pris avant la migration est dans `backups/`. En urgence, depuis le serveur, `deploy/deploy.sh <sha> <version>` relance une version déjà publiée sur GHCR (avec `REGISTRY=ghcr.io/davexstudio-dev`, après `docker login ghcr.io` avec un jeton `read:packages`).
 
 ## Supervision
 

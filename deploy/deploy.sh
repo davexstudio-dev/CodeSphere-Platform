@@ -14,12 +14,12 @@
 # A failed pull or dump changes nothing: the running containers keep serving. Rolling back is
 # deploying an earlier commit again (schema changes are made backward compatible, #168).
 #
-# Environment: REGISTRY, e.g. ghcr.io/davexstudio (where the images are).
+# Environment: REGISTRY, e.g. ghcr.io/davexstudio-dev (where the images are).
 set -euo pipefail
 
 SHA="${1:?usage: deploy.sh <git-sha> <version>}"
 VERSION="${2:?usage: deploy.sh <git-sha> <version>}"
-REGISTRY="${REGISTRY:?Set REGISTRY, e.g. ghcr.io/davexstudio}"
+REGISTRY="${REGISTRY:?Set REGISTRY, e.g. ghcr.io/davexstudio-dev}"
 
 cd "$(dirname "$0")/.."
 

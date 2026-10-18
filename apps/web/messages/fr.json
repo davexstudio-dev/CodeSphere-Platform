@@ -316,6 +316,41 @@
 				"generic": "Une erreur est survenue. Réessayez."
 			}
 		},
+		"social": {
+			"title": "Comptes sociaux",
+			"description": "Connectez les comptes officiels X et LinkedIn de CodeSphere. Les jetons sont chiffrés et renouvelés avant leur expiration.",
+			"callbackDescription": "Finalisation de la connexion…",
+			"finishing": "Finalisation de la connexion…",
+			"back": "Retour aux comptes sociaux",
+			"unavailable": "Comptes indisponibles",
+			"retry": "Réessayer",
+			"notSetUp": "Aucune application OAuth n'est configurée sur ce déploiement (voir SOCIAL_CREDENTIALS_SECRET, X_CLIENT_ID, LINKEDIN_CLIENT_ID).",
+			"platforms": {
+				"x": "X",
+				"linkedin": "LinkedIn"
+			},
+			"state": {
+				"not-configured": "Non configuré",
+				"not-connected": "Non connecté",
+				"reconnect-required": "À reconnecter",
+				"connected": "Connecté"
+			},
+			"hint": {
+				"not-configured": "Aucune application OAuth n'est configurée pour cette plateforme.",
+				"not-connected": "Aucun compte n'est encore connecté.",
+				"reconnect-required": "La plateforme n'accepte plus l'accès enregistré. Reconnectez le compte avant de publier.",
+				"connected": ""
+			},
+			"expires": "Expiration du jeton d'accès",
+			"noExpiry": "Sans expiration",
+			"renewsOnNextPost": "renouvelé à la prochaine publication",
+			"connectedAt": "Connecté le",
+			"connect": "Connecter",
+			"reconnect": "Reconnecter",
+			"disconnect": "Déconnecter",
+			"connectedNow": "{platform} connecté.",
+			"error": "La connexion a échoué. Réessayez."
+		},
 		"kpi": "KPI",
 		"audit": {
 			"title": "Journal d'audit",
@@ -401,6 +436,21 @@
 			"tag": {
 				"follow": "Suivi de Tag"
 			}
+		}
+	},
+	"share": {
+		"trigger": "Partager",
+		"menu": "Partager cette page",
+		"native": "Partager…",
+		"copy": "Copier le lien",
+		"copied": "Lien copié",
+		"copyFailed": "Impossible de copier le lien",
+		"targets": {
+			"whatsapp": "WhatsApp",
+			"x": "X",
+			"linkedin": "LinkedIn",
+			"telegram": "Telegram",
+			"facebook": "Facebook"
 		}
 	},
 	"question": {

@@ -1,6 +1,6 @@
 # OAuth : URL de rappel des previews (GitHub, GitLab, Google) et plugin oAuthProxy de Better Auth
 
-Ticket : DASSED/CodeSphere-Platform#99 (parent #86). Rédigé le 2026-10-11.
+Ticket : davexstudio-dev/CodeSphere-Platform#99 (parent #86). Rédigé le 2026-10-11.
 Version de Better Auth du dépôt : `better-auth` 1.7.5 (`package.json` racine ; `@better-auth/*` 1.7.5 dans `packages/auth`).
 
 ## Réponse courte

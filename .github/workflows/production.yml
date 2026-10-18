@@ -6,7 +6,7 @@ name: Release
 #
 # Pipeline, same shape as staging.yml and preview.yml:
 #   gate    -> on main, a new vX.Y.Z, and the commit's CI and licence runs passed
-#   build   -> the web and server images, once, pushed to ghcr.io/davexstudio tagged with the commit (in parallel
+#   build   -> the web and server images, once, pushed to ghcr.io/davexstudio-dev tagged with the commit (in parallel
 #              with e2e); nothing is ever built on the server
 #   e2e     -> the Playwright journeys on a local stack (e2e.yml, #55)
 #   deploy  -> environment "production" (its required reviewers approve here), then over SSH:
@@ -50,10 +50,10 @@ concurrency:
 
 env:
   VERSION: ${{ inputs.version }}
-  # The images live under the davexstudio account, not the repository owner: the run's own token
-  # cannot publish there, so a token of that account (GHCR_TOKEN, scopes write:packages and
-  # read:packages) pushes them in build and pulls them on the server in deploy.
-  REGISTRY: ghcr.io/davexstudio
+  # The images live under the repository owner (davexstudio-dev): the run's own token pushes them
+  # in build. The server pulls them in deploy with GHCR_TOKEN (read:packages), since the run's
+  # token does not leave GitHub.
+  REGISTRY: ghcr.io/davexstudio-dev
 
 jobs:
   # TEST: waits for the push runs of ci.yml and licenses.yml on this commit; fails when one
@@ -105,6 +105,8 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      # Pushes the images to ghcr.io under the repository owner.
+      packages: write
     strategy:
       # Each image reports on its own: a broken web build does not hide the state of the server one.
       fail-fast: false
@@ -122,8 +124,8 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         with:
           registry: ghcr.io
-          username: ${{ vars.GHCR_USERNAME }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/setup-buildx-action@v3
       # The build mounts these as BuildKit secrets (never in a layer). Nothing secret is needed to
       # build: the web image holds public values only, the server reads its secrets at runtime.
