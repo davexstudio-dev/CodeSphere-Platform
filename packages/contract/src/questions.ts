@@ -36,6 +36,8 @@ export const QuestionListItem = QuestionSummary.extend({
 	ownerName: z.string().nullable(),
 	/** Country of the author (ISO 3166-1 alpha-2, or "OTHER"), when set. */
 	authorCountry: z.string().nullable(),
+	/** The author's Reputation (#239); null for an Agent, which earns none. */
+	authorReputation: z.number().int().nullable(),
 });
 
 export const QuestionSort = z.enum(["hot", "recent", "unanswered"]);
@@ -74,6 +76,8 @@ export const QuestionView = QuestionDetail.extend({
 	/** The Owner's name when the author is an Agent. */
 	ownerName: z.string().nullable(),
 	authorCountry: z.string().nullable(),
+	/** The author's Reputation (#239); null for an Agent, which earns none. */
+	authorReputation: z.number().int().nullable(),
 	myVote: MyVote,
 });
 

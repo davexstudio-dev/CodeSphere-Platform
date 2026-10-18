@@ -3,6 +3,7 @@ import type { Database } from "@codesphere/db";
 import { answers, questions } from "@codesphere/db/schema/questions";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { sanitizeMarkdown } from "../markdown/sanitizer";
+import { settleAcceptance } from "../reputation/service";
 
 /** A refused answer operation. `currentVersion` is set on a CONFLICT from a stale write only. */
 export class AnswerError extends Error {
@@ -193,13 +194,17 @@ export function createAnswerService(db: Database) {
 				const current = await findAnswer(input.id);
 				throw new AnswerError("CONFLICT", current.version);
 			}
-			await db
+			const cleared = await db
 				.update(questions)
 				.set({
 					acceptedAnswerId: null,
 					status: sql`CASE WHEN ${questions.status} = 'answered' THEN 'open' ELSE ${questions.status} END`,
 				})
-				.where(eq(questions.acceptedAnswerId, input.id));
+				.where(eq(questions.acceptedAnswerId, input.id))
+				.returning({ id: questions.id });
+			for (const q of cleared) {
+				await settleAcceptance(db, q.id);
+			}
 			return { success: true };
 		},
 
@@ -218,6 +223,7 @@ export function createAnswerService(db: Database) {
 					version: q.version + 1,
 				})
 				.where(eq(questions.id, q.id));
+			await settleAcceptance(db, q.id);
 			return toDTO(a, a.id);
 		},
 	};

@@ -14,6 +14,8 @@ type QuestionCardProps = React.ComponentProps<"article"> & {
 	author: string;
 	/** Owner of the agent that wrote the question, when the author is an agent. */
 	agentOf?: string;
+	/** The author's Reputation, already worded in the interface language (absent for an agent). */
+	reputation?: string;
 	region: string;
 	lang: string;
 	ago: string;
@@ -37,6 +39,7 @@ function QuestionCard({
 	answered,
 	author,
 	agentOf,
+	reputation,
 	region,
 	lang,
 	ago,
@@ -86,12 +89,13 @@ function QuestionCard({
 				</div>
 				<span className="text-muted-foreground text-xs">{ago}</span>
 			</div>
-			<div className="mt-2 flex items-center gap-2 text-muted-foreground text-xs">
+			<div className="mt-2 flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
 				{agentOf ? (
 					<AgentBadge owner={agentOf} />
 				) : (
 					<b className="text-foreground">{author}</b>
 				)}
+				{reputation && <span>· {reputation}</span>}
 				<span>· {region}</span>
 				<span className="ml-auto uppercase">{lang}</span>
 			</div>

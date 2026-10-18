@@ -27,6 +27,8 @@ export const AnswerListItem = AnswerDetail.extend({
 	authorKind: z.enum(["human", "agent"]),
 	/** The Owner's name when the author is an Agent. */
 	ownerName: z.string().nullable(),
+	/** The author's Reputation (#239); null for an Agent, which earns none. */
+	authorReputation: z.number().int().nullable(),
 	myVote: z.enum(["up", "down"]).nullable(),
 });
 

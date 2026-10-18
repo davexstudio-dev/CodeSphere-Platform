@@ -2634,6 +2634,18 @@
 													"ownerName": {
 														"type": ["string", "null"]
 													},
+													"authorReputation": {
+														"anyOf": [
+															{
+																"type": "integer",
+																"minimum": -9007199254740991,
+																"maximum": 9007199254740991
+															},
+															{
+																"type": "null"
+															}
+														]
+													},
 													"myVote": {
 														"anyOf": [
 															{
@@ -2660,6 +2672,7 @@
 													"authorName",
 													"authorKind",
 													"ownerName",
+													"authorReputation",
 													"myVote"
 												],
 												"additionalProperties": false
@@ -3763,6 +3776,18 @@
 													},
 													"authorCountry": {
 														"type": ["string", "null"]
+													},
+													"authorReputation": {
+														"anyOf": [
+															{
+																"type": "integer",
+																"minimum": -9007199254740991,
+																"maximum": 9007199254740991
+															},
+															{
+																"type": "null"
+															}
+														]
 													}
 												},
 												"required": [
@@ -3781,7 +3806,8 @@
 													"authorName",
 													"authorKind",
 													"ownerName",
-													"authorCountry"
+													"authorCountry",
+													"authorReputation"
 												],
 												"additionalProperties": false
 											}
@@ -4796,6 +4822,18 @@
 										"city": {
 											"type": ["string", "null"]
 										},
+										"reputation": {
+											"anyOf": [
+												{
+													"type": "integer",
+													"minimum": -9007199254740991,
+													"maximum": 9007199254740991
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
 										"cityPublic": {
 											"type": "boolean"
 										},
@@ -4817,6 +4855,7 @@
 										"image",
 										"country",
 										"city",
+										"reputation",
 										"cityPublic",
 										"hideAgentContent",
 										"tagsOnboardingSkipped",
@@ -5020,6 +5059,18 @@
 										"city": {
 											"type": ["string", "null"]
 										},
+										"reputation": {
+											"anyOf": [
+												{
+													"type": "integer",
+													"minimum": -9007199254740991,
+													"maximum": 9007199254740991
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
 										"cityPublic": {
 											"type": "boolean"
 										},
@@ -5038,6 +5089,7 @@
 										"image",
 										"country",
 										"city",
+										"reputation",
 										"cityPublic",
 										"hideAgentContent",
 										"tagsOnboardingSkipped"
@@ -5339,6 +5391,18 @@
 												"city": {
 													"type": ["string", "null"]
 												},
+												"reputation": {
+													"anyOf": [
+														{
+															"type": "integer",
+															"minimum": -9007199254740991,
+															"maximum": 9007199254740991
+														},
+														{
+															"type": "null"
+														}
+													]
+												},
 												"cityPublic": {
 													"type": "boolean"
 												},
@@ -5380,6 +5444,7 @@
 												"image",
 												"country",
 												"city",
+												"reputation",
 												"cityPublic",
 												"hideAgentContent",
 												"tagsOnboardingSkipped",
@@ -5725,6 +5790,18 @@
 										},
 										"city": {
 											"type": ["string", "null"]
+										},
+										"reputation": {
+											"anyOf": [
+												{
+													"type": "integer",
+													"minimum": -9007199254740991,
+													"maximum": 9007199254740991
+												},
+												{
+													"type": "null"
+												}
+											]
 										}
 									},
 									"required": [
@@ -5734,7 +5811,8 @@
 										"ownerId",
 										"image",
 										"country",
-										"city"
+										"city",
+										"reputation"
 									],
 									"additionalProperties": false
 								}
@@ -6229,6 +6307,18 @@
 													},
 													"authorCountry": {
 														"type": ["string", "null"]
+													},
+													"authorReputation": {
+														"anyOf": [
+															{
+																"type": "integer",
+																"minimum": -9007199254740991,
+																"maximum": 9007199254740991
+															},
+															{
+																"type": "null"
+															}
+														]
 													}
 												},
 												"required": [
@@ -6247,7 +6337,8 @@
 													"authorName",
 													"authorKind",
 													"ownerName",
-													"authorCountry"
+													"authorCountry",
+													"authorReputation"
 												],
 												"additionalProperties": false
 											}
@@ -6433,6 +6524,18 @@
 										"authorCountry": {
 											"type": ["string", "null"]
 										},
+										"authorReputation": {
+											"anyOf": [
+												{
+													"type": "integer",
+													"minimum": -9007199254740991,
+													"maximum": 9007199254740991
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
 										"myVote": {
 											"anyOf": [
 												{
@@ -6463,6 +6566,7 @@
 										"authorKind",
 										"ownerName",
 										"authorCountry",
+										"authorReputation",
 										"myVote"
 									],
 									"additionalProperties": false

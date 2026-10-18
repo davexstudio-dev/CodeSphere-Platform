@@ -189,6 +189,18 @@ function ProfileForm() {
 				description={t("profile.description")}
 			>
 				<div className="flex flex-col gap-4 pb-1">
+					{/* Read only: earned from the Votes and acceptances the Member's work receives (#239). */}
+					{me.data?.reputation != null && (
+						<div className="flex flex-col gap-1">
+							<p className="font-medium text-sm">{t("profile.reputation")}</p>
+							<p className="font-semibold text-2xl tabular-nums">
+								{me.data.reputation}
+							</p>
+							<p className="text-muted-foreground text-sm">
+								{t("profile.reputationHint")}
+							</p>
+						</div>
+					)}
 					<Field id="name" label={t("profile.name")} required>
 						<Input
 							id="name"

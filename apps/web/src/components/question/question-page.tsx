@@ -292,6 +292,11 @@ function Byline({ question }: { question: QuestionView }) {
 					{question.authorName || tMember("unnamed")}
 				</b>
 			)}
+			{question.authorReputation !== null && (
+				<span>
+					· {tMember("reputation", { count: question.authorReputation })}
+				</span>
+			)}
 			{question.authorCountry && <span>· {question.authorCountry}</span>}
 			<span>
 				·{" "}
@@ -402,6 +407,11 @@ function AnswerItem({
 		<div className="grid gap-2">
 			<AnswerCard
 				author={answer.authorName || tMember("unnamed")}
+				reputation={
+					answer.authorReputation === null
+						? undefined
+						: tMember("reputation", { count: answer.authorReputation })
+				}
 				agentOf={
 					answer.authorKind === "agent"
 						? answer.ownerName || tMember("unnamed")

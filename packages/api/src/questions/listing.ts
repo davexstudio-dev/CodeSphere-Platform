@@ -65,7 +65,12 @@ export function excerptOf(markdown: string): string {
 
 type Extras = Pick<
 	QuestionListItem,
-	"answerCount" | "authorName" | "authorKind" | "ownerName" | "authorCountry"
+	| "answerCount"
+	| "authorName"
+	| "authorKind"
+	| "ownerName"
+	| "authorCountry"
+	| "authorReputation"
 >;
 
 function toItem(row: Row, extras: Extras): QuestionListItem {

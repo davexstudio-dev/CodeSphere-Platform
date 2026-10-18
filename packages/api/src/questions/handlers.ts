@@ -237,13 +237,14 @@ export function createAnswersHandlers() {
 				]);
 				return {
 					items: items.map((a) => {
-						const { authorName, authorKind, ownerName } =
+						const { authorName, authorKind, ownerName, authorReputation } =
 							authors.get(a.authorId) ?? UNKNOWN_AUTHOR;
 						return {
 							...a,
 							authorName,
 							authorKind,
 							ownerName,
+							authorReputation,
 							myVote: mine.get(a.id) ?? null,
 						};
 					}),
