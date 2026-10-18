@@ -30,7 +30,7 @@ export const config = {
 		{
 			// Pages only: the API paths are the server's, static files carry no script.
 			source:
-				"/((?!api/|rpc|mcp|_next/static|_next/image|favicon.ico|robots.txt).*)",
+				"/((?!api/|rpc|mcp|_next/static|_next/image|favicon.ico|robots.txt|og-default.png).*)",
 			// A prefetch is not rendered as a page: no nonce to draw.
 			missing: [
 				{ type: "header", key: "next-router-prefetch" },

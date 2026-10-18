@@ -78,7 +78,20 @@ type PreviewInput = {
 	/** Markdown, or a plain description. */
 	description: string;
 	url: string;
+	/** Absolute URL of the card image (a crawler resolves no relative path). */
+	imageUrl: string;
 };
+
+export const SITE_NAME = "CodeSphere Platform";
+
+/** Static card image served from `public/`, 1200x630 (#262). */
+export const OG_IMAGE_PATH = "/og-default.png";
+
+export type OgImage = { url: string; width: 1200; height: 630; alt: string };
+
+export function ogImage(url: string): OgImage {
+	return { url, width: 1200, height: 630, alt: SITE_NAME };
+}
 
 export type Preview = {
 	title: string;
@@ -90,17 +103,22 @@ export type Preview = {
 		description: string;
 		url: string;
 		siteName: string;
+		images: OgImage[];
 	};
-	twitter: { card: "summary"; title: string; description: string };
+	twitter: {
+		card: "summary_large_image";
+		title: string;
+		description: string;
+		images: string[];
+	};
 };
-
-export const SITE_NAME = "CodeSphere";
 
 /** Link-preview metadata of a public page. */
 export function previewMetadata({
 	title,
 	description,
 	url,
+	imageUrl,
 }: PreviewInput): Preview {
 	const text = excerpt(description);
 	return {
@@ -113,7 +131,13 @@ export function previewMetadata({
 			description: text,
 			url,
 			siteName: SITE_NAME,
+			images: [ogImage(imageUrl)],
 		},
-		twitter: { card: "summary", title, description: text },
+		twitter: {
+			card: "summary_large_image",
+			title,
+			description: text,
+			images: [imageUrl],
+		},
 	};
 }
