@@ -49,6 +49,7 @@
 		"db:generate": "turbo run db:generate -F @codesphere/db --",
 		"db:migrate": "turbo run db:migrate -F @codesphere/db --",
 		"db:seed": "bun run --cwd packages/db db:seed",
+		"db:seed:demo": "bun run --cwd packages/api db:seed:demo",
 		"e2e": "bun run --cwd apps/e2e e2e",
 		"db:local": "turbo run db:local -F @codesphere/db --",
 		"db:local:studio": "turbo run db:local:studio -F @codesphere/db --",
