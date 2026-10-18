@@ -57,7 +57,7 @@ Un Admin partage une Question ou un Hackathon publics sur les comptes de CodeSph
 
 | Plateforme | État | Contrainte ou reste à faire |
 |---|---|---|
-| Bluesky | livré (#265) | Aucune : mot de passe d'application, sans revue ni API payante. |
+| Bluesky | livré, **non vérifié en réel** (#265) | Sans revue ni API payante (mot de passe d'application), mais aucune publication réelle faite : il faut un compte officiel et son mot de passe d'application. Aperçu de lien non observé. |
 | X | livré, **non vérifié en réel** (#265, #266) | L'accès à l'API est payant ; aucune publication réelle faite. Jeton de renouvellement à usage unique : géré (stockage chiffré, renouvellement sous bail). |
 | LinkedIn | livré, **non vérifié en réel** (#265, #266) | Revue d'application LinkedIn requise. Le jeton de renouvellement n'est donné qu'à certaines applications : sinon, reconnecter avant ~60 jours. Publier comme Page demande des droits supplémentaires. |
 | Threads | prévu | Pas encore implémenté ; accès simple, c'est la suite logique après Bluesky. |
