@@ -17,15 +17,15 @@ Plateforme d'échange pour développeurs africains, par des développeurs : Q&R 
 | Fondations, contrats publiés, staging `develop` (Vercel + Workers) | 9–13 oct. (contrôle le 13) |
 | Profil, Tags, flux, page CADEV, formulaire de Question | 13–17 oct. (contrôle le 17) |
 | Questions, réponses, votes, hors-ligne, agents, API, MCP | 17–21 oct. (contrôle le 21) |
-| Admin minimal, intégration, **gel des fonctionnalités le 22 au soir** (`fix/*` seulement, sur décision du capitaine) | 21–22 oct. |
-| Sécurité, pages légales, contenu de démo, répétition générale (23), dossier | 23–24 oct. |
+| Admin minimal, intégration | 21–22 oct. |
+| Sécurité, pages légales, contenu de démo, répétition générale (23), dossier, **gel des fonctionnalités le 24 au soir** (`fix/*` seulement, sur décision du capitaine) | 23–24 oct. |
 | **Dépôt le samedi 24 oct.** (marge d'un jour) ; limite officielle confirmée le 2026-10-09 | **25 oct. avant 17h00 GMT** |
 | Vote entre participants d'un même pays, **obligatoire pour la prise en compte de la soumission** | 25 oct. 18h – 26 oct. 23h59 |
 | Vote du public (10 % des points) | 27–30 oct., 23h59 |
 | Délibération du jury | 1er nov. |
 | Proclamation des résultats | à confirmer (15 nov. dans l'ancien règlement) |
 
-Points de contrôle : 13, 17 et 21 oct. (staging à jour, parcours de démo rejoué, CI verte), gel le 22 au soir, répétition générale le 23. Obligations : déploiement sur un produit payant Systalink (Cloud Server Business, Dakar) ; composants tiers sous licence permissive uniquement (MIT, Apache 2.0, BSD ; GPL/AGPL/LGPL = irrecevable, art. 6 du règlement ; MPL-2.0 acceptée par l'organisateur, présente via `lightningcss`, à déclarer dans la partie « technologies » à la création du projet) ; usage de l'IA déclaré ; équipe de 4. Jury : pertinence 25 %, qualité technique 30 %, UX 20 %, innovation 15 %, public 10 %.
+Points de contrôle : 13, 17 et 21 oct. (staging à jour, parcours de démo rejoué, CI verte), gel le 24 au soir, répétition générale le 23. Obligations : déploiement sur un produit payant Systalink (Cloud Server Business, Dakar) ; composants tiers sous licence permissive uniquement (MIT, Apache 2.0, BSD ; GPL/AGPL/LGPL = irrecevable, art. 6 du règlement ; MPL-2.0 acceptée par l'organisateur, présente via `lightningcss`, à déclarer dans la partie « technologies » à la création du projet) ; usage de l'IA déclaré ; équipe de 4. Jury : pertinence 25 %, qualité technique 30 %, UX 20 %, innovation 15 %, public 10 %.
 
 ### Ligne de coupe
 
@@ -116,17 +116,17 @@ Maquette de référence dans le ticket. Palette **Latérite** (`#a8432a` / `#d68
 - **Logs** : redaction, ni email ni corps de requête, IP tronquée, 14 jours ; **journal d'audit** (clés, suspensions, suppressions de compte).
 - **Données personnelles** ([#23](https://github.com/0xdaydy/systalink-challenge/issues/23), [#24](https://github.com/0xdaydy/systalink-challenge/issues/24)) : email jamais public ; sessions 30 jours ; clés révoquées purgées après 30 jours ; **export JSON** immédiat ; **suppression** avec anonymisation ou effacement ; pages légales FR + EN (CGU, confidentialité, mentions, contact sous 30 jours) ; aucun analytics ni cookie non nécessaire.
 - **Docker** : multi-étapes, non root ; Postgres non exposé.
-- **Tests de sécurité obligatoires** ([#27](https://github.com/0xdaydy/systalink-challenge/issues/27)) : XSS Markdown, droits, 429, idempotence, export, suppression de compte. Grille `docs/security/owasp-checklist.md` et checklist serveur avant le 29 oct.
+- **Tests de sécurité obligatoires** ([#27](https://github.com/0xdaydy/systalink-challenge/issues/27)) : XSS Markdown, droits, 429, idempotence, export, suppression de compte. Grille `docs/security/owasp-checklist.md` et checklist serveur avant le 24 oct.
 - **Actions humaines** : déclaration CDP Sénégal, conditions de traitement Systalink.
 
 ## 5. Livraison ([carte #28](https://github.com/0xdaydy/systalink-challenge/issues/28))
 
 - **Environnements** : local (`docker-compose.yml`) ; `staging.codesphereplatform.xyz` et `codesphereplatform.xyz` sur le même Cloud Server, Caddy partagé (squelette : PR #36).
 - **Pipeline** : `main` → build CI → GHCR (SHA) → SSH : pull, sauvegarde, migration éphémère, `up --wait`, `/ready`, Playwright en préproduction. Production = étiquette `vX.Y.Z` + Release GitHub. Retour arrière = étiquette précédente. Migrations additives uniquement.
-- **Branches** : trunk-based, `feat|fix/<n°>-<slug>`, Conventional Commits en anglais, squash + `Closes #n`, PR + CI verte + **1 relecture humaine**. Gel à partir du 22 oct. au soir : `fix/*` seulement, sur décision du capitaine.
+- **Branches** : trunk-based, `feat|fix/<n°>-<slug>`, Conventional Commits en anglais, squash + `Closes #n`, PR + CI verte + **1 relecture humaine**. Gel à partir du 24 oct. au soir : `fix/*` seulement, sur décision du capitaine.
 - **Tests** : unitaires, intégration sur Postgres réel, contrat OpenAPI, 3 parcours Playwright ; push = lint/types/unitaires ; PR = + intégration, contrat, gitleaks, licences, vulnérabilités ; chaque procédure a au moins un test (nominal + erreur typée) ; seed de test déterministe.
 - **Versions** : SemVer, `v1.0.0` = soumission ; version + SHA dans `/health` et le pied de page.
-- **Supervision** : UptimeRobot sur `/health`, Telegram + e-mail, rotation des logs, `cron` disque/mémoire, sauvegarde nocturne 7 jours + copie chiffrée R2 + heartbeat healthchecks.io ; restauration testée le 29 oct.
+- **Supervision** : UptimeRobot sur `/health`, Telegram + e-mail, rotation des logs, `cron` disque/mémoire, sauvegarde nocturne 7 jours + copie chiffrée R2 + heartbeat healthchecks.io ; restauration testée le 24 oct.
 - **Équipe** ([#38](https://github.com/0xdaydy/systalink-challenge/issues/38)) : 4 membres. Capitaine @0xdaydy (backend, API, base de données) ; @Justice-47 et @Strong-Ari (frontend) ; @lamafx (QA / tests, documentation et dossier CADEV, suppléant CI/CD, déploiement et infra) ; production/SSH/secrets/astreinte = capitaine + @lamafx.
 
 ## 6. Livrables de dépôt

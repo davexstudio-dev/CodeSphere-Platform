@@ -89,7 +89,7 @@ Les pull requests qui touchent la pile (Dockerfiles, `docker-compose.prod.yml`, 
   17 3 * * *   cd ~/codesphere && deploy/backup.sh >> backups/backup.log 2>&1
   ```
 
-## Avant la démo CADEV (29 oct., début du gel)
+## Avant la démo CADEV (24 oct., début du gel)
 
 Faire une sauvegarde, vérifier sa présence sur R2, en rapatrier une copie et la restaurer dans une base locale (`pg_restore`, voir l'en-tête de `backup.sh`) pour s'assurer qu'elle est exploitable.
 

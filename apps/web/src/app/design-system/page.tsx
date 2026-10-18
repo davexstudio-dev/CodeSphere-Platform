@@ -706,7 +706,7 @@ export default function DesignSystemPage() {
 									state: "current",
 								},
 								{
-									date: "22 oct.",
+									date: "24 oct.",
 									title: "Gel des fonctionnalités",
 									state: "upcoming",
 								},
