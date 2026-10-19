@@ -62,9 +62,9 @@ export function initialsOf(name: string): string {
 		.split(/\s+/)
 		.filter(Boolean)
 		.map((word) => Array.from(word)[0] ?? "");
-	return (
-		letters.length > 1 ? letters[0] + letters.at(-1) : (letters[0] ?? "")
-	).toUpperCase();
+	const first = letters[0] ?? "";
+	const last = letters.length > 1 ? (letters.at(-1) ?? "") : "";
+	return `${first}${last}`.toUpperCase();
 }
 
 export function Blobatar({
