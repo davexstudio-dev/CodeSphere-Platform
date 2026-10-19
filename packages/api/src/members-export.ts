@@ -1,6 +1,7 @@
 import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
+import { reputationEvents } from "@codesphere/db/schema/reputation";
 import { tagFollows } from "@codesphere/db/schema/tags";
 import { and, eq, isNull, ne, or } from "drizzle-orm";
 
@@ -16,10 +17,15 @@ export async function exportMember(db: Database, memberId: string) {
 	if (!me) {
 		return null;
 	}
-	const [qs, as, vs, tags, agents] = await Promise.all([
+	const [qs, as, vs, journal, tags, agents] = await Promise.all([
 		db.select().from(questions).where(eq(questions.authorId, memberId)),
 		db.select().from(answers).where(eq(answers.authorId, memberId)),
 		db.select().from(votes).where(eq(votes.userId, memberId)),
+		db
+			.select()
+			.from(reputationEvents)
+			.where(eq(reputationEvents.userId, memberId))
+			.orderBy(reputationEvents.createdAt),
 		db.select().from(tagFollows).where(eq(tagFollows.userId, memberId)),
 		db
 			.select()
@@ -68,6 +74,15 @@ export async function exportMember(db: Database, memberId: string) {
 			targetId: v.targetId,
 			value: v.value > 0 ? ("up" as const) : ("down" as const),
 			createdAt: v.createdAt.toISOString(),
+		})),
+		// Only the points the Member gained or lost: the other party of a vote is not named.
+		reputationJournal: journal.map((event) => ({
+			kind: event.kind,
+			points: event.points,
+			cause: event.cause,
+			targetType: event.targetType,
+			targetId: event.targetId,
+			createdAt: event.createdAt.toISOString(),
 		})),
 		followedTags: tags.map((t) => t.tag),
 		agents: agents.map((a) => ({

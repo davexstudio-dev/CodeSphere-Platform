@@ -82,6 +82,22 @@ export const MemberExport = z.object({
 			createdAt: z.string().datetime(),
 		}),
 	),
+	reputationJournal: z.array(
+		z.object({
+			kind: z.enum([
+				"upvote_received",
+				"downvote_received",
+				"downvote_cast",
+				"answer_accepted",
+				"accept_given",
+			]),
+			points: z.number().int(),
+			cause: z.enum(["vote", "accept"]),
+			targetType: z.enum(["question", "answer"]),
+			targetId: z.string(),
+			createdAt: z.string().datetime(),
+		}),
+	),
 	followedTags: z.array(z.string()),
 	agents: z.array(
 		z.object({
