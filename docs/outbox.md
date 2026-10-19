@@ -10,7 +10,8 @@ Les événements du produit quittent le monolithe par une **table d'outbox** vid
 | Aucun événement perdu | Le relais ne marque un événement `published_at` qu'**après** l'acceptation par la file. Un échec laisse l'événement en attente, avec un délai croissant (1 s, 2 s, 4 s… 5 min). |
 | Aucun effet appliqué deux fois | La livraison est **au moins une fois** (un plantage entre l'envoi et le marquage renvoie l'événement). Les consommateurs sont idempotents (voir plus bas). |
 | Deux relais ne prennent pas les mêmes événements | Réservation `FOR UPDATE SKIP LOCKED` avec un bail (`locked_until`, 60 s) : un relais mort libère ses événements à l'échéance. |
-| Un événement qui échoue sans fin ne bloque pas les autres | Après 8 tentatives : `failed_at`, jamais repris, visible dans `outboxStatus`. |
+| Un événement qui échoue sans fin ne bloque pas les autres | Après 8 tentatives d'envoi : `failed_at`, jamais repris. Un consommateur qui épuise ses 6 reprises Queues : la ligne est marquée `failed_at` (le message part en file d'échec). Dans les deux cas, visible dans `outboxStatus`. |
+| Un événement empoisonné ne retient pas ses voisins | Côté Bun, chaque message est livré seul : seul le fautif est reporté. Côté Cloudflare, chaque message est acquitté ou repris individuellement. |
 
 Hors garantie : l'**ordre** est celui de création au sein d'un lot, pas entre lots ni entre consommateurs. Un consommateur lit l'état courant de l'agrégat (`aggregate_type`, `aggregate_id`) plutôt que de se fier à l'ordre ou au contenu du `payload`.
 
@@ -31,7 +32,7 @@ await withAudit(db, auditEvent, mutation /* ...returning({ id }) */, [
 
 Sans changement associé : `publishEvent(db, { type, aggregateType, aggregateId, dedupeKey })`. Avec une `dedupeKey`, émettre deux fois écrit une fois (une requête rejouée ne double pas l'événement).
 
-Aujourd'hui émis : `organization.applied|validated|rejected|suspended`, `job.removed`.
+Aujourd'hui émis : `organization.applied|validated|rejected|suspended|reinstated`, `job.removed`.
 
 ## Écrire un consommateur
 
@@ -65,7 +66,7 @@ Pour le voir : valider une Organisation depuis `/admin/organizations`, attendre 
 | Environnement | Relais | File |
 |---|---|---|
 | Cloudflare (Worker) | Cron Trigger chaque minute (`scheduled`) : `drainOutbox` | Queue `codesphere-events` (binding `EVENTS`), consommée par le `queue` du même Worker (`apiQueue`), file d'échec `codesphere-events-dlq` |
-| Serveur Bun, développement, tests | `startOutboxRelay` (toutes les 5 s, dans le processus) | Locale : les événements vont directement aux consommateurs, mêmes garanties |
+| Serveur Bun, développement, tests | `startOutboxRelay` (toutes les 5 s, dans le processus ; `OUTBOX_RELAY=false` à côté du Worker sur la même base) | Locale : les événements vont directement aux consommateurs, mêmes garanties |
 
 À créer une fois côté Cloudflare : `wrangler queues create codesphere-events` et `wrangler queues create codesphere-events-dlq`.
 

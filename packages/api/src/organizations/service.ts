@@ -58,6 +58,14 @@ function offsetOf(cursor: string | undefined) {
 	return Number(match[1]);
 }
 
+// One event type per decision: a reinstatement is not a first validation.
+const EVENT_TYPES = {
+	validate: "organization.validated",
+	reject: "organization.rejected",
+	suspend: "organization.suspended",
+	reinstate: "organization.reinstated",
+} as const;
+
 /** A decision of an Admin and the status it applies to. */
 const DECISIONS = {
 	validate: {
@@ -301,7 +309,7 @@ export function createOrganizationService(db: Database) {
 						.returning({ id: organization.id }),
 					[
 						outboxInsert({
-							type: `organization.${rule.to}`,
+							type: EVENT_TYPES[decision],
 							aggregateType: "organization",
 							aggregateIdColumn: "id",
 							payload: { decision },

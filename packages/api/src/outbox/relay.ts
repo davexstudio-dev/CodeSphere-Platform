@@ -18,7 +18,11 @@ export type QueueMessage = {
 
 /** What the relay needs from a queue: Cloudflare Queues' `sendBatch`, or a local dispatcher. */
 export interface EventQueue {
-	sendBatch(messages: QueueMessage[]): Promise<void>;
+	/**
+	 * Sends the messages. Throwing fails the whole batch; a queue that can tell which ones failed
+	 * returns their ids, so only those are retried and the others are marked published.
+	 */
+	sendBatch(messages: QueueMessage[]): Promise<void | { failed: string[] }>;
 }
 
 type Claimed = {
@@ -59,7 +63,7 @@ export async function drainOutbox(
 	options: DrainOptions = {},
 ) {
 	const batchSize = options.batchSize ?? 50;
-	const leaseMs = options.leaseMs ?? 60_000;
+	const leaseMs = options.leaseMs ?? 120_000;
 	const maxAttempts = options.maxAttempts ?? OUTBOX_MAX_ATTEMPTS;
 	const at = new Date((options.now ?? Date.now)());
 	const until = new Date(at.getTime() + leaseMs);
@@ -102,8 +106,9 @@ export async function drainOutbox(
 		claimed.map((row) => sql`${row.id}::uuid`),
 		sql`, `,
 	);
+	let failedIds: string[] = [];
 	try {
-		await queue.sendBatch(messages);
+		failedIds = (await queue.sendBatch(messages))?.failed ?? [];
 	} catch (error) {
 		const reason =
 			error instanceof Error ? error.message.slice(0, 300) : "send failed";
@@ -111,18 +116,61 @@ export async function drainOutbox(
 		await db.execute(sql`
 			UPDATE outbox_events SET last_error = ${reason},
 				locked_until = ${at}::timestamp + LEAST(power(2, GREATEST(attempts - 1, 0)) * 1000, 300000) * interval '1 millisecond'
-			WHERE id IN (${ids})`);
+			WHERE id IN (${ids}) AND published_at IS NULL`);
 		return { claimed: claimed.length, published: 0, failed: claimed.length };
 	}
-	// A crash here sends the batch again after the lease: that is the "at least once".
-	await db.execute(sql`
-		UPDATE outbox_events SET published_at = ${new Date((options.now ?? Date.now)())}, locked_until = NULL, last_error = NULL
-		WHERE id IN (${ids})`);
-	return { claimed: claimed.length, published: claimed.length, failed: 0 };
+	const failed = new Set(failedIds);
+	const okIds = claimed.filter((row) => !failed.has(row.id));
+	if (failed.size > 0) {
+		const badIds = sql.join(
+			[...failed].map((id) => sql`${id}::uuid`),
+			sql`, `,
+		);
+		await db.execute(sql`
+			UPDATE outbox_events SET last_error = 'consumer failed',
+				locked_until = ${at}::timestamp + LEAST(power(2, GREATEST(attempts - 1, 0)) * 1000, 300000) * interval '1 millisecond'
+			WHERE id IN (${badIds}) AND published_at IS NULL`);
+	}
+	if (okIds.length > 0) {
+		// A crash here sends the batch again after the lease: that is the "at least once". Guarded,
+		// so a slow relay never rewrites what another one already marked.
+		await db.execute(sql`
+			UPDATE outbox_events SET published_at = ${new Date((options.now ?? Date.now)())}, locked_until = NULL, last_error = NULL
+			WHERE id IN (${sql.join(
+				okIds.map((row) => sql`${row.id}::uuid`),
+				sql`, `,
+			)}) AND published_at IS NULL`);
+	}
+	return {
+		claimed: claimed.length,
+		published: okIds.length,
+		failed: failed.size,
+	};
 }
 
-/** How the outbox stands: for an Admin and for alerts. */
-export async function outboxStatus(db: Database, now: () => number = Date.now) {
+/** Retries of the Queues consumer in wrangler.jsonc (`max_retries`): after them the message goes to the dead-letter queue. */
+export const QUEUE_MAX_RETRIES = 6;
+
+/**
+ * A consumer gave up on an event for good (its queue retries are over): the outbox row is marked
+ * failed, so `outboxStatus` shows it and an Admin can act, instead of it vanishing into the
+ * dead-letter queue while the row still reads "published".
+ */
+export async function markConsumerFailed(
+	db: Database,
+	eventId: string,
+	reason: string,
+) {
+	await db.execute(sql`
+		UPDATE outbox_events SET failed_at = now(), last_error = ${reason.slice(0, 300)}
+		WHERE id = ${eventId}::uuid AND failed_at IS NULL`);
+}
+
+/**
+ * How the outbox stands: for an Admin and for alerts. `failed` counts the events given up on, by the
+ * relay or by the queue's consumers after their retries. Ages are measured by the database's clock.
+ */
+export async function outboxStatus(db: Database) {
 	const [row] = rowsOf<{
 		pending: number;
 		failed: number;
@@ -131,8 +179,8 @@ export async function outboxStatus(db: Database, now: () => number = Date.now) {
 		await db.execute(sql`
 			SELECT
 				count(*) FILTER (WHERE published_at IS NULL AND failed_at IS NULL)::int AS pending,
-				count(*) FILTER (WHERE failed_at IS NOT NULL AND published_at IS NULL)::int AS failed,
-				EXTRACT(EPOCH FROM (${new Date(now())}::timestamp - MIN(created_at) FILTER (WHERE published_at IS NULL AND failed_at IS NULL)))::int AS oldest_pending_seconds
+				count(*) FILTER (WHERE failed_at IS NOT NULL)::int AS failed,
+				EXTRACT(EPOCH FROM (now() - MIN(created_at) FILTER (WHERE published_at IS NULL AND failed_at IS NULL)))::int AS oldest_pending_seconds
 			FROM outbox_events`),
 	);
 	return {

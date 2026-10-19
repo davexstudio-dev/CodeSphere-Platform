@@ -25,8 +25,8 @@ export function outboxInsert(
 ): SQL {
 	return sql`
 		INSERT INTO outbox_events (type, aggregate_type, aggregate_id, payload, dedupe_key)
-		SELECT ${event.type}, ${event.aggregateType}, (m.${sql.identifier(event.aggregateIdColumn)})::text,
-			${JSON.stringify(event.payload ?? {})}::jsonb, ${event.dedupeKey ?? null}
+		SELECT ${event.type}::text, ${event.aggregateType}::text, (m.${sql.identifier(event.aggregateIdColumn)})::text,
+			${JSON.stringify(event.payload ?? {})}::jsonb, ${event.dedupeKey ?? null}::text
 		FROM m
 		ON CONFLICT (dedupe_key) DO NOTHING`;
 }

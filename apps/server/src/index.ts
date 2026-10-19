@@ -44,9 +44,11 @@ const app = createApp({
 });
 
 // No Cloudflare Queues on the Bun server: the relay hands the outbox's events to the consumers in
-// process, with the same guarantees (docs/outbox.md).
-startOutboxRelay(db, {
-	onError: (error) => logger.warn({ err: error }, "outbox relay failed"),
-});
+// process, with the same guarantees (docs/outbox.md). Off with OUTBOX_RELAY=false.
+if (ENV.OUTBOX_RELAY) {
+	startOutboxRelay(db, {
+		onError: (error) => logger.warn({ err: error }, "outbox relay failed"),
+	});
+}
 
 export default app;

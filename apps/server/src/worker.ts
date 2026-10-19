@@ -7,7 +7,11 @@ import {
 	type QueueBinding,
 } from "@codesphere/api/outbox/loop";
 import type { QueueMessage } from "@codesphere/api/outbox/relay";
-import { drainOutbox } from "@codesphere/api/outbox/relay";
+import {
+	drainOutbox,
+	markConsumerFailed,
+	QUEUE_MAX_RETRIES,
+} from "@codesphere/api/outbox/relay";
 import { parseFarmingLimits } from "@codesphere/api/reputation/farming";
 import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { runIngestion } from "@codesphere/api/watch/ingest";
@@ -172,7 +176,9 @@ export async function apiScheduled(
 			),
 		);
 	}
-	if (cron === undefined || cron === WATCH_CRON) {
+	// Every schedule drains the outbox; only the every-minute one skips reading the Sources, so
+	// retuning the other schedule in wrangler.jsonc never silently stops the ingestion.
+	if (cron !== DRAIN_ONLY_CRON) {
 		ctx.waitUntil(
 			runIngestion(db).then(
 				(result) => log("watch ingestion", result),
@@ -182,8 +188,8 @@ export async function apiScheduled(
 	}
 }
 
-/** The cron schedule (apps/web/wrangler.jsonc) that also reads the watch feed's Sources. */
-export const WATCH_CRON = "*/30 * * * *";
+/** The cron schedule of apps/web/wrangler.jsonc that only drains the outbox. */
+export const DRAIN_ONLY_CRON = "* * * * *";
 
 /** The Queues consumer (#259): each message goes to the consumers that want it, once each. */
 export async function apiQueue(
@@ -216,6 +222,12 @@ export async function apiQueue(
 					error: String(error),
 				}),
 			);
+			// The last retry: record the failure on the outbox row, then let the queue dead-letter it.
+			if ((message.attempts ?? 1) > QUEUE_MAX_RETRIES) {
+				await markConsumerFailed(db, message.body.id, String(error)).catch(
+					() => undefined,
+				);
+			}
 			// Only the consumers that failed run again: the others left their marker.
 			message.retry({
 				delaySeconds: Math.min(2 ** (message.attempts ?? 1), 300),

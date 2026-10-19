@@ -21,6 +21,7 @@ import {
 	backoffMs,
 	drainOutbox,
 	type EventQueue,
+	markConsumerFailed,
 	outboxStatus,
 	type QueueMessage,
 } from "./relay";
@@ -369,5 +370,92 @@ describe.skipIf(!url)("outbox on Postgres", () => {
 		const { seen, queue } = recorder();
 		await drainOutbox(db, queue, { now: () => now + 10_000_000 });
 		expect(seen.some((m) => m.aggregateId === "d1")).toBe(false);
+	});
+
+	test("one poison event holds back none of its neighbours", async () => {
+		await publishEvent(db, {
+			type: type("poison"),
+			aggregateType: "n",
+			aggregateId: "p0",
+		});
+		await publishEvent(db, {
+			type: type("poison"),
+			aggregateType: "n",
+			aggregateId: "p1",
+		});
+		await publishEvent(db, {
+			type: type("poison"),
+			aggregateType: "n",
+			aggregateId: "p2",
+		});
+		const handled: string[] = [];
+		const consumer: Consumer = {
+			name: `it-${run}-poison`,
+			types: [type("poison")],
+			async handle(message) {
+				if (message.aggregateId === "p1") {
+					throw new Error("poison");
+				}
+				handled.push(message.aggregateId);
+			},
+		};
+		const queue = localQueue(db, [consumer]);
+		let now = Date.now();
+		const result = await drainOutbox(db, queue, { now: () => now });
+		expect(handled.sort()).toEqual(["p0", "p2"]);
+		expect(result.failed).toBe(1);
+		const rows = await db
+			.select()
+			.from(outboxEvents)
+			.where(eq(outboxEvents.type, type("poison")));
+		expect(
+			rows
+				.filter((r) => r.publishedAt)
+				.map((r) => r.aggregateId)
+				.sort(),
+		).toEqual(["p0", "p2"]);
+		expect(rows.find((r) => r.aggregateId === "p1")).toMatchObject({
+			publishedAt: null,
+			attempts: 1,
+		});
+		await db
+			.delete(processedEvents)
+			.where(eq(processedEvents.consumer, consumer.name));
+		now += 1;
+	});
+
+	test("an atomic consumer that forgets its marker is refused, and a consumer's final failure shows in the status", async () => {
+		const message: QueueMessage = {
+			id: crypto.randomUUID(),
+			type: type("atomic"),
+			aggregateType: "n",
+			aggregateId: "a",
+			payload: {},
+			createdAt: new Date().toISOString(),
+		};
+		const careless: Consumer = {
+			name: `it-${run}-careless`,
+			types: "*",
+			atomic: true,
+			async handle() {},
+		};
+		await expect(deliver(db, [careless], message)).rejects.toBeInstanceOf(
+			AggregateError,
+		);
+
+		await publishEvent(db, {
+			type: type("final"),
+			aggregateType: "n",
+			aggregateId: "f1",
+		});
+		const { seen, queue } = recorder();
+		for (let i = 0; i < 100; i++) {
+			if ((await drainOutbox(db, queue, { batchSize: 50 })).claimed === 0)
+				break;
+		}
+		const sent = seen.find((m) => m.aggregateId === "f1");
+		const before = (await outboxStatus(db)).failed;
+		await markConsumerFailed(db, sent?.id ?? "", "consumer gave up");
+		expect((await outboxStatus(db)).failed).toBe(before + 1);
 	});
 });

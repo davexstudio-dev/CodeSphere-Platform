@@ -56,7 +56,25 @@ export async function deliver(
 				}
 			}
 			await consumer.handle(message, db);
-			if (!consumer.atomic) {
+			if (consumer.atomic) {
+				// An atomic consumer writes its own marker (effectOnce); one that did not would apply its
+				// effect again on every redelivery, so it is refused loudly.
+				const [marker] = await db
+					.select({ id: processedEvents.eventId })
+					.from(processedEvents)
+					.where(
+						and(
+							eq(processedEvents.consumer, consumer.name),
+							eq(processedEvents.eventId, message.id),
+						),
+					)
+					.limit(1);
+				if (!marker) {
+					throw new Error(
+						`atomic consumer ${consumer.name} did not record its marker: use effectOnce`,
+					);
+				}
+			} else {
 				await db
 					.insert(processedEvents)
 					.values({ consumer: consumer.name, eventId: message.id })
@@ -96,16 +114,25 @@ export async function effectOnce(
 	return Number(rows[0]?.ran ?? 0) > 0;
 }
 
-/** A local queue: sends each message straight to the consumers (the Bun server, tests). */
+/**
+ * A local queue: sends each message straight to the consumers (the Bun server, tests). A message
+ * whose consumer fails is reported alone, so one poison event never holds back its neighbours.
+ */
 export function localQueue(
 	db: Database,
 	consumers: readonly Consumer[],
 ): EventQueue {
 	return {
 		async sendBatch(messages) {
+			const failed: string[] = [];
 			for (const message of messages) {
-				await deliver(db, consumers, message);
+				try {
+					await deliver(db, consumers, message);
+				} catch {
+					failed.push(message.id);
+				}
 			}
+			return { failed };
 		},
 	};
 }
