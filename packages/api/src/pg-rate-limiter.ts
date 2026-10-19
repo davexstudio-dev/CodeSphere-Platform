@@ -15,6 +15,9 @@ export type LimiterFactory = (options: {
 	windowMs: number;
 }) => Limiter;
 
+// Fixed windows aligned on the window length (an hour, a UTC day): a burst can straddle a boundary
+// and reach twice the limit across it. That is the accepted trade for a single atomic statement.
+
 // About one call in a hundred also purges the expired windows: no scheduler is needed, and a purge
 // that fails is only a missed clean-up.
 const PURGE_ODDS = 0.01;
@@ -40,7 +43,10 @@ export function postgresLimiters(
 				})
 				.onConflictDoUpdate({
 					target: [rateLimits.key, rateLimits.windowStart],
-					set: { hits: sql`${rateLimits.hits} + 1` },
+					// Capped just above the limit: a client hammering a closed door cannot grow the number.
+					set: {
+						hits: sql`LEAST(${rateLimits.hits} + 1, ${maxRequests + 1})`,
+					},
 				})
 				.returning({ hits: rateLimits.hits });
 			if (random() < PURGE_ODDS) {
@@ -49,7 +55,11 @@ export function postgresLimiters(
 					.where(lt(rateLimits.expiresAt, at))
 					.catch(() => undefined);
 			}
-			return { success: (row?.hits ?? 1) <= maxRequests, reset };
+			if (!row) {
+				// The upsert always returns its row; fail closed rather than let a write through.
+				throw new Error("rate limiter: no counter returned");
+			}
+			return { success: row.hits <= maxRequests, reset };
 		},
 	});
 }

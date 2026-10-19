@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "ce98a892-3e77-4510-8871-2603f48e75ab",
+  "id": "71262bcc-0114-4e29-bd2e-5d48dc7ebcd0",
   "prevIds": [
     "cf095ccb-3b75-40c7-a24c-6ff60f0b5e05"
   ],
@@ -2978,6 +2978,27 @@
       "entityType": "indexes",
       "schema": "public",
       "table": "votes"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "expires_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "rate_limits_expires_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "rate_limits"
     },
     {
       "nameExplicit": true,

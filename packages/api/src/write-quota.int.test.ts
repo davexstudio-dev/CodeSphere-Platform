@@ -101,6 +101,19 @@ describe.skipIf(!url)("shared write limits on Postgres", () => {
 			expect(results.filter((r) => r.success)).toHaveLength(10);
 		});
 
+		test("a client hammering a closed door does not grow the counter", async () => {
+			const limiter = postgresLimiters(db)({ ...options, maxRequests: 3 });
+			const key = `hammer-${run}`;
+			for (let i = 0; i < 25; i++) {
+				await limiter.limit(key);
+			}
+			const [row] = await db
+				.select()
+				.from(rateLimits)
+				.where(like(rateLimits.key, `%:${key}`));
+			expect(row?.hits).toBe(4);
+		});
+
 		test("a new window starts from zero and reports when it resets", async () => {
 			let clock = Date.UTC(2026, 9, 19, 10, 30);
 			const limiter = postgresLimiters(

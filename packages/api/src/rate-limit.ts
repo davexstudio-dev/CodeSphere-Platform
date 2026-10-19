@@ -1,17 +1,14 @@
 import { MemoryRateLimiter } from "@orpc/ratelimit/memory";
 import { ORPCError } from "@orpc/server";
 
+import type { Limiter } from "./pg-rate-limiter";
+
 const HOUR = 60 * 60 * 1000;
 
 // Per Member write limits (spec §3, #72). In memory: each process counts for itself, which is what
 // the MVP asks for; a shared store would change the limiter, not the callers.
 export const QUESTIONS_PER_HOUR = 10;
 export const ANSWERS_PER_HOUR = 30;
-
-// What `consume` reads: the oRPC memory limiter and the Postgres one (pg-rate-limiter.ts) both fit.
-type Limiter = {
-	limit(key: string): Promise<{ success: boolean; reset?: number }>;
-};
 
 export const questionLimiter = new MemoryRateLimiter({
 	maxRequests: QUESTIONS_PER_HOUR,

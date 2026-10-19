@@ -1,5 +1,6 @@
 import {
 	bigint,
+	index,
 	integer,
 	pgTable,
 	primaryKey,
@@ -18,5 +19,9 @@ export const rateLimits = pgTable(
 		hits: integer("hits").notNull(),
 		expiresAt: bigint("expires_at", { mode: "number" }).notNull(),
 	},
-	(t) => [primaryKey({ columns: [t.key, t.windowStart] })],
+	(t) => [
+		primaryKey({ columns: [t.key, t.windowStart] }),
+		// The purge scans by expiry.
+		index("rate_limits_expires_idx").on(t.expiresAt),
+	],
 );

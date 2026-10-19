@@ -9,11 +9,17 @@ import { createListingService, InvalidCursorError } from "./listing";
 import { createQuestionService, QuestionError } from "./service";
 
 /** The signed-in user as the write quota sees them: an Agent only if its row says so. */
-function actorOf(sessionUser: { id: string; kind?: unknown } | undefined) {
+function actorOf(
+	sessionUser: { id: string; kind?: unknown; ownerId?: unknown } | undefined,
+) {
+	const agent = sessionUser?.kind === "agent";
 	return {
 		id: sessionUser?.id ?? "",
-		kind:
-			sessionUser?.kind === "agent" ? ("agent" as const) : ("human" as const),
+		kind: agent ? ("agent" as const) : ("human" as const),
+		ownerId:
+			agent && typeof sessionUser?.ownerId === "string"
+				? sessionUser.ownerId
+				: null,
 	};
 }
 

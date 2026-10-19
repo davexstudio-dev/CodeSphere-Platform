@@ -3,7 +3,11 @@ import { user } from "@codesphere/db/schema/auth";
 import { MemoryRateLimiter } from "@orpc/ratelimit/memory";
 import { eq } from "drizzle-orm";
 
-import { type LimiterFactory, postgresLimiters } from "./pg-rate-limiter";
+import {
+	type Limiter,
+	type LimiterFactory,
+	postgresLimiters,
+} from "./pg-rate-limiter";
 import { ANSWERS_PER_HOUR, consume, QUESTIONS_PER_HOUR } from "./rate-limit";
 
 const HOUR = 60 * 60 * 1000;
@@ -30,7 +34,12 @@ export const WRITE_QUOTAS = {
 } as const;
 
 export type WriteAction = "question" | "answer";
-export type WriteActor = { id: string; kind: "human" | "agent" };
+export type WriteActor = {
+	id: string;
+	kind: "human" | "agent";
+	/** An Agent's Owner when the session already carries it: saves a read. */
+	ownerId?: string | null;
+};
 
 export type WriteQuota = {
 	/**
@@ -52,31 +61,33 @@ export function createWriteQuota(
 	limiters: LimiterFactory,
 	ownerOf: (agentId: string) => Promise<string | null>,
 ): WriteQuota {
-	const build = (scope: keyof typeof WRITE_QUOTAS, action: WriteAction) =>
-		limiters({ name: `${action}:${scope}`, ...WRITE_QUOTAS[scope][action] });
-	const table = {
-		human: {
-			question: build("human", "question"),
-			answer: build("human", "answer"),
-		},
-		agent: {
-			question: build("agent", "question"),
-			answer: build("agent", "answer"),
-		},
-		owner: {
-			question: build("owner", "question"),
-			answer: build("owner", "answer"),
-		},
-	};
+	const scopes = Object.keys(WRITE_QUOTAS) as (keyof typeof WRITE_QUOTAS)[];
+	const actions: WriteAction[] = ["question", "answer"];
+	const table = Object.fromEntries(
+		scopes.map((scope) => [
+			scope,
+			Object.fromEntries(
+				actions.map((action) => [
+					action,
+					limiters({
+						name: `${action}:${scope}`,
+						...WRITE_QUOTAS[scope][action],
+					}),
+				]),
+			),
+		]),
+	) as Record<(typeof scopes)[number], Record<WriteAction, Limiter>>;
 	return {
 		async consume(actor, action) {
 			if (actor.kind === "human") {
 				await consume(table.human[action], actor.id);
 				return;
 			}
+			// Both daily windows reset together, so a write refused by the Owner's quota after the
+			// Agent's own was counted costs the Agent nothing it would have kept.
 			await consume(table.agent[action], actor.id);
 			// An Agent without a resolvable Owner is only held to its own quota.
-			const owner = await ownerOf(actor.id);
+			const owner = actor.ownerId ?? (await ownerOf(actor.id));
 			if (owner) {
 				await consume(table.owner[action], owner);
 			}
