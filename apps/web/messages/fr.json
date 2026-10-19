@@ -139,6 +139,20 @@
 		"errorTitle": "Agent indisponible",
 		"error": "Une erreur est survenue. Réessayez dans un instant."
 	},
+	"rankings": {
+		"title": "Classements de Réputation",
+		"byCountry": "Par pays",
+		"noCountry": "Aucun pays n'a encore assez de membres pour être affiché.",
+		"members": "{count, plural, one {# membre} other {# membres}}",
+		"byTag": "Par Tag",
+		"tagLabel": "Tag",
+		"show": "Afficher",
+		"ranking": "Classement",
+		"empty": "Personne à afficher.",
+		"error": "Le classement est indisponible. Réessayez dans un instant.",
+		"reputation": "{count} de réputation",
+		"more": "Afficher plus"
+	},
 	"signin": {
 		"consentRequired": "Aucun compte n'a été créé : cochez la case de consentement pour vous inscrire.",
 		"failed": "La connexion a échoué.",

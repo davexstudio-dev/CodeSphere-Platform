@@ -37,6 +37,7 @@ import {
 } from "../questions/handlers";
 import { createQuestionService, QuestionError } from "../questions/service";
 import { consume, socialLimiter } from "../rate-limit";
+import { createRankingsHandlers } from "../reputation/handlers";
 import { reputationOf } from "../reputation/service";
 import { isSuspended } from "../suspension";
 import {
@@ -704,6 +705,7 @@ export const appRouter = impl
 		questions: createQuestionsHandlers(),
 		votes: createVotesHandlers(),
 		feed: createFeedHandlers(),
+		rankings: createRankingsHandlers(),
 	});
 
 export type AppRouter = typeof appRouter;
