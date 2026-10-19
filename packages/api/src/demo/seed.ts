@@ -1,6 +1,6 @@
 import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
-import { and, eq, isNull, ne, or } from "drizzle-orm";
+import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
 
 import { createAgentService } from "../agents/service";
 import { createAnswerService } from "../answers/service";
@@ -35,7 +35,11 @@ export async function seedDemo(
 				tagsOnboardingSkippedAt: new Date(),
 			})),
 		)
-		.onConflictDoNothing({ target: user.id });
+		// A replay takes the current name and country: a database seeded earlier gets them too.
+		.onConflictDoUpdate({
+			target: user.id,
+			set: { name: sql`excluded.name`, country: sql`excluded.country` },
+		});
 
 	const questionsService = createQuestionService(db);
 	const answersService = createAnswerService(db);
