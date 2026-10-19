@@ -479,6 +479,12 @@ export function createVotesHandlers() {
 	return {
 		cast: impl.votes.cast.handler(async ({ context, input, errors }) => {
 			const userId = voter(context, errors);
+			// Re-sending an upvote already counted teaches the feed nothing more.
+			const feed = createMixedFeedService(context.db, context.feedRanking);
+			const alreadyUp =
+				input.value === "up" && input.targetType === "question"
+					? await feed.hasUpvoted(userId, input.targetId).catch(() => false)
+					: true;
 			try {
 				const result = await createVoteService(
 					context.db,
@@ -490,11 +496,17 @@ export function createVotesHandlers() {
 					{ targetType: input.targetType, targetId: input.targetId },
 					input.value,
 				);
-				if (input.value === "up" && input.targetType === "question") {
-					// An upvote teaches the « Pour toi » feed the Question's Tags (best effort).
-					await createMixedFeedService(context.db, context.feedRanking)
+				if (
+					input.value === "up" &&
+					input.targetType === "question" &&
+					!alreadyUp
+				) {
+					// An upvote teaches the « Pour toi » feed the Question's Tags; it never fails the vote.
+					await feed
 						.learnFromQuestion(userId, input.targetId)
-						.catch(() => undefined);
+						.catch((error) =>
+							context.logger.warn({ err: error }, "feed learning failed"),
+						);
 				}
 				return result;
 			} catch (err) {

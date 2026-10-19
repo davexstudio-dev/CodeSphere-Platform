@@ -18,7 +18,7 @@ import { WatchCard } from "@/components/watch/watch-card";
 
 import { pageSizeFor } from "@/lib/data-saver";
 import { HAS_DATABASE } from "@/lib/deployment";
-import { type FeedFilter, visibleEntries } from "@/lib/home";
+import { type FeedFilter, toMixed, visibleEntries } from "@/lib/home";
 import { useMounted } from "@/lib/use-mounted";
 import { orpc } from "@/utils/orpc";
 
@@ -77,17 +77,7 @@ export function useFeed(tab: FeedTab, signedIn: boolean, filter: FeedFilter) {
 	// Every entry appears once, even if a page boundary moves under a live feed.
 	const entries: MixedItem[] = forYou
 		? (personal.data?.pages ?? []).flatMap((page) => page.items)
-		: (listed.data?.pages ?? []).flatMap((page) =>
-				page.items.map(
-					(question): MixedItem => ({
-						kind: "question",
-						question,
-						reasons: [],
-						sourceKey: null,
-						sourceName: null,
-					}),
-				),
-			);
+		: (listed.data?.pages ?? []).flatMap((page) => page.items.map(toMixed));
 	const items = visibleEntries(entries, filter);
 	return {
 		items,
@@ -230,6 +220,11 @@ export function FeedSkeleton() {
  * Nothing is shown on the other tabs, where there is no ranking to explain.
  */
 function FeedWhy({ entry }: { entry: MixedItem }) {
+	// Nothing to explain on the other tabs: no hooks are mounted for them.
+	return entry.reasons.length === 0 ? null : <FeedWhyBar entry={entry} />;
+}
+
+function FeedWhyBar({ entry }: { entry: MixedItem }) {
 	const t = useTranslations("home.why");
 	const queryClient = useQueryClient();
 	const mute = useMutation(
@@ -239,9 +234,6 @@ function FeedWhy({ entry }: { entry: MixedItem }) {
 			},
 		}),
 	);
-	if (entry.reasons.length === 0) {
-		return null;
-	}
 	const tags =
 		entry.kind === "question" ? entry.question.tags : entry.item.tags;
 	const tag = entry.reasons.find((r) => r.value)?.value ?? tags[0];

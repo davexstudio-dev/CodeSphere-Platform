@@ -1,8 +1,8 @@
 import type { AgentRules } from "@codesphere/api/agents/moderation";
 import type { Context as ApiContext } from "@codesphere/api/context";
 import { exposedOverMCP, exposedOverOpenAPI } from "@codesphere/api/exposure";
-import { openApiDocument } from "@codesphere/api/openapi";
 import type { FeedRanking } from "@codesphere/api/feed-mixed/ranking";
+import { openApiDocument } from "@codesphere/api/openapi";
 import type { FarmingLimits } from "@codesphere/api/reputation/farming";
 import type { PrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { appRouter } from "@codesphere/api/routers/index";
@@ -163,7 +163,12 @@ export function createApp(deps: AppDeps) {
 	// Outbound click on a watch item (#256): counted per item, then redirected to the stored link.
 	// No session, no cookie, no record of who clicked.
 	app.get("/api/v1/watch/out/:id", async (c) => {
-		const url = await countWatchClick(deps.db, c.req.param("id"));
+		// Only a real click counts: a prefetch or a HEAD request follows the link without being one.
+		const url = await countWatchClick(
+			deps.db,
+			c.req.param("id"),
+			c.req.method === "GET" && c.req.header("purpose") !== "prefetch",
+		);
 		return url ? c.redirect(url, 302) : c.notFound();
 	});
 

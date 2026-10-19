@@ -196,6 +196,29 @@ describe.skipIf(!url)("mixed feed on Postgres", () => {
 		expect((await mine()).ranked).toContain(ids.qPlain ?? "");
 	});
 
+	test("« Moins comme ça » holds even with personalisation off", async () => {
+		await feed.mute(me, { kind: "tag", key: "zz-a" });
+		await feed.update(me, { personalization: false });
+		const page = await mine();
+		expect(page.ranked).not.toContain(ids.qFollowed ?? "");
+		expect(page.ranked).toContain(ids.wFollowed ?? "");
+		await feed.update(me, { personalization: true });
+		await feed.unmute(me, { kind: "tag", key: "zz-a" });
+	});
+
+	test("two partial updates keep each other's field; re-sent upvotes are known", async () => {
+		await Promise.all([
+			feed.update(me, { personalization: false }),
+			feed.update(me, { language: "en" }),
+		]);
+		expect(await feed.view(me)).toMatchObject({
+			personalization: false,
+			language: "en",
+		});
+		await feed.update(me, { personalization: true, language: null });
+		expect(await feed.hasUpvoted(me, ids.qPlain ?? "")).toBe(false);
+	});
+
 	test("what an upvote teaches lifts the Tag, capped", async () => {
 		const before = await mine();
 		await feed.learn(me, ["zz-d"], 100);

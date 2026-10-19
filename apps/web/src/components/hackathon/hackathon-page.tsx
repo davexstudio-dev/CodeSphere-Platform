@@ -37,7 +37,7 @@ import {
 	milestoneStates,
 	sortedMilestones,
 } from "@/lib/hackathon";
-import { submissionClose } from "@/lib/home";
+import { submissionClose, toMixed } from "@/lib/home";
 import { useMounted } from "@/lib/use-mounted";
 import { orpc } from "@/utils/orpc";
 
@@ -418,13 +418,7 @@ function Discussion({ slug }: { slug: string }) {
 				<p className="text-muted-foreground">{t("empty")}</p>
 			) : (
 				<HomeFeed
-					items={items.map((question) => ({
-						kind: "question" as const,
-						question,
-						reasons: [],
-						sourceKey: null,
-						sourceName: null,
-					}))}
+					items={items.map(toMixed)}
 					hasNextPage={questions.hasNextPage}
 					isFetchingNextPage={questions.isFetchingNextPage}
 					fetchNextPage={questions.fetchNextPage}

@@ -1,3 +1,5 @@
+import type { MixedItem, QuestionListItem } from "@codesphere/contract";
+
 // Small rules of the home page (#130), kept out of the components so they are tested alone.
 
 /** The instant submissions close: the `submission_close` Milestone, else the first one. */
@@ -87,4 +89,15 @@ export function visibleEntries<T extends Entry>(
 			(filter.language === "all" || entry.item?.language === filter.language)
 		);
 	});
+}
+
+/** A Question as an entry of the shared feed list, with nothing to explain (no ranking on its tab). */
+export function toMixed(question: QuestionListItem): MixedItem {
+	return {
+		kind: "question",
+		question,
+		reasons: [],
+		sourceKey: null,
+		sourceName: null,
+	};
 }

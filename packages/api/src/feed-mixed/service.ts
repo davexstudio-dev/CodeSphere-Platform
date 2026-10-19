@@ -6,7 +6,7 @@ import {
 	feedMuted,
 	feedPreferences,
 } from "@codesphere/db/schema/feed";
-import { questions } from "@codesphere/db/schema/questions";
+import { questions, votes } from "@codesphere/db/schema/questions";
 import { tagFollows } from "@codesphere/db/schema/tags";
 import { watchSources } from "@codesphere/db/schema/watch";
 import { and, eq, inArray, sql } from "drizzle-orm";
@@ -103,30 +103,51 @@ export function createMixedFeedService(
 		};
 	}
 
+	// Defined apart so a method can be passed around without losing `this`.
+	async function learn(userId: string, tags: readonly string[], delta = 1) {
+		if (tags.length === 0 || !(await preferencesOf(userId)).personalization) {
+			return;
+		}
+		await db
+			.insert(feedAffinity)
+			.values(
+				tags.map((tag) => ({
+					userId,
+					tag,
+					weight: Math.min(delta, FEED_AFFINITY_MAX),
+				})),
+			)
+			.onConflictDoUpdate({
+				target: [feedAffinity.userId, feedAffinity.tag],
+				set: {
+					weight: sql`LEAST(${FEED_AFFINITY_MAX}, ${feedAffinity.weight} + ${delta})`,
+					updatedAt: new Date(),
+				},
+			});
+	}
+
 	return {
 		view,
+		learn,
 
 		async update(
 			userId: string,
 			patch: { personalization?: boolean; language?: Language | null },
 		) {
-			const current = await preferencesOf(userId);
+			// Only the fields given are written, in one statement: two concurrent partial updates
+			// cannot overwrite each other with a stale copy of the other field.
+			const changes = {
+				...(patch.personalization === undefined
+					? {}
+					: { personalization: patch.personalization }),
+				...(patch.language === undefined ? {} : { language: patch.language }),
+			};
 			await db
 				.insert(feedPreferences)
-				.values({
-					userId,
-					personalization: patch.personalization ?? current.personalization,
-					language:
-						patch.language === undefined ? current.language : patch.language,
-				})
+				.values({ userId, ...changes })
 				.onConflictDoUpdate({
 					target: feedPreferences.userId,
-					set: {
-						personalization: patch.personalization ?? current.personalization,
-						language:
-							patch.language === undefined ? current.language : patch.language,
-						updatedAt: new Date(),
-					},
+					set: { ...changes, updatedAt: new Date() },
 				});
 			return view(userId);
 		},
@@ -152,30 +173,20 @@ export function createMixedFeedService(
 			return view(userId);
 		},
 
-		/**
-		 * What an upvote or a kept item teaches the feed: a capped weight on each Tag of the item. Only
-		 * while personalisation is on, and only the weights are stored, never what was viewed.
-		 */
-		async learn(userId: string, tags: readonly string[], delta = 1) {
-			if (tags.length === 0 || !(await preferencesOf(userId)).personalization) {
-				return;
-			}
-			await db
-				.insert(feedAffinity)
-				.values(
-					tags.map((tag) => ({
-						userId,
-						tag,
-						weight: Math.min(delta, FEED_AFFINITY_MAX),
-					})),
+		/** Whether the Member already upvoted this Question: re-sending a vote teaches nothing more. */
+		async hasUpvoted(userId: string, questionId: string) {
+			const [row] = await db
+				.select({ value: votes.value })
+				.from(votes)
+				.where(
+					and(
+						eq(votes.userId, userId),
+						eq(votes.targetType, "question"),
+						eq(votes.targetId, questionId),
+					),
 				)
-				.onConflictDoUpdate({
-					target: [feedAffinity.userId, feedAffinity.tag],
-					set: {
-						weight: sql`LEAST(${FEED_AFFINITY_MAX}, ${feedAffinity.weight} + ${delta})`,
-						updatedAt: new Date(),
-					},
-				});
+				.limit(1);
+			return (row?.value ?? 0) > 0;
 		},
 
 		/** An upvoted Question teaches its Tags. */
@@ -186,7 +197,7 @@ export function createMixedFeedService(
 				.where(eq(questions.id, questionId))
 				.limit(1);
 			if (row) {
-				await this.learn(userId, row.tags);
+				await learn(userId, row.tags);
 			}
 		},
 
@@ -212,6 +223,9 @@ export function createMixedFeedService(
 			const restrict = !personal && followed.length > 0;
 			const fallback = !personal && followed.length === 0;
 
+			const windowStart = new Date(
+				snapshotAt.getTime() - ranking.windowDays * 86_400_000,
+			);
 			const at = sql`(${snapshotAt.toISOString()}::timestamptz at time zone 'utc')`;
 			const hotOf = (score: SQLChunk, since: SQLChunk) =>
 				sql`((${score})::float8 / power(greatest(extract(epoch from (${at} - ${since})) / 3600.0, 0) + 2, ${HOT_GRAVITY}::float8))`;
@@ -225,12 +239,11 @@ export function createMixedFeedService(
 				: sql`c.hot`;
 			const visible = [
 				restrict
-					? sql`(c.tags && ${textArray(followed)} OR c.owner = ${userId})`
+					? sql`(s.tags && ${textArray(followed)} OR s.owner = ${userId})`
 					: sql`true`,
-				personal
-					? sql`NOT (c.tags && COALESCE((SELECT array_agg(key) FROM feed_muted WHERE user_id = ${userId} AND kind = 'tag'), ARRAY[]::text[]))
-						AND NOT (c.source_key IS NOT NULL AND c.source_key IN (SELECT key FROM feed_muted WHERE user_id = ${userId} AND kind = 'source'))`
-					: sql`true`,
+				// « Moins comme ça » is an explicit choice: it holds whatever the personalisation says.
+				sql`NOT (s.tags && COALESCE((SELECT array_agg(key) FROM feed_muted WHERE user_id = ${userId} AND kind = 'tag'), ARRAY[]::text[]))
+					AND NOT (s.source_key IS NOT NULL AND s.source_key IN (SELECT key FROM feed_muted WHERE user_id = ${userId} AND kind = 'source'))`,
 				position
 					? sql`(s.score < ${position.hot}::float8 OR (s.score = ${position.hot}::float8 AND s.id < ${position.id}))`
 					: sql`true`,
@@ -242,15 +255,15 @@ export function createMixedFeedService(
 					SELECT 'question'::text AS kind, q.id::text AS id, q.tags, q.language,
 						COALESCE(u.country = ANY (${textArray(AFRICAN_COUNTRIES)}), false) AS african,
 						NULL::text AS source_key, q.author_id AS owner,
-						${hotOf(sql`q.score + 1`, sql`q.created_at`)} AS hot
+						${hotOf(sql`greatest(q.score + 1, 0)`, sql`q.created_at`)} AS hot
 					FROM questions q JOIN "user" u ON u.id = q.author_id
-					WHERE q.deleted_at IS NULL AND q.created_at <= ${snapshotAt}
+					WHERE q.deleted_at IS NULL AND q.created_at <= ${snapshotAt} AND q.created_at > ${windowStart}
 					UNION ALL
 					SELECT 'watch'::text, w.id::text, w.tags, w.language, w.african_source,
 						COALESCE(w.source_id::text, 'domain:' || w.domain), NULL::text,
-						${hotOf(sql`COALESCE((SELECT SUM(v.value) FROM watch_item_votes v WHERE v.item_id = w.id), 0) + 1`, sql`w.published_at`)}
+						${hotOf(sql`greatest(COALESCE((SELECT SUM(v.value) FROM watch_item_votes v WHERE v.item_id = w.id), 0) + 1, 0)`, sql`w.published_at`)}
 					FROM watch_items w
-					WHERE w.visibility = 'visible' AND w.published_at <= ${snapshotAt}
+					WHERE w.visibility = 'visible' AND w.published_at <= ${snapshotAt} AND w.published_at > ${windowStart}
 				),
 				c AS (
 					SELECT cand.*,
@@ -262,7 +275,7 @@ export function createMixedFeedService(
 				SELECT s.kind, s.id, s.score, s.tags, s.source_key, s.lang_ok, s.african,
 					(SELECT array_agg(f.tag) FROM tag_follows f WHERE f.user_id = ${userId} AND f.tag = ANY (s.tags)) AS followed_hit,
 					(SELECT array_agg(a.tag) FROM feed_affinity a WHERE a.user_id = ${userId} AND a.weight > 0 AND a.tag = ANY (s.tags)) AS learned_hit
-				FROM s JOIN c ON c.id = s.id
+				FROM s
 				WHERE ${sql.join(visible, sql` AND `)}
 				ORDER BY s.score DESC, s.id DESC
 				LIMIT ${input.limit + 1}`);

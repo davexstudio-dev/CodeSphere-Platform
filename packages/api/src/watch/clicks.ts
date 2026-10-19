@@ -11,14 +11,26 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export async function countWatchClick(
 	db: Database,
 	id: string,
+	count = true,
 ): Promise<string | null> {
 	if (!UUID.test(id)) {
 		return null;
 	}
-	const [row] = await db
-		.update(watchItems)
-		.set({ clickCount: sql`${watchItems.clickCount} + 1` })
-		.where(and(eq(watchItems.id, id), eq(watchItems.visibility, "visible")))
-		.returning({ url: watchItems.url });
-	return row?.url ?? null;
+	const visible = and(
+		eq(watchItems.id, id),
+		eq(watchItems.visibility, "visible"),
+	);
+	const [row] = count
+		? await db
+				.update(watchItems)
+				.set({ clickCount: sql`${watchItems.clickCount} + 1` })
+				.where(visible)
+				.returning({ url: watchItems.url })
+		: await db
+				.select({ url: watchItems.url })
+				.from(watchItems)
+				.where(visible)
+				.limit(1);
+	// The link was normalised to http(s) when stored; never redirect anywhere else.
+	return row && /^https?:\/\//.test(row.url) ? row.url : null;
 }

@@ -20,6 +20,8 @@ export type FeedRanking = {
 	learnedAffinity: number;
 	/** Ceiling of an item's total affinity. */
 	affinityCap: number;
+	/** Only items from the last N days are ranked: older ones have a negligible hot score. */
+	windowDays: number;
 };
 
 export const DEFAULT_FEED_RANKING: FeedRanking = {
@@ -29,6 +31,7 @@ export const DEFAULT_FEED_RANKING: FeedRanking = {
 	followedAffinity: 1,
 	learnedAffinity: 0.1,
 	affinityCap: 3,
+	windowDays: 120,
 };
 
 const Overrides = z
@@ -39,6 +42,7 @@ const Overrides = z
 		followedAffinity: z.number().min(0).max(10),
 		learnedAffinity: z.number().min(0).max(10),
 		affinityCap: z.number().min(0).max(20),
+		windowDays: z.number().int().min(1).max(3650),
 	})
 	.partial()
 	.strict();
