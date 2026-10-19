@@ -48,7 +48,7 @@ export function plainText(raw: string): string {
 			/<\/?(p|br|div|li|ul|ol|h[1-6]|tr|td|blockquote|pre)\b[^>]*>/gi,
 			" ",
 		)
-		.replace(/<[^>]*>/g, "");
+		.replace(/<\/?[a-zA-Z][^>]*>/g, "");
 	return decode(stripped).replace(/\s+/g, " ").trim();
 }
 

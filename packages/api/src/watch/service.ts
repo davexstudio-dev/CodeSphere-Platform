@@ -17,6 +17,7 @@ import {
 	requirePrivilege,
 } from "../reputation/privileges";
 import { SUMMARY_MAX, truncate } from "./feed-parser";
+import { isSafeFeedUrl } from "./ingest";
 import { domainOf, InvalidUrlError, isBlocked, normalizeUrl } from "./url";
 
 export class WatchError extends Error {
@@ -281,6 +282,17 @@ export function createWatchService(
 			if (item.submitterId === userId) {
 				throw new WatchError("FORBIDDEN");
 			}
+			// Nor may an Owner vote on what their own Agent proposed.
+			if (item.submitterId) {
+				const [submitter] = await db
+					.select({ ownerId: user.ownerId })
+					.from(user)
+					.where(eq(user.id, item.submitterId))
+					.limit(1);
+				if (submitter?.ownerId === userId) {
+					throw new WatchError("FORBIDDEN");
+				}
+			}
 			if (value === 0) {
 				await db
 					.delete(watchItemVotes)
@@ -345,7 +357,7 @@ export function createWatchService(
 		},
 
 		admin: {
-			async sources() {
+			async sources(id?: string) {
 				const rows = await db
 					.select({
 						id: watchSources.id,
@@ -361,6 +373,7 @@ export function createWatchService(
 						itemCount: sql<number>`(SELECT count(*)::int FROM watch_items i WHERE i.source_id = "watch_sources"."id" AND i.visibility <> 'removed')`,
 					})
 					.from(watchSources)
+					.where(id ? eq(watchSources.id, id) : undefined)
 					.orderBy(watchSources.name);
 				return rows;
 			},
@@ -375,7 +388,7 @@ export function createWatchService(
 					tags: string[];
 				},
 			) {
-				if (!input.feedUrl.startsWith("https://")) {
+				if (!isSafeFeedUrl(input.feedUrl)) {
 					throw new WatchError("BAD_REQUEST");
 				}
 				const domain = hostOf(input.feedUrl);
@@ -408,7 +421,7 @@ export function createWatchService(
 			},
 
 			async source(id: string) {
-				const found = (await this.sources()).find((s) => s.id === id);
+				const [found] = await this.sources(id);
 				if (!found) {
 					throw new WatchError("NOT_FOUND");
 				}
@@ -448,11 +461,28 @@ export function createWatchService(
 						.set(set)
 						.where(eq(watchSources.id, input.id))
 						.returning({ id: watchSources.id }),
-					// A flag or Tags change reaches the Source's existing items.
+					// A flag or Tags change reaches the Source's existing items. The new values come from
+					// the input: a step sees the Source as it was before the update.
 					[
-						sql`UPDATE watch_items SET african_source = s.african
-							FROM watch_sources s WHERE s.id = ${input.id} AND watch_items.source_id = s.id
-							AND EXISTS (SELECT 1 FROM m)`,
+						...(input.african === undefined && input.tags === undefined
+							? []
+							: [
+									// One statement: two CTEs updating the same rows would apply only one.
+									sql`UPDATE watch_items SET ${sql.join(
+										[
+											...(input.african === undefined
+												? []
+												: [sql`african_source = ${input.african}`]),
+											...(input.tags === undefined
+												? []
+												: [
+														sql`tags = COALESCE((SELECT array_agg(t) FROM json_array_elements_text(${JSON.stringify([...new Set(input.tags)])}::json) AS t), '{}')`,
+													]),
+										],
+										sql`, `,
+									)}
+										WHERE source_id = ${input.id} AND EXISTS (SELECT 1 FROM m)`,
+								]),
 					],
 				);
 				if (rows.length === 0) {
@@ -497,8 +527,11 @@ export function createWatchService(
 					[
 						sql`UPDATE watch_items SET visibility = 'removed', removed_reason = 'source_request'
 							WHERE source_id = ${id} AND visibility <> 'removed' AND EXISTS (SELECT 1 FROM m)`,
+						// The domains of the articles it linked to (its feed may live on a shared host, which
+						// is left alone).
 						sql`INSERT INTO watch_blocked_domains (domain, reason)
-							SELECT ${source.domain}, 'source_request' FROM m
+							SELECT DISTINCT i.domain, 'source_request' FROM watch_items i
+							WHERE i.source_id = ${id} AND EXISTS (SELECT 1 FROM m)
 							ON CONFLICT (domain) DO NOTHING`,
 					],
 				);

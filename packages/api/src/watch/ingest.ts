@@ -7,7 +7,19 @@ import {
 import { asc, eq, sql } from "drizzle-orm";
 
 import { parseFeed } from "./feed-parser";
-import { domainOf, isBlocked, normalizeUrl } from "./url";
+import { domainOf, isBlocked, isPublicHost, normalizeUrl } from "./url";
+
+/** An address a feed may be read from: HTTPS on a public host. */
+export function isSafeFeedUrl(raw: string): boolean {
+	try {
+		const url = new URL(raw);
+		return (
+			url.protocol === "https:" && isPublicHost(url.hostname.toLowerCase())
+		);
+	} catch {
+		return false;
+	}
+}
 
 const MAX_FEED_BYTES = 1_000_000;
 const FETCH_TIMEOUT_MS = 8_000;
@@ -20,19 +32,31 @@ export type FetchText = (url: string) => Promise<string>;
 
 /** Reads a feed over HTTPS with a timeout and a size cap; never follows a feed to plain HTTP. */
 export const fetchFeedText: FetchText = async (url) => {
-	if (!url.startsWith("https://")) {
-		throw new Error("feed must be served over HTTPS");
+	let current = url;
+	let response: Response | undefined;
+	// Redirects are followed by hand, up to three, and only to public HTTPS hosts.
+	for (let hop = 0; hop <= 3; hop++) {
+		if (!isSafeFeedUrl(current)) {
+			throw new Error("feed must be a public HTTPS address");
+		}
+		response = await fetch(current, {
+			redirect: "manual",
+			signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+			headers: {
+				accept:
+					"application/rss+xml, application/atom+xml, application/xml, text/xml",
+				"user-agent": "CodeSphereBot/1.0 (+https://codesphereplatform.xyz)",
+			},
+		});
+		const location = response.headers.get("location");
+		if (response.status >= 300 && response.status < 400 && location) {
+			current = new URL(location, current).toString();
+			continue;
+		}
+		break;
 	}
-	const response = await fetch(url, {
-		signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-		headers: {
-			accept:
-				"application/rss+xml, application/atom+xml, application/xml, text/xml",
-			"user-agent": "CodeSphereBot/1.0 (+https://codesphereplatform.xyz)",
-		},
-	});
-	if (!response.ok) {
-		throw new Error(`feed answered ${response.status}`);
+	if (!response?.ok) {
+		throw new Error(`feed answered ${response?.status ?? "nothing"}`);
 	}
 	const reader = response.body?.getReader();
 	if (!reader) {
@@ -53,7 +77,7 @@ export const fetchFeedText: FetchText = async (url) => {
 		}
 		text += decoder.decode(value, { stream: true });
 	}
-	return text;
+	return text + decoder.decode();
 };
 
 type Source = typeof watchSources.$inferSelect;
@@ -64,12 +88,9 @@ export async function ingestSource(
 	source: Source,
 	fetchText: FetchText = fetchFeedText,
 	now: () => number = Date.now,
+	blockedDomains?: readonly string[],
 ): Promise<number> {
-	const blocked = (
-		await db
-			.select({ domain: watchBlockedDomains.domain })
-			.from(watchBlockedDomains)
-	).map((row) => row.domain);
+	const blocked = blockedDomains ?? (await loadBlocked(db));
 	const rows: (typeof watchItems.$inferInsert)[] = [];
 	let error: string | null = null;
 	try {
@@ -95,7 +116,10 @@ export async function ingestSource(
 					africanSource: source.african,
 					sourceId: source.id,
 					visibility: "visible",
-					publishedAt: item.publishedAt ?? new Date(now()),
+					// A date in the future would pin the item on top of the feed: clamp it to now.
+					publishedAt: new Date(
+						Math.min(item.publishedAt?.getTime() ?? now(), now()),
+					),
 				});
 			} catch {
 				// A malformed link of the feed is skipped, not fatal for the others.
@@ -120,6 +144,13 @@ export async function ingestSource(
 	return added;
 }
 
+const loadBlocked = async (db: Database) =>
+	(
+		await db
+			.select({ domain: watchBlockedDomains.domain })
+			.from(watchBlockedDomains)
+	).map((row) => row.domain);
+
 /** The scheduled task: reads the active Sources, the least recently read first. */
 export async function runIngestion(
 	db: Database,
@@ -135,9 +166,11 @@ export async function runIngestion(
 			asc(watchSources.id),
 		)
 		.limit(SOURCES_PER_RUN);
-	let added = 0;
-	for (const source of sources) {
-		added += await ingestSource(db, source, fetchText, now);
-	}
+	const blocked = await loadBlocked(db);
+	// Read in parallel: a few slow feeds must not add up inside one Cron run.
+	const counts = await Promise.all(
+		sources.map((source) => ingestSource(db, source, fetchText, now, blocked)),
+	);
+	const added = counts.reduce((sum, n) => sum + n, 0);
 	return { sources: sources.length, added };
 }

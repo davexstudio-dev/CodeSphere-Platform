@@ -51,6 +51,12 @@ describe("parseFeed", () => {
 		);
 	});
 
+	test("a comparison sign in the text is not taken for a tag", () => {
+		expect(plainText("Why x &lt; y &amp;&amp; y &gt; z")).toBe(
+			"Why x < y && y > z",
+		);
+	});
+
 	test("garbage gives no item", () => {
 		expect(parseFeed("not xml")).toEqual([]);
 	});

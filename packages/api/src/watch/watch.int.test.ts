@@ -117,6 +117,51 @@ describe.skipIf(!url)("watch feed on Postgres", () => {
 		});
 	});
 
+	test("a date in the future is clamped to now", async () => {
+		const [source] = await db
+			.select()
+			.from(watchSources)
+			.where(eq(watchSources.id, sourceId));
+		const future = `<rss><channel><item><title>Soon</title><link>https://${host}/future</link><pubDate>Fri, 01 Jan 2100 00:00:00 GMT</pubDate></item></channel></rss>`;
+		await ingestSource(
+			db,
+			source as never,
+			async () => future,
+			() => Date.parse("2026-10-19T10:00:00Z"),
+		);
+		const [row] = await db
+			.select()
+			.from(watchItems)
+			.where(eq(watchItems.urlKey, `https://${host}/future`));
+		expect(row?.publishedAt.toISOString()).toBe("2026-10-19T10:00:00.000Z");
+		await db
+			.delete(watchItems)
+			.where(eq(watchItems.urlKey, `https://${host}/future`));
+	});
+
+	test("changing a Source's flag and Tags reaches its existing items", async () => {
+		await open.admin.updateSource(admin, {
+			id: sourceId,
+			african: false,
+			tags: ["data"],
+		});
+		const items = (
+			await open.list({ limit: 50, tag: "data" }, null)
+		).items.filter((i) => i.domain === host);
+		expect(items).toHaveLength(2);
+		expect(items.every((i) => !i.africanSource)).toBe(true);
+		await open.admin.updateSource(admin, {
+			id: sourceId,
+			african: true,
+			tags: ["web"],
+		});
+		expect(
+			(await open.list({ limit: 50, tag: "web" }, null)).items.filter(
+				(i) => i.domain === host && i.africanSource,
+			),
+		).toHaveLength(2);
+	});
+
 	test("a failing feed is recorded on the Source, not thrown", async () => {
 		const [source] = await db
 			.select()
@@ -253,6 +298,41 @@ describe.skipIf(!url)("watch feed on Postgres", () => {
 
 		const retracted = await open.vote(bob, id, 0);
 		expect(retracted.myVote).toBeNull();
+	});
+
+	test("an Owner cannot vote on what their own Agent proposed", async () => {
+		const owner = `it-watch-owner-${run}`;
+		const agent = `it-watch-agent-${run}`;
+		await db.insert(user).values([
+			{ id: owner, name: owner, email: `${owner}@example.com` },
+			{
+				id: agent,
+				name: agent,
+				email: `${agent}@example.com`,
+				kind: "agent",
+				ownerId: owner,
+			},
+		]);
+		try {
+			const proposal = await open.submit(
+				{ id: agent, kind: "agent" },
+				{
+					url: `https://owner.${host}/p`,
+					title: "Owned",
+					summary: "",
+					tags: [],
+					language: "en",
+				},
+				noQuota,
+			);
+			await expect(open.vote(owner, proposal.id, 1)).rejects.toMatchObject({
+				code: "FORBIDDEN",
+			});
+			expect((await open.vote(bob, proposal.id, 1)).visibility).toBe("visible");
+		} finally {
+			await db.delete(watchItems).where(eq(watchItems.domain, `owner.${host}`));
+			await db.delete(user).where(inArray(user.id, [agent, owner]));
+		}
 	});
 
 	test("anonymous readers cannot ask for pending or saved items", async () => {

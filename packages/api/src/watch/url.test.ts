@@ -1,7 +1,13 @@
 /// <reference types="bun" />
 import { describe, expect, test } from "bun:test";
 
-import { domainOf, InvalidUrlError, isBlocked, normalizeUrl } from "./url";
+import {
+	domainOf,
+	InvalidUrlError,
+	isBlocked,
+	isPublicHost,
+	normalizeUrl,
+} from "./url";
 
 describe("normalizeUrl", () => {
 	test("gives one key to spellings of the same article", () => {
@@ -41,5 +47,26 @@ describe("domains", () => {
 		expect(isBlocked("blog.bad.com", ["bad.com"])).toBe(true);
 		expect(isBlocked("bad.com", ["bad.com"])).toBe(true);
 		expect(isBlocked("notbad.com", ["bad.com"])).toBe(false);
+	});
+});
+
+describe("meaningful parameters", () => {
+	test("ref and source are kept: they can select a different page", () => {
+		expect(normalizeUrl("https://github.com/o/r/blob/x?ref=v1")).not.toBe(
+			normalizeUrl("https://github.com/o/r/blob/x?ref=v2"),
+		);
+	});
+	test("addresses and local names are not public hosts", () => {
+		for (const host of [
+			"127.0.0.1",
+			"169.254.169.254",
+			"localhost",
+			"db.internal",
+			"[::1]",
+			"nas.local",
+		]) {
+			expect(isPublicHost(host)).toBe(false);
+		}
+		expect(isPublicHost("blog.example.com")).toBe(true);
 	});
 });

@@ -7,9 +7,7 @@ const TRACKING_EXACT = new Set([
 	"dclid",
 	"msclkid",
 	"igshid",
-	"ref",
 	"ref_src",
-	"source",
 	"yclid",
 	"_hsenc",
 	"_hsmi",
@@ -37,7 +35,7 @@ export function normalizeUrl(raw: string): string {
 		throw new InvalidUrlError("only http(s) links");
 	}
 	const host = url.hostname.toLowerCase().replace(/^www\./, "");
-	if (!host.includes(".")) {
+	if (!isPublicHost(host)) {
 		throw new InvalidUrlError("not a public host");
 	}
 	const params = [...url.searchParams.entries()]
@@ -53,3 +51,13 @@ export function normalizeUrl(raw: string): string {
 /** Whether `domain` is, or is a subdomain of, one of the blocked domains. */
 export const isBlocked = (domain: string, blocked: readonly string[]) =>
 	blocked.some((b) => domain === b || domain.endsWith(`.${b}`));
+
+/** A host a feed or a link may point to: a registered domain name, not an address or a local name. */
+export function isPublicHost(host: string): boolean {
+	return (
+		host.includes(".") &&
+		!/^[\d.]+$/.test(host) &&
+		!host.includes(":") &&
+		!/\.(local|localhost|internal|lan|home|corp|intranet)$/.test(host)
+	);
+}
