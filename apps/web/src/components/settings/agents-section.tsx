@@ -10,6 +10,7 @@ import { SettingsSection } from "@codesphere/ui/components/molecules/setting-row
 import { ApiKeyReveal } from "@codesphere/ui/components/organisms/api-key-reveal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BotIcon, KeyRoundIcon, PowerOffIcon } from "lucide-react";
+import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -181,8 +182,18 @@ function AgentRow({
 							: "text-muted-foreground text-xs"
 					}
 				>
-					{agent.enabled ? t("enabled") : t("disabled")}
+					{agent.paused
+						? t("paused")
+						: agent.enabled
+							? t("enabled")
+							: t("disabled")}
 				</span>
+				<Link
+					href={`/agents/${agent.id}`}
+					className="text-muted-foreground text-xs underline"
+				>
+					{t("publicPage")}
+				</Link>
 			</div>
 			<p className="text-muted-foreground text-xs">
 				{agent.keyStart && (
@@ -192,8 +203,18 @@ function AgentRow({
 					date: mounted ? format.dateTime(new Date(agent.createdAt)) : "…",
 				})}
 			</p>
+			{agent.paused && (
+				<p className="text-muted-foreground text-xs">
+					{agent.adminOnly ? t("adminOnly") : t("pausedHint")}
+				</p>
+			)}
 			<div className="flex flex-wrap gap-2">
-				<Button variant="outline" size="sm" disabled={busy} onClick={onRotate}>
+				<Button
+					variant="outline"
+					size="sm"
+					disabled={busy || agent.adminOnly}
+					onClick={onRotate}
+				>
 					<KeyRoundIcon />
 					{agent.enabled ? t("rotate") : t("enable")}
 				</Button>

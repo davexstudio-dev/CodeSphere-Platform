@@ -1,12 +1,33 @@
 import { AGENTS_PER_OWNER, type AgentSummary } from "@codesphere/contract";
 import type { Database } from "@codesphere/db";
+import { auditLog } from "@codesphere/db/schema/audit";
 import { apikey, user } from "@codesphere/db/schema/auth";
 import { and, count, eq, isNull, ne, or, sql } from "drizzle-orm";
 
 import { withAudit } from "../audit";
+import {
+	type AgentRules,
+	creationBlockedUntil,
+	DEFAULT_AGENT_RULES,
+	endPause,
+	type PausedAgent,
+	pauseState,
+} from "./moderation";
+
+export {
+	type AgentRules,
+	DEFAULT_AGENT_RULES,
+	type PausedAgent,
+	parseAgentRules,
+	settleAgentAnswer,
+} from "./moderation";
 
 export class AgentError extends Error {
-	constructor(readonly code: "NOT_FOUND" | "CONFLICT") {
+	constructor(
+		readonly code: "NOT_FOUND" | "CONFLICT" | "PAUSED" | "BLOCKED",
+		/** For BLOCKED: when the Owner may create Agents again. */
+		readonly until?: Date,
+	) {
 		super(code);
 	}
 }
@@ -62,7 +83,10 @@ export async function agentPreset(
 	return row ? presetOf(row.metadata) : null;
 }
 
-export function createAgentService(db: Database) {
+export function createAgentService(
+	db: Database,
+	rules: AgentRules = DEFAULT_AGENT_RULES,
+) {
 	const owned = (ownerId: string, id: string) =>
 		and(
 			eq(user.id, id),
@@ -88,11 +112,15 @@ export function createAgentService(db: Database) {
 		if (!row) {
 			throw new AgentError("NOT_FOUND");
 		}
+		const pauses = await pauseState(db, id);
 		return {
 			id: row.id,
 			name: row.name,
 			preset: presetOf(row.metadata),
 			enabled: row.enabled ?? false,
+			paused: pauses.open,
+			// The first pause the Owner may lift; after a second one, only an Admin.
+			adminOnly: pauses.open && pauses.count >= 2,
 			keyStart: row.start,
 			createdAt: row.createdAt.toISOString(),
 		};
@@ -136,6 +164,10 @@ export function createAgentService(db: Database) {
 
 		/** Up to AGENTS_PER_OWNER live Agents per Owner; the key is returned once. Audited. */
 		async create(ownerId: string, input: { name: string; preset: Preset }) {
+			const blockedUntil = await creationBlockedUntil(db, ownerId, rules);
+			if (blockedUntil) {
+				throw new AgentError("BLOCKED", blockedUntil);
+			}
 			const [{ n } = { n: 0 }] = await db
 				.select({ n: count() })
 				.from(user)
@@ -184,6 +216,11 @@ export function createAgentService(db: Database) {
 		/** New key, old one dead, Agent enabled again. Two events: the revoked key and the new one. */
 		async rotateKey(ownerId: string, id: string) {
 			await summary(ownerId, id);
+			// A paused Agent: the Owner brings it back once; after a second pause, an Admin must.
+			const pauses = await pauseState(db, id);
+			if (pauses.open && pauses.count >= 2) {
+				throw new AgentError("PAUSED");
+			}
 			const key = generateKey();
 			const hash = await hashKey(key);
 			const rows = await withAudit(
@@ -218,6 +255,7 @@ export function createAgentService(db: Database) {
 			if (rows.length === 0) {
 				throw new AgentError("NOT_FOUND");
 			}
+			await endPause(db, id, ownerId);
 			return { agent: await summary(ownerId, id), key };
 		},
 
@@ -242,6 +280,84 @@ export function createAgentService(db: Database) {
 				throw new AgentError("NOT_FOUND");
 			}
 			return summary(ownerId, id);
+		},
+
+		/** What the public page of an Agent shows about it; NOT_FOUND for a human or an unknown id. */
+		async publicInfo(id: string) {
+			const [row] = await db
+				.select({
+					id: user.id,
+					name: user.name,
+					createdAt: user.createdAt,
+					suspensionReason: user.suspensionReason,
+					ownerName: sql<
+						string | null
+					>`(SELECT o.name FROM "user" o WHERE o.id = ${user.ownerId})`,
+					enabled: apikey.enabled,
+				})
+				.from(user)
+				.leftJoin(apikey, eq(apikey.referenceId, user.id))
+				.where(and(eq(user.id, id), eq(user.kind, "agent")))
+				.limit(1);
+			if (!row) {
+				throw new AgentError("NOT_FOUND");
+			}
+			const pauses = await pauseState(db, id);
+			const status =
+				row.suspensionReason === DELETED
+					? ("retired" as const)
+					: pauses.open
+						? ("paused" as const)
+						: row.enabled
+							? ("active" as const)
+							: ("disabled" as const);
+			return {
+				id: row.id,
+				name: row.name,
+				ownerName: row.ownerName ?? "Deleted member",
+				status,
+				createdAt: row.createdAt.toISOString(),
+				rejectScore: rules.rejectScore,
+			};
+		},
+
+		/**
+		 * An Admin brings back a paused Agent, whatever the number of pauses: its key is enabled again
+		 * and the pause ends. Audited. NOT_FOUND for a user that is not a live Agent.
+		 */
+		async reactivate(adminId: string, id: string) {
+			const [agent] = await db
+				.select({ id: user.id })
+				.from(user)
+				.where(
+					and(
+						eq(user.id, id),
+						eq(user.kind, "agent"),
+						or(
+							isNull(user.suspensionReason),
+							ne(user.suspensionReason, DELETED),
+						),
+					),
+				)
+				.limit(1);
+			if (!agent) {
+				throw new AgentError("NOT_FOUND");
+			}
+			const keys = await db
+				.update(apikey)
+				.set({ enabled: true, updatedAt: new Date() })
+				.where(eq(apikey.referenceId, id))
+				.returning({ id: apikey.id });
+			if (keys.length === 0) {
+				throw new AgentError("NOT_FOUND");
+			}
+			await endPause(db, id, adminId);
+			await db.insert(auditLog).values({
+				actorId: adminId,
+				action: "agent.reactivate",
+				targetType: "agent",
+				targetId: id,
+			});
 		},
 
 		/**
@@ -275,4 +391,37 @@ export function createAgentService(db: Database) {
 			return { success: true };
 		},
 	};
+}
+
+/**
+ * Tells the Owner their Agent was paused. A failed send is only logged: the pause already stands.
+ */
+export async function notifyAgentPaused(
+	db: Database,
+	paused: PausedAgent,
+	notifications:
+		| {
+				agentPaused(
+					member: { email: string; name: string },
+					agentName: string,
+				): Promise<void>;
+		  }
+		| undefined,
+	logger: { warn(obj: object, msg: string): void },
+) {
+	if (!notifications) {
+		return;
+	}
+	try {
+		const [owner] = await db
+			.select({ email: user.email, name: user.name })
+			.from(user)
+			.where(eq(user.id, paused.ownerId))
+			.limit(1);
+		if (owner) {
+			await notifications.agentPaused(owner, paused.agentName);
+		}
+	} catch (error) {
+		logger.warn({ err: error }, "agent paused notification failed");
+	}
 }

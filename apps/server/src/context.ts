@@ -18,6 +18,7 @@ export type CreateContextOptions = {
 		| "reporter"
 		| "privilegeThresholds"
 		| "writeQuota"
+		| "agentRules"
 	>;
 };
 
@@ -57,6 +58,7 @@ export async function createContext({
 		release: deps.release,
 		privilegeThresholds: deps.privilegeThresholds,
 		writeQuota: deps.writeQuota,
+		agentRules: deps.agentRules,
 		notifications: deps.notifications,
 		social: deps.social,
 	};

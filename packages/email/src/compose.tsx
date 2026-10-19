@@ -8,6 +8,11 @@ import {
 	type AccountDeletedProps,
 } from "./templates/account-deleted";
 import {
+	AGENT_PAUSED_SUBJECTS,
+	AgentPaused,
+	type AgentPausedProps,
+} from "./templates/agent-paused";
+import {
 	API_KEY_CREATED_SUBJECTS,
 	ApiKeyCreated,
 	type ApiKeyCreatedProps,
@@ -40,6 +45,7 @@ export type EmailMessage =
 	| { kind: "member-suspended"; props: MemberSuspendedProps }
 	| { kind: "member-reactivated"; props: MemberReactivatedProps }
 	| { kind: "api-key-created"; props: ApiKeyCreatedProps }
+	| { kind: "agent-paused"; props: AgentPausedProps }
 	| { kind: "sign-in-code"; props: SignInCodeProps };
 
 /** The subject and the body of a message, in the language of its props. */
@@ -73,6 +79,11 @@ export function composeEmail(message: EmailMessage): {
 			return {
 				subject: API_KEY_CREATED_SUBJECTS[locale],
 				template: <ApiKeyCreated {...message.props} />,
+			};
+		case "agent-paused":
+			return {
+				subject: AGENT_PAUSED_SUBJECTS[locale],
+				template: <AgentPaused {...message.props} />,
 			};
 		case "sign-in-code":
 			return {

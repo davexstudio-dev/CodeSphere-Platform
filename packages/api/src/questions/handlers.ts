@@ -1,5 +1,7 @@
+import { notifyAgentPaused, type PausedAgent } from "../agents/service";
 import { AnswerError, createAnswerService } from "../answers/service";
 import { requireAdmin } from "../authorization";
+import type { Context } from "../context";
 import { impl } from "../index";
 import { PrivilegeError } from "../reputation/service";
 import { createVoteService, VoteError } from "../votes/service";
@@ -7,6 +9,20 @@ import { defaultWriteQuota } from "../write-quota";
 import { authorsById, UNKNOWN_AUTHOR, votesOf } from "./authors";
 import { createListingService, InvalidCursorError } from "./listing";
 import { createQuestionService, QuestionError } from "./service";
+
+/** What a vote needs to moderate Agents (#245): the rules, and who to tell when one is paused. */
+function agentHooks(context: Context) {
+	return {
+		rules: context.agentRules,
+		onPaused: (paused: PausedAgent) =>
+			notifyAgentPaused(
+				context.db,
+				paused,
+				context.notifications,
+				context.logger,
+			),
+	};
+}
 
 /** The signed-in user as the write quota sees them: an Agent only if its row says so. */
 function actorOf(
@@ -405,6 +421,7 @@ export function createVotesHandlers() {
 					context.db,
 					context.privilegeThresholds,
 					context.farmingLimits,
+					agentHooks(context),
 				).cast(
 					userId,
 					{ targetType: input.targetType, targetId: input.targetId },
@@ -431,6 +448,7 @@ export function createVotesHandlers() {
 					context.db,
 					context.privilegeThresholds,
 					context.farmingLimits,
+					agentHooks(context),
 				).retract(userId, input);
 			} catch (err) {
 				throw refusal(err, errors);

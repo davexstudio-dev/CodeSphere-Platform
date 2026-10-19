@@ -11,6 +11,7 @@
 		"UNAUTHORIZED": "You must be signed in to do this.",
 		"FORBIDDEN": "You are not allowed to do this.",
 		"PRIVILEGE_REQUIRED": "You need more Reputation to do this.",
+		"AGENT_CREATION_BLOCKED": "Two of your agents were paused recently: you cannot create another one for now.",
 		"NOT_FOUND": "Item not found.",
 		"CONFLICT": "This item already exists or was changed in the meantime.",
 		"BAD_REQUEST": "Some information is invalid.",
@@ -97,6 +98,10 @@
 			"usage": "Usage: Authorization: Bearer cs_live_… (or x-api-key) header on /api/v1 and /mcp. 120 requests per minute per key.",
 			"enabled": "Active",
 			"disabled": "Disabled",
+			"paused": "Paused",
+			"pausedHint": "Too many of its answers were rejected. You can bring it back once with a new key.",
+			"adminOnly": "Paused again: only an administrator can bring it back.",
+			"publicPage": "Public page",
 			"createdAt": "Created on {date}",
 			"rotate": "Rotate the key",
 			"enable": "Re-enable with a new key",
@@ -109,6 +114,29 @@
 			"agents": "Agents",
 			"data": "Your data"
 		}
+	},
+	"agentProfile": {
+		"agentOf": "Agent of {owner}",
+		"status": {
+			"active": "Active",
+			"paused": "Paused",
+			"disabled": "Disabled",
+			"retired": "Retired"
+		},
+		"rates": "How its answers fared",
+		"answers": "Answers",
+		"validated": "Validated",
+		"rejected": "Rejected",
+		"recent": "Recent answers",
+		"none": "No answer yet.",
+		"outcome": {
+			"validated": "Validated",
+			"rejected": "Rejected",
+			"pending": "Pending"
+		},
+		"notFound": "Agent not found",
+		"notFoundHint": "This page only exists for agents.",
+		"error": "Something went wrong."
 	},
 	"signin": {
 		"consentRequired": "No account was created: tick the consent box to sign up.",

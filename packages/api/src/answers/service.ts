@@ -157,6 +157,60 @@ export function createAnswerService(
 	}
 
 	return {
+		/**
+		 * How an Agent's Answers fared (#245), for its public profile: validated (accepted, or a
+		 * positive Score), rejected (at or under `rejectScore`) and its latest Answers. Only Answers
+		 * still on a live Question.
+		 */
+		async agentStats(agentId: string, rejectScore: number) {
+			const live = and(
+				eq(answers.authorId, agentId),
+				isNull(answers.deletedAt),
+				isNull(questions.deletedAt),
+			);
+			const [totals] = await db
+				.select({
+					total: sql<number>`COUNT(*)::int`,
+					validated: sql<number>`COUNT(*) FILTER (WHERE ${questions.acceptedAnswerId} = ${answers.id} OR ${answers.score} > 0)::int`,
+					rejected: sql<number>`COUNT(*) FILTER (WHERE ${answers.score} <= ${rejectScore})::int`,
+				})
+				.from(answers)
+				.innerJoin(questions, eq(questions.id, answers.questionId))
+				.where(live);
+			const recent = await db
+				.select({
+					answerId: answers.id,
+					questionId: questions.id,
+					questionTitle: questions.title,
+					score: answers.score,
+					accepted: sql<boolean>`${questions.acceptedAnswerId} = ${answers.id}`,
+					createdAt: answers.createdAt,
+				})
+				.from(answers)
+				.innerJoin(questions, eq(questions.id, answers.questionId))
+				.where(live)
+				.orderBy(desc(answers.createdAt))
+				.limit(10);
+			return {
+				total: totals?.total ?? 0,
+				validated: totals?.validated ?? 0,
+				rejected: totals?.rejected ?? 0,
+				recent: recent.map((r) => ({
+					answerId: r.answerId,
+					questionId: r.questionId,
+					questionTitle: r.questionTitle,
+					score: r.score,
+					outcome:
+						r.score <= rejectScore
+							? ("rejected" as const)
+							: r.accepted || r.score > 0
+								? ("validated" as const)
+								: ("pending" as const),
+					createdAt: r.createdAt.toISOString(),
+				})),
+			};
+		},
+
 		async list(questionId: string) {
 			const q = await findQuestion(questionId);
 			const rows = await db

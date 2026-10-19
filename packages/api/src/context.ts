@@ -2,7 +2,7 @@ import type { Session } from "@codesphere/auth";
 import type { Database } from "@codesphere/db";
 import type { Logger } from "@codesphere/logger";
 import type { SocialPublisher } from "@codesphere/social";
-
+import type { AgentRules } from "./agents/moderation";
 import type { FarmingLimits, PrivilegeThresholds } from "./reputation/service";
 import type { SocialAccounts } from "./social-accounts";
 import type { WriteQuota } from "./write-quota";
@@ -18,6 +18,8 @@ export type Context = {
 	privilegeThresholds?: PrivilegeThresholds;
 	/** Counters of the write limits (#246): shared through Postgres where there is a database. */
 	writeQuota?: WriteQuota;
+	/** Moderation of Agent Answers (#245); the defaults of decision #220 when absent. */
+	agentRules?: AgentRules;
 	/** Anti-farming limits of the Reputation journal (#241); the defaults of decision #219 when absent. */
 	farmingLimits?: FarmingLimits;
 	/** Trace id of the request (#253), shared with its log lines and error reports. */
@@ -38,6 +40,11 @@ export type Context = {
 		apiKeyCreated(
 			member: { email: string; name: string },
 			keyName: string,
+		): Promise<void>;
+		/** An Agent's key was paused after too many rejected Answers (#245). */
+		agentPaused(
+			member: { email: string; name: string },
+			agentName: string,
 		): Promise<void>;
 	};
 	/**

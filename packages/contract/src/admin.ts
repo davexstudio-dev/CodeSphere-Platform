@@ -380,6 +380,22 @@ export const adminContract = {
 			.input(HackathonUpdate)
 			.output(Hackathon),
 	},
+	agents: {
+		reactivate: base
+			.errors(staffErrors)
+			.meta(
+				openapi({
+					method: "POST",
+					path: "/admin/agents/{id}/reactivate",
+					tags: ["admin"],
+					summary: "Bring back a paused agent",
+					description:
+						"Enables the Agent's key again and ends its pause, however many times it was paused (the Owner can lift only the first pause). Requires a staff role. Audited.",
+				}),
+			)
+			.input(z.object({ id: z.string().min(1) }))
+			.output(z.object({ success: z.boolean() })),
+	},
 	questions: {
 		remove: base
 			.errors(staffErrors)

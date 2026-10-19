@@ -1,3 +1,4 @@
+import { parseAgentRules } from "@codesphere/api/agents/moderation";
 import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { postgresWriteQuota } from "@codesphere/api/write-quota";
 import { createAuth } from "@codesphere/auth";
@@ -43,6 +44,7 @@ export type WorkerEnv = {
 		| "trace"
 		| "silent";
 	PRIVILEGE_THRESHOLDS?: string;
+	AGENT_RULES?: string;
 	APP_VERSION?: string;
 	GIT_SHA?: string;
 };
@@ -106,6 +108,7 @@ function buildApp(env: WorkerEnv) {
 		// The public Worker never serves the spec or its UI: they are for development only.
 		apiDocs: false,
 		writeQuota: postgresWriteQuota(db),
+		agentRules: parseAgentRules(env.AGENT_RULES),
 		privilegeThresholds: parsePrivilegeThresholds(env.PRIVILEGE_THRESHOLDS),
 		notifications: createNotifications(env, logger),
 		resendWebhookSecret: env.RESEND_WEBHOOK_SECRET,
@@ -119,7 +122,7 @@ export function apiFetch(
 	env: WorkerEnv,
 	ctx: WorkerContext,
 ): Response | Promise<Response> {
-	const key = `${env.BETTER_AUTH_URL}|${env.DATABASE_URL ?? ""}|${env.PRIVILEGE_THRESHOLDS ?? ""}`;
+	const key = `${env.BETTER_AUTH_URL}|${env.DATABASE_URL ?? ""}|${env.PRIVILEGE_THRESHOLDS ?? ""}|${env.AGENT_RULES ?? ""}`;
 	if (!cached || cached.key !== key) {
 		cached = { key, app: buildApp(env) };
 	}

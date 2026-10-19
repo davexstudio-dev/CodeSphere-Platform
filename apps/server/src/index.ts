@@ -1,3 +1,4 @@
+import { parseAgentRules } from "@codesphere/api/agents/moderation";
 import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { postgresWriteQuota } from "@codesphere/api/write-quota";
 
@@ -33,6 +34,7 @@ const app = createApp({
 	resendWebhookSecret: ENV.RESEND_WEBHOOK_SECRET,
 	reporter,
 	writeQuota: postgresWriteQuota(db),
+	agentRules: parseAgentRules(ENV.AGENT_RULES),
 	privilegeThresholds: parsePrivilegeThresholds(ENV.PRIVILEGE_THRESHOLDS),
 });
 

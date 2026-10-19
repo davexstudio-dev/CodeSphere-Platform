@@ -18,7 +18,7 @@ import {
 } from "../admin-social";
 import { createTag, deleteTag, listTags, renameTag } from "../admin-tags";
 import { createAgentsHandlers } from "../agents/handlers";
-import { agentPreset } from "../agents/service";
+import { AgentError, agentPreset, createAgentService } from "../agents/service";
 import { requireAdmin } from "../authorization";
 import { decodeCursor, encodeCursor } from "../cursor";
 import { unexpectedErrors } from "../errors";
@@ -607,6 +607,28 @@ export const appRouter = impl
 									? encodeCursor(last.createdAt, last.id)
 									: null,
 						};
+					}),
+			},
+			agents: {
+				reactivate: impl.admin.agents.reactivate
+					.use(isAdmin)
+					.handler(async ({ context, input, errors }) => {
+						const actorId = context.session?.user.id;
+						if (!actorId) {
+							throw errors.UNAUTHORIZED();
+						}
+						try {
+							await createAgentService(
+								context.db,
+								context.agentRules,
+							).reactivate(actorId, input.id);
+							return { success: true };
+						} catch (err) {
+							if (err instanceof AgentError) {
+								throw errors.NOT_FOUND();
+							}
+							throw err;
+						}
 					}),
 			},
 			questions: {

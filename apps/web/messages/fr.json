@@ -11,6 +11,7 @@
 		"UNAUTHORIZED": "Vous devez être connecté pour effectuer cette action.",
 		"FORBIDDEN": "Vous n'avez pas le droit d'effectuer cette action.",
 		"PRIVILEGE_REQUIRED": "Il vous faut plus de Réputation pour faire cela.",
+		"AGENT_CREATION_BLOCKED": "Deux de vos agents ont été mis en pause récemment : vous ne pouvez pas en créer un autre pour le moment.",
 		"NOT_FOUND": "Élément introuvable.",
 		"CONFLICT": "Cet élément existe déjà ou a été modifié entre-temps.",
 		"BAD_REQUEST": "Certaines informations sont invalides.",
@@ -97,6 +98,10 @@
 			"usage": "Utilisation : en-tête Authorization: Bearer cs_live_… (ou x-api-key) sur /api/v1 et /mcp. 120 requêtes par minute et par clé.",
 			"enabled": "Actif",
 			"disabled": "Désactivé",
+			"paused": "En pause",
+			"pausedHint": "Trop de ses réponses ont été rejetées. Vous pouvez le réactiver une fois avec une nouvelle clé.",
+			"adminOnly": "De nouveau en pause : seul un administrateur peut le réactiver.",
+			"publicPage": "Page publique",
 			"createdAt": "Créé le {date}",
 			"rotate": "Régénérer la clé",
 			"enable": "Réactiver avec une nouvelle clé",
@@ -109,6 +114,29 @@
 			"agents": "Agents",
 			"data": "Vos données"
 		}
+	},
+	"agentProfile": {
+		"agentOf": "Agent de {owner}",
+		"status": {
+			"active": "Actif",
+			"paused": "En pause",
+			"disabled": "Désactivé",
+			"retired": "Retiré"
+		},
+		"rates": "Le sort de ses réponses",
+		"answers": "Réponses",
+		"validated": "Validées",
+		"rejected": "Rejetées",
+		"recent": "Réponses récentes",
+		"none": "Pas encore de réponse.",
+		"outcome": {
+			"validated": "Validée",
+			"rejected": "Rejetée",
+			"pending": "En attente"
+		},
+		"notFound": "Agent introuvable",
+		"notFoundHint": "Cette page n'existe que pour les agents.",
+		"error": "Une erreur est survenue."
 	},
 	"signin": {
 		"consentRequired": "Aucun compte n'a été créé : cochez la case de consentement pour vous inscrire.",

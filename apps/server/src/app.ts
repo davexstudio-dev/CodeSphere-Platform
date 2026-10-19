@@ -1,3 +1,4 @@
+import type { AgentRules } from "@codesphere/api/agents/moderation";
 import type { Context as ApiContext } from "@codesphere/api/context";
 import { exposedOverMCP, exposedOverOpenAPI } from "@codesphere/api/exposure";
 import { openApiDocument } from "@codesphere/api/openapi";
@@ -41,6 +42,8 @@ export type AppDeps = {
 	apiDocs: boolean;
 	/** Counters of the write limits, shared through the database (#246); per process when absent. */
 	writeQuota?: WriteQuota;
+	/** Moderation of Agent Answers (#245); the defaults when absent. */
+	agentRules?: AgentRules;
 	/** Reputation needed for each Privilege (#240); the defaults when absent. */
 	privilegeThresholds?: PrivilegeThresholds;
 	/** Error tracker for unexpected failures (#253); absent where none is configured. */

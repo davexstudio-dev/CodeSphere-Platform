@@ -2,6 +2,12 @@ import type { Database } from "@codesphere/db";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import {
+	type AgentRules,
+	DEFAULT_AGENT_RULES,
+	type PausedAgent,
+	settleAgentAnswer,
+} from "../agents/service";
+import {
 	DEFAULT_PRIVILEGE_THRESHOLDS,
 	FARMING_LIMITS,
 	type FarmingLimits,
@@ -25,6 +31,11 @@ export function createVoteService(
 	db: Database,
 	thresholds: PrivilegeThresholds = DEFAULT_PRIVILEGE_THRESHOLDS,
 	limits: FarmingLimits = FARMING_LIMITS,
+	agents: {
+		rules?: AgentRules;
+		/** Called when this vote got an Agent paused (#245): the Owner is to be told. */
+		onPaused?: (paused: PausedAgent) => Promise<void> | void;
+	} = {},
 ) {
 	// The author of a live target: a deleted or unknown one is NOT_FOUND.
 	async function authorOf({ targetType, targetId }: VoteTarget) {
@@ -69,6 +80,27 @@ export function createVoteService(
 		return row?.value === value;
 	}
 
+	// An Agent's Answer whose Score changed may be rejected, and the Agent paused (#245).
+	async function settleAgent(
+		{ targetType, targetId }: VoteTarget,
+		authorId: string,
+		score: number,
+	) {
+		if (targetType !== "answer") {
+			return;
+		}
+		const paused = await settleAgentAnswer(
+			db,
+			authorId,
+			targetId,
+			score,
+			agents.rules ?? DEFAULT_AGENT_RULES,
+		);
+		if (paused) {
+			await agents.onPaused?.(paused);
+		}
+	}
+
 	async function guard(voterId: string, target: VoteTarget) {
 		const authorId = await authorOf(target);
 		if (authorId === voterId) {
@@ -97,7 +129,9 @@ export function createVoteService(
 					set: { value: signed },
 				});
 			await settleVote(db, voterId, target, authorId, limits);
-			return { score: await recount(target), vote: value };
+			const score = await recount(target);
+			await settleAgent(target, authorId, score);
+			return { score, vote: value };
 		},
 
 		async retract(voterId: string, target: VoteTarget) {
@@ -112,7 +146,9 @@ export function createVoteService(
 					),
 				);
 			await settleVote(db, voterId, target, authorId, limits);
-			return { score: await recount(target), vote: null };
+			const score = await recount(target);
+			await settleAgent(target, authorId, score);
+			return { score, vote: null };
 		},
 	};
 }
