@@ -19,7 +19,8 @@ export function decodeRankingCursor(cursor: string | undefined) {
 	if (cursor === undefined) {
 		return 0;
 	}
-	const match = /^o(\d{1,9})$/.exec(cursor);
+	// At most 5 digits: a ranking is read page by page, not by jumping a million rows ahead.
+	const match = /^o(\d{1,5})$/.exec(cursor);
 	if (!match) {
 		throw new InvalidRankingCursorError();
 	}
@@ -45,6 +46,17 @@ function page(rows: Ranked[], offset: number, limit: number) {
 		nextCursor:
 			rows.length > limit ? encodeRankingCursor(offset + limit) : null,
 	};
+}
+
+/** The countries with enough Members to be shown: a cheap count, no Reputation sums. */
+async function publicCountries(db: Database) {
+	const rows = await db
+		.select({ country: user.country })
+		.from(user)
+		.where(and(eligible, sql`${user.country} IS NOT NULL`))
+		.groupBy(user.country)
+		.having(sql`COUNT(*) >= ${MIN_MEMBERS_PER_COUNTRY}`);
+	return new Set(rows.map((row) => row.country));
 }
 
 /** Countries with enough Members to be shown, by total Reputation. */
@@ -146,6 +158,9 @@ export async function membersOfTag(
 			and(
 				counted,
 				eligible,
+				// Reputation earned on content since removed does not rank.
+				isNull(questions.deletedAt),
+				sql`(${answers.id} IS NULL OR ${answers.deletedAt} IS NULL)`,
 				sql`${tag.toLowerCase()} = ANY(${questions.tags})`,
 			),
 		)
@@ -156,7 +171,7 @@ export async function membersOfTag(
 		.offset(offset);
 	// A Member's country is hidden unless it is one shown publicly: a Tag ranking must not reveal
 	// that a country with fewer than 5 Members exists.
-	const shown = new Set((await countryRanking(db)).items.map((c) => c.country));
+	const shown = await publicCountries(db);
 	return page(
 		rows.map((row) => ({
 			...row,

@@ -4,7 +4,7 @@ import { Button } from "@codesphere/ui/components/atoms/button";
 import { Input } from "@codesphere/ui/components/atoms/input";
 import { Skeleton } from "@codesphere/ui/components/atoms/skeleton";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { orpc } from "@/utils/orpc";
@@ -16,7 +16,6 @@ type Scope =
 /** Reputation rankings (#242): pick a country shown publicly, or type a Tag. */
 export function RankingsPage() {
 	const t = useTranslations("rankings");
-	const format = useFormatter();
 	const [scope, setScope] = useState<Scope | null>(null);
 	const [tag, setTag] = useState("");
 	const countries = useQuery(orpc.rankings.countries.queryOptions());
@@ -57,6 +56,17 @@ export function RankingsPage() {
 				</h2>
 				{countries.isPending ? (
 					<Skeleton className="h-10 rounded-xl" />
+				) : countries.isError ? (
+					<p className="text-muted-foreground text-sm">
+						{t("error")}{" "}
+						<Button
+							variant="link"
+							size="sm"
+							onClick={() => countries.refetch()}
+						>
+							{t("retry")}
+						</Button>
+					</p>
 				) : (countries.data?.items.length ?? 0) === 0 ? (
 					<p className="text-muted-foreground text-sm">{t("noCountry")}</p>
 				) : (
@@ -96,7 +106,7 @@ export function RankingsPage() {
 				>
 					<Input
 						aria-label={t("tagLabel")}
-						placeholder="sql"
+						placeholder={t("tagPlaceholder")}
 						value={tag}
 						onChange={(e) => setTag(e.target.value)}
 					/>
@@ -109,7 +119,7 @@ export function RankingsPage() {
 				<section aria-label={t("ranking")} className="grid gap-2">
 					{list.isPending ? (
 						<Skeleton className="h-32 rounded-xl" />
-					) : list.isError ? (
+					) : list.isError && items.length === 0 ? (
 						<p className="text-muted-foreground text-sm">{t("error")}</p>
 					) : items.length === 0 ? (
 						<p className="text-muted-foreground text-sm">{t("empty")}</p>
@@ -128,13 +138,14 @@ export function RankingsPage() {
 										{member.country ? ` · ${member.country}` : ""}
 									</span>
 									<span className="font-semibold">
-										{t("reputation", {
-											count: format.number(member.reputation),
-										})}
+										{t("reputation", { count: member.reputation })}
 									</span>
 								</li>
 							))}
 						</ol>
+					)}
+					{list.isError && items.length > 0 && (
+						<p className="text-muted-foreground text-sm">{t("error")}</p>
 					)}
 					{list.hasNextPage && (
 						<Button

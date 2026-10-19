@@ -150,7 +150,9 @@
 		"ranking": "Classement",
 		"empty": "Personne à afficher.",
 		"error": "Le classement est indisponible. Réessayez dans un instant.",
-		"reputation": "{count} de réputation",
+		"reputation": "{count, number} de réputation",
+		"tagPlaceholder": "sql",
+		"retry": "Réessayer",
 		"more": "Afficher plus"
 	},
 	"signin": {

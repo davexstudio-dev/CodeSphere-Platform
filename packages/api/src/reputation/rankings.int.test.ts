@@ -177,6 +177,52 @@ describe.skipIf(!url)("Reputation rankings on Postgres", () => {
 		);
 	});
 
+	test("bounds the offset a cursor can ask for", async () => {
+		await expect(
+			api.rankings.byTag({ tag, limit: 5, cursor: "o999999999" }),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+	});
+
+	test("Reputation earned on removed content does not rank on a Tag", async () => {
+		const [gone] = await db
+			.insert(questions)
+			.values({
+				authorId: members[4] ?? "",
+				idempotencyKey: crypto.randomUUID(),
+				title: "Removed",
+				body: "b",
+				bodyHtml: "<p>b</p>",
+				language: "en",
+				tags: [tag],
+				deletedAt: new Date(),
+			})
+			.returning();
+		await grant(members[4] ?? "", 999, {
+			type: "question",
+			id: gone?.id ?? "",
+		});
+		const ranking = await api.rankings.byTag({ tag, limit: 20 });
+		expect(ranking.items.map((m) => m.id)).not.toContain(members[4]);
+	});
+
+	test("the Tag ranking paginates and leaves out a negative total", async () => {
+		await grant(members[5] ?? "", -4, {
+			type: "question",
+			id: questionIds[0] ?? "",
+		});
+		const first = await api.rankings.byTag({ tag, limit: 2 });
+		expect(first.items.map((m) => m.rank)).toEqual([1, 2]);
+		const second = await api.rankings.byTag({
+			tag,
+			limit: 2,
+			cursor: first.nextCursor ?? undefined,
+		});
+		expect(second.items.map((m) => [m.rank, m.id])).toEqual([
+			[3, members[1] as string],
+		]);
+		expect(second.nextCursor).toBeNull();
+	});
+
 	test("ranks Members by Reputation earned on a Tag, through Answers too", async () => {
 		const ranking = await api.rankings.byTag({ tag, limit: 20 });
 		expect(ranking.items.map((m) => [m.rank, m.id, m.reputation])).toEqual([

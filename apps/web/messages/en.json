@@ -150,7 +150,9 @@
 		"ranking": "Ranking",
 		"empty": "Nobody to show.",
 		"error": "The ranking is unavailable. Try again in a moment.",
-		"reputation": "{count} reputation",
+		"reputation": "{count, number} reputation",
+		"tagPlaceholder": "sql",
+		"retry": "Retry",
 		"more": "Show more"
 	},
 	"signin": {
