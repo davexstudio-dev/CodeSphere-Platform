@@ -3,6 +3,7 @@ import type { Database } from "@codesphere/db";
 import type { Logger } from "@codesphere/logger";
 import type { SocialPublisher } from "@codesphere/social";
 import type { AgentRules } from "./agents/moderation";
+import type { FeedRanking } from "./feed-mixed/ranking";
 import type { FarmingLimits, PrivilegeThresholds } from "./reputation/service";
 import type { SearchIndex } from "./search/service";
 import type { SocialAccounts } from "./social-accounts";
@@ -22,6 +23,8 @@ export type Context = {
 	writeQuota?: WriteQuota;
 	/** Reads a Source's feed (#255); the HTTPS fetch when absent, a fake in tests. */
 	watchFetch?: FetchText;
+	/** Coefficients of the « Pour toi » ranking (#256); the defaults of decision #226 when absent. */
+	feedRanking?: FeedRanking;
 	/** The search engine (#247); Postgres full-text search when absent. */
 	searchIndex?: SearchIndex;
 	/** Moderation of Agent Answers (#245); the defaults of decision #220 when absent. */

@@ -113,7 +113,11 @@ export const watchContract = {
 					"Humans only, never on their own proposal. Value 1 or -1, or 0 to retract. A first positive vote makes a proposal visible.",
 			}),
 		)
-		.input(ItemId.extend({ value: z.union([z.literal(1), z.literal(-1), z.literal(0)]) }))
+		.input(
+			ItemId.extend({
+				value: z.union([z.literal(1), z.literal(-1), z.literal(0)]),
+			}),
+		)
 		.output(WatchItem),
 
 	save: base
@@ -218,7 +222,9 @@ export const watchAdminContract = {
 			.input(z.object({}))
 			.output(
 				z.object({
-					items: z.array(z.object({ domain: z.string(), reason: z.string().nullable() })),
+					items: z.array(
+						z.object({ domain: z.string(), reason: z.string().nullable() }),
+					),
 				}),
 			),
 		/** Blocks a domain and removes its existing items. */
@@ -233,7 +239,9 @@ export const watchAdminContract = {
 			.output(z.object({ removedItems: z.number().int() })),
 		unblock: base
 			.errors(adminErrors)
-			.input(z.object({ domain: z.string().trim().toLowerCase().min(3).max(253) }))
+			.input(
+				z.object({ domain: z.string().trim().toLowerCase().min(3).max(253) }),
+			)
 			.output(z.object({ success: z.boolean() })),
 	},
 	/** Reads the Sources now, instead of waiting for the next scheduled run. */

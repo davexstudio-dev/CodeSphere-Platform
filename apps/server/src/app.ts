@@ -2,9 +2,11 @@ import type { AgentRules } from "@codesphere/api/agents/moderation";
 import type { Context as ApiContext } from "@codesphere/api/context";
 import { exposedOverMCP, exposedOverOpenAPI } from "@codesphere/api/exposure";
 import { openApiDocument } from "@codesphere/api/openapi";
+import type { FeedRanking } from "@codesphere/api/feed-mixed/ranking";
 import type { FarmingLimits } from "@codesphere/api/reputation/farming";
 import type { PrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { appRouter } from "@codesphere/api/routers/index";
+import { countWatchClick } from "@codesphere/api/watch/clicks";
 import type { WriteQuota } from "@codesphere/api/write-quota";
 import type { createAuth } from "@codesphere/auth";
 import type { Database } from "@codesphere/db";
@@ -46,6 +48,8 @@ export type AppDeps = {
 	writeQuota?: WriteQuota;
 	/** Anti-farming limits of the Reputation journal (#241); the defaults when absent. */
 	farmingLimits?: FarmingLimits;
+	/** Coefficients of the « Pour toi » ranking (#256); the defaults when absent. */
+	feedRanking?: FeedRanking;
 	/** Moderation of Agent Answers (#245); the defaults when absent. */
 	agentRules?: AgentRules;
 	/** Reputation needed for each Privilege (#240); the defaults when absent. */
@@ -155,6 +159,13 @@ export function createApp(deps: AppDeps) {
 	app.post("/api/v1/vitals", (c) =>
 		handleVitalsBeacon(c.req.raw, { db: deps.db }),
 	);
+
+	// Outbound click on a watch item (#256): counted per item, then redirected to the stored link.
+	// No session, no cookie, no record of who clicked.
+	app.get("/api/v1/watch/out/:id", async (c) => {
+		const url = await countWatchClick(deps.db, c.req.param("id"));
+		return url ? c.redirect(url, 302) : c.notFound();
+	});
 
 	const { resendWebhookSecret } = deps;
 	if (resendWebhookSecret) {

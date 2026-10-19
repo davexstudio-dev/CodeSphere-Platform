@@ -23,6 +23,7 @@ import { toast } from "sonner";
 
 import { useOutbox } from "@/components/outbox-provider";
 import { AgentsSection } from "@/components/settings/agents-section";
+import { FeedPersonalization } from "@/components/settings/feed-section";
 import { PrivacyActions } from "@/components/settings/privacy-section";
 import { waiting } from "@/lib/outbox";
 import { orpc } from "@/utils/orpc";
@@ -325,8 +326,9 @@ export default function SettingsPage() {
 						<ProfileForm />
 					</TabsContent>
 					{/* Outside the profile form: each has its own actions, and forms do not nest. */}
-					<TabsContent value="tags">
+					<TabsContent value="tags" className="flex flex-col gap-6">
 						<TagsSection />
+						<FeedPersonalization />
 					</TabsContent>
 					<TabsContent value="agents">
 						<AgentsSection />

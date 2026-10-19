@@ -1,8 +1,14 @@
 import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
+import {
+	feedAffinity,
+	feedMuted,
+	feedPreferences,
+} from "@codesphere/db/schema/feed";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
 import { reputationEvents } from "@codesphere/db/schema/reputation";
 import { tagFollows } from "@codesphere/db/schema/tags";
+import { watchItemSaves, watchItems } from "@codesphere/db/schema/watch";
 import { and, eq, isNull, ne, or } from "drizzle-orm";
 
 import { ownProfile } from "./profile";
@@ -17,30 +23,46 @@ export async function exportMember(db: Database, memberId: string) {
 	if (!me) {
 		return null;
 	}
-	const [qs, as, vs, journal, tags, agents] = await Promise.all([
-		db.select().from(questions).where(eq(questions.authorId, memberId)),
-		db.select().from(answers).where(eq(answers.authorId, memberId)),
-		db.select().from(votes).where(eq(votes.userId, memberId)),
-		db
-			.select()
-			.from(reputationEvents)
-			.where(eq(reputationEvents.userId, memberId))
-			.orderBy(reputationEvents.createdAt, reputationEvents.id),
-		db.select().from(tagFollows).where(eq(tagFollows.userId, memberId)),
-		db
-			.select()
-			.from(user)
-			.where(
-				and(
-					eq(user.ownerId, memberId),
-					eq(user.kind, "agent"),
-					or(
-						isNull(user.suspensionReason),
-						ne(user.suspensionReason, "deleted"),
+	const [qs, as, vs, journal, tags, agents, prefs, muted, affinity, kept] =
+		await Promise.all([
+			db.select().from(questions).where(eq(questions.authorId, memberId)),
+			db.select().from(answers).where(eq(answers.authorId, memberId)),
+			db.select().from(votes).where(eq(votes.userId, memberId)),
+			db
+				.select()
+				.from(reputationEvents)
+				.where(eq(reputationEvents.userId, memberId))
+				.orderBy(reputationEvents.createdAt, reputationEvents.id),
+			db.select().from(tagFollows).where(eq(tagFollows.userId, memberId)),
+			db
+				.select()
+				.from(user)
+				.where(
+					and(
+						eq(user.ownerId, memberId),
+						eq(user.kind, "agent"),
+						or(
+							isNull(user.suspensionReason),
+							ne(user.suspensionReason, "deleted"),
+						),
 					),
 				),
-			),
-	]);
+			db
+				.select()
+				.from(feedPreferences)
+				.where(eq(feedPreferences.userId, memberId)),
+			db.select().from(feedMuted).where(eq(feedMuted.userId, memberId)),
+			db.select().from(feedAffinity).where(eq(feedAffinity.userId, memberId)),
+			db
+				.select({
+					itemId: watchItems.id,
+					url: watchItems.url,
+					title: watchItems.title,
+				})
+				.from(watchItemSaves)
+				.innerJoin(watchItems, eq(watchItems.id, watchItemSaves.itemId))
+				.where(eq(watchItemSaves.userId, memberId)),
+		]);
 	return {
 		exportedAt: new Date().toISOString(),
 		profile: {
@@ -86,6 +108,13 @@ export async function exportMember(db: Database, memberId: string) {
 			createdAt: event.createdAt.toISOString(),
 		})),
 		followedTags: tags.map((t) => t.tag),
+		feedProfile: {
+			personalization: prefs[0]?.personalization ?? true,
+			language: prefs[0]?.language ?? null,
+			muted: muted.map((m) => ({ kind: m.kind, key: m.key })),
+			affinity: affinity.map((a) => ({ tag: a.tag, weight: a.weight })),
+		},
+		keptItems: kept,
 		agents: agents.map((a) => ({
 			id: a.id,
 			name: a.name,

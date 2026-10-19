@@ -17,6 +17,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { errorCodeOf } from "@/i18n/errors";
+import { getServerUrl } from "@/lib/server-url";
 import { orpc } from "@/utils/orpc";
 
 /**
@@ -73,7 +74,8 @@ export function WatchCard({
 		<article className="grid gap-2 rounded-2xl border p-4">
 			<h3 className="font-semibold text-lg leading-snug">
 				<a
-					href={item.url}
+					// Through the redirect, which counts the click per item (no record of who).
+					href={`${getServerUrl()}/api/v1/watch/out/${item.id}`}
 					target="_blank"
 					rel="noopener noreferrer nofollow ugc"
 					className="hover:underline"

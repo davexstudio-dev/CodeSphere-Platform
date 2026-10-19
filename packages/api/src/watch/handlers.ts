@@ -1,5 +1,6 @@
 import { ORPCError } from "@orpc/server";
 import { requireAdmin } from "../authorization";
+import { createMixedFeedService } from "../feed-mixed/service";
 
 import { impl } from "../index";
 import { PrivilegeError } from "../reputation/service";
@@ -98,6 +99,20 @@ const humanOf = (
 	return user;
 };
 
+// What an upvote or a kept item teaches the « Pour toi » feed. Best effort: it never fails the call.
+async function learn(
+	context: {
+		db: Parameters<typeof createMixedFeedService>[0];
+		feedRanking?: Parameters<typeof createMixedFeedService>[1];
+	},
+	userId: string,
+	tags: readonly string[],
+) {
+	await createMixedFeedService(context.db, context.feedRanking)
+		.learn(userId, tags)
+		.catch(() => undefined);
+}
+
 export function createWatchHandlers() {
 	const service = (context: {
 		db: Parameters<typeof createWatchService>[0];
@@ -140,7 +155,15 @@ export function createWatchHandlers() {
 		vote: impl.watch.vote.handler(async ({ context, input, errors }) => {
 			const user = humanOf(context, errors);
 			try {
-				return await service(context).vote(user.id, input.itemId, input.value);
+				const item = await service(context).vote(
+					user.id,
+					input.itemId,
+					input.value,
+				);
+				if (input.value === 1) {
+					await learn(context, user.id, item.tags);
+				}
+				return item;
 			} catch (err) {
 				throw refuse(err, errors);
 			}
@@ -149,7 +172,15 @@ export function createWatchHandlers() {
 		save: impl.watch.save.handler(async ({ context, input, errors }) => {
 			const user = humanOf(context, errors);
 			try {
-				return await service(context).save(user.id, input.itemId, input.saved);
+				const item = await service(context).save(
+					user.id,
+					input.itemId,
+					input.saved,
+				);
+				if (input.saved) {
+					await learn(context, user.id, item.tags);
+				}
+				return item;
 			} catch (err) {
 				throw refuse(err, errors);
 			}

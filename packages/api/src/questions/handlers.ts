@@ -2,6 +2,7 @@ import { notifyAgentPaused, type PausedAgent } from "../agents/service";
 import { AnswerError, createAnswerService } from "../answers/service";
 import { requireAdmin } from "../authorization";
 import type { Context } from "../context";
+import { createMixedFeedService } from "../feed-mixed/service";
 import { impl } from "../index";
 import { PrivilegeError } from "../reputation/service";
 import {
@@ -479,7 +480,7 @@ export function createVotesHandlers() {
 		cast: impl.votes.cast.handler(async ({ context, input, errors }) => {
 			const userId = voter(context, errors);
 			try {
-				return await createVoteService(
+				const result = await createVoteService(
 					context.db,
 					context.privilegeThresholds,
 					context.farmingLimits,
@@ -489,6 +490,13 @@ export function createVotesHandlers() {
 					{ targetType: input.targetType, targetId: input.targetId },
 					input.value,
 				);
+				if (input.value === "up" && input.targetType === "question") {
+					// An upvote teaches the « Pour toi » feed the Question's Tags (best effort).
+					await createMixedFeedService(context.db, context.feedRanking)
+						.learnFromQuestion(userId, input.targetId)
+						.catch(() => undefined);
+				}
+				return result;
 			} catch (err) {
 				if (err instanceof PrivilegeError) {
 					throw errors.PRIVILEGE_REQUIRED({

@@ -117,6 +117,23 @@
 			"tags": "Tags",
 			"agents": "Agents",
 			"data": "Your data"
+		},
+		"feed": {
+			"title": "« For you » feed",
+			"description": "Questions and watch links ranked for you.",
+			"personalization": "Personalise my feed",
+			"personalizationHint": "Off, the feed shows the most popular on the Tags you follow only, with no bonus and no learning.",
+			"language": "Favoured language",
+			"languageHint": "Content in this language rises a little.",
+			"languageAuto": "Auto",
+			"muted": "Hidden with « Less like this »",
+			"mutedNone": "Nothing is hidden.",
+			"kind": {
+				"tag": "Tag",
+				"source": "Source"
+			},
+			"unmute": "Stop hiding {name}",
+			"error": "Something went wrong. Try again."
 		}
 	},
 	"agentProfile": {
@@ -248,6 +265,18 @@
 			"diaspora": "Diaspora / other",
 			"language": "Language",
 			"country": "Country"
+		},
+		"why": {
+			"because": "Why:",
+			"reason": {
+				"followed_tag": "you follow {tag}",
+				"learned_tag": "you like {tag}",
+				"language": "in your language",
+				"african": "African source or author",
+				"trending": "trending now"
+			},
+			"lessTag": "Less about {tag}",
+			"lessSource": "Less from {source}"
 		}
 	},
 	"admin": {

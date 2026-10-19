@@ -1,4 +1,5 @@
 import { parseAgentRules } from "@codesphere/api/agents/moderation";
+import { parseFeedRanking } from "@codesphere/api/feed-mixed/ranking";
 import { parseFarmingLimits } from "@codesphere/api/reputation/farming";
 import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { runIngestion } from "@codesphere/api/watch/ingest";
@@ -48,6 +49,7 @@ export type WorkerEnv = {
 	PRIVILEGE_THRESHOLDS?: string;
 	AGENT_RULES?: string;
 	FARMING_LIMITS?: string;
+	FEED_RANKING?: string;
 	APP_VERSION?: string;
 	GIT_SHA?: string;
 };
@@ -113,6 +115,7 @@ function buildApp(env: WorkerEnv) {
 		writeQuota: postgresWriteQuota(db),
 		agentRules: parseAgentRules(env.AGENT_RULES),
 		farmingLimits: parseFarmingLimits(env.FARMING_LIMITS),
+		feedRanking: parseFeedRanking(env.FEED_RANKING),
 		privilegeThresholds: parsePrivilegeThresholds(env.PRIVILEGE_THRESHOLDS),
 		notifications: createNotifications(env, logger),
 		resendWebhookSecret: env.RESEND_WEBHOOK_SECRET,
@@ -126,7 +129,7 @@ export function apiFetch(
 	env: WorkerEnv,
 	ctx: WorkerContext,
 ): Response | Promise<Response> {
-	const key = `${env.BETTER_AUTH_URL}|${env.DATABASE_URL ?? ""}|${env.PRIVILEGE_THRESHOLDS ?? ""}|${env.AGENT_RULES ?? ""}|${env.FARMING_LIMITS ?? ""}`;
+	const key = `${env.BETTER_AUTH_URL}|${env.DATABASE_URL ?? ""}|${env.PRIVILEGE_THRESHOLDS ?? ""}|${env.AGENT_RULES ?? ""}|${env.FARMING_LIMITS ?? ""}|${env.FEED_RANKING ?? ""}`;
 	if (!cached || cached.key !== key) {
 		cached = { key, app: buildApp(env) };
 	}

@@ -418,7 +418,13 @@ function Discussion({ slug }: { slug: string }) {
 				<p className="text-muted-foreground">{t("empty")}</p>
 			) : (
 				<HomeFeed
-					items={items}
+					items={items.map((question) => ({
+						kind: "question" as const,
+						question,
+						reasons: [],
+						sourceKey: null,
+						sourceName: null,
+					}))}
 					hasNextPage={questions.hasNextPage}
 					isFetchingNextPage={questions.isFetchingNextPage}
 					fetchNextPage={questions.fetchNextPage}

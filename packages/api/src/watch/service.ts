@@ -8,7 +8,17 @@ import {
 	watchItemVotes,
 	watchSources,
 } from "@codesphere/db/schema/watch";
-import { and, desc, eq, exists, lt, or, type SQL, sql } from "drizzle-orm";
+import {
+	and,
+	desc,
+	eq,
+	exists,
+	inArray,
+	lt,
+	or,
+	type SQL,
+	sql,
+} from "drizzle-orm";
 
 import { withAudit } from "../audit";
 import {
@@ -165,6 +175,18 @@ export function createWatchService(
 
 	return {
 		get,
+
+		/** Visible items among `ids`, for a viewer (their vote and kept flag). Order is not kept. */
+		async byIds(ids: string[], viewer: Viewer) {
+			if (ids.length === 0) {
+				return [];
+			}
+			const rows = await selectItems(
+				viewer,
+				and(inArray(watchItems.id, ids), eq(watchItems.visibility, "visible")),
+			);
+			return rows.map(toItem);
+		},
 
 		async list(filter: ItemFilter, viewer: Viewer) {
 			if ((filter.pending || filter.saved) && !viewer) {

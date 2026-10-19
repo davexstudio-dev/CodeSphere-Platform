@@ -269,7 +269,11 @@ export const adminContract = {
 		setReserved: base
 			.errors(tagErrors)
 			.input(
-				z.object({ id: Id, reserved: z.boolean(), expectedVersion: ExpectedVersion }),
+				z.object({
+					id: Id,
+					reserved: z.boolean(),
+					expectedVersion: ExpectedVersion,
+				}),
 			)
 			.output(AdminTag),
 		rename: base

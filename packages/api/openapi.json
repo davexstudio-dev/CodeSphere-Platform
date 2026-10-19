@@ -4772,6 +4772,1183 @@
 				}
 			}
 		},
+		"/feed/mixed": {
+			"get": {
+				"operationId": "feed.mixed",
+				"tags": ["feed"],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "cursor",
+						"schema": {
+							"type": "string"
+						},
+						"allowEmptyValue": true,
+						"allowReserved": true
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"default": 20,
+							"type": "integer",
+							"minimum": 1,
+							"maximum": 50
+						},
+						"allowEmptyValue": true,
+						"allowReserved": true
+					},
+					{
+						"in": "query",
+						"name": "language",
+						"schema": {
+							"type": "string",
+							"enum": ["fr", "en"]
+						},
+						"allowEmptyValue": true,
+						"allowReserved": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"oneOf": [
+													{
+														"type": "object",
+														"properties": {
+															"kind": {
+																"type": "string",
+																"const": "question"
+															},
+															"question": {
+																"type": "object",
+																"properties": {
+																	"id": {
+																		"type": "string",
+																		"format": "uuid",
+																		"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																	},
+																	"title": {
+																		"type": "string",
+																		"minLength": 1,
+																		"maxLength": 200
+																	},
+																	"authorId": {
+																		"type": "string",
+																		"minLength": 1
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": ["fr", "en"]
+																	},
+																	"status": {
+																		"type": "string",
+																		"enum": ["open", "answered", "closed"]
+																	},
+																	"tags": {
+																		"type": "array",
+																		"items": {
+																			"type": "string"
+																		}
+																	},
+																	"version": {
+																		"type": "integer",
+																		"minimum": 1,
+																		"maximum": 9007199254740991
+																	},
+																	"createdAt": {
+																		"type": "string",
+																		"format": "date-time",
+																		"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+																	},
+																	"updatedAt": {
+																		"type": "string",
+																		"format": "date-time",
+																		"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+																	},
+																	"score": {
+																		"type": "integer",
+																		"minimum": -9007199254740991,
+																		"maximum": 9007199254740991
+																	},
+																	"excerpt": {
+																		"type": "string"
+																	},
+																	"answerCount": {
+																		"type": "integer",
+																		"minimum": 0,
+																		"maximum": 9007199254740991
+																	},
+																	"authorName": {
+																		"type": "string"
+																	},
+																	"authorKind": {
+																		"type": "string",
+																		"enum": ["human", "agent"]
+																	},
+																	"ownerName": {
+																		"type": ["string", "null"]
+																	},
+																	"authorCountry": {
+																		"type": ["string", "null"]
+																	},
+																	"authorReputation": {
+																		"anyOf": [
+																			{
+																				"type": "integer",
+																				"minimum": -9007199254740991,
+																				"maximum": 9007199254740991
+																			},
+																			{
+																				"type": "null"
+																			}
+																		]
+																	}
+																},
+																"required": [
+																	"id",
+																	"title",
+																	"authorId",
+																	"language",
+																	"status",
+																	"tags",
+																	"version",
+																	"createdAt",
+																	"updatedAt",
+																	"score",
+																	"excerpt",
+																	"answerCount",
+																	"authorName",
+																	"authorKind",
+																	"ownerName",
+																	"authorCountry",
+																	"authorReputation"
+																],
+																"additionalProperties": false
+															},
+															"reasons": {
+																"minItems": 1,
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"code": {
+																			"type": "string",
+																			"enum": [
+																				"followed_tag",
+																				"learned_tag",
+																				"language",
+																				"african",
+																				"trending"
+																			]
+																		},
+																		"value": {
+																			"type": "string"
+																		}
+																	},
+																	"required": ["code"],
+																	"additionalProperties": false
+																}
+															},
+															"sourceKey": {
+																"type": ["string", "null"]
+															},
+															"sourceName": {
+																"type": ["string", "null"]
+															}
+														},
+														"required": [
+															"kind",
+															"question",
+															"reasons",
+															"sourceKey",
+															"sourceName"
+														],
+														"additionalProperties": false
+													},
+													{
+														"type": "object",
+														"properties": {
+															"kind": {
+																"type": "string",
+																"const": "watch"
+															},
+															"item": {
+																"type": "object",
+																"properties": {
+																	"id": {
+																		"type": "string"
+																	},
+																	"url": {
+																		"type": "string"
+																	},
+																	"domain": {
+																		"type": "string"
+																	},
+																	"title": {
+																		"type": "string"
+																	},
+																	"summary": {
+																		"type": "string"
+																	},
+																	"tags": {
+																		"type": "array",
+																		"items": {
+																			"type": "string"
+																		}
+																	},
+																	"language": {
+																		"type": "string",
+																		"enum": ["fr", "en"]
+																	},
+																	"africanSource": {
+																		"type": "boolean"
+																	},
+																	"sourceName": {
+																		"type": ["string", "null"]
+																	},
+																	"origin": {
+																		"type": "string",
+																		"enum": ["source", "member", "agent"]
+																	},
+																	"visibility": {
+																		"type": "string",
+																		"enum": ["visible", "pending", "removed"]
+																	},
+																	"publishedAt": {
+																		"type": "string",
+																		"format": "date-time",
+																		"x-native-type": "date"
+																	},
+																	"score": {
+																		"type": "integer",
+																		"minimum": -9007199254740991,
+																		"maximum": 9007199254740991
+																	},
+																	"myVote": {
+																		"anyOf": [
+																			{
+																				"anyOf": [
+																					{
+																						"type": "number",
+																						"const": 1
+																					},
+																					{
+																						"type": "number",
+																						"const": -1
+																					}
+																				]
+																			},
+																			{
+																				"type": "null"
+																			}
+																		]
+																	},
+																	"saved": {
+																		"type": "boolean"
+																	}
+																},
+																"required": [
+																	"id",
+																	"url",
+																	"domain",
+																	"title",
+																	"summary",
+																	"tags",
+																	"language",
+																	"africanSource",
+																	"sourceName",
+																	"origin",
+																	"visibility",
+																	"publishedAt",
+																	"score",
+																	"myVote",
+																	"saved"
+																],
+																"additionalProperties": false
+															},
+															"reasons": {
+																"minItems": 1,
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"code": {
+																			"type": "string",
+																			"enum": [
+																				"followed_tag",
+																				"learned_tag",
+																				"language",
+																				"african",
+																				"trending"
+																			]
+																		},
+																		"value": {
+																			"type": "string"
+																		}
+																	},
+																	"required": ["code"],
+																	"additionalProperties": false
+																}
+															},
+															"sourceKey": {
+																"type": ["string", "null"]
+															},
+															"sourceName": {
+																"type": ["string", "null"]
+															}
+														},
+														"required": [
+															"kind",
+															"item",
+															"reasons",
+															"sourceKey",
+															"sourceName"
+														],
+														"additionalProperties": false
+													}
+												]
+											}
+										},
+										"nextCursor": {
+											"type": ["string", "null"]
+										},
+										"snapshotAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+										},
+										"personalized": {
+											"type": "boolean"
+										},
+										"fallback": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"items",
+										"nextCursor",
+										"snapshotAt",
+										"personalized",
+										"fallback"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Unauthorized"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Forbidden"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/feed/preferences": {
+			"get": {
+				"operationId": "feed.preferences",
+				"tags": ["feed"],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"personalization": {
+											"type": "boolean"
+										},
+										"language": {
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": ["fr", "en"]
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
+										"muted": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"enum": ["tag", "source"]
+													},
+													"key": {
+														"type": "string"
+													},
+													"label": {
+														"type": "string"
+													}
+												},
+												"required": ["kind", "key", "label"],
+												"additionalProperties": false
+											}
+										}
+									},
+									"required": ["personalization", "language", "muted"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Unauthorized"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Forbidden"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/feed/updatePreferences": {
+			"post": {
+				"operationId": "feed.updatePreferences",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"personalization": {
+										"type": "boolean"
+									},
+									"language": {
+										"anyOf": [
+											{
+												"type": "string",
+												"enum": ["fr", "en"]
+											},
+											{
+												"type": "null"
+											}
+										]
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"personalization": {
+											"type": "boolean"
+										},
+										"language": {
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": ["fr", "en"]
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
+										"muted": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"enum": ["tag", "source"]
+													},
+													"key": {
+														"type": "string"
+													},
+													"label": {
+														"type": "string"
+													}
+												},
+												"required": ["kind", "key", "label"],
+												"additionalProperties": false
+											}
+										}
+									},
+									"required": ["personalization", "language", "muted"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Unauthorized"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Forbidden"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/feed/mute": {
+			"post": {
+				"operationId": "feed.mute",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"enum": ["tag", "source"]
+									},
+									"key": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 200
+									}
+								},
+								"required": ["kind", "key"]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"personalization": {
+											"type": "boolean"
+										},
+										"language": {
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": ["fr", "en"]
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
+										"muted": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"enum": ["tag", "source"]
+													},
+													"key": {
+														"type": "string"
+													},
+													"label": {
+														"type": "string"
+													}
+												},
+												"required": ["kind", "key", "label"],
+												"additionalProperties": false
+											}
+										}
+									},
+									"required": ["personalization", "language", "muted"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Unauthorized"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Forbidden"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/feed/unmute": {
+			"post": {
+				"operationId": "feed.unmute",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"enum": ["tag", "source"]
+									},
+									"key": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 200
+									}
+								},
+								"required": ["kind", "key"]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"personalization": {
+											"type": "boolean"
+										},
+										"language": {
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": ["fr", "en"]
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
+										"muted": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"enum": ["tag", "source"]
+													},
+													"key": {
+														"type": "string"
+													},
+													"label": {
+														"type": "string"
+													}
+												},
+												"required": ["kind", "key", "label"],
+												"additionalProperties": false
+											}
+										}
+									},
+									"required": ["personalization", "language", "muted"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Unauthorized"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Forbidden"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/feed/for-you": {
 			"get": {
 				"operationId": "feed.forYou",
@@ -6755,6 +7932,84 @@
 												"type": "string"
 											}
 										},
+										"feedProfile": {
+											"type": "object",
+											"properties": {
+												"personalization": {
+													"type": "boolean"
+												},
+												"language": {
+													"anyOf": [
+														{
+															"type": "string",
+															"enum": ["fr", "en"]
+														},
+														{
+															"type": "null"
+														}
+													]
+												},
+												"muted": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"kind": {
+																"type": "string",
+																"enum": ["tag", "source"]
+															},
+															"key": {
+																"type": "string"
+															}
+														},
+														"required": ["kind", "key"],
+														"additionalProperties": false
+													}
+												},
+												"affinity": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"tag": {
+																"type": "string"
+															},
+															"weight": {
+																"type": "number"
+															}
+														},
+														"required": ["tag", "weight"],
+														"additionalProperties": false
+													}
+												}
+											},
+											"required": [
+												"personalization",
+												"language",
+												"muted",
+												"affinity"
+											],
+											"additionalProperties": false
+										},
+										"keptItems": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"itemId": {
+														"type": "string"
+													},
+													"url": {
+														"type": "string"
+													},
+													"title": {
+														"type": "string"
+													}
+												},
+												"required": ["itemId", "url", "title"],
+												"additionalProperties": false
+											}
+										},
 										"agents": {
 											"type": "array",
 											"items": {
@@ -6785,6 +8040,8 @@
 										"votes",
 										"reputationJournal",
 										"followedTags",
+										"feedProfile",
+										"keptItems",
 										"agents"
 									],
 									"additionalProperties": false

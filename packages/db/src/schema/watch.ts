@@ -59,6 +59,8 @@ export const watchItems = pgTable(
 		// A Source's item, or a Member's or Agent's proposal (exactly one of the two is set).
 		sourceId: uuid("source_id").references(() => watchSources.id),
 		submitterId: text("submitter_id").references(() => user.id),
+		// Outbound clicks, counted through the redirect: an aggregate per item, never a log per Member.
+		clickCount: integer("click_count").default(0).notNull(),
 		visibility: text("visibility", { enum: WATCH_VISIBILITIES })
 			.default("pending")
 			.notNull(),

@@ -30,6 +30,7 @@ import { communitySnapshot } from "../community/service";
 import { decodeCursor, encodeCursor } from "../cursor";
 import { unexpectedErrors } from "../errors";
 import { isRead, isWatchSubmission } from "../exposure";
+import { createMixedFeedHandlers } from "../feed-mixed/handlers";
 import { loadHackathons } from "../hackathons";
 import { impl } from "../index";
 import { sanitizeMarkdown } from "../markdown/sanitizer";
@@ -746,7 +747,7 @@ export const appRouter = impl
 		answers: createAnswersHandlers(),
 		questions: createQuestionsHandlers(),
 		votes: createVotesHandlers(),
-		feed: createFeedHandlers(),
+		feed: { ...createFeedHandlers(), ...createMixedFeedHandlers() },
 		rankings: createRankingsHandlers(),
 		watch: createWatchHandlers(),
 		community: {

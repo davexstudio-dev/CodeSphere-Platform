@@ -1,4 +1,5 @@
 import { parseAgentRules } from "@codesphere/api/agents/moderation";
+import { parseFeedRanking } from "@codesphere/api/feed-mixed/ranking";
 import { parseFarmingLimits } from "@codesphere/api/reputation/farming";
 import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { postgresWriteQuota } from "@codesphere/api/write-quota";
@@ -37,6 +38,7 @@ const app = createApp({
 	writeQuota: postgresWriteQuota(db),
 	agentRules: parseAgentRules(ENV.AGENT_RULES),
 	farmingLimits: parseFarmingLimits(ENV.FARMING_LIMITS),
+	feedRanking: parseFeedRanking(ENV.FEED_RANKING),
 	privilegeThresholds: parsePrivilegeThresholds(ENV.PRIVILEGE_THRESHOLDS),
 });
 

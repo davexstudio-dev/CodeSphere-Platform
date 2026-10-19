@@ -1,19 +1,24 @@
 "use client";
 
-import type { QuestionListItem } from "@codesphere/contract";
+import type { MixedItem } from "@codesphere/contract";
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { Skeleton } from "@codesphere/ui/components/atoms/skeleton";
 import { QuestionFeed } from "@codesphere/ui/components/organisms/question-feed";
 import { useDataSaver } from "@codesphere/ui/lib/data-saver";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+	useInfiniteQuery,
+	useMutation,
+	useQueryClient,
+} from "@tanstack/react-query";
 import type { Route } from "next";
-import { useFormatter, useNow, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import Link from "@/components/link";
+import { WatchCard } from "@/components/watch/watch-card";
 
 import { pageSizeFor } from "@/lib/data-saver";
 import { HAS_DATABASE } from "@/lib/deployment";
-import { type FeedFilter, visibleItems } from "@/lib/home";
+import { type FeedFilter, visibleEntries } from "@/lib/home";
 import { useMounted } from "@/lib/use-mounted";
 import { orpc } from "@/utils/orpc";
 
@@ -35,9 +40,15 @@ export function useFeed(tab: FeedTab, signedIn: boolean, filter: FeedFilter) {
 			? filter.language
 			: undefined;
 	const country = filter.country === "all" ? undefined : filter.country;
+	const locale = useLocale();
+	const reader = locale === "fr" || locale === "en" ? locale : undefined;
 	const personal = useInfiniteQuery({
-		...orpc.feed.forYou.infiniteOptions({
-			input: (cursor: string | undefined) => ({ cursor, limit: pageSize }),
+		...orpc.feed.mixed.infiniteOptions({
+			input: (cursor: string | undefined) => ({
+				cursor,
+				limit: pageSize,
+				language: reader,
+			}),
 			initialPageParam: undefined,
 			getNextPageParam: (last) => last.nextCursor ?? undefined,
 		}),
@@ -63,11 +74,21 @@ export function useFeed(tab: FeedTab, signedIn: boolean, filter: FeedFilter) {
 		enabled: HAS_DATABASE && !forYou,
 	});
 	const query = forYou ? personal : listed;
-	// A Question never appears twice, even if a page boundary moves under a live feed.
-	const items = visibleItems(
-		(query.data?.pages ?? []).flatMap((page) => page.items),
-		filter,
-	);
+	// Every entry appears once, even if a page boundary moves under a live feed.
+	const entries: MixedItem[] = forYou
+		? (personal.data?.pages ?? []).flatMap((page) => page.items)
+		: (listed.data?.pages ?? []).flatMap((page) =>
+				page.items.map(
+					(question): MixedItem => ({
+						kind: "question",
+						question,
+						reasons: [],
+						sourceKey: null,
+						sourceName: null,
+					}),
+				),
+			);
+	const items = visibleEntries(entries, filter);
 	return {
 		items,
 		isPending: HAS_DATABASE && query.isPending,
@@ -95,7 +116,7 @@ export function HomeFeed({
 	isFetchingNextPage,
 	fetchNextPage,
 }: {
-	items: QuestionListItem[];
+	items: MixedItem[];
 	hasNextPage: boolean;
 	isFetchingNextPage: boolean;
 	fetchNextPage: () => unknown;
@@ -128,34 +149,57 @@ export function HomeFeed({
 
 	return (
 		<div className="grid gap-4">
-			<QuestionFeed
-				className="md:columns-1"
-				questions={items.map((q) => ({
-					id: q.id,
-					title: q.title,
-					excerpt: q.excerpt,
-					tags: q.tags,
-					score: q.score,
-					answers: q.answerCount,
-					answersLabel: t("answers", { count: q.answerCount }),
-					answered: q.status === "answered",
-					author: q.authorName || tMember("unnamed"),
-					agentOf:
-						q.authorKind === "agent"
-							? q.ownerName || tMember("unnamed")
-							: undefined,
-					reputation:
-						q.authorReputation === null
-							? undefined
-							: tMember("reputation", { count: q.authorReputation }),
-					region: q.authorCountry ?? "—",
-					lang: q.language,
-					href: `/questions/${q.id}`,
-					linkAs: CardLink,
-					// Relative to the viewer's clock, so only once mounted (no hydration mismatch).
-					ago: mounted ? format.relativeTime(new Date(q.createdAt), now) : "…",
-				}))}
-			/>
+			{items.map((entry) =>
+				entry.kind === "watch" ? (
+					<div key={entry.item.id} className="grid gap-1">
+						<WatchCard item={entry.item} signedIn onSignIn={() => undefined} />
+						<FeedWhy entry={entry} />
+					</div>
+				) : (
+					<div key={entry.question.id} className="grid gap-1">
+						<QuestionFeed
+							className="md:columns-1"
+							questions={[
+								{
+									id: entry.question.id,
+									title: entry.question.title,
+									excerpt: entry.question.excerpt,
+									tags: entry.question.tags,
+									score: entry.question.score,
+									answers: entry.question.answerCount,
+									answersLabel: t("answers", {
+										count: entry.question.answerCount,
+									}),
+									answered: entry.question.status === "answered",
+									author: entry.question.authorName || tMember("unnamed"),
+									agentOf:
+										entry.question.authorKind === "agent"
+											? entry.question.ownerName || tMember("unnamed")
+											: undefined,
+									reputation:
+										entry.question.authorReputation === null
+											? undefined
+											: tMember("reputation", {
+													count: entry.question.authorReputation,
+												}),
+									region: entry.question.authorCountry ?? "—",
+									lang: entry.question.language,
+									href: `/questions/${entry.question.id}`,
+									linkAs: CardLink,
+									// Relative to the viewer's clock, so only once mounted (no hydration mismatch).
+									ago: mounted
+										? format.relativeTime(
+												new Date(entry.question.createdAt),
+												now,
+											)
+										: "…",
+								},
+							]}
+						/>
+						<FeedWhy entry={entry} />
+					</div>
+				),
+			)}
 			<div ref={sentinel} aria-hidden className="h-px" />
 			{hasNextPage && (
 				<Button
@@ -177,6 +221,60 @@ export function FeedSkeleton() {
 			<Skeleton className="h-40 rounded-xl" />
 			<Skeleton className="h-40 rounded-xl" />
 			<Skeleton className="h-40 rounded-xl" />
+		</div>
+	);
+}
+
+/**
+ * Why a card is in « Pour toi » (#256), and « Moins comme ça »: hide its main Tag or its Source.
+ * Nothing is shown on the other tabs, where there is no ranking to explain.
+ */
+function FeedWhy({ entry }: { entry: MixedItem }) {
+	const t = useTranslations("home.why");
+	const queryClient = useQueryClient();
+	const mute = useMutation(
+		orpc.feed.mute.mutationOptions({
+			onSuccess: () => {
+				void queryClient.invalidateQueries({ queryKey: orpc.feed.key() });
+			},
+		}),
+	);
+	if (entry.reasons.length === 0) {
+		return null;
+	}
+	const tags =
+		entry.kind === "question" ? entry.question.tags : entry.item.tags;
+	const tag = entry.reasons.find((r) => r.value)?.value ?? tags[0];
+	return (
+		<div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 text-muted-foreground text-xs">
+			<span>
+				{t("because")}{" "}
+				{entry.reasons
+					.map((r) => t(`reason.${r.code}`, { tag: r.value ?? "" }))
+					.join(" · ")}
+			</span>
+			{tag && (
+				<Button
+					size="sm"
+					variant="ghost"
+					disabled={mute.isPending}
+					onClick={() => mute.mutate({ kind: "tag", key: tag })}
+				>
+					{t("lessTag", { tag })}
+				</Button>
+			)}
+			{entry.sourceKey && (
+				<Button
+					size="sm"
+					variant="ghost"
+					disabled={mute.isPending}
+					onClick={() =>
+						mute.mutate({ kind: "source", key: entry.sourceKey as string })
+					}
+				>
+					{t("lessSource", { source: entry.sourceName ?? entry.sourceKey })}
+				</Button>
+			)}
 		</div>
 	);
 }

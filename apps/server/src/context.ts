@@ -20,6 +20,7 @@ export type CreateContextOptions = {
 		| "writeQuota"
 		| "agentRules"
 		| "farmingLimits"
+		| "feedRanking"
 	>;
 };
 
@@ -61,6 +62,7 @@ export async function createContext({
 		writeQuota: deps.writeQuota,
 		agentRules: deps.agentRules,
 		farmingLimits: deps.farmingLimits,
+		feedRanking: deps.feedRanking,
 		notifications: deps.notifications,
 		social: deps.social,
 	};

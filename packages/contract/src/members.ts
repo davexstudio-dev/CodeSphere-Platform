@@ -103,6 +103,19 @@ export const MemberExport = z.object({
 		}),
 	),
 	followedTags: z.array(z.string()),
+	/** What shapes the « Pour toi » feed (#256): the choices made and the weights learned. */
+	feedProfile: z.object({
+		personalization: z.boolean(),
+		language: z.enum(["fr", "en"]).nullable(),
+		muted: z.array(
+			z.object({ kind: z.enum(["tag", "source"]), key: z.string() }),
+		),
+		affinity: z.array(z.object({ tag: z.string(), weight: z.number() })),
+	}),
+	/** Watch items the Member kept for later. */
+	keptItems: z.array(
+		z.object({ itemId: z.string(), url: z.string(), title: z.string() }),
+	),
 	agents: z.array(
 		z.object({
 			id: z.string(),

@@ -25,6 +25,11 @@ export async function deleteMember(
 	const mine = sql`SELECT id FROM m`;
 	const steps = [
 		sql`DELETE FROM session WHERE user_id IN (${mine})`,
+		// The « Pour toi » profile (#256) and the items kept for later are the Member's alone.
+		sql`DELETE FROM feed_preferences WHERE user_id IN (${mine})`,
+		sql`DELETE FROM feed_muted WHERE user_id IN (${mine})`,
+		sql`DELETE FROM feed_affinity WHERE user_id IN (${mine})`,
+		sql`DELETE FROM watch_item_saves WHERE user_id IN (${mine})`,
 		sql`DELETE FROM account WHERE user_id IN (${mine})`,
 		sql`DELETE FROM apikey WHERE reference_id IN (${mine})
 			OR reference_id IN (SELECT id FROM "user" WHERE owner_id IN (${mine}))`,

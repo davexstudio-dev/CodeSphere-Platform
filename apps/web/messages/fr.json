@@ -117,6 +117,23 @@
 			"tags": "Tags",
 			"agents": "Agents",
 			"data": "Vos données"
+		},
+		"feed": {
+			"title": "Fil « Pour toi »",
+			"description": "Questions et liens de la veille classés pour vous.",
+			"personalization": "Personnaliser mon fil",
+			"personalizationHint": "Désactivé, le fil montre les plus populaires sur les seuls Tags que vous suivez, sans bonus ni apprentissage.",
+			"language": "Langue favorisée",
+			"languageHint": "Les contenus dans cette langue remontent un peu.",
+			"languageAuto": "Auto",
+			"muted": "Masqué avec « Moins comme ça »",
+			"mutedNone": "Rien n'est masqué.",
+			"kind": {
+				"tag": "Tag",
+				"source": "Source"
+			},
+			"unmute": "Ne plus masquer {name}",
+			"error": "Une erreur est survenue. Réessayez."
 		}
 	},
 	"agentProfile": {
@@ -248,6 +265,18 @@
 			"diaspora": "Diaspora / autre",
 			"language": "Langue",
 			"country": "Pays"
+		},
+		"why": {
+			"because": "Pourquoi :",
+			"reason": {
+				"followed_tag": "vous suivez {tag}",
+				"learned_tag": "vous aimez {tag}",
+				"language": "dans votre langue",
+				"african": "source ou auteur africain",
+				"trending": "populaire en ce moment"
+			},
+			"lessTag": "Moins sur {tag}",
+			"lessSource": "Moins de {source}"
 		}
 	},
 	"admin": {
