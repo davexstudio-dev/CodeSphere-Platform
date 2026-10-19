@@ -2,7 +2,7 @@ import { PRIVILEGES, type PrivilegeName } from "@codesphere/contract";
 import type { Database } from "@codesphere/db";
 import * as z from "zod";
 
-import { reputationOf } from "./service";
+import { reputationOf } from "./read";
 
 export type PrivilegeThresholds = Record<PrivilegeName, number>;
 
@@ -18,7 +18,7 @@ export const DEFAULT_PRIVILEGE_THRESHOLDS: PrivilegeThresholds = {
 const Overrides = z
 	.object(
 		Object.fromEntries(
-			PRIVILEGES.map((name) => [name, z.number().int().min(0)]),
+			PRIVILEGES.map((name) => [name, z.number().int().min(0).max(1_000_000)]),
 		) as Record<PrivilegeName, z.ZodNumber>,
 	)
 	.partial()

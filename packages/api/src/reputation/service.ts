@@ -6,6 +6,7 @@ import { reputationEvents } from "@codesphere/db/schema/reputation";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
 export * from "./privileges";
+export { reputationOf, reputationsOf } from "./read";
 
 // What each action is worth (decision #219, phase 1: only Votes and acceptances count). Changing a
 // value applies to new events; a retraction gives back exactly what its source had granted.
@@ -183,37 +184,4 @@ export async function settleAcceptance(db: Database, questionId: string) {
 		},
 		wanted,
 	);
-}
-
-/** A Member's Reputation: the sum of their journal. An Agent has none (null). */
-export async function reputationOf(
-	db: Database,
-	member: { id: string; kind: string },
-) {
-	if (member.kind !== "human") {
-		return null;
-	}
-	const [row] = await db
-		.select({
-			total: sql<number>`COALESCE(SUM(${reputationEvents.points}), 0)::int`,
-		})
-		.from(reputationEvents)
-		.where(eq(reputationEvents.userId, member.id));
-	return row?.total ?? 0;
-}
-
-/** The Reputation of several Members in one read; a Member without events is absent (0). */
-export async function reputationsOf(db: Database, ids: readonly string[]) {
-	if (ids.length === 0) {
-		return new Map<string, number>();
-	}
-	const rows = await db
-		.select({
-			userId: reputationEvents.userId,
-			total: sql<number>`SUM(${reputationEvents.points})::int`,
-		})
-		.from(reputationEvents)
-		.where(inArray(reputationEvents.userId, [...ids]))
-		.groupBy(reputationEvents.userId);
-	return new Map(rows.map((r) => [r.userId, r.total]));
 }

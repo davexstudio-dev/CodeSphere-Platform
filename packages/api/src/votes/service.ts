@@ -51,6 +51,21 @@ export function createVoteService(
 		return row?.score ?? 0;
 	}
 
+	async function hasVote(voterId: string, target: VoteTarget, value: number) {
+		const [row] = await db
+			.select({ value: votes.value })
+			.from(votes)
+			.where(
+				and(
+					eq(votes.userId, voterId),
+					eq(votes.targetType, target.targetType),
+					eq(votes.targetId, target.targetId),
+				),
+			)
+			.limit(1);
+		return row?.value === value;
+	}
+
 	async function guard(voterId: string, target: VoteTarget) {
 		const authorId = await authorOf(target);
 		if (authorId === voterId) {
@@ -63,10 +78,14 @@ export function createVoteService(
 	return {
 		async cast(voterId: string, target: VoteTarget, value: "up" | "down") {
 			const authorId = await guard(voterId, target);
-			if (value === "down") {
+			const signed = value === "up" ? 1 : -1;
+			// Repeating a down vote already cast changes nothing, so it needs no Privilege: an
+			// outbox retry after the Member dropped below the threshold must not be refused. (The
+			// check and the write are not atomic: the edge database has no transaction, so a burst
+			// of concurrent down votes can overshoot the threshold by a few points.)
+			if (value === "down" && !(await hasVote(voterId, target, signed))) {
 				await requirePrivilege(db, { id: voterId }, "downvote", thresholds);
 			}
-			const signed = value === "up" ? 1 : -1;
 			await db
 				.insert(votes)
 				.values({ userId: voterId, ...target, value: signed })

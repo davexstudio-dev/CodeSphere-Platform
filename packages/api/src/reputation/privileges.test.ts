@@ -44,5 +44,8 @@ describe("parsePrivilegeThresholds", () => {
 			"invalid",
 		);
 		expect(() => parsePrivilegeThresholds("[]")).toThrow("invalid");
+		expect(() => parsePrivilegeThresholds('{"downvote": 99999999999}')).toThrow(
+			"invalid",
+		);
 	});
 });

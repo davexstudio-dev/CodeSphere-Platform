@@ -109,11 +109,35 @@ describe.skipIf(!url)("downvote Privilege on Postgres", () => {
 		).toMatchObject({ vote: "down" });
 	});
 
+	test("repeating a down vote already cast needs no Privilege", async () => {
+		// The veteran is now at 74, under the threshold of 75: a retry is still accepted.
+		expect(
+			await clientAs(veteran).votes.cast({ ...target, value: "down" }),
+		).toMatchObject({ vote: "down" });
+	});
+
 	test("the threshold is configuration, not code", async () => {
+		// A target the veteran has not voted on: a repeat would not be gated.
+		const [other] = await db
+			.insert(questions)
+			.values({
+				authorId: author,
+				idempotencyKey: crypto.randomUUID(),
+				title: "Another question",
+				body: "b",
+				bodyHtml: "<p>b</p>",
+				language: "en",
+				tags: ["sql"],
+			})
+			.returning();
+		const fresh = {
+			targetType: "question" as const,
+			targetId: other?.id ?? "",
+		};
 		// Raised above the veteran's Reputation: refused.
 		await expect(
 			clientAs(veteran, '{"downvote": 76}').votes.cast({
-				...target,
+				...fresh,
 				value: "down",
 			}),
 		).rejects.toMatchObject({
@@ -124,7 +148,7 @@ describe.skipIf(!url)("downvote Privilege on Postgres", () => {
 		// Lowered to 0: even the rookie may.
 		expect(
 			await clientAs(rookie, '{"downvote": 0}').votes.cast({
-				...target,
+				...fresh,
 				value: "down",
 			}),
 		).toMatchObject({ vote: "down" });

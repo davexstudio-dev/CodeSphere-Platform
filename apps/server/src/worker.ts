@@ -117,7 +117,7 @@ export function apiFetch(
 	env: WorkerEnv,
 	ctx: WorkerContext,
 ): Response | Promise<Response> {
-	const key = `${env.BETTER_AUTH_URL}|${env.DATABASE_URL ?? ""}`;
+	const key = `${env.BETTER_AUTH_URL}|${env.DATABASE_URL ?? ""}|${env.PRIVILEGE_THRESHOLDS ?? ""}`;
 	if (!cached || cached.key !== key) {
 		cached = { key, app: buildApp(env) };
 	}
