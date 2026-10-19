@@ -1,10 +1,12 @@
 import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
-import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
+import { answers, questions, votes } from "@codesphere/db/schema/questions";
+import { and, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 
 import { createAgentService } from "../agents/service";
 import { createAnswerService } from "../answers/service";
 import { createQuestionService } from "../questions/service";
+import { settleAcceptance } from "../reputation/service";
 import { createVoteService } from "../votes/service";
 import { demoMembers, demoQuestions } from "./content";
 
@@ -12,6 +14,100 @@ import { demoMembers, demoQuestions } from "./content";
 export const DEMO_AGENT_NAME = "Assistant Mobile Money";
 
 export class DemoSeedError extends Error {}
+
+/**
+ * Removes the demo content, so a changed version of it loads cleanly (`--reset`). The Votes are
+ * retracted and the acceptances cleared through the same settlement as the API, so the Reputation
+ * journal stays append-only and balanced; then the demo Members' Answers and Questions, and any
+ * Answer on those Questions, are deleted. The Members themselves are kept: the seed updates them.
+ */
+export async function resetDemo(db: Database) {
+	const memberIds = demoMembers.map((m) => m.id);
+	const ownQuestions = await db
+		.select({ id: questions.id })
+		.from(questions)
+		.where(inArray(questions.authorId, memberIds));
+	const questionIds = ownQuestions.map((q) => q.id);
+	const ownAnswers = await db
+		.select({ id: answers.id })
+		.from(answers)
+		.where(
+			or(
+				inArray(answers.authorId, memberIds),
+				questionIds.length > 0
+					? inArray(answers.questionId, questionIds)
+					: sql`false`,
+			),
+		);
+	const answerIds = ownAnswers.map((a) => a.id);
+
+	// Every Vote by a demo Member, and every Vote on demo content, whoever cast it.
+	const touched = await db
+		.select({
+			userId: votes.userId,
+			targetType: votes.targetType,
+			targetId: votes.targetId,
+		})
+		.from(votes)
+		.where(
+			or(
+				inArray(votes.userId, memberIds),
+				questionIds.length > 0
+					? and(
+							eq(votes.targetType, "question"),
+							inArray(votes.targetId, questionIds),
+						)
+					: sql`false`,
+				answerIds.length > 0
+					? and(
+							eq(votes.targetType, "answer"),
+							inArray(votes.targetId, answerIds),
+						)
+					: sql`false`,
+			),
+		);
+	const votesService = createVoteService(db);
+	for (const v of touched) {
+		await votesService.retract(v.userId, {
+			targetType: v.targetType,
+			targetId: v.targetId,
+		});
+	}
+
+	// Acceptances on demo Questions, or of a demo Answer on someone else's Question.
+	const accepting = await db
+		.update(questions)
+		.set({
+			acceptedAnswerId: null,
+			status: sql`CASE WHEN ${questions.status} = 'answered' THEN 'open' ELSE ${questions.status} END`,
+		})
+		.where(
+			or(
+				questionIds.length > 0
+					? inArray(questions.id, questionIds)
+					: sql`false`,
+				answerIds.length > 0
+					? inArray(questions.acceptedAnswerId, answerIds)
+					: sql`false`,
+			),
+		)
+		.returning({ id: questions.id });
+	for (const q of accepting) {
+		await settleAcceptance(db, q.id);
+	}
+
+	if (answerIds.length > 0) {
+		await db.delete(answers).where(inArray(answers.id, answerIds));
+	}
+	if (questionIds.length > 0) {
+		await db.delete(questions).where(inArray(questions.id, questionIds));
+	}
+	return {
+		questions: questionIds.length,
+		answers: answerIds.length,
+		votes: touched.length,
+	};
+}
 
 /**
  * Loads the demo content through the same services as the API, so the Markdown is sanitized and

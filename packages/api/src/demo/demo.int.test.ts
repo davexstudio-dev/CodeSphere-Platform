@@ -8,11 +8,13 @@ import { auditLog } from "@codesphere/db/schema/audit";
 import { apikey, user } from "@codesphere/db/schema/auth";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
 import { reputationEvents } from "@codesphere/db/schema/reputation";
-import { count, eq, inArray, or } from "drizzle-orm";
+import { and, count, eq, inArray, or } from "drizzle-orm";
 
+import { AnswerError } from "../answers/service";
 import { reputationOf } from "../reputation/service";
+import { createVoteService } from "../votes/service";
 import { demoMembers, demoQuestions } from "./content";
-import { DEMO_AGENT_NAME, DemoSeedError, seedDemo } from "./seed";
+import { DEMO_AGENT_NAME, DemoSeedError, resetDemo, seedDemo } from "./seed";
 
 const url = process.env.TEST_DATABASE_URL;
 // Each run loads the whole content (dozens of Answers and Votes): far more than the default 5 s.
@@ -137,6 +139,69 @@ describe.skipIf(!url)("demo content on Postgres", () => {
 				.from(user)
 				.where(eq(user.ownerId, owner));
 			expect(agents).toEqual([{ name: DEMO_AGENT_NAME, kind: "agent" }]);
+		},
+		SEED_TIMEOUT,
+	);
+
+	test(
+		"after a content change, --reset clears the old demo content and the seed loads again",
+		async () => {
+			// What staging held: an older content, where a Member answered under another key,
+			// and a real Member's Vote on a demo Question.
+			const [q2] = await db
+				.select({ id: questions.id })
+				.from(questions)
+				.where(
+					and(
+						eq(questions.authorId, "demo-aicha"),
+						eq(questions.idempotencyKey, demoQuestions[1]?.key ?? ""),
+					),
+				);
+			if (!q2) throw new Error("demo Question 2 missing");
+			await resetDemo(db);
+			const [old] = await db
+				.insert(questions)
+				.values({
+					authorId: "demo-aicha",
+					idempotencyKey: demoQuestions[1]?.key ?? "",
+					title: "Ancienne question",
+					body: "Ancienne version.",
+					bodyHtml: "<p>Ancienne version.</p>",
+					language: "fr",
+					tags: ["ussd"],
+				})
+				.returning({ id: questions.id });
+			if (!old) throw new Error("seed failed");
+			await db.insert(answers).values({
+				questionId: old.id,
+				authorId: "demo-mariam",
+				idempotencyKey: crypto.randomUUID(),
+				body: "Ancienne réponse.",
+				bodyHtml: "<p>Ancienne réponse.</p>",
+			});
+			await createVoteService(db).cast(
+				owner,
+				{ targetType: "question", targetId: old.id },
+				"up",
+			);
+			await expect(seedDemo(db)).rejects.toBeInstanceOf(AnswerError);
+
+			const removed = await resetDemo(db);
+			expect(removed.questions).toBeGreaterThan(0);
+			expect(await demoQuestionRows()).toEqual([]);
+			const leftVotes = await db
+				.select({ n: count() })
+				.from(votes)
+				.where(inArray(votes.userId, people));
+			expect(leftVotes[0]?.n).toBe(0);
+			// Every point the demo content granted is given back: the journal sums to zero.
+			for (const id of [...memberIds, owner]) {
+				expect(await reputationOf(db, { id, kind: "human" })).toBe(0);
+			}
+
+			const reloaded = await seedDemo(db);
+			expect(reloaded.questions).toBe(demoQuestions.length);
+			expect(await demoQuestionRows()).toHaveLength(demoQuestions.length);
 		},
 		SEED_TIMEOUT,
 	);
