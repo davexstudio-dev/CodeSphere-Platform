@@ -41,7 +41,7 @@ describe.skipIf(!url)("CADEV seed and hackathons.get on Postgres", () => {
 		const found = await client.hackathons.get({ slug });
 		expect(found.milestones[0]).toMatchObject({
 			key: "submission_close",
-			startsAt: "2026-10-25T17:00:00.000Z",
+			startsAt: "2026-11-15T17:00:00.000Z",
 		});
 		expect(found.criteria.reduce((sum, c) => sum + c.weight, 0)).toBe(100);
 	});
