@@ -12,7 +12,7 @@ import type * as z from "zod";
 
 type HackathonRow = typeof hackathon.$inferSelect;
 type Children = {
-	organization: { name: string; slug: string };
+	organization: { name: string; slug: string | null };
 	milestones: {
 		key: string;
 		label: string;
@@ -80,30 +80,24 @@ export async function loadHackathons(
 	filter?: { slug: string },
 	limit = 20,
 ) {
-	const rows = await db
-		.select()
+	const joined = await db
+		.select({
+			row: hackathon,
+			orgName: organization.name,
+			orgSlug: organization.slug,
+			orgStatus: organization.status,
+		})
 		.from(hackathon)
+		.innerJoin(organization, eq(organization.id, hackathon.organizationId))
 		.where(filter ? eq(hackathon.slug, filter.slug) : undefined)
 		.orderBy(asc(hackathon.createdAt))
 		.limit(limit);
-	if (!rows.length) {
+	if (!joined.length) {
 		return [];
 	}
+	const rows = joined.map((j) => j.row);
 	const ids = rows.map((r) => r.id);
-	const [organizations, milestones, prizes, criteria] = await Promise.all([
-		db
-			.select({
-				id: organization.id,
-				name: organization.name,
-				slug: organization.slug,
-			})
-			.from(organization)
-			.where(
-				inArray(
-					organization.id,
-					rows.map((r) => r.organizationId),
-				),
-			),
+	const [milestones, prizes, criteria] = await Promise.all([
 		db
 			.select()
 			.from(hackathonMilestone)
@@ -117,11 +111,12 @@ export async function loadHackathons(
 			.from(hackathonCriterion)
 			.where(inArray(hackathonCriterion.hackathonId, ids)),
 	]);
-	return rows.map((row) =>
+	return joined.map(({ row, orgName, orgSlug, orgStatus }) =>
 		toHackathon(row, {
-			organization: organizations.find((o) => o.id === row.organizationId) ?? {
-				name: "",
-				slug: "",
+			// The profile link only exists while the Organization's profile is public.
+			organization: {
+				name: orgName,
+				slug: orgStatus === "validated" ? orgSlug : null,
 			},
 			milestones: milestones.filter((m) => m.hackathonId === row.id),
 			prizes: prizes.filter((p) => p.hackathonId === row.id),

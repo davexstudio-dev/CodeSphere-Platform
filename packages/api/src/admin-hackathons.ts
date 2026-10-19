@@ -96,7 +96,7 @@ export async function updateHackathon(
 	const fields: string[] = SCALARS.filter(
 		(field) => next[field] !== undefined && !same(next[field], current[field]),
 	);
-	if (organizationId) fields.push("organizer");
+	if (organizationId) fields.push("organization");
 
 	const milestones = input.milestones?.map((m) => ({
 		...m,

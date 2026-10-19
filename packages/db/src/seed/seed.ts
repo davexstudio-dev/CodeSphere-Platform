@@ -34,6 +34,7 @@ export async function seedHackathon(
 			status: "validated",
 			system: true,
 			reviewedAt: new Date(),
+			validatedAt: new Date(),
 		})
 		.onConflictDoNothing({ target: organization.slug });
 	const [owner] = await db

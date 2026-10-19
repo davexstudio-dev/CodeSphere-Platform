@@ -34,7 +34,7 @@ const profileOf = (row: Row) => ({
 	website: row.website,
 	description: row.description,
 	country: row.country,
-	validatedAt: row.status === "validated" ? iso(row.reviewedAt) : null,
+	validatedAt: row.status === "validated" ? iso(row.validatedAt) : null,
 });
 
 const ownOf = (row: Row): OwnOrganization => ({
@@ -269,6 +269,18 @@ export function createOrganizationService(db: Database) {
 							statusReason: input.reason ?? null,
 							reviewedBy: actorId,
 							reviewedAt: new Date(),
+							// The first validation date survives a suspension and a reinstatement.
+							...(decision === "validate"
+								? {
+										validatedAt: sql`COALESCE(${organization.validatedAt}, now())`,
+									}
+								: {}),
+							// A rejected name is free again: the applicant can fix their request and reapply.
+							...(decision === "reject"
+								? {
+										slug: sql`${organization.slug} || '-rejected-' || substr(${organization.id}::text, 1, 8)`,
+									}
+								: {}),
 							version: sql`${organization.version} + 1`,
 						})
 						.where(

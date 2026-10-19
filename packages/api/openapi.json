@@ -1639,7 +1639,7 @@
 											"type": "string"
 										},
 										"organizationSlug": {
-											"type": "string"
+											"type": ["string", "null"]
 										},
 										"summary": {
 											"type": "string"
@@ -6470,7 +6470,7 @@
 														"type": "string"
 													},
 													"organizationSlug": {
-														"type": "string"
+														"type": ["string", "null"]
 													},
 													"summary": {
 														"type": "string"
@@ -6716,7 +6716,7 @@
 											"type": "string"
 										},
 										"organizationSlug": {
-											"type": "string"
+											"type": ["string", "null"]
 										},
 										"summary": {
 											"type": "string"

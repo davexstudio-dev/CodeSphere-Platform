@@ -38,6 +38,12 @@ describe("emailMatchesWebsite", () => {
 		expect(emailMatchesWebsite("a@b.co", "not a url")).toBe(false);
 	});
 
+	test("an address without @ is refused", () => {
+		expect(emailMatchesWebsite("example.org", "https://example.org")).toBe(
+			false,
+		);
+	});
+
 	test("emailDomain", () => {
 		expect(emailDomain("a@WWW.Acme.io")).toBe("acme.io");
 	});

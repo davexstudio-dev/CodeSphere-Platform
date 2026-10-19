@@ -43,6 +43,8 @@ export const organization = pgTable(
 		ownerId: text("owner_id").references(() => user.id),
 		reviewedBy: text("reviewed_by").references(() => user.id),
 		reviewedAt: timestamp("reviewed_at", { precision: 3 }),
+		// When it was first validated: kept through a suspension and a reinstatement.
+		validatedAt: timestamp("validated_at", { precision: 3 }),
 		// Guards concurrent Admin decisions (CONFLICT).
 		version: integer("version").default(1).notNull(),
 		createdAt: timestamp("created_at", { precision: 3 }).defaultNow().notNull(),

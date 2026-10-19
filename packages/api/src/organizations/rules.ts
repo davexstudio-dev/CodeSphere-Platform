@@ -27,8 +27,10 @@ const FREE_MAIL = new Set([
 const bare = (host: string) => host.toLowerCase().replace(/^www\./, "");
 
 /** The domain of an email address, lowercase; empty when there is none. */
-export const emailDomain = (email: string) =>
-	bare(email.slice(email.lastIndexOf("@") + 1));
+export const emailDomain = (email: string) => {
+	const at = email.lastIndexOf("@");
+	return at < 0 ? "" : bare(email.slice(at + 1));
+};
 
 /**
  * Whether `email` is on the website's own domain: the same host, or a subdomain of it

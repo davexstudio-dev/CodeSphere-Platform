@@ -80,7 +80,7 @@ export default function AdminHackathonsPage() {
 	const original: Draft | null = hackathon
 		? {
 				name: hackathon.name,
-				organizationSlug: hackathon.organizationSlug,
+				organizationSlug: hackathon.organizationSlug ?? "",
 				summary: hackathon.summary,
 				teamMin: hackathon.teamMin,
 				teamMax: hackathon.teamMax,
@@ -150,7 +150,7 @@ export default function AdminHackathonsPage() {
 			slug: SLUG,
 			expectedVersion: hackathon.version,
 			name: draft.name,
-			organizationSlug: draft.organizationSlug,
+			organizationSlug: draft.organizationSlug || undefined,
 			summary: draft.summary,
 			teamMin: draft.teamMin,
 			teamMax: draft.teamMax,
@@ -245,6 +245,17 @@ export default function AdminHackathonsPage() {
 													set("organizationSlug", e.target.value)
 												}
 											>
+												{/* The current organizer first, even when its profile is no longer public. */}
+												{!(organizations.data?.items ?? []).some(
+													(o) => o.slug === hackathon.organizationSlug,
+												) && (
+													<option
+														value={hackathon.organizationSlug ?? ""}
+														disabled={!hackathon.organizationSlug}
+													>
+														{hackathon.organizer}
+													</option>
+												)}
 												{(organizations.data?.items ?? []).map((o) => (
 													<option key={o.slug} value={o.slug}>
 														{o.name}

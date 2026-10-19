@@ -29,8 +29,8 @@ export const Hackathon = z.object({
 	name: z.string(),
 	/** Name of the Organization that lists it. */
 	organizer: z.string(),
-	/** Slug of that Organization, for its public profile. */
-	organizationSlug: z.string(),
+	/** Slug of that Organization's public profile; null while it is not public (suspended). */
+	organizationSlug: z.string().nullable(),
 	summary: z.string(),
 	teamMin: z.number().int(),
 	teamMax: z.number().int(),

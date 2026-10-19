@@ -11,7 +11,7 @@ import { organization } from "@codesphere/db/schema/organizations";
 import { cadev2026 } from "@codesphere/db/seed/cadev";
 import { seedHackathon } from "@codesphere/db/seed/seed";
 import { createRouterClient } from "@orpc/server";
-import { eq, inArray, like } from "drizzle-orm";
+import { eq, inArray, like, or } from "drizzle-orm";
 
 import { appRouter } from "../routers";
 import { testContext } from "../test-context";
@@ -67,7 +67,15 @@ describe.skipIf(!url)("organizations on Postgres", () => {
 
 	afterAll(async () => {
 		await db.delete(hackathon).where(like(hackathon.slug, `it-org-%${run}`));
-		await db.delete(organization).where(like(organization.slug, `%${run}`));
+		await db
+			.delete(organization)
+			.where(
+				or(
+					like(organization.slug, `%${run}%`),
+					inArray(organization.ownerId, ids),
+					inArray(organization.reviewedBy, ids),
+				),
+			);
 		await db.delete(auditLog).where(inArray(auditLog.actorId, ids));
 		await db.delete(user).where(inArray(user.id, [bot, alice, admin]));
 	});
@@ -216,6 +224,33 @@ describe.skipIf(!url)("organizations on Postgres", () => {
 		expect(
 			(await anonymous().organizations.get({ slug: created.slug })).name,
 		).toBe(name("e"));
+	});
+
+	test("a rejected name is free again, and the first validation date survives a suspension", async () => {
+		const staff = as(admin, "admin").admin.organizations;
+		const first = await as(alice).organizations.request(application(name("f")));
+		await staff.reject({
+			id: first.id,
+			expectedVersion: 1,
+			reason: "Missing details",
+		});
+		// Reapplying with the same name works: the rejected slug was released.
+		const again = await as(alice).organizations.request(application(name("f")));
+		expect(again.slug).toBe(first.slug);
+		const v = await staff.validate({ id: again.id, expectedVersion: 1 });
+		const date = (await anonymous().organizations.get({ slug: again.slug }))
+			.validatedAt;
+		expect(date).not.toBeNull();
+		const s = await staff.suspend({
+			id: again.id,
+			expectedVersion: v.version,
+			reason: "Pause",
+		});
+		await staff.reinstate({ id: again.id, expectedVersion: s.version });
+		expect(
+			(await anonymous().organizations.get({ slug: again.slug })).validatedAt,
+		).toBe(date);
+		// Open applications: the limit counts it (a, e, f here).
 	});
 
 	test("every decision is audited with its actor", async () => {
