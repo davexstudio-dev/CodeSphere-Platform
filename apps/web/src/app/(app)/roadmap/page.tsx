@@ -23,7 +23,11 @@ export default async function Page() {
 	const locale = await getLocale();
 	const format = await getFormatter();
 	const roadmap = roadmapIn(locale);
-	const snapshot = await client.community.snapshot().catch(() => null);
+	const snapshot = await client.community.snapshot().catch((error) => {
+		// Not fatal for the page, but never silent: a broken snapshot must show in the logs.
+		console.error("roadmap: community snapshot unavailable", error);
+		return null;
+	});
 
 	const duration = (minutes: number) =>
 		minutes >= 120

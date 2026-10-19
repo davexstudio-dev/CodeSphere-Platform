@@ -51,7 +51,7 @@ export async function computeCommunityFigures(
 		SELECT
 			COUNT(*)::int AS questions,
 			COUNT(fa.at)::int AS answered,
-			COUNT(q.accepted_answer_id)::int AS accepted,
+			COUNT(q.accepted_answer_id) FILTER (WHERE fa.at IS NOT NULL)::int AS accepted,
 			(PERCENTILE_CONT(0.5) WITHIN GROUP (
 				ORDER BY EXTRACT(EPOCH FROM (fa.at - q.created_at)) / 60
 			) FILTER (WHERE fa.at IS NOT NULL))::float AS median
@@ -61,7 +61,12 @@ export async function computeCommunityFigures(
 	const countries = await db
 		.select({ country: user.country })
 		.from(user)
-		.where(and(human, sql`${user.country} IS NOT NULL`))
+		.where(
+			and(
+				human,
+				sql`${user.country} IS NOT NULL AND ${user.country} <> 'OTHER'`,
+			),
+		)
 		.groupBy(user.country)
 		.having(sql`COUNT(*) >= ${MIN_MEMBERS_PER_COUNTRY}`);
 
@@ -84,7 +89,8 @@ export async function computeCommunityFigures(
 /**
  * The figures of the day: read from the snapshot, computed and stored by the first visitor of the
  * UTC day (no scheduler). Concurrent first visitors may both compute; the first insert wins and
- * both return the stored row, so a day never shows two sets of figures.
+ * both return the stored row, so a day never shows two sets of figures. The aggregates are cheap at
+ * the current scale; if a midnight stampede ever weighs on the database, take an advisory lock here.
  */
 export async function communitySnapshot(
 	db: Database,

@@ -23,7 +23,7 @@ sections:
       - { fr: "Budgets de performance en CI, PWA installable, économiseur de données", en: "Performance budgets in CI, installable PWA, data saver", status: delivered, ref: "#224" }
       - { fr: "Classements par pays et par Tag", en: "Rankings by country and by Tag", status: delivered, ref: "#219" }
       - { fr: "Notifications", en: "Notifications", status: planned }
-      - { fr: "Cette page de feuille de route avec chiffres quotidiens", en: "This roadmap page with daily figures", status: delivered, ref: "#231" }
+      - { fr: "Cette page de feuille de route avec chiffres quotidiens", en: "This roadmap page with daily figures", status: delivered, ref: "#252" }
   - id: phase2
     title: { fr: "Phase 2 : fil de veille, emplois, recommandation", en: "Phase 2: watch feed, jobs, recommendation" }
     target: { fr: "À fixer", en: "To be set" }
