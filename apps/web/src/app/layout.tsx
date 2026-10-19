@@ -16,7 +16,12 @@ import {
 } from "@/lib/data-saver";
 import { LEGAL_PAGES, legalHref } from "@/lib/legal";
 import { publicPageUrl } from "@/lib/page-url";
-import { OG_IMAGE_PATH, ogImage, SITE_NAME } from "@/lib/share";
+import {
+	OG_IMAGE_PATH,
+	ogImage,
+	SITE_DESCRIPTION,
+	SITE_NAME,
+} from "@/lib/share";
 
 // Google Fonts only (CADEV rule), self-hosted at build time by next/font.
 const outfit = Outfit({
@@ -34,7 +39,7 @@ const jetbrainsMono = JetBrains_Mono({
 	preload: false,
 });
 
-const DESCRIPTION = "Plateforme d'échange pour développeurs africains";
+const DESCRIPTION = SITE_DESCRIPTION;
 
 // Generic card (home, unknown or unreadable pages): the page-level previews of Questions and
 // Hackathons set their own `openGraph` and `twitter`, which replace these.

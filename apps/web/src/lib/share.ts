@@ -83,6 +83,8 @@ type PreviewInput = {
 };
 
 export const SITE_NAME = "CodeSphere Platform";
+export const SITE_DESCRIPTION =
+	"Plateforme d'échange pour développeurs africains";
 
 /** Static card image served from `public/`, 1200x630 (#262). */
 export const OG_IMAGE_PATH = "/og-default.png";
