@@ -172,7 +172,7 @@ function Loaded({
 					]}
 				/>
 				<QuestionSteps steps={steps} label={tNav("steps")} className="-mt-3" />
-				<header id="question" className="grid scroll-mt-32 gap-3">
+				<header id="question" className="motion-rise grid scroll-mt-32 gap-3">
 					<div className="flex flex-wrap items-center gap-2">
 						<StatusBadge status={statusOf(question.status)}>
 							{t(`status.${question.status}`)}
@@ -239,12 +239,13 @@ function Loaded({
 						) : others.length === 0 ? (
 							<p className="text-muted-foreground text-sm">{t("noAnswer")}</p>
 						) : (
-							others.map((answer) => (
+							others.map((answer, index) => (
 								<AnswerItem
 									key={answer.id}
 									answer={answer}
 									question={question}
 									viewer={viewer}
+									index={index}
 								/>
 							))
 						)}
@@ -360,10 +361,13 @@ function AnswerItem({
 	answer,
 	question,
 	viewer,
+	index = 0,
 }: {
 	answer: AnswerListItem;
 	question: QuestionView;
 	viewer: Viewer;
+	/** Position in the list: the entrance of the answers is staggered. */
+	index?: number;
 }) {
 	const t = useTranslations("question");
 	const tMember = useTranslations("member");
@@ -409,7 +413,10 @@ function AnswerItem({
 	};
 	const isQuestionAuthor = viewer?.id === question.authorId;
 	const content = (
-		<div className="grid grid-cols-1 gap-2">
+		<div
+			className="motion-rise grid grid-cols-1 gap-2"
+			style={{ "--i": index } as React.CSSProperties}
+		>
 			<AnswerCard
 				author={answer.authorName || tMember("unnamed")}
 				reputation={

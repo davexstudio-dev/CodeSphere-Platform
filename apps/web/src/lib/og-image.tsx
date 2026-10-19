@@ -2,8 +2,9 @@ import { ImageResponse } from "next/og";
 import { errorCodeOf } from "@/i18n/errors";
 import { BRAND } from "@/lib/brand";
 import { type CardInput, cardText, OG_SIZE } from "@/lib/og-card";
+import { loadFonts } from "@/lib/og-fonts";
 import { publicPageUrl } from "@/lib/page-url";
-import { OG_IMAGE_PATH, SITE_NAME } from "@/lib/share";
+import { OG_IMAGE_PATH, SITE_DESCRIPTION, SITE_NAME } from "@/lib/share";
 
 /** A found card is cached longer than the generic one served while the content cannot be read. */
 const FOUND_CACHE = "public, max-age=300, s-maxage=3600";
@@ -14,8 +15,10 @@ const GENERIC_CACHE = "public, max-age=60, s-maxage=300";
  * `card` (content unknown, deleted or unreadable) it is the generic card: no leak, and a crawler
  * still gets an image rather than an error.
  */
-function draw(card: CardInput | null) {
-	const text = cardText(card ?? { title: SITE_NAME });
+async function draw(card: CardInput | null) {
+	// The generic card says what the site is rather than repeating its name.
+	const text = cardText(card ?? { title: SITE_DESCRIPTION });
+	const fonts = await loadFonts(text.title, text.subtitle ?? "", ...text.tags);
 	return new ImageResponse(
 		<div
 			style={{
@@ -91,6 +94,7 @@ function draw(card: CardInput | null) {
 		</div>,
 		{
 			...OG_SIZE,
+			fonts,
 			headers: { "Cache-Control": card ? FOUND_CACHE : GENERIC_CACHE },
 		},
 	);
@@ -104,7 +108,7 @@ function draw(card: CardInput | null) {
  */
 export async function renderCard(card: CardInput | null) {
 	try {
-		const image = draw(card);
+		const image = await draw(card);
 		return new Response(await image.arrayBuffer(), {
 			status: 200,
 			headers: image.headers,

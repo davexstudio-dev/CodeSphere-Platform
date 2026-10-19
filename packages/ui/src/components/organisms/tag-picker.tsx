@@ -65,7 +65,7 @@ function TagPicker({
 		<section
 			data-slot="tag-picker"
 			className={cn(
-				"flex flex-col gap-5 rounded-xl border border-border bg-card p-6 text-card-foreground",
+				"motion-rise flex flex-col gap-5 rounded-xl border border-border bg-card p-6 text-card-foreground",
 				className,
 			)}
 			{...props}
@@ -75,16 +75,20 @@ function TagPicker({
 				<p className="text-muted-foreground text-sm">{l.lead(min)}</p>
 			</header>
 			<ul className="flex flex-wrap gap-2">
-				{tags.map((tag) => {
+				{tags.map((tag, index) => {
 					const selected = value.includes(tag);
 					return (
-						<li key={tag}>
+						<li
+							key={tag}
+							className="motion-rise"
+							style={{ "--i": index } as React.CSSProperties}
+						>
 							<button
 								type="button"
 								aria-pressed={selected}
 								onClick={() => toggle(tag)}
 								className={cn(
-									"rounded-full border px-3 py-1 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50",
+									"rounded-full border px-3 py-1 text-sm outline-none transition-[color,background-color,border-color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-95",
 									selected
 										? "border-primary bg-primary text-primary-foreground"
 										: "border-border text-muted-foreground hover:border-primary hover:text-foreground",

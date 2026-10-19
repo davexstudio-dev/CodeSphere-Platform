@@ -215,85 +215,88 @@ export function AskForm() {
 					}
 				}}
 			>
-				{step === 0 && (
-					<TitleStep
-						value={value.title}
-						onChange={(v) => set("title", v)}
-						error={errorText("title")}
-					/>
-				)}
-				{step === 1 && (
-					<Field
-						id="ask-body"
-						label={t("fields.body")}
-						description={t("fields.bodyHint")}
-						error={errorText("body")}
-						required
-					>
-						<Tabs defaultValue="write">
-							<TabsList>
-								<TabsTrigger value="write">{t("write")}</TabsTrigger>
-								<TabsTrigger value="preview">{t("preview")}</TabsTrigger>
-							</TabsList>
-							<TabsContent value="write">
-								<Textarea
-									id="ask-body"
-									className="min-h-64 font-mono"
-									value={value.body}
-									maxLength={20_000}
-									aria-invalid={Boolean(errors.body)}
-									onChange={(event) => set("body", event.target.value)}
-								/>
-							</TabsContent>
-							<TabsContent value="preview">
-								<div className="min-h-64 rounded-md border border-border p-3">
-									{value.body.trim() ? (
-										<MarkdownPreview body={value.body} />
-									) : (
-										<p className="text-muted-foreground text-sm">
-											{t("nothingToPreview")}
-										</p>
-									)}
-								</div>
-							</TabsContent>
-						</Tabs>
-					</Field>
-				)}
-				{step === 2 && (
-					<div className="grid gap-5">
+				{/* One keyed wrapper: each step fades in as the previous one leaves. */}
+				<div key={step} className="motion-rise grid gap-5">
+					{step === 0 && (
+						<TitleStep
+							value={value.title}
+							onChange={(v) => set("title", v)}
+							error={errorText("title")}
+						/>
+					)}
+					{step === 1 && (
 						<Field
-							id="ask-tags"
-							label={t("fields.tags")}
-							description={t("fields.tagsHint")}
-							error={errorText("tags")}
+							id="ask-body"
+							label={t("fields.body")}
+							description={t("fields.bodyHint")}
+							error={errorText("body")}
 							required
 						>
-							<TagInput
-								{...tagInputLabels}
-								inputId="ask-tags"
-								value={value.tags}
-								onValueChange={(tags) => set("tags", tags)}
-								max={5}
-								invalid={Boolean(errors.tags)}
-							/>
+							<Tabs defaultValue="write">
+								<TabsList>
+									<TabsTrigger value="write">{t("write")}</TabsTrigger>
+									<TabsTrigger value="preview">{t("preview")}</TabsTrigger>
+								</TabsList>
+								<TabsContent value="write">
+									<Textarea
+										id="ask-body"
+										className="min-h-64 font-mono"
+										value={value.body}
+										maxLength={20_000}
+										aria-invalid={Boolean(errors.body)}
+										onChange={(event) => set("body", event.target.value)}
+									/>
+								</TabsContent>
+								<TabsContent value="preview">
+									<div className="min-h-64 rounded-md border border-border p-3">
+										{value.body.trim() ? (
+											<MarkdownPreview body={value.body} />
+										) : (
+											<p className="text-muted-foreground text-sm">
+												{t("nothingToPreview")}
+											</p>
+										)}
+									</div>
+								</TabsContent>
+							</Tabs>
 						</Field>
-						<div className="grid gap-2">
-							<p className="font-medium text-sm">{t("fields.language")}</p>
-							<SegmentedControl
-								options={LANGUAGES.map((l) => t(`languages.${l}`))}
-								value={t(`languages.${value.language}`)}
-								onValueChange={(label) =>
-									set(
-										"language",
-										LANGUAGES.find((l) => t(`languages.${l}`) === label) ??
-											value.language,
-									)
-								}
-							/>
+					)}
+					{step === 2 && (
+						<div className="grid gap-5">
+							<Field
+								id="ask-tags"
+								label={t("fields.tags")}
+								description={t("fields.tagsHint")}
+								error={errorText("tags")}
+								required
+							>
+								<TagInput
+									{...tagInputLabels}
+									inputId="ask-tags"
+									value={value.tags}
+									onValueChange={(tags) => set("tags", tags)}
+									max={5}
+									invalid={Boolean(errors.tags)}
+								/>
+							</Field>
+							<div className="grid gap-2">
+								<p className="font-medium text-sm">{t("fields.language")}</p>
+								<SegmentedControl
+									options={LANGUAGES.map((l) => t(`languages.${l}`))}
+									value={t(`languages.${value.language}`)}
+									onValueChange={(label) =>
+										set(
+											"language",
+											LANGUAGES.find((l) => t(`languages.${l}`) === label) ??
+												value.language,
+										)
+									}
+								/>
+							</div>
 						</div>
-					</div>
-				)}
-				{step === 3 && <Review draft={value} />}
+					)}
+					{step === 3 && <Review draft={value} />}
+				</div>
 
 				{entry?.state === "rejected" && (
 					<p role="alert" className="text-destructive text-sm">
