@@ -95,6 +95,10 @@ export const MemberExport = z.object({
 			cause: z.enum(["vote", "accept"]),
 			targetType: z.enum(["question", "answer"]),
 			targetId: z.string(),
+			/** Set when an anti-farming rule cancelled the event: its points count for nothing. */
+			voidedReason: z
+				.enum(["new_account", "repeat_voter", "daily_cap"])
+				.nullable(),
 			createdAt: z.string().datetime(),
 		}),
 	),

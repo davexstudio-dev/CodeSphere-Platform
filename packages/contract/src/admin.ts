@@ -22,6 +22,25 @@ export const AuditEvent = z.object({
 	createdAt: Timestamp,
 });
 
+/** A Reputation event the anti-farming rules cancelled (#241), with who gave it to whom. */
+export const ReputationFlag = z.object({
+	id: z.string(),
+	reason: z.enum(["new_account", "repeat_voter", "daily_cap"]),
+	/** The points that were not counted. */
+	points: z.number().int(),
+	kind: z.string(),
+	voter: z.object({ id: z.string(), name: z.string() }),
+	author: z.object({ id: z.string(), name: z.string() }),
+	targetType: z.enum(["question", "answer"]),
+	targetId: z.string(),
+	createdAt: Timestamp,
+});
+
+export const ReputationFlagFilter = PageInput.extend({
+	/** Defaults to `repeat_voter`, the case reported to the Admins; the others are automatic. */
+	reason: z.enum(["new_account", "repeat_voter", "daily_cap"]).optional(),
+});
+
 export const AuditLogFilter = PageInput.extend({
 	/** Exact action, e.g. "hackathon.update". */
 	action: z.string().min(1).max(64).optional(),
@@ -326,6 +345,22 @@ export const adminContract = {
 			)
 			.input(AuditLogFilter)
 			.output(Page(AuditEvent)),
+	},
+	reputationFlags: {
+		list: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
+			.meta(
+				openapi({
+					method: "GET",
+					path: "/admin/reputation-flags",
+					tags: ["admin"],
+					summary: "List cancelled Reputation events",
+					description:
+						"Reputation events the anti-farming rules cancelled, newest first: by default the repeated votes of one voter on one author (repeat_voter). They stay in the journal, voided, and count for nothing. Requires a staff role.",
+				}),
+			)
+			.input(ReputationFlagFilter)
+			.output(Page(ReputationFlag)),
 	},
 	hackathons: {
 		update: base

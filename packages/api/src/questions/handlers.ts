@@ -225,9 +225,10 @@ export function createAnswersHandlers() {
 	return {
 		list: impl.answers.list.handler(async ({ context, input, errors }) => {
 			try {
-				const { items } = await createAnswerService(context.db).list(
-					input.questionId,
-				);
+				const { items } = await createAnswerService(
+					context.db,
+					context.farmingLimits,
+				).list(input.questionId);
 				const ids = items.map((a) => a.id);
 				const [authors, mine] = await Promise.all([
 					authorsById(
@@ -266,7 +267,10 @@ export function createAnswersHandlers() {
 			// 30 Answers per hour and Member (#72).
 			await consume(answerLimiter, userId);
 			try {
-				return await createAnswerService(context.db).create(userId, input);
+				return await createAnswerService(
+					context.db,
+					context.farmingLimits,
+				).create(userId, input);
 			} catch (err) {
 				if (err instanceof AnswerError) {
 					if (err.code === "NOT_FOUND") throw errors.NOT_FOUND();
@@ -282,7 +286,10 @@ export function createAnswersHandlers() {
 				throw errors.UNAUTHORIZED();
 			}
 			try {
-				return await createAnswerService(context.db).update(userId, input);
+				return await createAnswerService(
+					context.db,
+					context.farmingLimits,
+				).update(userId, input);
 			} catch (err) {
 				throw answerRefusal(err, errors);
 			}
@@ -294,7 +301,10 @@ export function createAnswersHandlers() {
 				throw errors.UNAUTHORIZED();
 			}
 			try {
-				return await createAnswerService(context.db).remove(userId, input);
+				return await createAnswerService(
+					context.db,
+					context.farmingLimits,
+				).remove(userId, input);
 			} catch (err) {
 				throw answerRefusal(err, errors);
 			}
@@ -306,7 +316,10 @@ export function createAnswersHandlers() {
 				throw errors.UNAUTHORIZED();
 			}
 			try {
-				return await createAnswerService(context.db).accept(userId, input.id);
+				return await createAnswerService(
+					context.db,
+					context.farmingLimits,
+				).accept(userId, input.id);
 			} catch (err) {
 				if (err instanceof AnswerError) {
 					if (err.code === "NOT_FOUND") throw errors.NOT_FOUND();
@@ -369,6 +382,7 @@ export function createVotesHandlers() {
 				return await createVoteService(
 					context.db,
 					context.privilegeThresholds,
+					context.farmingLimits,
 				).cast(
 					userId,
 					{ targetType: input.targetType, targetId: input.targetId },
@@ -391,7 +405,11 @@ export function createVotesHandlers() {
 		retract: impl.votes.retract.handler(async ({ context, input, errors }) => {
 			const userId = voter(context, errors);
 			try {
-				return await createVoteService(context.db).retract(userId, input);
+				return await createVoteService(
+					context.db,
+					context.privilegeThresholds,
+					context.farmingLimits,
+				).retract(userId, input);
 			} catch (err) {
 				throw refusal(err, errors);
 			}

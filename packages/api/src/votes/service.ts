@@ -3,6 +3,8 @@ import { answers, questions, votes } from "@codesphere/db/schema/questions";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import {
 	DEFAULT_PRIVILEGE_THRESHOLDS,
+	FARMING_LIMITS,
+	type FarmingLimits,
 	type PrivilegeThresholds,
 	requirePrivilege,
 	settleVote,
@@ -22,6 +24,7 @@ export type VoteTarget = {
 export function createVoteService(
 	db: Database,
 	thresholds: PrivilegeThresholds = DEFAULT_PRIVILEGE_THRESHOLDS,
+	limits: FarmingLimits = FARMING_LIMITS,
 ) {
 	// The author of a live target: a deleted or unknown one is NOT_FOUND.
 	async function authorOf({ targetType, targetId }: VoteTarget) {
@@ -93,7 +96,7 @@ export function createVoteService(
 					target: [votes.userId, votes.targetType, votes.targetId],
 					set: { value: signed },
 				});
-			await settleVote(db, voterId, target, authorId);
+			await settleVote(db, voterId, target, authorId, limits);
 			return { score: await recount(target), vote: value };
 		},
 
@@ -108,7 +111,7 @@ export function createVoteService(
 						eq(votes.targetId, target.targetId),
 					),
 				);
-			await settleVote(db, voterId, target, authorId);
+			await settleVote(db, voterId, target, authorId, limits);
 			return { score: await recount(target), vote: null };
 		},
 	};

@@ -2,10 +2,12 @@ import { type contract, MEMBER_SUSPENDED_MESSAGE } from "@codesphere/contract";
 import { auditLog } from "@codesphere/db/schema/audit";
 import { user } from "@codesphere/db/schema/auth";
 import { questions } from "@codesphere/db/schema/questions";
+import { reputationEvents } from "@codesphere/db/schema/reputation";
 import { SocialConnectError } from "@codesphere/social";
 import type { RouterContractClient } from "@orpc/contract";
 import { ORPCError } from "@orpc/server";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { updateHackathon } from "../admin-hackathons";
 import { kpiReport } from "../admin-kpi";
 import { listMembers, setSuspension } from "../admin-members";
@@ -481,6 +483,73 @@ export const appRouter = impl
 							throw errors.CONFLICT({ message: outcome.message });
 						}
 						return outcome.publication;
+					}),
+			},
+			reputationFlags: {
+				list: impl.admin.reputationFlags.list
+					.use(isAdmin)
+					.handler(async ({ context, input, errors }) => {
+						const position = input.cursor ? decodeCursor(input.cursor) : null;
+						if (input.cursor && !position) {
+							throw errors.BAD_REQUEST({
+								data: {
+									issues: [{ path: ["cursor"], message: "Invalid cursor" }],
+								},
+							});
+						}
+						const voter = alias(user, "voter");
+						const author = alias(user, "author");
+						const rows = await context.db
+							.select({
+								event: reputationEvents,
+								voterName: voter.name,
+								authorName: author.name,
+							})
+							.from(reputationEvents)
+							.innerJoin(voter, eq(voter.id, reputationEvents.actorId))
+							.innerJoin(author, eq(author.id, reputationEvents.userId))
+							.where(
+								and(
+									eq(
+										reputationEvents.voidedReason,
+										input.reason ?? "repeat_voter",
+									),
+									position
+										? or(
+												lt(reputationEvents.createdAt, position.createdAt),
+												and(
+													eq(reputationEvents.createdAt, position.createdAt),
+													lt(reputationEvents.id, position.id),
+												),
+											)
+										: undefined,
+								),
+							)
+							.orderBy(
+								desc(reputationEvents.createdAt),
+								desc(reputationEvents.id),
+							)
+							.limit(input.limit + 1);
+						const page = rows.slice(0, input.limit);
+						const last = page.at(-1)?.event;
+						return {
+							items: page.map(({ event, voterName, authorName }) => ({
+								id: event.id,
+								// Non-null: the query filters on a reason.
+								reason: event.voidedReason ?? "repeat_voter",
+								points: event.points,
+								kind: event.kind,
+								voter: { id: event.actorId, name: voterName },
+								author: { id: event.userId, name: authorName },
+								targetType: event.targetType,
+								targetId: event.targetId,
+								createdAt: event.createdAt.toISOString(),
+							})),
+							nextCursor:
+								rows.length > input.limit && last
+									? encodeCursor(last.createdAt, last.id)
+									: null,
+						};
 					}),
 			},
 			auditLog: {

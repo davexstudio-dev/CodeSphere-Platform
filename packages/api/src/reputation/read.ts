@@ -1,6 +1,6 @@
 import type { Database } from "@codesphere/db";
 import { reputationEvents } from "@codesphere/db/schema/reputation";
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
 // Reads of the journal, apart from `service.ts` (which writes it and re-exports these) so that
 // `privileges.ts` can read a Reputation without importing the service that re-exports it.
@@ -18,7 +18,12 @@ export async function reputationOf(
 			total: sql<number>`COALESCE(SUM(${reputationEvents.points}), 0)::int`,
 		})
 		.from(reputationEvents)
-		.where(eq(reputationEvents.userId, member.id));
+		.where(
+			and(
+				eq(reputationEvents.userId, member.id),
+				isNull(reputationEvents.voidedReason),
+			),
+		);
 	return row?.total ?? 0;
 }
 
@@ -33,7 +38,12 @@ export async function reputationsOf(db: Database, ids: readonly string[]) {
 			total: sql<number>`SUM(${reputationEvents.points})::int`,
 		})
 		.from(reputationEvents)
-		.where(inArray(reputationEvents.userId, [...ids]))
+		.where(
+			and(
+				inArray(reputationEvents.userId, [...ids]),
+				isNull(reputationEvents.voidedReason),
+			),
+		)
 		.groupBy(reputationEvents.userId);
 	return new Map(rows.map((r) => [r.userId, r.total]));
 }

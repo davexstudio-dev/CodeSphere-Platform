@@ -6,7 +6,7 @@ import { and, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { createAgentService } from "../agents/service";
 import { createAnswerService } from "../answers/service";
 import { createQuestionService } from "../questions/service";
-import { settleAcceptance } from "../reputation/service";
+import { NO_FARMING_LIMITS, settleAcceptance } from "../reputation/service";
 import { createVoteService } from "../votes/service";
 import { demoMembers, demoQuestions } from "./content";
 
@@ -66,7 +66,7 @@ export async function resetDemo(db: Database) {
 					: sql`false`,
 			),
 		);
-	const votesService = createVoteService(db);
+	const votesService = createVoteService(db, undefined, NO_FARMING_LIMITS);
 	for (const v of touched) {
 		await votesService.retract(v.userId, {
 			targetType: v.targetType,
@@ -93,7 +93,7 @@ export async function resetDemo(db: Database) {
 		)
 		.returning({ id: questions.id });
 	for (const q of accepting) {
-		await settleAcceptance(db, q.id);
+		await settleAcceptance(db, q.id, NO_FARMING_LIMITS);
 	}
 
 	if (answerIds.length > 0) {
@@ -138,8 +138,8 @@ export async function seedDemo(
 		});
 
 	const questionsService = createQuestionService(db);
-	const answersService = createAnswerService(db);
-	const votesService = createVoteService(db);
+	const answersService = createAnswerService(db, NO_FARMING_LIMITS);
+	const votesService = createVoteService(db, undefined, NO_FARMING_LIMITS);
 	let answers = 0;
 	let votes = 0;
 	let accepted = 0;

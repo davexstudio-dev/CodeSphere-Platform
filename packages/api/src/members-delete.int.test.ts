@@ -10,6 +10,7 @@ import { reputationEvents } from "@codesphere/db/schema/reputation";
 import { createRouterClient } from "@orpc/server";
 import { eq, inArray, or, sql } from "drizzle-orm";
 
+import { NO_FARMING_LIMITS } from "./reputation/farming";
 import { appRouter } from "./routers";
 import { testContext } from "./test-context";
 import { createVoteService } from "./votes/service";
@@ -25,7 +26,7 @@ describe.skipIf(!url)("members.delete on Postgres", () => {
 	const late = `it-del-late-${run}`;
 	const famous = `it-del-famous-${run}`;
 	const ids = [author, leaver, staying, late, famous];
-	const service = createVoteService(db);
+	const service = createVoteService(db, undefined, NO_FARMING_LIMITS);
 	let questionId = "";
 
 	const clientAs = (id: string) =>

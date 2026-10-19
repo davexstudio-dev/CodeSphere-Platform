@@ -3,7 +3,7 @@ import type { Database } from "@codesphere/db";
 import type { Logger } from "@codesphere/logger";
 import type { SocialPublisher } from "@codesphere/social";
 
-import type { PrivilegeThresholds } from "./reputation/service";
+import type { FarmingLimits, PrivilegeThresholds } from "./reputation/service";
 import type { SocialAccounts } from "./social-accounts";
 
 export type Context = {
@@ -15,6 +15,8 @@ export type Context = {
 	requestId: string;
 	/** Reputation needed for each Privilege (#240); the defaults of decision #219 when absent. */
 	privilegeThresholds?: PrivilegeThresholds;
+	/** Anti-farming limits of the Reputation journal (#241); the defaults of decision #219 when absent. */
+	farmingLimits?: FarmingLimits;
 	/** Trace id of the request (#253), shared with its log lines and error reports. */
 	traceId?: string;
 	/** Sends an unexpected error to the error tracker; absent where none is configured. */

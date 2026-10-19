@@ -82,6 +82,7 @@ export async function exportMember(db: Database, memberId: string) {
 			cause: event.cause,
 			targetType: event.targetType,
 			targetId: event.targetId,
+			voidedReason: event.voidedReason,
 			createdAt: event.createdAt.toISOString(),
 		})),
 		followedTags: tags.map((t) => t.tag),

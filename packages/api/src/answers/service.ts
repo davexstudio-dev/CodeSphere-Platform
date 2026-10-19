@@ -3,7 +3,11 @@ import type { Database } from "@codesphere/db";
 import { answers, questions } from "@codesphere/db/schema/questions";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { sanitizeMarkdown } from "../markdown/sanitizer";
-import { settleAcceptance } from "../reputation/service";
+import {
+	FARMING_LIMITS,
+	type FarmingLimits,
+	settleAcceptance,
+} from "../reputation/service";
 
 /** A refused answer operation. `currentVersion` is set on a CONFLICT from a stale write only. */
 export class AnswerError extends Error {
@@ -24,7 +28,10 @@ function isUniqueViolation(err: unknown) {
 	return code === UNIQUE_VIOLATION;
 }
 
-export function createAnswerService(db: Database) {
+export function createAnswerService(
+	db: Database,
+	limits: FarmingLimits = FARMING_LIMITS,
+) {
 	async function findQuestion(id: string) {
 		const [q] = await db
 			.select()
@@ -203,7 +210,7 @@ export function createAnswerService(db: Database) {
 				.where(eq(questions.acceptedAnswerId, input.id))
 				.returning({ id: questions.id });
 			for (const q of cleared) {
-				await settleAcceptance(db, q.id);
+				await settleAcceptance(db, q.id, limits);
 			}
 			return { success: true };
 		},
@@ -223,7 +230,7 @@ export function createAnswerService(db: Database) {
 					version: q.version + 1,
 				})
 				.where(eq(questions.id, q.id));
-			await settleAcceptance(db, q.id);
+			await settleAcceptance(db, q.id, limits);
 			return toDTO(a, a.id);
 		},
 	};

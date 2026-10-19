@@ -5,6 +5,7 @@ import { AdminShell } from "@codesphere/ui/components/organisms/admin-shell";
 import {
 	BarChart3Icon,
 	LogOutIcon,
+	ScaleIcon,
 	ScrollTextIcon,
 	ShareIcon,
 	ShieldIcon,
@@ -25,6 +26,7 @@ const NAV = [
 	{ key: "hackathons.title", href: "/admin/hackathons", icon: TrophyIcon },
 	{ key: "tags.title", href: "/admin/tags", icon: TagIcon },
 	{ key: "social.title", href: "/admin/social", icon: ShareIcon },
+	{ key: "reputation.title", href: "/admin/reputation", icon: ScaleIcon },
 	{ key: "audit.title", href: "/admin/audit", icon: ScrollTextIcon },
 ] as const;
 
