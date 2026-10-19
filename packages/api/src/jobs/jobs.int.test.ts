@@ -32,6 +32,7 @@ describe.skipIf(!url)("jobs on Postgres", () => {
 	const other = `it-job-other-${run}`;
 	const cand = `it-job-cand-${run}`;
 	const bot = `it-job-bot-${run}`;
+	const cand2 = other;
 	const ids = [admin, boss, other, cand, bot];
 	const tag = `jt-${run}`;
 	const as = (id: string, role = "member", kind = "human") =>
@@ -357,6 +358,24 @@ describe.skipIf(!url)("jobs on Postgres", () => {
 		}
 	});
 
+	test("links are http(s) only", async () => {
+		await expect(
+			as(boss).jobs.publish(posting({ applyUrl: "javascript:alert(1)" })),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+		await expect(
+			as(cand).talent.update({ codeUrl: "data:text/html,<script>1</script>" }),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+		await expect(
+			as(cand).organizations.request({
+				name: `Evil ${run}`,
+				website: "javascript:alert(1)",
+				contactEmail: "a@b.co",
+				country: "SN",
+				description: "",
+			}),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+	});
+
 	test("the card and the applications are exported and deleted with the account", async () => {
 		await as(cand).talent.update({ enabled: true, headline: "Backend" });
 		const exported = await exportMember(db, cand);
@@ -378,5 +397,57 @@ describe.skipIf(!url)("jobs on Postgres", () => {
 		expect(
 			await db.select().from(jobReports).where(eq(jobReports.userId, cand)),
 		).toEqual([]);
+	});
+
+	test("a dismissed report stays dismissed; deleting an owner takes their postings down", async () => {
+		const owner = `it-job-owner2-${run}`;
+		await db
+			.insert(user)
+			.values({ id: owner, name: "Owner2", email: `${owner}@example.com` });
+		const [org] = await db
+			.insert(organization)
+			.values({
+				slug: `job-owner2-${run}`,
+				name: `Owner2 ${run}`,
+				website: `https://o2${run}.example.org`,
+				country: "SN",
+				status: "validated",
+				ownerId: owner,
+				validatedAt: new Date(),
+			})
+			.returning({ slug: organization.slug, id: organization.id });
+		try {
+			const job = await as(owner).jobs.publish(
+				posting({
+					organizationSlug: org?.slug ?? "",
+					title: `Owner2 job ${run}`,
+				}),
+			);
+			await as(cand2).jobs.report({ id: job.id, reason: "Douteux" });
+			await as(admin, "admin").admin.jobs.dismiss({ id: job.id });
+			await as(cand2).jobs.report({ id: job.id, reason: "Encore douteux" });
+			const queue = await as(admin, "admin").admin.jobs.review({ limit: 50 });
+			expect(queue.items.some((j) => j.id === job.id)).toBe(false);
+
+			await deleteMember(db, owner, false);
+			await expect(anonymous().jobs.get({ id: job.id })).rejects.toMatchObject({
+				code: "NOT_FOUND",
+			});
+			const [after] = await db
+				.select()
+				.from(organization)
+				.where(eq(organization.id, org?.id ?? ""));
+			expect(after).toMatchObject({
+				status: "suspended",
+				statusReason: "owner deleted",
+			});
+		} finally {
+			await db
+				.delete(jobPostings)
+				.where(eq(jobPostings.organizationId, org?.id ?? ""));
+			await db.delete(organization).where(eq(organization.id, org?.id ?? ""));
+			await db.delete(auditLog).where(eq(auditLog.actorId, owner));
+			await db.delete(user).where(eq(user.id, owner));
+		}
 	});
 });

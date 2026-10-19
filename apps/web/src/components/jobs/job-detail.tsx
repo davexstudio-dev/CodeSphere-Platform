@@ -145,11 +145,23 @@ export function JobDetail({ id }: { id: string }) {
 					</a>
 				)}
 				{data.myApplication ? (
-					<p className="text-sm">
-						{data.myApplication.sharedCard
-							? t("appliedShared")
-							: t("appliedPlain")}
-					</p>
+					<div className="flex flex-wrap items-center gap-3">
+						<p className="text-sm">
+							{data.myApplication.sharedCard
+								? t("appliedShared")
+								: t("appliedPlain")}
+						</p>
+						{data.myApplication.sharedCard && (
+							<Button
+								size="sm"
+								variant="outline"
+								disabled={applyTo.isPending}
+								onClick={() => apply(false)}
+							>
+								{t("stopSharing")}
+							</Button>
+						)}
+					</div>
 				) : (
 					<div className="flex flex-wrap gap-2">
 						<Button disabled={applyTo.isPending} onClick={() => apply(true)}>

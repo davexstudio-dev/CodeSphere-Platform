@@ -3,15 +3,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
+import { authClient } from "@/lib/auth-client";
 import { HAS_DATABASE } from "@/lib/deployment";
 import { orpc } from "@/utils/orpc";
 
 /** « Emplois qui correspondent à vos Tags » (#258): live postings on the Tags the Member follows. */
 export function JobsModule() {
 	const t = useTranslations("jobs.module");
+	const { data: session } = authClient.useSession();
+	// Only for a signed-in Member: the postings are those of the Tags they follow.
 	const matching = useQuery({
 		...orpc.jobs.matching.queryOptions({ input: { limit: 3 } }),
-		enabled: HAS_DATABASE,
+		enabled: HAS_DATABASE && Boolean(session),
 	});
 	const items = matching.data?.items ?? [];
 	if (items.length === 0) {

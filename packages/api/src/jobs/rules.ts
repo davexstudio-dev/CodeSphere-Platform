@@ -13,10 +13,11 @@ export const expiryOf = (at: Date) =>
 const MONEY_ASKED: readonly RegExp[] = [
 	/frais\s+(de|d['’])\s*(dossier|inscription|recrutement|formation|activation|traitement|visa|v[ée]rification)/i,
 	/(registration|application|processing|training|recruitment|activation|onboarding|verification|visa)\s+fees?\b/i,
-	/\b(pay\w*|vers\w+|envoy\w+|r[ée]gl\w+|d[ée]pos\w+|send\w*|deposit\w*|transfer\w*)\b[^.\n]{0,60}\b(pour\s+postuler|pour\s+[êe]tre\s+(recrut[ée]|retenu|embauch[ée])|avant\s+(l['’]embauche|de\s+commencer)|to\s+apply|to\s+be\s+(hired|selected)|before\s+(you\s+)?(start|being\s+hired))/i,
+	// A payment verb, a sum or a money word, and the moment the candidate is asked to pay.
+	/\b(pay(?:ez|er|e)?|vers(?:ez|er|ement)|envoy(?:ez|er)|r[ée]gl(?:ez|er)|d[ée]pos\w+|send\w*|deposit\w*|transfer\w*)\b[^.\n]{0,40}\b(\d[\d\s.,]*\s*(fcfa|xof|cfa|usd|eur|€|\$)|money|argent|fees?|frais|somme|montant)[^.\n]{0,40}\b(pour\s+postuler|pour\s+[êe]tre\s+(recrut[ée]|retenu|embauch[ée])|avant\s+(l['’]embauche|de\s+commencer|l['’]entretien)|to\s+apply|to\s+be\s+(hired|selected)|before\s+(you\s+)?(start|being\s+hired|the\s+interview))/i,
+	/\b(pay(?:ez|er|e)?|vers(?:ez|er|ement)|envoy(?:ez|er)|r[ée]gl(?:ez|er))\b[^.\n]{0,40}\b(pour\s+postuler|to\s+apply)/i,
 	/(d[ée]p[ôo]t\s+de\s+garantie|caution\s+(obligatoire|exig[ée]e)|refundable\s+deposit|security\s+deposit\s+(required|is\s+required))/i,
 	/(western\s+union|moneygram)/i,
-	/(achet\w+|buy|purchase)\b[^.\n]{0,30}\b(votre|your)\s+(propre\s+)?(mat[ée]riel|equipment|laptop|kit|licence|license)/i,
 ];
 
 /** Whether the text asks the candidate to pay something to apply or to be hired. */

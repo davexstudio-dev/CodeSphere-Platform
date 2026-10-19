@@ -27,7 +27,7 @@ import {
 } from "drizzle-orm";
 
 import { withAudit } from "../audit";
-import { reputationOf } from "../reputation/read";
+import { reputationsOf } from "../reputation/read";
 import {
 	applyChannel,
 	asksCandidateForMoney,
@@ -163,49 +163,84 @@ export function createJobService(
 		return Boolean(row);
 	}
 
-	async function strongestTags(userId: string): Promise<string[]> {
+	/** The three Tags each Member earned the most Reputation on, for several Members in one read. */
+	async function strongestTagsOf(userIds: readonly string[]) {
+		const out = new Map<string, string[]>();
+		if (userIds.length === 0) {
+			return out;
+		}
 		const result = await db.execute(sql`
-			SELECT t AS tag
-			FROM reputation_events e
-			LEFT JOIN answers a ON e.target_type = 'answer' AND a.id = e.target_id
-			JOIN questions q ON q.id = CASE WHEN e.target_type = 'question' THEN e.target_id ELSE a.question_id END
-			CROSS JOIN LATERAL unnest(q.tags) AS t
-			WHERE e.user_id = ${userId} AND e.voided_reason IS NULL AND q.deleted_at IS NULL
-			GROUP BY t HAVING SUM(e.points) > 0
-			ORDER BY SUM(e.points) DESC, t
-			LIMIT 3`);
-		return rowsOf<{ tag: string }>(result).map((r) => r.tag);
+			SELECT user_id, tag FROM (
+				SELECT e.user_id, t AS tag,
+					row_number() OVER (PARTITION BY e.user_id ORDER BY SUM(e.points) DESC, t) AS rank
+				FROM reputation_events e
+				LEFT JOIN answers a ON e.target_type = 'answer' AND a.id = e.target_id
+				JOIN questions q ON q.id = CASE WHEN e.target_type = 'question' THEN e.target_id ELSE a.question_id END
+				CROSS JOIN LATERAL unnest(q.tags) AS t
+				WHERE e.user_id IN (${sql.join(
+					userIds.map((id) => sql`${id}`),
+					sql`, `,
+				)})
+					AND e.voided_reason IS NULL AND q.deleted_at IS NULL
+				GROUP BY e.user_id, t HAVING SUM(e.points) > 0
+			) ranked WHERE rank <= 3 ORDER BY user_id, rank`);
+		for (const row of rowsOf<{ user_id: string; tag: string }>(result)) {
+			out.set(row.user_id, [...(out.get(row.user_id) ?? []), row.tag]);
+		}
+		return out;
 	}
 
-	async function cardView(
-		userId: string,
-		card?: {
-			headline: string | null;
-			codeUrl: string | null;
-			contactEmail: string | null;
-		},
-	): Promise<TalentCardView> {
-		const [member] = await db.select().from(user).where(eq(user.id, userId));
-		if (!member) {
+	/**
+	 * What a recruiter sees of several Members, in a handful of reads whatever their number. A
+	 * suspended or non-human Member has no card to show.
+	 */
+	async function cardViews(
+		userIds: readonly string[],
+	): Promise<Map<string, TalentCardView>> {
+		const out = new Map<string, TalentCardView>();
+		if (userIds.length === 0) {
+			return out;
+		}
+		const [members, stored, reputations, tags] = await Promise.all([
+			db
+				.select()
+				.from(user)
+				.where(
+					and(
+						inArray(user.id, [...userIds]),
+						eq(user.kind, "human"),
+						sql`${user.suspendedAt} IS NULL`,
+					),
+				),
+			db
+				.select()
+				.from(talentCards)
+				.where(inArray(talentCards.userId, [...userIds])),
+			reputationsOf(db, userIds),
+			strongestTagsOf(userIds),
+		]);
+		const cardOf = new Map(stored.map((c) => [c.userId, c]));
+		for (const member of members) {
+			const card = cardOf.get(member.id);
+			out.set(member.id, {
+				name: member.name,
+				reputation: reputations.get(member.id) ?? 0,
+				strongestTags: tags.get(member.id) ?? [],
+				country: member.country,
+				headline: card?.headline ?? null,
+				codeUrl: card?.codeUrl ?? null,
+				contactEmail: card?.contactEmail ?? null,
+			});
+		}
+		return out;
+	}
+
+	async function cardView(userId: string): Promise<TalentCardView> {
+		const view = (await cardViews([userId])).get(userId);
+		if (!view) {
 			throw new JobError("NOT_FOUND");
 		}
-		const stored =
-			card ??
-			(
-				await db
-					.select()
-					.from(talentCards)
-					.where(eq(talentCards.userId, userId))
-			)[0];
-		return {
-			name: member.name,
-			reputation: (await reputationOf(db, member)) ?? 0,
-			strongestTags: await strongestTags(userId),
-			country: member.country,
-			headline: stored?.headline ?? null,
-			codeUrl: stored?.codeUrl ?? null,
-			contactEmail: stored?.contactEmail ?? null,
-		};
+		return view;
 	}
 
 	async function ownCard(userId: string): Promise<OwnTalentCard> {
@@ -219,7 +254,7 @@ export function createJobService(
 			headline: stored?.headline ?? null,
 			codeUrl: stored?.codeUrl ?? null,
 			contactEmail: stored?.contactEmail ?? null,
-			preview: await cardView(userId, stored),
+			preview: await cardView(userId),
 		};
 	}
 
@@ -342,7 +377,10 @@ export function createJobService(
 					expiresAt: expiryOf(at),
 				})
 				.returning({ id: jobPostings.id });
-			return posting(created?.id ?? "", { id: userId });
+			if (!created) {
+				throw new JobError("CONFLICT");
+			}
+			return posting(created.id, { id: userId });
 		},
 
 		async close(userId: string, id: string) {
@@ -398,7 +436,9 @@ export function createJobService(
 				.values({ userId, jobId: id, reason })
 				.onConflictDoUpdate({
 					target: [jobReports.userId, jobReports.jobId],
-					set: { reason, outcome: null },
+					set: { reason },
+					// Re-reporting only edits a report still waiting: an Admin's decision stands.
+					setWhere: sql`${jobReports.outcome} IS NULL`,
 				});
 		},
 
@@ -459,13 +499,15 @@ export function createJobService(
 				.innerJoin(user, eq(user.id, jobApplications.userId))
 				.where(eq(jobApplications.jobId, id))
 				.orderBy(asc(jobApplications.createdAt));
-			return Promise.all(
-				rows.map(async (row) => ({
-					name: row.name,
-					appliedAt: row.createdAt.toISOString(),
-					card: row.sharedCard ? await cardView(row.userId) : null,
-				})),
+			// The card is shown for this posting only, and never for a Member since suspended.
+			const cards = await cardViews(
+				rows.filter((r) => r.sharedCard).map((r) => r.userId),
 			);
+			return rows.map((row) => ({
+				name: row.name,
+				appliedAt: row.createdAt.toISOString(),
+				card: row.sharedCard ? (cards.get(row.userId) ?? null) : null,
+			}));
 		},
 
 		talent: {
@@ -516,13 +558,19 @@ export function createJobService(
 							sql`${user.suspendedAt} IS NULL`,
 						),
 					)
-					.orderBy(desc(talentCards.updatedAt), asc(talentCards.userId))
+					// A stable order: an edit must not move a card between pages.
+					.orderBy(asc(user.createdAt), asc(talentCards.userId))
 					.limit(page.limit + 1)
 					.offset(offset);
 				return {
-					items: await Promise.all(
-						rows.slice(0, page.limit).map((r) => cardView(r.userId, r.card)),
-					),
+					items: await (async () => {
+						const slice = rows.slice(0, page.limit);
+						const cards = await cardViews(slice.map((r) => r.userId));
+						return slice.flatMap((r) => {
+							const view = cards.get(r.userId);
+							return view ? [view] : [];
+						});
+					})(),
 					nextCursor:
 						rows.length > page.limit ? `o${offset + page.limit}` : null,
 				};
@@ -535,7 +583,7 @@ export function createJobService(
 				const reports = sql<number>`(SELECT count(*)::int FROM job_reports r WHERE r.job_id = ${jobPostings.id} AND r.outcome IS NULL)`;
 				const rows = await select(null)
 					.where(sql`${reports} > 0`)
-					.orderBy(desc(reports), desc(jobPostings.publishedAt))
+					.orderBy(asc(jobPostings.publishedAt), asc(jobPostings.id))
 					.limit(page.limit + 1)
 					.offset(offset);
 				const slice = rows.slice(0, page.limit);

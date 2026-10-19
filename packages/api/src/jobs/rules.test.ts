@@ -27,6 +27,9 @@ describe("asksCandidateForMoney", () => {
 			"Develop payment APIs for mobile money operators.",
 			"Salaire versé le 5 de chaque mois, avec une prime de formation.",
 			"Apply with your CV and a link to your code.",
+			"Send your CV and a code sample to apply.",
+			"Use version control to apply best practices.",
+			"We give you a stipend to purchase your laptop.",
 		]) {
 			expect(asksCandidateForMoney(text)).toBe(false);
 		}

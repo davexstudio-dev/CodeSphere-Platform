@@ -1,7 +1,7 @@
 import { openapi } from "@orpc/openapi";
 import * as z from "zod";
 
-import { base, Page, PageInput, Region } from "./base";
+import { base, HttpUrl, Page, PageInput, Region } from "./base";
 
 // Job postings and the Talent card (#258, decision #227).
 
@@ -34,7 +34,7 @@ export const PublishJobInput = z.object({
 	tags: z.array(Tag).min(1).max(MAX_JOB_TAGS),
 	country: Region.shape.country,
 	remote: z.boolean().default(false),
-	applyUrl: z.url().max(2048).optional(),
+	applyUrl: HttpUrl.max(2048).optional(),
 	applyEmail: z.email().max(254).optional(),
 });
 
@@ -68,7 +68,7 @@ export const UpdateTalentCardInput = z.object({
 	enabled: z.boolean().optional(),
 	openToContact: z.boolean().optional(),
 	headline: z.string().trim().max(140).nullable().optional(),
-	codeUrl: z.url().max(2048).nullable().optional(),
+	codeUrl: HttpUrl.max(2048).nullable().optional(),
 	contactEmail: z.email().max(254).nullable().optional(),
 });
 

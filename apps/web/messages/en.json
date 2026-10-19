@@ -1216,6 +1216,7 @@
 				"forbidden": "Only the owner of a validated Organization can post.",
 				"generic": "Publishing failed. Try again."
 			}
-		}
+		},
+		"stopSharing": "Stop sharing my card"
 	}
 }

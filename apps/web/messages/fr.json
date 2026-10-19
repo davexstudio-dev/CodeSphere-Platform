@@ -1216,6 +1216,7 @@
 				"forbidden": "Seul le propriétaire d'une Organisation validée peut publier.",
 				"generic": "La publication a échoué. Réessayez."
 			}
-		}
+		},
+		"stopSharing": "Ne plus partager ma fiche"
 	}
 }

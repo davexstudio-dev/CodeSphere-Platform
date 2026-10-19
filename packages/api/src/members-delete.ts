@@ -34,6 +34,12 @@ export async function deleteMember(
 		sql`DELETE FROM talent_cards WHERE user_id IN (${mine})`,
 		sql`DELETE FROM job_applications WHERE user_id IN (${mine})`,
 		sql`DELETE FROM job_reports WHERE user_id IN (${mine})`,
+		// The Organizations the Member owned lose their postings and are suspended: nobody is left
+		// to close or answer them.
+		sql`UPDATE job_postings SET status = 'removed', removed_reason = 'owner deleted'
+			WHERE status = 'published' AND organization_id IN (SELECT id FROM organization WHERE owner_id IN (${mine}))`,
+		sql`UPDATE organization SET status = 'suspended', status_reason = 'owner deleted'
+			WHERE owner_id IN (${mine}) AND status IN ('pending', 'validated')`,
 		sql`DELETE FROM account WHERE user_id IN (${mine})`,
 		sql`DELETE FROM apikey WHERE reference_id IN (${mine})
 			OR reference_id IN (SELECT id FROM "user" WHERE owner_id IN (${mine}))`,

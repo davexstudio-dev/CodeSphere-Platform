@@ -1,7 +1,7 @@
 import { openapi } from "@orpc/openapi";
 import * as z from "zod";
 
-import { base, Page, PageInput, Region } from "./base";
+import { base, HttpUrl, Page, PageInput, Region } from "./base";
 
 export const ORGANIZATION_STATUSES = [
 	"pending",
@@ -33,7 +33,7 @@ export const OwnOrganization = OrganizationProfile.extend({
 
 export const OrganizationApplication = z.object({
 	name: z.string().trim().min(2).max(120),
-	website: z.url().max(2048),
+	website: HttpUrl.max(2048),
 	/** An address on the Organization's own domain (a free mailbox is refused). */
 	contactEmail: z.email().max(254),
 	country: Region.shape.country,

@@ -98,3 +98,6 @@ export const base = oc.errors({
 	// No database for this deployment, or the database is down: the request can be retried later.
 	SERVICE_UNAVAILABLE: {},
 });
+
+/** A link that opens in a browser: http or https only. `javascript:` and `data:` never reach an `href`. */
+export const HttpUrl = z.url({ protocol: /^https?$/ });
