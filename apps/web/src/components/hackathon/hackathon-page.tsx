@@ -132,16 +132,18 @@ function HackathonView({ hackathon }: { hackathon: HackathonData }) {
 				value={tab}
 				onValueChange={(value) => isHackathonTab(value) && setTab(value)}
 			>
-				{/* Six tabs scroll sideways on a phone rather than wrap. */}
-				<div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-					<TabsList>
-						{HACKATHON_TABS.map((key) => (
-							<TabsTrigger key={key} value={key}>
-								{t(`tabs.${key}`)}
-							</TabsTrigger>
-						))}
-					</TabsList>
-				</div>
+				{/* On a phone, the six tabs sit in two rows of three: all visible, none hidden off screen. */}
+				<TabsList className="grid w-full grid-cols-3 rounded-2xl md:inline-flex md:w-fit md:rounded-full">
+					{HACKATHON_TABS.map((key) => (
+						<TabsTrigger
+							key={key}
+							value={key}
+							className="rounded-xl px-2 md:rounded-full md:px-4"
+						>
+							{t(`tabs.${key}`)}
+						</TabsTrigger>
+					))}
+				</TabsList>
 				<TabsContent value="overview" className="pt-4">
 					<Overview hackathon={hackathon} />
 				</TabsContent>

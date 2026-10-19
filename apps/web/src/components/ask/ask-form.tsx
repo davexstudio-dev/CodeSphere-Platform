@@ -176,7 +176,7 @@ export function AskForm() {
 	}
 
 	return (
-		<div className="grid gap-6">
+		<div className="grid grid-cols-1 gap-6">
 			<Stepper steps={steps} current={step} />
 
 			{/* Phone: the steps already answered, as a conversation. */}
