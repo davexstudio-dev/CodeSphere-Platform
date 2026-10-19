@@ -16,6 +16,7 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from "@codesphere/ui/components/atoms/avatar";
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import type * as React from "react";
 
 /**
@@ -54,6 +55,24 @@ export type BlobatarProps = React.ComponentProps<typeof Avatar> & {
 	blobatar?: GeneratedOptions;
 };
 
+/**
+ * Up to two initials of a name: "Ada Lovelace" is "AL", "ada" is "A", "@bob" is "B". A name with no
+ * letter or digit at all has none: "?".
+ */
+export function initialsOf(name: string): string {
+	const initials = name
+		.trim()
+		.split(/\s+/)
+		.map((word) => /[\p{L}\p{N}]/u.exec(word)?.[0])
+		.filter((letter): letter is string => Boolean(letter));
+	if (initials.length === 0) {
+		return "?";
+	}
+	const first = initials[0] ?? "";
+	const last = initials.length > 1 ? (initials.at(-1) ?? "") : "";
+	return `${first}${last}`.toUpperCase();
+}
+
 export function Blobatar({
 	name,
 	src,
@@ -61,6 +80,14 @@ export function Blobatar({
 	blobatar,
 	...props
 }: BlobatarProps) {
+	// Data saver mode (#250): no picture and no generated artwork, just the initials.
+	if (useDataSaver()) {
+		return (
+			<Avatar {...props}>
+				<AvatarFallback>{initialsOf(name)}</AvatarFallback>
+			</Avatar>
+		);
+	}
 	return (
 		<Avatar {...props}>
 			{src ? <AvatarImage src={src} alt={alt ?? name} /> : null}

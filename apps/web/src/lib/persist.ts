@@ -18,6 +18,7 @@ const BUSTER = "contract-v1";
  */
 const PERSISTED = new Set([
 	"feed.forYou",
+	"feed.mixed",
 	"questions.list",
 	"questions.get",
 	"answers.list",

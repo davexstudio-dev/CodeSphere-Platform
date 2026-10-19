@@ -6,6 +6,7 @@ import type {
 import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
 import { answers, questions } from "@codesphere/db/schema/questions";
+// biome-ignore lint/style/noRestrictedImports: tolerated, listing reads the Member's tag follows; move behind a tags contract (#254)
 import { tagFollows } from "@codesphere/db/schema/tags";
 import {
 	and,
@@ -192,6 +193,23 @@ export function createListingService(db: Database) {
 		};
 	}
 
+	/** The live Questions among `ids`, as list items, in the order of `ids`. */
+	async function byIds(ids: string[]) {
+		if (ids.length === 0) {
+			return [];
+		}
+		const rows = await db
+			.select()
+			.from(questions)
+			.where(and(inArray(questions.id, ids), isNull(questions.deletedAt)));
+		const extras = await extrasFor(rows);
+		const byId = new Map(rows.map((row) => [row.id, row]));
+		return ids.flatMap((id) => {
+			const row = byId.get(id);
+			return row ? [toItem(row, extras.get(id) as Extras)] : [];
+		});
+	}
+
 	async function hot(
 		input: ListQuestionsInput,
 		tags: string[] | undefined,
@@ -257,6 +275,7 @@ export function createListingService(db: Database) {
 
 	return {
 		extrasFor,
+		byIds,
 
 		/** `questions.list`: filters apply to every sort; `unanswered` is open Questions, newest first. */
 		async list(input: ListQuestionsInput) {

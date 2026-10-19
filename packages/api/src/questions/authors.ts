@@ -33,6 +33,7 @@ export async function authorsById(
 			kind: user.kind,
 			ownerId: user.ownerId,
 			country: user.country,
+			suspensionReason: user.suspensionReason,
 		})
 		.from(user)
 		.where(inArray(user.id, unique));
@@ -60,7 +61,14 @@ export async function authorsById(
 			authorKind: a.kind === "agent" ? "agent" : "human",
 			ownerName: a.ownerId ? (ownerName.get(a.ownerId) ?? null) : null,
 			authorCountry: a.country ?? null,
-			authorReputation: a.kind === "agent" ? null : (reputation.get(a.id) ?? 0),
+			// A deleted Member keeps their journal (#243) but not the Reputation it would show: a
+			// large total next to "Deleted member" would be a fingerprint.
+			authorReputation:
+				a.kind === "agent"
+					? null
+					: a.suspensionReason === "deleted"
+						? 0
+						: (reputation.get(a.id) ?? 0),
 		});
 	}
 	return out;

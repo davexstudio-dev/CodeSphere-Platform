@@ -17,17 +17,20 @@ import {
 	TabsTrigger,
 } from "@codesphere/ui/components/molecules/tabs";
 import { Timeline } from "@codesphere/ui/components/molecules/timeline";
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon, ExternalLinkIcon } from "lucide-react";
 import type { Route } from "next";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import type { z } from "zod";
-
+import { GalleryTab } from "@/components/hackathon/gallery-tab";
+import { TeamTab } from "@/components/hackathon/team-tab";
 import { FeedSkeleton, HomeFeed } from "@/components/home-feed";
+import Link from "@/components/link";
 import { ShareMenu } from "@/components/share-menu";
 import { errorCodeOf } from "@/i18n/errors";
+import { pageSizeFor } from "@/lib/data-saver";
 import { HAS_DATABASE } from "@/lib/deployment";
 import {
 	HACKATHON_TABS,
@@ -36,7 +39,7 @@ import {
 	milestoneStates,
 	sortedMilestones,
 } from "@/lib/hackathon";
-import { submissionClose } from "@/lib/home";
+import { submissionClose, toMixed } from "@/lib/home";
 import { useMounted } from "@/lib/use-mounted";
 import { orpc } from "@/utils/orpc";
 
@@ -162,6 +165,12 @@ function HackathonView({ hackathon }: { hackathon: HackathonData }) {
 				<TabsContent value="discussion" className="pt-4">
 					{tab === "discussion" && <Discussion slug={hackathon.slug} />}
 				</TabsContent>
+				<TabsContent value="team" className="pt-4">
+					{tab === "team" && <TeamTab slug={hackathon.slug} />}
+				</TabsContent>
+				<TabsContent value="gallery" className="pt-4">
+					{tab === "gallery" && <GalleryTab slug={hackathon.slug} />}
+				</TabsContent>
 			</Tabs>
 		</Shell>
 	);
@@ -176,7 +185,13 @@ function Header({ hackathon }: { hackathon: HackathonData }) {
 		<header className="grid gap-5 rounded-3xl border border-border bg-card p-5 md:grid-cols-[1fr_auto] md:items-end md:p-8">
 			<div className="grid gap-2">
 				<p className="text-muted-foreground text-sm">
-					{t("organizedBy", { organizer: hackathon.organizer })}
+					{t("organizedBy")}{" "}
+					<Link
+						href={`/organizations/${hackathon.organizationSlug}` as Route}
+						className="font-medium text-foreground hover:underline"
+					>
+						{hackathon.organizer}
+					</Link>
 				</p>
 				<h1 className="font-bold text-3xl tracking-tight md:text-4xl">
 					{hackathon.name}
@@ -389,11 +404,12 @@ function Judging({ hackathon }: { hackathon: HackathonData }) {
 function Discussion({ slug }: { slug: string }) {
 	const t = useTranslations("hackathon.discussion");
 	const mounted = useMounted();
+	const pageSize = pageSizeFor(20, useDataSaver());
 	const questions = useInfiniteQuery(
 		orpc.questions.list.infiniteOptions({
 			input: (cursor: string | undefined) => ({
 				cursor,
-				limit: 20,
+				limit: pageSize,
 				tags: [slug],
 				sort: "recent" as const,
 			}),
@@ -416,7 +432,7 @@ function Discussion({ slug }: { slug: string }) {
 				<p className="text-muted-foreground">{t("empty")}</p>
 			) : (
 				<HomeFeed
-					items={items}
+					items={items.map(toMixed)}
 					hasNextPage={questions.hasNextPage}
 					isFetchingNextPage={questions.isFetchingNextPage}
 					fetchNextPage={questions.fetchNextPage}

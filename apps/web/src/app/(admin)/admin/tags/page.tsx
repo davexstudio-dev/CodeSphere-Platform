@@ -3,6 +3,7 @@
 import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { Input } from "@codesphere/ui/components/atoms/input";
+import { Switch } from "@codesphere/ui/components/atoms/switch";
 import {
 	Alert,
 	AlertDescription,
@@ -47,7 +48,9 @@ export default function AdminTagsPage() {
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const [mode, setMode] = useState<Mode>("read");
 	const [name, setName] = useState("");
+	const [reserveNew, setReserveNew] = useState(false);
 	const [error, setError] = useState<ErrorKey | null>(null);
+	const [errorOnReserve, setErrorOnReserve] = useState(false);
 	const selected = items.find((tag) => tag.id === selectedId) ?? null;
 
 	const settled = (nextId: string | null) => {
@@ -59,10 +62,12 @@ export default function AdminTagsPage() {
 			queryKey: orpc.admin.auditLog.key(),
 		});
 	};
-	const failed = (failure: unknown) => {
+	const report = (failure: unknown, onReserve: boolean) => {
 		setError(tagMutationErrorKey(failure));
+		setErrorOnReserve(onReserve);
 		void queryClient.invalidateQueries({ queryKey: orpc.admin.tags.key() });
 	};
+	const failed = (failure: unknown) => report(failure, false);
 
 	const create = useMutation(
 		orpc.admin.tags.create.mutationOptions({
@@ -76,6 +81,12 @@ export default function AdminTagsPage() {
 			onError: failed,
 		}),
 	);
+	const reserve = useMutation(
+		orpc.admin.tags.setReserved.mutationOptions({
+			onSuccess: (tag) => settled(tag.id),
+			onError: (failure) => report(failure, true),
+		}),
+	);
 	const remove = useMutation(
 		orpc.admin.tags.delete.mutationOptions({
 			onSuccess: () => settled(null),
@@ -84,7 +95,11 @@ export default function AdminTagsPage() {
 	);
 
 	const block = selected ? deleteBlock(selected) : null;
-	const busy = create.isPending || rename.isPending || remove.isPending;
+	const busy =
+		create.isPending ||
+		rename.isPending ||
+		remove.isPending ||
+		reserve.isPending;
 
 	return (
 		<AdminFrame title={t("title")} description={t("description")}>
@@ -122,6 +137,7 @@ export default function AdminTagsPage() {
 								onClick={() => {
 									setMode("create");
 									setName("");
+									setReserveNew(false);
 									setError(null);
 								}}
 							>
@@ -153,11 +169,24 @@ export default function AdminTagsPage() {
 										onChange={(e) => setName(e.target.value)}
 									/>
 								</Field>
+								<div className="flex items-center gap-2">
+									<Switch
+										id="tag-new-reserved"
+										checked={reserveNew}
+										onCheckedChange={setReserveNew}
+									/>
+									<label htmlFor="tag-new-reserved" className="text-sm">
+										{t("reserveNew")}
+									</label>
+								</div>
+								<p className="text-muted-foreground text-xs">
+									{t("reservedHint")}
+								</p>
 							</RecordSection>
 							<SaveBar
 								dirty={name.trim().length > 0}
 								saving={busy}
-								onSave={() => create.mutate({ name })}
+								onSave={() => create.mutate({ name, reserved: reserveNew })}
 								onDiscard={() => setMode("read")}
 								saveLabel={tc("create")}
 								discardLabel={tc("cancel")}
@@ -169,13 +198,15 @@ export default function AdminTagsPage() {
 						<RecordSheet
 							title={selected.name}
 							badges={
-								selected.ownerHackathon ? (
-									<Badge variant="outline">{t("protected")}</Badge>
+								selected.ownerHackathon || selected.reserved ? (
+									<Badge variant="outline">
+										{selected.ownerHackathon ? t("protected") : t("reserved")}
+									</Badge>
 								) : undefined
 							}
 							editing={mode === "edit"}
 							onEdit={
-								selected.ownerHackathon
+								selected.ownerHackathon || selected.reserved
 									? undefined
 									: () => {
 											setMode("edit");
@@ -235,30 +266,68 @@ export default function AdminTagsPage() {
 									onDiscard={() => setMode("read")}
 								/>
 							) : (
-								<RecordSection title={t("deletion")}>
-									{error && (
-										<Alert variant="destructive">
-											<AlertCircleIcon />
-											<AlertDescription>
-												{t(`errors.${error}`)}
-											</AlertDescription>
-										</Alert>
+								<>
+									{!selected.ownerHackathon && (
+										<RecordSection title={t("reservation")}>
+											{error && errorOnReserve && (
+												<Alert variant="destructive">
+													<AlertCircleIcon />
+													<AlertDescription>
+														{t(`errors.${error}`)}
+													</AlertDescription>
+												</Alert>
+											)}
+											<div className="flex items-center gap-2">
+												<Switch
+													id="tag-reserved"
+													checked={selected.reserved}
+													disabled={busy || selected.system}
+													onCheckedChange={(reserved) =>
+														reserve.mutate({
+															id: selected.id,
+															reserved,
+															expectedVersion: selected.version,
+														})
+													}
+												/>
+												<label htmlFor="tag-reserved" className="text-sm">
+													{t("reserved")}
+												</label>
+											</div>
+											<p className="text-muted-foreground text-xs">
+												{selected.system ? t("systemHint") : t("reservedHint")}
+											</p>
+										</RecordSection>
 									)}
-									{block && (
-										<p className="text-muted-foreground text-sm">
-											{block.reason === "owned"
-												? t("blocked.owned", { slug: block.slug })
-												: t("blocked.used", { count: block.count })}
-										</p>
-									)}
-									<ConfirmTwoStep
-										label={t("delete")}
-										confirmLabel={(seconds) => tc("confirm", { seconds })}
-										cancelLabel={tc("cancel")}
-										disabled={busy || block !== null}
-										onConfirm={() => remove.mutate({ id: selected.id })}
-									/>
-								</RecordSection>
+									<RecordSection title={t("deletion")}>
+										{error && !errorOnReserve && (
+											<Alert variant="destructive">
+												<AlertCircleIcon />
+												<AlertDescription>
+													{t(`errors.${error}`)}
+												</AlertDescription>
+											</Alert>
+										)}
+										{block && (
+											<p className="text-muted-foreground text-sm">
+												{block.reason === "owned"
+													? t("blocked.owned", { slug: block.slug })
+													: block.reason === "system"
+														? t("blocked.system")
+														: block.reason === "reserved"
+															? t("blocked.reserved")
+															: t("blocked.used", { count: block.count })}
+											</p>
+										)}
+										<ConfirmTwoStep
+											label={t("delete")}
+											confirmLabel={(seconds) => tc("confirm", { seconds })}
+											cancelLabel={tc("cancel")}
+											disabled={busy || block !== null}
+											onConfirm={() => remove.mutate({ id: selected.id })}
+										/>
+									</RecordSection>
+								</>
 							)}
 						</RecordSheet>
 					) : (

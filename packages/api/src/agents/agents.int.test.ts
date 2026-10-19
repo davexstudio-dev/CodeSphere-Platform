@@ -106,6 +106,7 @@ describe.skipIf(!url)("agents and account deletion on Postgres", () => {
 					async apiKeyCreated(member, keyName) {
 						sent.push({ email: member.email, keyName });
 					},
+					async agentPaused() {},
 				},
 			}),
 		});

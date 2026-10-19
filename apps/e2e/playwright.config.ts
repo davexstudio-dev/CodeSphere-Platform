@@ -72,6 +72,10 @@ export default defineConfig({
 				// The back-office staff of the tests: the role is derived from these lists at sign-in.
 				ADMIN_EMAILS: "e2e.admin@example.com",
 				MODERATOR_EMAILS: "e2e.moderator@example.com",
+				// The journeys test voting, not its guards: voters are accounts created minutes ago and
+				// a down vote needs Reputation (#240, #241), so these are relaxed for the tests.
+				PRIVILEGE_THRESHOLDS: '{"downvote":0,"submit_feed_item":0}',
+				FARMING_LIMITS: '{"minAccountAgeDays":0}',
 			},
 		},
 		{

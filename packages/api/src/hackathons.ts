@@ -6,11 +6,13 @@ import {
 	hackathonMilestone,
 	hackathonPrize,
 } from "@codesphere/db/schema/hackathons";
+import { organization } from "@codesphere/db/schema/organizations";
 import { asc, eq, inArray } from "drizzle-orm";
 import type * as z from "zod";
 
 type HackathonRow = typeof hackathon.$inferSelect;
 type Children = {
+	organization: { name: string; slug: string | null };
 	milestones: {
 		key: string;
 		label: string;
@@ -43,7 +45,8 @@ export function toHackathon(
 	return {
 		slug: row.slug,
 		name: row.name,
-		organizer: row.organizer,
+		organizer: children.organization.name,
+		organizationSlug: children.organization.slug,
 		summary: row.summary,
 		teamMin: row.teamMin,
 		teamMax: row.teamMax,
@@ -64,6 +67,7 @@ export function toHackathon(
 			// A bad value in the database fails loudly (INTERNAL_SERVER_ERROR) instead of being guessed.
 			scoredBy: JudgingCriterion.shape.scoredBy.parse(c.scoredBy),
 		})),
+		opensAt: row.opensAt ? row.opensAt.toISOString() : null,
 		sourceUrl: row.sourceUrl,
 		sourceNote: row.sourceNote,
 		verifiedAt: row.verifiedAt.toISOString(),
@@ -77,15 +81,22 @@ export async function loadHackathons(
 	filter?: { slug: string },
 	limit = 20,
 ) {
-	const rows = await db
-		.select()
+	const joined = await db
+		.select({
+			row: hackathon,
+			orgName: organization.name,
+			orgSlug: organization.slug,
+			orgStatus: organization.status,
+		})
 		.from(hackathon)
+		.innerJoin(organization, eq(organization.id, hackathon.organizationId))
 		.where(filter ? eq(hackathon.slug, filter.slug) : undefined)
 		.orderBy(asc(hackathon.createdAt))
 		.limit(limit);
-	if (!rows.length) {
+	if (!joined.length) {
 		return [];
 	}
+	const rows = joined.map((j) => j.row);
 	const ids = rows.map((r) => r.id);
 	const [milestones, prizes, criteria] = await Promise.all([
 		db
@@ -101,8 +112,13 @@ export async function loadHackathons(
 			.from(hackathonCriterion)
 			.where(inArray(hackathonCriterion.hackathonId, ids)),
 	]);
-	return rows.map((row) =>
+	return joined.map(({ row, orgName, orgSlug, orgStatus }) =>
 		toHackathon(row, {
+			// The profile link only exists while the Organization's profile is public.
+			organization: {
+				name: orgName,
+				slug: orgStatus === "validated" ? orgSlug : null,
+			},
 			milestones: milestones.filter((m) => m.hackathonId === row.id),
 			prizes: prizes.filter((p) => p.hackathonId === row.id),
 			criteria: criteria.filter((c) => c.hackathonId === row.id),

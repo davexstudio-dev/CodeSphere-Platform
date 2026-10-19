@@ -52,6 +52,27 @@ export const Page = <T extends z.ZodType>(item: T) =>
 		nextCursor: z.string().nullable(),
 	});
 
+/** Moderation and editing powers unlocked by Reputation (decision #219, glossary: Privilege). */
+export const PRIVILEGES = [
+	"flag",
+	"propose_tag_edit",
+	"downvote",
+	"close_vote",
+	"edit_tags",
+	"submit_feed_item",
+] as const;
+export const PrivilegeName = z.enum(PRIVILEGES);
+export type PrivilegeName = z.infer<typeof PrivilegeName>;
+
+/** Refusal of a Privilege the Member has not earned yet: says what is needed and what they have. */
+export const PrivilegeRequired = {
+	data: z.object({
+		privilege: PrivilegeName,
+		required: z.number().int(),
+		current: z.number().int(),
+	}),
+};
+
 /**
  * Base builder for every contract. Standard codes (UNAUTHORIZED, FORBIDDEN,
  * NOT_FOUND, CONFLICT) need no schema; only errors that carry data are typed.
@@ -69,7 +90,7 @@ export const base = oc.errors({
 		}),
 	},
 	INTERNAL_SERVER_ERROR: {
-		data: z.object({ requestId: z.string() }),
+		data: z.object({ requestId: z.string(), traceId: z.string().optional() }),
 	},
 	TOO_MANY_REQUESTS: {
 		data: z.object({ retryAfter: z.number() }),
@@ -77,3 +98,6 @@ export const base = oc.errors({
 	// No database for this deployment, or the database is down: the request can be retried later.
 	SERVICE_UNAVAILABLE: {},
 });
+
+/** A link that opens in a browser: http or https only. `javascript:` and `data:` never reach an `href`. */
+export const HttpUrl = z.url({ protocol: /^https?$/ });

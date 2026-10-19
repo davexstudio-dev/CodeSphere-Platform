@@ -7,7 +7,8 @@ const row = {
 	id: "h1",
 	slug: "cadev-2026",
 	name: "Coupe d'Afrique des Développeurs 2026",
-	organizer: "Systalink",
+	organizationId: "o1",
+	opensAt: null,
 	summary: "Concours en ligne.",
 	teamMin: 2,
 	teamMax: 5,
@@ -22,6 +23,7 @@ const row = {
 describe("toHackathon", () => {
 	test("orders the children by position and serialises dates as ISO", () => {
 		const h = toHackathon(row, {
+			organization: { name: "Systalink", slug: "systalink" },
 			milestones: [
 				{
 					key: "jury",
@@ -58,6 +60,7 @@ describe("toHackathon", () => {
 	test("refuses a criterion scored by an unknown party instead of guessing", () => {
 		expect(() =>
 			toHackathon(row, {
+				organization: { name: "Systalink", slug: "systalink" },
 				milestones: [],
 				prizes: [],
 				criteria: [

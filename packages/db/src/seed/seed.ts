@@ -1,3 +1,5 @@
+import { eq } from "drizzle-orm";
+
 import type { Database } from "../index";
 import {
 	hackathon,
@@ -5,7 +7,9 @@ import {
 	hackathonMilestone,
 	hackathonPrize,
 } from "../schema/hackathons";
+import { organization } from "../schema/organizations";
 import { tag } from "../schema/tags";
+import { slugify } from "../slug";
 import { cadev2026, type SeedHackathon } from "./cadev";
 import { STARTER_TAGS } from "./tags";
 
@@ -17,10 +21,32 @@ export async function seedHackathon(
 	db: Database,
 	data: SeedHackathon,
 ): Promise<"created" | "kept"> {
-	const { milestones, prizes, criteria, ...fields } = data;
+	const { milestones, prizes, criteria, organizer, ...fields } = data;
+	// The organizer is a validated Organization the platform creates itself (#257), once.
+	const slug = slugify(organizer);
+	await db
+		.insert(organization)
+		.values({
+			slug,
+			name: organizer,
+			website: new URL(fields.sourceUrl).origin,
+			country: "OTHER",
+			status: "validated",
+			system: true,
+			reviewedAt: new Date(),
+			validatedAt: new Date(),
+		})
+		.onConflictDoNothing({ target: organization.slug });
+	const [owner] = await db
+		.select({ id: organization.id })
+		.from(organization)
+		.where(eq(organization.slug, slug));
+	if (!owner) {
+		throw new Error(`organization ${slug} could not be created`);
+	}
 	const [created] = await db
 		.insert(hackathon)
-		.values(fields)
+		.values({ ...fields, organizationId: owner.id })
 		.onConflictDoNothing({ target: hackathon.slug })
 		.returning({ id: hackathon.id });
 	if (!created) {

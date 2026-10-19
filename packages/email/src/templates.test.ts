@@ -11,6 +11,7 @@ const messages = (locale: "fr" | "en"): EmailMessage[] => [
 	{ kind: "member-suspended", props: { name: "Ada", reason: "spam", locale } },
 	{ kind: "member-reactivated", props: { name: "Ada", locale } },
 	{ kind: "api-key-created", props: { name: "Ada", keyName: "ci", locale } },
+	{ kind: "agent-paused", props: { name: "Ada", agentName: "helper", locale } },
 ];
 
 describe("every message renders in French and English", () => {

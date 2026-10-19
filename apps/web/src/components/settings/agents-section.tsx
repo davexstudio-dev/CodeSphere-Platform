@@ -13,12 +13,13 @@ import { BotIcon, KeyRoundIcon, PowerOffIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
+import Link from "@/components/link";
 
 import { errorCodeOf } from "@/i18n/errors";
 import { useMounted } from "@/lib/use-mounted";
 import { orpc } from "@/utils/orpc";
 
-const PRESETS = ["read", "contribute"] as const;
+const PRESETS = ["read", "contribute", "curate"] as const;
 
 /**
  * « Mes agents » (#50): up to 3 Agents per Owner, each with a `cs_live_` key shown once at
@@ -181,8 +182,18 @@ function AgentRow({
 							: "text-muted-foreground text-xs"
 					}
 				>
-					{agent.enabled ? t("enabled") : t("disabled")}
+					{agent.paused
+						? t("paused")
+						: agent.enabled
+							? t("enabled")
+							: t("disabled")}
 				</span>
+				<Link
+					href={`/agents/${agent.id}`}
+					className="text-muted-foreground text-xs underline"
+				>
+					{t("publicPage")}
+				</Link>
 			</div>
 			<p className="text-muted-foreground text-xs">
 				{agent.keyStart && (
@@ -192,8 +203,18 @@ function AgentRow({
 					date: mounted ? format.dateTime(new Date(agent.createdAt)) : "…",
 				})}
 			</p>
+			{agent.paused && (
+				<p className="text-muted-foreground text-xs">
+					{agent.adminOnly ? t("adminOnly") : t("pausedHint")}
+				</p>
+			)}
 			<div className="flex flex-wrap gap-2">
-				<Button variant="outline" size="sm" disabled={busy} onClick={onRotate}>
+				<Button
+					variant="outline"
+					size="sm"
+					disabled={busy || agent.adminOnly}
+					onClick={onRotate}
+				>
 					<KeyRoundIcon />
 					{agent.enabled ? t("rotate") : t("enable")}
 				</Button>

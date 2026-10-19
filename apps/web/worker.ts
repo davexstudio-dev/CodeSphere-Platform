@@ -4,6 +4,8 @@
 // this file).
 import {
 	apiFetch,
+	apiQueue,
+	apiScheduled,
 	isApiPath,
 	type WorkerContext,
 	type WorkerEnv,
@@ -25,5 +27,21 @@ export default {
 			return apiFetch(request, env, ctx);
 		}
 		return openNext.fetch(request, env, ctx);
+	},
+	// Cron Triggers (apps/web/wrangler.jsonc): drain the outbox every minute (#259), read the watch
+	// feed's Sources every half hour (#255).
+	async scheduled(
+		event: { cron?: string },
+		env: WorkerEnv,
+		ctx: WorkerContext,
+	): Promise<void> {
+		await apiScheduled(env, ctx, event.cron);
+	},
+	// Cloudflare Queues consumer of the outbox's events (#259).
+	async queue(
+		batch: Parameters<typeof apiQueue>[0],
+		env: WorkerEnv,
+	): Promise<void> {
+		await apiQueue(batch, env);
 	},
 };

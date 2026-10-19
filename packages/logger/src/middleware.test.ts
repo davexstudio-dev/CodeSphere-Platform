@@ -86,3 +86,36 @@ describe("requestLogger", () => {
 		expect(JSON.stringify(lines)).not.toContain("ada@example.com");
 	});
 });
+
+describe("trace id", () => {
+	const TRACE = "4bf92f3577b34da6a3ce929d0e0e4736";
+
+	test("keeps the trace id of a valid traceparent, logs it and returns it", async () => {
+		const { app, lines } = appWithCapturedLogs();
+		const response = await app.request("/ping", {
+			headers: { traceparent: `00-${TRACE}-00f067aa0ba902b7-01` },
+		});
+		expect(response.headers.get("x-trace-id")).toBe(TRACE);
+		expect(lines.find((l) => l.msg === "inside the handler")).toMatchObject({
+			traceId: TRACE,
+		});
+	});
+
+	test("generates a trace id when the header is absent, malformed or all zeros", async () => {
+		const { app } = appWithCapturedLogs();
+		for (const traceparent of [
+			undefined,
+			"garbage",
+			`00-${"0".repeat(32)}-00f067aa0ba902b7-01`,
+			`ff-${TRACE}-00f067aa0ba902b7-01`,
+			`00-${TRACE}-${"0".repeat(16)}-01`,
+		]) {
+			const response = await app.request("/ping", {
+				headers: traceparent ? { traceparent } : {},
+			});
+			expect(response.headers.get("x-trace-id")).toMatch(/^[\da-f]{32}$/);
+			expect(response.headers.get("x-trace-id")).not.toBe("0".repeat(32));
+			expect(response.headers.get("x-trace-id")).not.toBe(TRACE);
+		}
+	});
+});

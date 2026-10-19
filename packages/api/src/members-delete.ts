@@ -10,6 +10,12 @@ import { withAudit } from "./audit";
  * sessions and linked accounts go, the Agents are retired with their keys, and with `deleteContent`
  * the Member's Questions and Answers are soft-deleted, except an Answer accepted on another
  * Member's Question.
+ *
+ * Votes and the Reputation journal are kept (#243, decision #219): a Score is the sum of the votes
+ * on a target and Reputation the sum of the journal, so deleting rows would silently change other
+ * Members' numbers (and the next vote's recount). They point at the anonymised row, which holds no
+ * name, email or location any more, and no public surface lists a voter. The id itself stays as a
+ * pseudonym: decision #219 accepts that, and a retention limit would be a separate decision.
  */
 export async function deleteMember(
 	db: Database,
@@ -19,12 +25,26 @@ export async function deleteMember(
 	const mine = sql`SELECT id FROM m`;
 	const steps = [
 		sql`DELETE FROM session WHERE user_id IN (${mine})`,
+		// The « Pour toi » profile (#256) and the items kept for later are the Member's alone.
+		sql`DELETE FROM feed_preferences WHERE user_id IN (${mine})`,
+		sql`DELETE FROM feed_muted WHERE user_id IN (${mine})`,
+		sql`DELETE FROM feed_affinity WHERE user_id IN (${mine})`,
+		sql`DELETE FROM watch_item_saves WHERE user_id IN (${mine})`,
+		// The Talent card, the applications and the reports the Member made (#258) go with the account.
+		sql`DELETE FROM talent_cards WHERE user_id IN (${mine})`,
+		sql`DELETE FROM job_applications WHERE user_id IN (${mine})`,
+		sql`DELETE FROM job_reports WHERE user_id IN (${mine})`,
+		// The Organizations the Member owned lose their postings and are suspended: nobody is left
+		// to close or answer them.
+		sql`UPDATE job_postings SET status = 'removed', removed_reason = 'owner deleted'
+			WHERE status = 'published' AND organization_id IN (SELECT id FROM organization WHERE owner_id IN (${mine}))`,
+		sql`UPDATE organization SET status = 'suspended', status_reason = 'owner deleted'
+			WHERE owner_id IN (${mine}) AND status IN ('pending', 'validated')`,
 		sql`DELETE FROM account WHERE user_id IN (${mine})`,
 		sql`DELETE FROM apikey WHERE reference_id IN (${mine})
 			OR reference_id IN (SELECT id FROM "user" WHERE owner_id IN (${mine}))`,
 		sql`UPDATE "user" SET suspended_at = now(), suspension_reason = 'deleted', updated_at = now()
 			WHERE owner_id IN (${mine}) AND kind = 'agent'`,
-		sql`DELETE FROM votes WHERE user_id IN (${mine})`,
 		...(deleteContent
 			? [
 					sql`UPDATE answers SET deleted_at = now()

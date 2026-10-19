@@ -58,6 +58,19 @@ export const ListQuestionsInput = z.object({
 
 export const QuestionPage = Page(QuestionListItem);
 
+export const SearchQuestionsInput = z.object({
+	/** What to look for: words in French or English, accents and typos forgiven. */
+	q: z.string().trim().min(3).max(200),
+	language: z.enum(["fr", "en"]).optional(),
+	cursor: z.string().optional(),
+	limit: z.number().int().min(1).max(50).default(20),
+});
+
+export const SimilarQuestionsInput = z.object({
+	/** The title being typed: Questions with a close title are returned. */
+	title: z.string().trim().max(200),
+});
+
 export const QuestionDetail = QuestionSummary.extend({
 	body: Markdown,
 	bodyHtml: z.string(),
@@ -135,6 +148,53 @@ export const questionsContract = {
 		)
 		.input(ListQuestionsInput)
 		.output(QuestionPage),
+
+	search: base
+		.errors({
+			BAD_REQUEST: {
+				data: z.object({
+					issues: z.array(
+						z.object({
+							path: z.array(z.union([z.string(), z.number()])),
+							message: z.string(),
+						}),
+					),
+				}),
+			},
+		})
+		.meta(
+			openapi({
+				method: "GET",
+				path: "/questions/search",
+				tags: ["questions"],
+				summary: "Search questions",
+				description:
+					"Full-text search over titles, bodies and Tags in French and English, most relevant first. Accents are ignored and a typo in a title is forgiven. At least 3 characters (400 otherwise). Paginated by an opaque cursor, up to 10 000 results: follow `nextCursor`, since a page can be shorter than `limit` when a result was removed meanwhile. Public.",
+			}),
+		)
+		.meta(
+			mcp.tool({
+				description:
+					"Search Questions by words (French or English), most relevant first.",
+				annotations: { readOnlyHint: true },
+			}),
+		)
+		.input(SearchQuestionsInput)
+		.output(QuestionPage),
+
+	similar: base
+		.meta(
+			openapi({
+				method: "GET",
+				path: "/questions/similar",
+				tags: ["questions"],
+				summary: "Find questions with a similar title",
+				description:
+					"Up to 5 live Questions whose title is close to the one given, closest first, to warn about a duplicate while a title is typed. Empty for a title under 8 characters. Never an error for what is typed. Public.",
+			}),
+		)
+		.input(SimilarQuestionsInput)
+		.output(z.object({ items: z.array(QuestionListItem) })),
 
 	get: base
 		.errors({ NOT_FOUND: {} })

@@ -71,6 +71,18 @@ export function createNotifications(
 ): NonNullable<Context["notifications"]> {
 	const mail = createEmailClient(env);
 	return {
+		async agentPaused(member, agentName) {
+			const result = await mail.send({
+				to: member.email,
+				...composeEmail({
+					kind: "agent-paused",
+					props: { name: member.name, agentName },
+				}),
+			});
+			if (result.status === "failed") {
+				logger.warn({ message: result.message }, "agent paused email not sent");
+			}
+		},
 		async apiKeyCreated(member, keyName) {
 			const result = await mail.send({
 				to: member.email,

@@ -1,13 +1,18 @@
 /// <reference types="bun" />
 // #122: admin mutations never reach the MCP server. They are documented over REST for staff only.
 import { describe, expect, test } from "bun:test";
+import { contract } from "@codesphere/contract";
 import { OpenAPIGenerator, openapi } from "@orpc/openapi";
 import { os } from "@orpc/server";
 import { ZodToJsonSchemaConverter } from "@orpc/zod";
 import { mcp } from "orpc-mcp";
 import { MCPHandler } from "orpc-mcp/fetch";
-
-import { exposedOverMCP, exposedOverOpenAPI, mcpTools } from "./exposure";
+import {
+	exposedOverMCP,
+	exposedOverOpenAPI,
+	isWatchSubmission,
+	mcpTools,
+} from "./exposure";
 import { appRouter } from "./routers";
 
 const mutation = os
@@ -166,5 +171,14 @@ describe("the MCP handler's catalog gate", () => {
 		expect(res.error).toMatchObject({
 			message: "Unknown tool: admin_tags_create",
 		});
+	});
+});
+
+describe("isWatchSubmission", () => {
+	test("a curate key may propose a link and nothing else", () => {
+		expect(isWatchSubmission(contract.watch.submit)).toBe(true);
+		expect(isWatchSubmission(contract.watch.vote)).toBe(false);
+		expect(isWatchSubmission(contract.watch.list)).toBe(false);
+		expect(isWatchSubmission(contract.questions.create)).toBe(false);
 	});
 });

@@ -4,8 +4,8 @@ import { Button } from "@codesphere/ui/components/atoms/button";
 import { ThemeToggle } from "@codesphere/ui/components/molecules/theme-toggle";
 import { AppHeader } from "@codesphere/ui/components/organisms/app-header";
 import { PlusIcon } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Link from "@/components/link";
 
 import LocaleSwitcher from "@/components/locale-switcher";
 import { MobileMenu } from "@/components/mobile-menu";

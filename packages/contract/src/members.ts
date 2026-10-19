@@ -82,7 +82,58 @@ export const MemberExport = z.object({
 			createdAt: z.string().datetime(),
 		}),
 	),
+	reputationJournal: z.array(
+		z.object({
+			kind: z.enum([
+				"upvote_received",
+				"downvote_received",
+				"downvote_cast",
+				"answer_accepted",
+				"accept_given",
+			]),
+			points: z.number().int(),
+			cause: z.enum(["vote", "accept"]),
+			targetType: z.enum(["question", "answer"]),
+			targetId: z.string(),
+			/** Set when an anti-farming rule cancelled the event: its points count for nothing. */
+			voidedReason: z
+				.enum(["new_account", "repeat_voter", "daily_cap"])
+				.nullable(),
+			createdAt: z.string().datetime(),
+		}),
+	),
 	followedTags: z.array(z.string()),
+	/** What shapes the « Pour toi » feed (#256): the choices made and the weights learned. */
+	feedProfile: z.object({
+		personalization: z.boolean(),
+		language: z.enum(["fr", "en"]).nullable(),
+		muted: z.array(
+			z.object({ kind: z.enum(["tag", "source"]), key: z.string() }),
+		),
+		affinity: z.array(z.object({ tag: z.string(), weight: z.number() })),
+	}),
+	/** The optional profile for recruiters (#258), when the Member ever set one. */
+	talentCard: z
+		.object({
+			enabled: z.boolean(),
+			openToContact: z.boolean(),
+			headline: z.string().nullable(),
+			codeUrl: z.string().nullable(),
+			contactEmail: z.string().nullable(),
+		})
+		.nullable(),
+	/** Job postings the Member applied to through CodeSphere. */
+	jobApplications: z.array(
+		z.object({
+			jobId: z.string(),
+			sharedCard: z.boolean(),
+			createdAt: z.string().datetime(),
+		}),
+	),
+	/** Watch items the Member kept for later. */
+	keptItems: z.array(
+		z.object({ itemId: z.string(), url: z.string(), title: z.string() }),
+	),
 	agents: z.array(
 		z.object({
 			id: z.string(),

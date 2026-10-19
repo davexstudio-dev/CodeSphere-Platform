@@ -4,18 +4,22 @@ import { Button } from "@codesphere/ui/components/atoms/button";
 import { AdminShell } from "@codesphere/ui/components/organisms/admin-shell";
 import {
 	BarChart3Icon,
+	BriefcaseIcon,
+	BuildingIcon,
+	GaugeIcon,
 	LogOutIcon,
+	RssIcon,
+	ScaleIcon,
 	ScrollTextIcon,
 	ShareIcon,
 	ShieldIcon,
 	TagIcon,
 	TrophyIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-
 import { useAdminIdentity } from "@/components/admin-identity";
+import Link from "@/components/link";
 import LocaleSwitcher from "@/components/locale-switcher";
 import { authClient } from "@/lib/auth-client";
 
@@ -24,7 +28,16 @@ const NAV = [
 	{ key: "moderation.title", href: "/admin", icon: ShieldIcon },
 	{ key: "hackathons.title", href: "/admin/hackathons", icon: TrophyIcon },
 	{ key: "tags.title", href: "/admin/tags", icon: TagIcon },
+	{
+		key: "organizations.title",
+		href: "/admin/organizations",
+		icon: BuildingIcon,
+	},
+	{ key: "jobs.title", href: "/admin/jobs", icon: BriefcaseIcon },
+	{ key: "watch.title", href: "/admin/watch", icon: RssIcon },
 	{ key: "social.title", href: "/admin/social", icon: ShareIcon },
+	{ key: "vitals.title", href: "/admin/vitals", icon: GaugeIcon },
+	{ key: "reputation.title", href: "/admin/reputation", icon: ScaleIcon },
 	{ key: "audit.title", href: "/admin/audit", icon: ScrollTextIcon },
 ] as const;
 

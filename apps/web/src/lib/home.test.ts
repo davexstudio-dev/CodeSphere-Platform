@@ -1,7 +1,13 @@
 /// <reference types="bun" />
 import { describe, expect, test } from "bun:test";
 
-import { firstName, greetingKey, submissionClose, visibleItems } from "./home";
+import {
+	firstName,
+	greetingKey,
+	submissionClose,
+	visibleEntries,
+	visibleItems,
+} from "./home";
 
 describe("submissionClose", () => {
 	test("is the start of the submission_close Milestone", () => {
@@ -78,5 +84,43 @@ describe("visibleItems", () => {
 		expect(
 			visibleItems(items, { ...all, country: "CI" }).map((i) => i.id),
 		).toEqual(["c"]);
+	});
+});
+
+describe("visibleEntries", () => {
+	const question = (id: string, over = {}) => ({
+		kind: "question" as const,
+		question: {
+			id,
+			authorKind: "human" as const,
+			language: "fr",
+			authorCountry: "SN",
+			...over,
+		},
+	});
+	const link = (id: string, language = "fr") => ({
+		kind: "watch" as const,
+		item: { id, language },
+	});
+	const all = { language: "all", country: "all", hideAgents: false };
+
+	test("applies the Question rules and keeps each entry once", () => {
+		const entries = [
+			question("q1"),
+			question("q1"),
+			question("q2", { authorKind: "agent" }),
+			link("w1"),
+		];
+		expect(
+			visibleEntries(entries, { ...all, hideAgents: true }).map((e) => e.kind),
+		).toEqual(["question", "watch"]);
+	});
+
+	test("a language filter reaches watch items, a country filter leaves them out", () => {
+		const entries = [question("q1"), link("w1", "en"), link("w2", "fr")];
+		expect(visibleEntries(entries, { ...all, language: "fr" })).toHaveLength(2);
+		expect(
+			visibleEntries(entries, { ...all, country: "SN" }).map((e) => e.kind),
+		).toEqual(["question"]);
 	});
 });

@@ -4,7 +4,12 @@ import * as z from "zod";
 
 import { base, ExpectedVersion, Id, Page, PageInput, Timestamp } from "./base";
 import { Hackathon, JudgingCriterion, Milestone, Prize } from "./hackathons";
+import { jobsAdminContract } from "./jobs";
 import { MemberSummary } from "./members";
+import { organizationsAdminContract } from "./organizations";
+import { teamsAdminContract } from "./teams";
+import { vitalsAdminContract } from "./vitals";
+import { watchAdminContract } from "./watch";
 
 export const AuditEvent = z.object({
 	id: z.string(),
@@ -20,6 +25,27 @@ export const AuditEvent = z.object({
 		})
 		.nullable(),
 	createdAt: Timestamp,
+});
+
+/** A Reputation event the anti-farming rules cancelled (#241), with who gave it to whom. */
+export const ReputationFlag = z.object({
+	id: z.string(),
+	reason: z.enum(["new_account", "repeat_voter", "daily_cap"]),
+	/** A vote, or an acceptance (whose "voter" is then the Question's author). */
+	cause: z.enum(["vote", "accept"]),
+	/** The points that were not counted. */
+	points: z.number().int(),
+	kind: z.string(),
+	voter: z.object({ id: z.string(), name: z.string() }),
+	author: z.object({ id: z.string(), name: z.string() }),
+	targetType: z.enum(["question", "answer"]),
+	targetId: z.string(),
+	createdAt: Timestamp,
+});
+
+export const ReputationFlagFilter = PageInput.extend({
+	/** Defaults to `repeat_voter`, the case reported to the Admins; the others are automatic. */
+	reason: z.enum(["new_account", "repeat_voter", "daily_cap"]).optional(),
 });
 
 export const AuditLogFilter = PageInput.extend({
@@ -39,13 +65,15 @@ export const HackathonUpdate = z
 		slug: z.string(),
 		expectedVersion: ExpectedVersion,
 		name: z.string().trim().min(1).max(120).optional(),
-		organizer: z.string().trim().min(1).max(120).optional(),
+		/** Slug of a validated Organization (#257). */
+		organizationSlug: z.string().trim().min(1).max(120).optional(),
 		summary: z.string().trim().min(1).max(2000).optional(),
 		teamMin: z.number().int().min(1).max(50).optional(),
 		teamMax: z.number().int().min(1).max(50).optional(),
 		sourceUrl: z.url().optional(),
 		sourceNote: z.string().trim().max(500).nullable().optional(),
 		verifiedAt: Timestamp.optional(),
+		opensAt: Timestamp.nullable().optional(),
 		milestones: z
 			.array(Milestone.extend({ label: z.string().trim().min(1).max(160) }))
 			.max(20)
@@ -128,6 +156,10 @@ export const AdminTag = z.object({
 	questionCount: z.number().int().min(0),
 	/** Slug of the Hackathon that owns the Tag, which then cannot be renamed or deleted. */
 	ownerHackathon: z.string().nullable(),
+	/** Reserved by an Admin: it can be neither renamed nor deleted. */
+	reserved: z.boolean(),
+	/** Relied on by the product itself: always reserved, the reservation cannot be lifted. */
+	system: z.boolean(),
 });
 
 /** Name of a Tag: normalized (trimmed, lowercase) like the Tags of a Question. */
@@ -236,7 +268,18 @@ export const adminContract = {
 			.output(z.object({ items: z.array(AdminTag) })),
 		create: base
 			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, CONFLICT: {} })
-			.input(z.object({ name: TagName }))
+			.input(z.object({ name: TagName, reserved: z.boolean().default(false) }))
+			.output(AdminTag),
+		/** Reserves a Tag (kept as is) or lifts the reservation; a system Tag stays reserved. */
+		setReserved: base
+			.errors(tagErrors)
+			.input(
+				z.object({
+					id: Id,
+					reserved: z.boolean(),
+					expectedVersion: ExpectedVersion,
+				}),
+			)
 			.output(AdminTag),
 		rename: base
 			.errors(tagErrors)
@@ -304,6 +347,11 @@ export const adminContract = {
 			.input(z.object({ id: z.string() }))
 			.output(AdminMember),
 	},
+	jobs: jobsAdminContract,
+	organizations: organizationsAdminContract,
+	teams: teamsAdminContract,
+	webVitals: vitalsAdminContract,
+	watch: watchAdminContract,
 	auditLog: {
 		list: base
 			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
@@ -327,6 +375,22 @@ export const adminContract = {
 			.input(AuditLogFilter)
 			.output(Page(AuditEvent)),
 	},
+	reputationFlags: {
+		list: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
+			.meta(
+				openapi({
+					method: "GET",
+					path: "/admin/reputation-flags",
+					tags: ["admin"],
+					summary: "List cancelled Reputation events",
+					description:
+						"Reputation events the anti-farming rules cancelled, newest first: by default the repeated votes of one voter on one author (repeat_voter). They stay in the journal, voided, and count for nothing. Requires a staff role.",
+				}),
+			)
+			.input(ReputationFlagFilter)
+			.output(Page(ReputationFlag)),
+	},
 	hackathons: {
 		update: base
 			.errors(staffErrors)
@@ -342,6 +406,22 @@ export const adminContract = {
 			)
 			.input(HackathonUpdate)
 			.output(Hackathon),
+	},
+	agents: {
+		reactivate: base
+			.errors(staffErrors)
+			.meta(
+				openapi({
+					method: "POST",
+					path: "/admin/agents/{id}/reactivate",
+					tags: ["admin"],
+					summary: "Bring back a paused agent",
+					description:
+						"Enables the Agent's key again and ends its pause, however many times it was paused (the Owner can lift only the first pause). Requires a staff role. Audited.",
+				}),
+			)
+			.input(z.object({ id: z.string().min(1) }))
+			.output(z.object({ success: z.boolean() })),
 	},
 	questions: {
 		remove: base

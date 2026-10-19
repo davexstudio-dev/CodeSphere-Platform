@@ -173,7 +173,8 @@ jobs:
           NEXT_PUBLIC_SERVER_URL: https://${{ env.PREVIEW_NAME }}.${{ env.PREVIEW_DOMAIN }}
           # Every preview has its own Neon database (the database job): the app uses it.
           NEXT_PUBLIC_HAS_DATABASE: "true"
-        run: bunx opennextjs-cloudflare build
+        # cf:build compiles the service worker (public/sw.js, #249) before OpenNext bundles the assets.
+        run: bun run cf:build
 
       - uses: actions/upload-artifact@v4
         with:
@@ -189,6 +190,8 @@ jobs:
   deploy:
     name: Deploy preview
     needs: [database, build]
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
     # always(): a failed or skipped stage must turn THIS check red. Without it the job would be
     # skipped, and a skipped required check counts as passed for the merge rule.
     if: >
@@ -308,6 +311,83 @@ jobs:
             const marker = '<!-- preview-url -->';
             const sha = context.payload.pull_request.head.sha.slice(0, 7);
             const body = `${marker}\n**Preview:** ${process.env.PREVIEW_URL}\n\nCommit \`${sha}\`. Removed when this pull request closes.`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            const existing = comments.find((c) => c.body?.startsWith(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+  # Stage 4: Lighthouse CI against the preview (#248, budgets of map #224). The budgets live in
+  # apps/web/lighthouse/lib.cjs: LCP and initial JS fail the pull request at once, the other
+  # budgets warn until 2 Nov 2026. The results are a table in the job summary and one PR comment.
+  lighthouse:
+    name: Lighthouse budgets
+    needs: deploy
+    if: >
+      always() &&
+      github.event.action != 'closed' &&
+      needs.deploy.result == 'success' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/web
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Bot Fight Mode challenges GitHub runners (see the reachability check above): the audit
+      # would measure the challenge page, so it is skipped with a notice rather than faked.
+      - name: Pick the pages to audit
+        id: pages
+        working-directory: apps/web
+        env:
+          PREVIEW_URL: ${{ needs.deploy.outputs.url }}
+        run: |
+          code=0
+          urls=$(node lighthouse/run.cjs urls "$PREVIEW_URL") || code=$?
+          if [ "$code" = "3" ]; then
+            echo "::notice::Lighthouse budgets not checked: Cloudflare challenged the runner. Add a WAF skip rule for this job to enforce them."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          elif [ "$code" != "0" ]; then
+            exit "$code"
+          else
+            echo "urls=$urls" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Lighthouse CI (timings)
+        if: steps.pages.outputs.skip != 'true'
+        working-directory: apps/web
+        env:
+          LHCI_URLS: ${{ steps.pages.outputs.urls }}
+        run: npx --yes @lhci/cli@0.15.1 autorun --config=lighthouserc.cjs
+      # Weights are checked on compressed bytes, which lhci's own assertions do not do.
+      - name: Report and check the weight budgets
+        id: report
+        if: always() && steps.pages.outputs.skip != 'true' && steps.pages.outcome == 'success'
+        working-directory: apps/web
+        run: |
+          [ -f .lighthouseci/manifest.json ] || { echo "::error::Lighthouse produced no results"; exit 1; }
+          code=0
+          node lighthouse/run.cjs report > "$RUNNER_TEMP/lighthouse.md" || code=$?
+          cat "$RUNNER_TEMP/lighthouse.md" >> "$GITHUB_STEP_SUMMARY"
+          exit "$code"
+      - name: Comment the results
+        if: always() && steps.pages.outputs.skip != 'true' && steps.report.outcome != 'skipped'
+        uses: actions/github-script@v7
+        env:
+          REPORT: ${{ runner.temp }}/lighthouse.md
+        with:
+          script: |
+            const fs = require('node:fs');
+            // A crashed report leaves an empty file: keep the last good comment.
+            if (!fs.existsSync(process.env.REPORT) || fs.statSync(process.env.REPORT).size === 0) return;
+            const marker = '<!-- lighthouse -->';
+            const body = `${marker}\n**Lighthouse budgets**\n\n${fs.readFileSync(process.env.REPORT, 'utf8')}`;
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
             const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });

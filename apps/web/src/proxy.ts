@@ -19,6 +19,9 @@ export function proxy(request: NextRequest) {
 
 	const response = NextResponse.next({ request: { headers: requestHeaders } });
 	response.headers.set("Content-Security-Policy", csp);
+	// The page differs with the browser's Save-Data header (data saver mode, #250).
+	// ...and with the Member's stored choice, a cookie.
+	response.headers.append("Vary", "Save-Data, Cookie");
 	for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
 		response.headers.set(name, value);
 	}
@@ -30,7 +33,7 @@ export const config = {
 		{
 			// Pages only: the API paths are the server's, static files carry no script.
 			source:
-				"/((?!api/|rpc|mcp|_next/static|_next/image|favicon.ico|robots.txt|og-default.png).*)",
+				"/((?!api/|rpc|mcp|_next/static|_next/image|favicon.ico|robots.txt|og-default.png|sw.js|icons/|manifest.webmanifest).*)",
 			// A prefetch is not rendered as a page: no nonce to draw.
 			missing: [
 				{ type: "header", key: "next-router-prefetch" },

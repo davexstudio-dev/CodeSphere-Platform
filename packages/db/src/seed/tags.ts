@@ -11,6 +11,8 @@ export const STARTER_TAGS = [
 	"sms",
 	"cadev-2026",
 	"hackathon",
+	// Reserved: the idea box of the public roadmap (#252) asks its Questions under this Tag.
+	"roadmap",
 	// Languages
 	"javascript",
 	"typescript",

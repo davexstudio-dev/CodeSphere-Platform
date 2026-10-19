@@ -27,7 +27,10 @@ export const JudgingCriterion = z.object({
 export const Hackathon = z.object({
 	slug: z.string(),
 	name: z.string(),
+	/** Name of the Organization that lists it. */
 	organizer: z.string(),
+	/** Slug of that Organization's public profile; null while it is not public (suspended). */
+	organizationSlug: z.string().nullable(),
 	summary: z.string(),
 	teamMin: z.number().int(),
 	teamMax: z.number().int(),
@@ -37,6 +40,8 @@ export const Hackathon = z.object({
 	sourceUrl: z.url(),
 	/** Where non-public information came from, shown next to « vérifié le ». */
 	sourceNote: z.string().nullable(),
+	/** When the Hackathon opens; null when unknown (no repository check then). */
+	opensAt: Timestamp.nullable(),
 	verifiedAt: Timestamp,
 	/** Increments on every edit; an Admin update with a stale version gets CONFLICT. */
 	version: z.number().int().min(1),

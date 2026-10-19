@@ -36,7 +36,8 @@ const SLUG = "cadev-2026";
 
 type Draft = {
 	name: string;
-	organizer: string;
+	/** Slug of the validated Organization that lists it (#257). */
+	organizationSlug: string;
 	summary: string;
 	teamMin: number;
 	teamMax: number;
@@ -67,6 +68,10 @@ export default function AdminHackathonsPage() {
 		orpc.hackathons.get.queryOptions({ input: { slug: SLUG } }),
 	);
 	const hackathon = query.data;
+	// Only validated Organizations can list a Hackathon (#257).
+	const organizations = useQuery(
+		orpc.organizations.list.queryOptions({ input: { limit: 50 } }),
+	);
 	const [draft, setDraft] = useState<Draft | null>(null);
 	const [confirming, setConfirming] = useState(false);
 	const [conflictVersion, setConflictVersion] = useState<number | null>(null);
@@ -75,7 +80,7 @@ export default function AdminHackathonsPage() {
 	const original: Draft | null = hackathon
 		? {
 				name: hackathon.name,
-				organizer: hackathon.organizer,
+				organizationSlug: hackathon.organizationSlug ?? "",
 				summary: hackathon.summary,
 				teamMin: hackathon.teamMin,
 				teamMax: hackathon.teamMax,
@@ -145,7 +150,7 @@ export default function AdminHackathonsPage() {
 			slug: SLUG,
 			expectedVersion: hackathon.version,
 			name: draft.name,
-			organizer: draft.organizer,
+			organizationSlug: draft.organizationSlug || undefined,
 			summary: draft.summary,
 			teamMin: draft.teamMin,
 			teamMax: draft.teamMax,
@@ -232,11 +237,31 @@ export default function AdminHackathonsPage() {
 											/>
 										</Field>
 										<Field id="h-organizer" label={t("organizer")}>
-											<Input
+											<select
 												id="h-organizer"
-												value={draft.organizer}
-												onChange={(e) => set("organizer", e.target.value)}
-											/>
+												className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+												value={draft.organizationSlug}
+												onChange={(e) =>
+													set("organizationSlug", e.target.value)
+												}
+											>
+												{/* The current organizer first, even when its profile is no longer public. */}
+												{!(organizations.data?.items ?? []).some(
+													(o) => o.slug === hackathon.organizationSlug,
+												) && (
+													<option
+														value={hackathon.organizationSlug ?? ""}
+														disabled={!hackathon.organizationSlug}
+													>
+														{hackathon.organizer}
+													</option>
+												)}
+												{(organizations.data?.items ?? []).map((o) => (
+													<option key={o.slug} value={o.slug}>
+														{o.name}
+													</option>
+												))}
+											</select>
 										</Field>
 										<div className="grid grid-cols-2 gap-3">
 											<Field id="h-min" label={t("teamMin")}>

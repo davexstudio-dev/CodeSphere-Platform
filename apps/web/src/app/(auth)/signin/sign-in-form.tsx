@@ -2,9 +2,9 @@
 
 import { CONSENT_VERSION } from "@codesphere/contract/consent";
 import { LoginPage } from "@codesphere/ui/components/organisms/login-page";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
+import Link from "@/components/link";
 
 import { signInErrorKey } from "@/lib/sign-in-error";
 import { useSsoSignIn } from "@/lib/use-sso-sign-in";

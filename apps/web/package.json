@@ -3,11 +3,13 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev --port 3001",
-		"build": "tsc -b ../../packages/contract && next build",
-		"check-types": "tsc -b ../../packages/contract && next typegen && tsc --noEmit",
+		"build": "bun run roadmap:build && bun run build:sw && tsc -b ../../packages/contract && next build",
+		"build:sw": "bun scripts/build-sw.mjs",
+		"roadmap:build": "bun scripts/build-roadmap.mjs",
+		"check-types": "tsc -b ../../packages/contract && next typegen && tsc --noEmit && tsc --noEmit -p src/sw",
 		"start": "next start",
 		"env:generate": "varlock codegen",
-		"cf:build": "opennextjs-cloudflare build"
+		"cf:build": "bun run roadmap:build && bun run build:sw && opennextjs-cloudflare build"
 	},
 	"dependencies": {
 		"@codesphere/api": "workspace:*",
@@ -24,6 +26,7 @@
 		"@varlock/nextjs-integration": "1.2.4",
 		"babel-plugin-react-compiler": "^1.0.0",
 		"better-auth": "catalog:",
+		"esbuild": "^0.28.2",
 		"idb-keyval": "^6.3.0",
 		"lucide-react": "catalog:",
 		"next": "16.3.8",
@@ -33,8 +36,10 @@
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"server": "workspace:*",
+		"serwist": "^9.5.13",
 		"sonner": "catalog:",
 		"varlock": "catalog:",
+		"web-vitals": "^6.2.3",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

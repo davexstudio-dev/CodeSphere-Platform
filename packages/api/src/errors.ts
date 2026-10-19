@@ -18,8 +18,14 @@ export const unexpectedErrors = impl.middleware(async ({ context, next }) => {
 			throw new ORPCError("SERVICE_UNAVAILABLE");
 		}
 		context.logger.error({ err: error }, "procedure failed");
+		try {
+			context.reportError?.(error);
+		} catch (reportFailure) {
+			// A broken tracker must not turn a logged failure into a different one.
+			context.logger.warn({ err: reportFailure }, "error report failed");
+		}
 		throw new ORPCError("INTERNAL_SERVER_ERROR", {
-			data: { requestId: context.requestId },
+			data: { requestId: context.requestId, traceId: context.traceId },
 		});
 	}
 });

@@ -49,7 +49,7 @@ describe.skipIf(!url)("admin.tags on Postgres (#125)", () => {
 		await db.delete(auditLog).where(eq(auditLog.actorId, adminId));
 		await db
 			.delete(tag)
-			.where(inArray(tag.name, [name("a"), name("b"), name("c")]));
+			.where(inArray(tag.name, [name("a"), name("b"), name("c"), name("r")]));
 		await db.delete(user).where(eq(user.id, adminId));
 	});
 
@@ -171,5 +171,174 @@ describe.skipIf(!url)("admin.tags on Postgres (#125)", () => {
 		await expect(clientAs("member").admin.tags.list({})).rejects.toMatchObject({
 			code: "FORBIDDEN",
 		});
+	});
+
+	test("a reserved Tag can be neither renamed nor deleted", async () => {
+		const reserved = await db
+			.select({ id: tag.id, version: tag.version })
+			.from(tag)
+			.where(eq(tag.name, "roadmap"))
+			.then((rows) => rows[0]);
+		if (!reserved) {
+			throw new Error("the roadmap Tag is not seeded");
+		}
+		await expect(
+			admin().admin.tags.delete({ id: reserved.id }),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+		await expect(
+			admin().admin.tags.rename({
+				id: reserved.id,
+				name: name("x"),
+				expectedVersion: reserved.version,
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+	});
+
+	test("an Admin reserves a Tag, which is then kept; lifting it is audited and versioned", async () => {
+		const created = await admin().admin.tags.create({
+			name: name("r"),
+			reserved: true,
+		});
+		expect(created).toMatchObject({ reserved: true, system: false });
+		await expect(
+			admin().admin.tags.delete({ id: created.id }),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+		await expect(
+			admin().admin.tags.rename({
+				id: created.id,
+				name: name("x"),
+				expectedVersion: created.version,
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+
+		const lifted = await admin().admin.tags.setReserved({
+			id: created.id,
+			reserved: false,
+			expectedVersion: created.version,
+		});
+		expect(lifted).toMatchObject({
+			reserved: false,
+			version: created.version + 1,
+		});
+		// A stale screen cannot overwrite the newer state.
+		await expect(
+			admin().admin.tags.setReserved({
+				id: created.id,
+				reserved: true,
+				expectedVersion: created.version,
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+		const again = await admin().admin.tags.setReserved({
+			id: created.id,
+			reserved: true,
+			expectedVersion: lifted.version,
+		});
+		expect(again.reserved).toBe(true);
+
+		const events = await db
+			.select({ action: auditLog.action })
+			.from(auditLog)
+			.where(eq(auditLog.targetId, created.id));
+		expect(events.map((e) => e.action).sort()).toEqual([
+			"tag.create",
+			"tag.reserve",
+			"tag.unreserve",
+		]);
+		await admin().admin.tags.setReserved({
+			id: created.id,
+			reserved: false,
+			expectedVersion: again.version,
+		});
+		await admin().admin.tags.delete({ id: created.id });
+	});
+
+	test("a system Tag stays reserved, and only staff may reserve", async () => {
+		const roadmap = await db
+			.select({ id: tag.id, version: tag.version })
+			.from(tag)
+			.where(eq(tag.name, "roadmap"))
+			.then((rows) => rows[0]);
+		if (!roadmap) throw new Error("the roadmap Tag is not seeded");
+		await expect(
+			admin().admin.tags.setReserved({
+				id: roadmap.id,
+				reserved: false,
+				expectedVersion: roadmap.version,
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+		await expect(
+			clientAs("member").admin.tags.setReserved({
+				id: roadmap.id,
+				reserved: true,
+				expectedVersion: roadmap.version,
+			}),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+		const listed = await admin().admin.tags.list({});
+		expect(listed.items.find((t) => t.name === "roadmap")).toMatchObject({
+			reserved: true,
+			system: true,
+		});
+	});
+
+	test("reserving is idempotent and refuses a Hackathon's Tag", async () => {
+		const tagRow = await admin().admin.tags.create({
+			name: name("b"),
+			reserved: true,
+		});
+		const same = await admin().admin.tags.setReserved({
+			id: tagRow.id,
+			reserved: true,
+			expectedVersion: tagRow.version,
+		});
+		expect(same.version).toBe(tagRow.version);
+		const events = await db
+			.select({ action: auditLog.action })
+			.from(auditLog)
+			.where(eq(auditLog.targetId, tagRow.id));
+		expect(events.map((e) => e.action)).toEqual(["tag.create"]);
+
+		const slug = name("hackres");
+		await seedHackathon(db, { ...cadev2026, slug });
+		const owned = await admin().admin.tags.create({ name: slug });
+		await expect(
+			admin().admin.tags.setReserved({
+				id: owned.id,
+				reserved: true,
+				expectedVersion: owned.version,
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+		await db.delete(hackathon).where(eq(hackathon.slug, slug));
+		await db.delete(tag).where(inArray(tag.id, [owned.id, tagRow.id]));
+	});
+
+	test("reserving is idempotent and refuses a Hackathon's Tag", async () => {
+		const row = await admin().admin.tags.create({
+			name: name("b2"),
+			reserved: true,
+		});
+		const same = await admin().admin.tags.setReserved({
+			id: row.id,
+			reserved: true,
+			expectedVersion: row.version,
+		});
+		expect(same.version).toBe(row.version);
+		const events = await db
+			.select({ action: auditLog.action })
+			.from(auditLog)
+			.where(eq(auditLog.targetId, row.id));
+		expect(events.map((e) => e.action)).toEqual(["tag.create"]);
+
+		const slug = name("hackres");
+		await seedHackathon(db, { ...cadev2026, slug });
+		const owned = await admin().admin.tags.create({ name: slug });
+		await expect(
+			admin().admin.tags.setReserved({
+				id: owned.id,
+				reserved: true,
+				expectedVersion: owned.version,
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+		await db.delete(hackathon).where(eq(hackathon.slug, slug));
+		await db.delete(tag).where(inArray(tag.id, [owned.id, row.id]));
 	});
 });

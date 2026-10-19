@@ -14,6 +14,11 @@ export {
 	type AccountDeletedProps,
 } from "./templates/account-deleted";
 export {
+	AGENT_PAUSED_SUBJECTS,
+	AgentPaused,
+	type AgentPausedProps,
+} from "./templates/agent-paused";
+export {
 	API_KEY_CREATED_SUBJECTS,
 	ApiKeyCreated,
 	type ApiKeyCreatedProps,

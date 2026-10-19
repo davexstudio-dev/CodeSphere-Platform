@@ -15,6 +15,23 @@
 	// and certificate).
 	// Required by `wrangler preview`, even empty: settings overridden for previews only.
 	"previews": {},
+	// Every minute the outbox is drained into the queue (#259); every 30 minutes the watch feed also
+	// reads its Sources (#255).
+	"triggers": { "crons": ["* * * * *", "*/30 * * * *"] },
+	// The events of the outbox (#259, docs/outbox.md): this Worker produces and consumes them. Create
+	// the queues once: `wrangler queues create codesphere-events` and `codesphere-events-dlq`.
+	"queues": {
+		"producers": [{ "binding": "EVENTS", "queue": "codesphere-events" }],
+		"consumers": [
+			{
+				"queue": "codesphere-events",
+				"max_batch_size": 10,
+				"max_batch_timeout": 5,
+				"max_retries": 6,
+				"dead_letter_queue": "codesphere-events-dlq"
+			}
+		]
+	},
 	"routes": [
 		{
 			"pattern": "preview.codesphereplatform.xyz",

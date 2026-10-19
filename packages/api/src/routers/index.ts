@@ -2,10 +2,12 @@ import { type contract, MEMBER_SUSPENDED_MESSAGE } from "@codesphere/contract";
 import { auditLog } from "@codesphere/db/schema/audit";
 import { user } from "@codesphere/db/schema/auth";
 import { questions } from "@codesphere/db/schema/questions";
+import { reputationEvents } from "@codesphere/db/schema/reputation";
 import { SocialConnectError } from "@codesphere/social";
 import type { RouterContractClient } from "@orpc/contract";
 import { ORPCError } from "@orpc/server";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { updateHackathon } from "../admin-hackathons";
 import { kpiReport } from "../admin-kpi";
 import { listMembers, setSuspension } from "../admin-members";
@@ -14,18 +16,35 @@ import {
 	createSocialPostStore,
 	publishShare,
 } from "../admin-social";
-import { createTag, deleteTag, listTags, renameTag } from "../admin-tags";
+import {
+	createTag,
+	deleteTag,
+	listTags,
+	renameTag,
+	setTagReserved,
+} from "../admin-tags";
 import { createAgentsHandlers } from "../agents/handlers";
-import { agentPreset } from "../agents/service";
+import { AgentError, agentPreset, createAgentService } from "../agents/service";
 import { requireAdmin } from "../authorization";
+import { communitySnapshot } from "../community/service";
 import { decodeCursor, encodeCursor } from "../cursor";
 import { unexpectedErrors } from "../errors";
-import { isRead } from "../exposure";
+import { isRead, isWatchSubmission } from "../exposure";
+import { createMixedFeedHandlers } from "../feed-mixed/handlers";
 import { loadHackathons } from "../hackathons";
 import { impl } from "../index";
+import {
+	createJobsAdminHandlers,
+	createJobsHandlers,
+	createTalentHandlers,
+} from "../jobs/handlers";
 import { sanitizeMarkdown } from "../markdown/sanitizer";
 import { deleteMember } from "../members-delete";
 import { exportMember } from "../members-export";
+import {
+	createOrganizationsAdminHandlers,
+	createOrganizationsHandlers,
+} from "../organizations/handlers";
 import { ownProfile, publicProfile } from "../profile";
 import {
 	createAnswersHandlers,
@@ -35,6 +54,7 @@ import {
 } from "../questions/handlers";
 import { createQuestionService, QuestionError } from "../questions/service";
 import { consume, socialLimiter } from "../rate-limit";
+import { createRankingsHandlers } from "../reputation/handlers";
 import { reputationOf } from "../reputation/service";
 import { isSuspended } from "../suspension";
 import {
@@ -44,6 +64,15 @@ import {
 	skipTagsOnboarding,
 	unfollowTag,
 } from "../tags";
+import {
+	createTeamsAdminHandlers,
+	createTeamsHandlers,
+} from "../teams/handlers";
+import { webVitalsByCountry } from "../vitals/service";
+import {
+	createWatchAdminHandlers,
+	createWatchHandlers,
+} from "../watch/handlers";
 
 // The authorization guard behind every admin procedure (spec §2). Throws the typed
 // UNAUTHORIZED / FORBIDDEN error declared on the admin contract.
@@ -124,9 +153,17 @@ const enforceAgentPreset = impl.middleware(
 			| { id: string; kind?: string }
 			| undefined;
 		if (user?.kind === "agent" && !isRead(procedure)) {
-			if ((await agentPreset(context.db, user.id)) !== "contribute") {
+			const preset = await agentPreset(context.db, user.id);
+			// `curate` may only propose links to the watch feed (#255).
+			const allowed =
+				preset === "contribute" ||
+				(preset === "curate" && isWatchSubmission(procedure));
+			if (!allowed) {
 				throw new ORPCError("FORBIDDEN", {
-					message: "This key is read-only.",
+					message:
+						preset === "curate"
+							? "This key may only propose watch links."
+							: "This key is read-only.",
 				});
 			}
 		}
@@ -236,7 +273,13 @@ export const appRouter = impl
 				if (!row) {
 					throw errors.NOT_FOUND();
 				}
-				return publicProfile(row, await reputationOf(context.db, row));
+				// A deleted Member's journal is kept (#243), but its total is not shown.
+				return publicProfile(
+					row,
+					row.suspensionReason === "deleted"
+						? 0
+						: await reputationOf(context.db, row),
+				);
 			}),
 		},
 		hackathons: {
@@ -351,9 +394,23 @@ export const appRouter = impl
 							context.db,
 							actorOf(context.session),
 							input.name,
+							input.reserved,
 						);
 						if (!outcome.ok) {
 							throw errors.CONFLICT();
+						}
+						return outcome.tag;
+					}),
+				setReserved: impl.admin.tags.setReserved
+					.use(isAdmin)
+					.handler(async ({ context, input, errors }) => {
+						const outcome = await setTagReserved(
+							context.db,
+							actorOf(context.session),
+							input,
+						);
+						if (!outcome.ok) {
+							throw tagRefusal(outcome.code, errors);
 						}
 						return outcome.tag;
 					}),
@@ -477,6 +534,85 @@ export const appRouter = impl
 						return outcome.publication;
 					}),
 			},
+			watch: createWatchAdminHandlers(),
+			organizations: createOrganizationsAdminHandlers(),
+			jobs: createJobsAdminHandlers(),
+			teams: createTeamsAdminHandlers(),
+			webVitals: {
+				byCountry: impl.admin.webVitals.byCountry
+					.use(isAdmin)
+					.handler(({ context, input }) =>
+						webVitalsByCountry(context.db, input.days),
+					),
+			},
+			reputationFlags: {
+				list: impl.admin.reputationFlags.list
+					.use(isAdmin)
+					.handler(async ({ context, input, errors }) => {
+						const position = input.cursor ? decodeCursor(input.cursor) : null;
+						if (input.cursor && !position) {
+							throw errors.BAD_REQUEST({
+								data: {
+									issues: [{ path: ["cursor"], message: "Invalid cursor" }],
+								},
+							});
+						}
+						const voter = alias(user, "voter");
+						const author = alias(user, "author");
+						const rows = await context.db
+							.select({
+								event: reputationEvents,
+								voterName: voter.name,
+								authorName: author.name,
+							})
+							.from(reputationEvents)
+							.innerJoin(voter, eq(voter.id, reputationEvents.actorId))
+							.innerJoin(author, eq(author.id, reputationEvents.userId))
+							.where(
+								and(
+									eq(
+										reputationEvents.voidedReason,
+										input.reason ?? "repeat_voter",
+									),
+									position
+										? or(
+												lt(reputationEvents.createdAt, position.createdAt),
+												and(
+													eq(reputationEvents.createdAt, position.createdAt),
+													lt(reputationEvents.id, position.id),
+												),
+											)
+										: undefined,
+								),
+							)
+							.orderBy(
+								desc(reputationEvents.createdAt),
+								desc(reputationEvents.id),
+							)
+							.limit(input.limit + 1);
+						const page = rows.slice(0, input.limit);
+						const last = page.at(-1)?.event;
+						return {
+							items: page.map(({ event, voterName, authorName }) => ({
+								id: event.id,
+								// Non-null: the query filters on a reason.
+								reason: event.voidedReason ?? "repeat_voter",
+								cause: event.cause,
+								points: event.points,
+								kind: event.kind,
+								voter: { id: event.actorId, name: voterName },
+								author: { id: event.userId, name: authorName },
+								targetType: event.targetType,
+								targetId: event.targetId,
+								createdAt: event.createdAt.toISOString(),
+							})),
+							nextCursor:
+								rows.length > input.limit && last
+									? encodeCursor(last.createdAt, last.id)
+									: null,
+						};
+					}),
+			},
 			auditLog: {
 				list: impl.admin.auditLog.list
 					.use(isAdmin)
@@ -531,6 +667,28 @@ export const appRouter = impl
 									? encodeCursor(last.createdAt, last.id)
 									: null,
 						};
+					}),
+			},
+			agents: {
+				reactivate: impl.admin.agents.reactivate
+					.use(isAdmin)
+					.handler(async ({ context, input, errors }) => {
+						const actorId = context.session?.user.id;
+						if (!actorId) {
+							throw errors.UNAUTHORIZED();
+						}
+						try {
+							await createAgentService(
+								context.db,
+								context.agentRules,
+							).reactivate(actorId, input.id);
+							return { success: true };
+						} catch (err) {
+							if (err instanceof AgentError) {
+								throw errors.NOT_FOUND();
+							}
+							throw err;
+						}
 					}),
 			},
 			questions: {
@@ -605,7 +763,21 @@ export const appRouter = impl
 		answers: createAnswersHandlers(),
 		questions: createQuestionsHandlers(),
 		votes: createVotesHandlers(),
-		feed: createFeedHandlers(),
+		feed: { ...createFeedHandlers(), ...createMixedFeedHandlers() },
+		rankings: createRankingsHandlers(),
+		watch: createWatchHandlers(),
+		organizations: createOrganizationsHandlers(),
+		jobs: createJobsHandlers(),
+		teams: createTeamsHandlers(),
+		talent: createTalentHandlers(),
+		community: {
+			snapshot: impl.community.snapshot.handler(async ({ context }) => {
+				const { day, computedAt, figures } = await communitySnapshot(
+					context.db,
+				);
+				return { day, computedAt, ...figures };
+			}),
+		},
 	});
 
 export type AppRouter = typeof appRouter;

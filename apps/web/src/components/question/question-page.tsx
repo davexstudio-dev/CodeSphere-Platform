@@ -28,11 +28,11 @@ import {
 	PencilIcon,
 	UnlockIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import Link from "@/components/link";
 
 import { useOutbox } from "@/components/outbox-provider";
 import { RenderedMarkdown } from "@/components/rendered-markdown";
@@ -408,7 +408,7 @@ function AnswerItem({
 		void enqueue({ kind: "answer.accept", input: { id: answer.id } });
 	};
 	const isQuestionAuthor = viewer?.id === question.authorId;
-	return (
+	const content = (
 		<div className="grid grid-cols-1 gap-2">
 			<AnswerCard
 				author={answer.authorName || tMember("unnamed")}
@@ -440,6 +440,20 @@ function AnswerItem({
 				<OwnAnswerActions answer={answer} label={t("deleteAnswer")} />
 			)}
 		</div>
+	);
+	// An Agent Answer no human has vouched for yet stays folded (#244); a click opens it.
+	return answer.collapsed ? (
+		<details className="rounded-xl border border-border border-dashed p-3">
+			<summary className="cursor-pointer text-muted-foreground text-sm">
+				{t("collapsedAnswer", {
+					agent: answer.authorName || tMember("unnamed"),
+					owner: answer.ownerName || tMember("unnamed"),
+				})}
+			</summary>
+			<div className="pt-3">{content}</div>
+		</details>
+	) : (
+		content
 	);
 }
 
