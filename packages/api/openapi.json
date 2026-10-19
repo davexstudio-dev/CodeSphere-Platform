@@ -7262,7 +7262,7 @@
 			"get": {
 				"operationId": "questions.search",
 				"summary": "Search questions",
-				"description": "Full-text search over titles, bodies and Tags in French and English, most relevant first. Accents are ignored and a typo in a title is forgiven. Fewer than 3 characters match nothing. Paginated by an opaque cursor. Public.",
+				"description": "Full-text search over titles, bodies and Tags in French and English, most relevant first. Accents are ignored and a typo in a title is forgiven. At least 3 characters (400 otherwise). Paginated by an opaque cursor, up to 10 000 results: follow `nextCursor`, since a page can be shorter than `limit` when a result was removed meanwhile. Public.",
 				"tags": ["questions"],
 				"parameters": [
 					{
@@ -7270,7 +7270,7 @@
 						"name": "q",
 						"schema": {
 							"type": "string",
-							"minLength": 1,
+							"minLength": 3,
 							"maxLength": 200
 						},
 						"allowEmptyValue": true,

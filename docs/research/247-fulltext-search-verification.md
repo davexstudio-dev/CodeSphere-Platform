@@ -34,6 +34,7 @@ La mesure reste sur un Postgres local, sans latence réseau.
 1. `CREATE EXTENSION unaccent` et `pg_trgm` : disponibles sur Neon, mais le rôle qui applique la
    migration doit pouvoir créer des extensions.
 2. `CREATE TEXT SEARCH CONFIGURATION` et `ALTER ... ALTER MAPPING` dans le schéma `public`.
-3. L'ajout de la colonne générée sur la table `questions` existante réécrit la table : à faire hors
-   pic de trafic si elle est déjà volumineuse.
+3. L'ajout de la colonne générée sur la table `questions` existante réécrit la table sous un verrou
+   exclusif, et les deux index GIN sont créés sans `CONCURRENTLY` (impossible dans une migration
+   transactionnelle) : à appliquer hors pic de trafic si la table est déjà volumineuse.
 4. La mesure de p95 avec la latence réelle du pilote `neon-http`.

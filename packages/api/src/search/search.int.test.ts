@@ -9,7 +9,11 @@ import { eq } from "drizzle-orm";
 
 import { appRouter } from "../routers";
 import { testContext } from "../test-context";
-import { createPostgresSearchIndex } from "./service";
+import {
+	createPostgresSearchIndex,
+	decodeSearchCursor,
+	encodeSearchCursor,
+} from "./service";
 
 const url = process.env.TEST_DATABASE_URL;
 
@@ -148,6 +152,17 @@ describe.skipIf(!url)("search on Postgres", () => {
 		expect(await index.search({ text: "ab", limit: 10, offset: 0 })).toEqual(
 			[],
 		);
+	});
+
+	test("never issues a cursor the decoder would refuse", async () => {
+		expect(encodeSearchCursor(9999)).toBe("o9999");
+		expect(encodeSearchCursor(10_000)).toBeNull();
+		expect(decodeSearchCursor(encodeSearchCursor(9999) ?? undefined)).toBe(
+			9999,
+		);
+		await expect(
+			api.questions.search({ q: "ab", limit: 5 }),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
 	});
 
 	test("questions.search returns items, paginates and refuses a cursor it did not issue", async () => {

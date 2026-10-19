@@ -9,6 +9,7 @@ import {
 	decodeSearchCursor,
 	encodeSearchCursor,
 	InvalidSearchCursorError,
+	MIN_TITLE_LENGTH,
 } from "../search/service";
 import { createVoteService, VoteError } from "../votes/service";
 import { defaultWriteQuota } from "../write-quota";
@@ -124,6 +125,8 @@ export function createQuestionsHandlers() {
 				);
 				return {
 					items,
+					// More results exist; the page itself can be short when a result was removed since the
+					// index returned it, so a client follows the cursor, not the page size.
 					nextCursor:
 						ids.length > input.limit
 							? encodeSearchCursor(offset + input.limit)
@@ -135,8 +138,17 @@ export function createQuestionsHandlers() {
 		similar: impl.questions.similar.handler(async ({ context, input }) => {
 			const index =
 				context.searchIndex ?? createPostgresSearchIndex(context.db);
-			const ids = await index.similarTitles({ title: input.title, limit: 5 });
-			return { items: await createListingService(context.db).byIds(ids) };
+			// What is typed never fails the form: too short a title, or an engine error, is no result.
+			if (input.title.length < MIN_TITLE_LENGTH) {
+				return { items: [] };
+			}
+			try {
+				const ids = await index.similarTitles({ title: input.title, limit: 5 });
+				return { items: await createListingService(context.db).byIds(ids) };
+			} catch (error) {
+				context.logger.warn({ err: error }, "similar titles failed");
+				return { items: [] };
+			}
 		}),
 
 		get: impl.questions.get.handler(async ({ context, input, errors }) => {

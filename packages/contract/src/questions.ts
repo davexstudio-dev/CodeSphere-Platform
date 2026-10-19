@@ -60,7 +60,7 @@ export const QuestionPage = Page(QuestionListItem);
 
 export const SearchQuestionsInput = z.object({
 	/** What to look for: words in French or English, accents and typos forgiven. */
-	q: z.string().trim().min(1).max(200),
+	q: z.string().trim().min(3).max(200),
 	language: z.enum(["fr", "en"]).optional(),
 	cursor: z.string().optional(),
 	limit: z.number().int().min(1).max(50).default(20),
@@ -169,7 +169,7 @@ export const questionsContract = {
 				tags: ["questions"],
 				summary: "Search questions",
 				description:
-					"Full-text search over titles, bodies and Tags in French and English, most relevant first. Accents are ignored and a typo in a title is forgiven. Fewer than 3 characters match nothing. Paginated by an opaque cursor. Public.",
+					"Full-text search over titles, bodies and Tags in French and English, most relevant first. Accents are ignored and a typo in a title is forgiven. At least 3 characters (400 otherwise). Paginated by an opaque cursor, up to 10 000 results: follow `nextCursor`, since a page can be shorter than `limit` when a result was removed meanwhile. Public.",
 			}),
 		)
 		.meta(

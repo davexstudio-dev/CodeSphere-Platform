@@ -34,7 +34,12 @@ export function decodeSearchCursor(cursor: string | undefined) {
 	return Number(match[1]);
 }
 
-export const encodeSearchCursor = (offset: number) => `o${offset}`;
+/** The deepest offset a cursor can carry: the decoder's 4 digits. */
+export const MAX_SEARCH_OFFSET = 9999;
+
+/** The cursor for the page at `offset`, or null past the deepest page: never a cursor the decoder refuses. */
+export const encodeSearchCursor = (offset: number) =>
+	offset > MAX_SEARCH_OFFSET ? null : `o${offset}`;
 
 /** Shorter than this, a text says too little to match on (nor to compare titles with). */
 export const MIN_SEARCH_LENGTH = 3;
@@ -59,11 +64,11 @@ export function createPostgresSearchIndex(db: Database): SearchIndex {
 			const words = normalised(sql`${trimmed}`);
 			// A Question is matched with the configuration of its own language (stems differ), or,
 			// for a typo the stems cannot absorb, by the words of the query appearing near-verbatim
-			// in its title.
+			// in its title. The typo evidence weighs less than a genuine full-text match.
 			const rank = sql<number>`(CASE ${questions.language}
 				WHEN 'fr' THEN ts_rank_cd(${vector}, ${fr})
 				ELSE ts_rank_cd(${vector}, ${en})
-			END + word_similarity(${words}, ${titleOf}))`;
+			END + 0.3 * word_similarity(${words}, ${titleOf}))`;
 			const rows = await db
 				.select({ id: questions.id })
 				.from(questions)
