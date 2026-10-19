@@ -139,14 +139,22 @@ export function HomeFeed({
 
 	return (
 		<div className="grid gap-4">
-			{items.map((entry) =>
+			{items.map((entry, index) =>
 				entry.kind === "watch" ? (
-					<div key={entry.item.id} className="grid gap-1">
+					<div
+						key={entry.item.id}
+						className="motion-rise grid gap-1"
+						style={{ "--i": index } as React.CSSProperties}
+					>
 						<WatchCard item={entry.item} signedIn onSignIn={() => undefined} />
 						<FeedWhy entry={entry} />
 					</div>
 				) : (
-					<div key={entry.question.id} className="grid gap-1">
+					<div
+						key={entry.question.id}
+						className="motion-rise grid gap-1"
+						style={{ "--i": index } as React.CSSProperties}
+					>
 						<QuestionFeed
 							className="md:columns-1"
 							questions={[

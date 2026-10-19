@@ -95,7 +95,7 @@ function AnswerCard({
 			data-slot="answer-card"
 			data-status={accepted ? "accepted" : agentOf ? "agent" : "default"}
 			className={cn(
-				"flex flex-col gap-3 rounded-lg border bg-card p-4 text-card-foreground",
+				"flex flex-col gap-3 rounded-lg border bg-card p-4 text-card-foreground transition-colors duration-500",
 				accepted && "border-success border-l-4",
 				!accepted && agentOf && "border-primary border-dashed",
 				!accepted && !agentOf && "border-border",
