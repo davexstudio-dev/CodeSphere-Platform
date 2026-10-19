@@ -7,6 +7,8 @@ import { chromium } from "@playwright/test";
 const PRIMARY = "oklch(0.515 0.139 35.1)";
 const FOREGROUND = "oklch(0.99 0.01 75)";
 const BACKGROUND = "oklch(0.975 0.012 75)";
+// The dark theme's background (`--background` under `.dark`): the address bar of a dark-mode phone.
+const DARK_BACKGROUND = "oklch(0.2 0.02 50)";
 const OUT = new URL("../web/public/icons/", import.meta.url);
 
 const svg = ({ size, maskable }) => {
@@ -35,15 +37,27 @@ const hex = await page.evaluate(
 		});
 		return colors.map((color) => {
 			context.clearRect(0, 0, 1, 1);
+			// A browser that cannot parse the colour ignores the assignment and paints the previous
+			// style: fail rather than hand back a wrong colour.
+			context.fillStyle = "#010203";
 			context.fillStyle = color;
+			if (context.fillStyle === "#010203") {
+				throw new Error(`this Chromium does not understand ${color}`);
+			}
 			context.fillRect(0, 0, 1, 1);
 			const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
 			return `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
 		});
 	},
-	[[PRIMARY, BACKGROUND]],
+	[[PRIMARY, BACKGROUND, DARK_BACKGROUND]],
 );
-console.log(JSON.stringify({ themeColor: hex[0], backgroundColor: hex[1] }));
+console.log(
+	JSON.stringify({
+		themeColor: hex[0],
+		backgroundColor: hex[1],
+		darkBackgroundColor: hex[2],
+	}),
+);
 
 for (const [name, size, maskable] of [
 	["icon-192.png", 192, false],

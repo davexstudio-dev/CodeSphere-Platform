@@ -39,7 +39,9 @@ const serwist = new Serwist({
 		entries: [
 			{
 				url: OFFLINE_URL,
-				matcher: ({ request }) => request.mode === "navigate",
+				// The same rule as the route above: an API or cross-origin navigation never gets it.
+				matcher: ({ request }) =>
+					isPageNavigation(request, new URL(request.url), self.location.origin),
 			},
 		],
 	},

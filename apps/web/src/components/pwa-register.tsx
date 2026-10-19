@@ -16,7 +16,10 @@ export function PwaRegister() {
 		}
 		void navigator.serviceWorker
 			.register("/sw.js", { scope: "/" })
-			.catch(() => undefined);
+			.catch((error: unknown) => {
+				// The site works without the worker: say why it is missing, do not break the page.
+				console.warn("Service worker registration failed", error);
+			});
 	}, []);
 	return null;
 }

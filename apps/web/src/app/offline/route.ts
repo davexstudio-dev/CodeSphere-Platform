@@ -1,3 +1,5 @@
+import { BRAND } from "@/lib/brand";
+
 // The page a navigation falls back to without network (#249), precached by the service worker at
 // `/offline`. A route handler, not a file in public/: `next start` serves public files only under
 // their exact name, while the Worker's assets answer `/offline.html` with a redirect, and a
@@ -5,7 +7,7 @@
 // nothing else available.
 export const dynamic = "force-static";
 
-export const OFFLINE_HTML = `<!doctype html>
+const OFFLINE_HTML = `<!doctype html>
 <html lang="fr">
 <head>
 	<meta charset="utf-8" />
@@ -14,12 +16,12 @@ export const OFFLINE_HTML = `<!doctype html>
 	<style>
 		:root { color-scheme: light dark; }
 		body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1.5rem;
-			font-family: system-ui, sans-serif; background: #fcf6ee; color: #2b211b; }
-		@media (prefers-color-scheme: dark) { body { background: #2a2420; color: #f5ede4; } }
+			font-family: system-ui, sans-serif; background: ${BRAND.background}; color: #2b211b; }
+		@media (prefers-color-scheme: dark) { body { background: ${BRAND.darkBackground}; color: #f5ede4; } }
 		main { max-width: 28rem; }
 		h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
 		p { line-height: 1.5; margin: 0 0 1.25rem; }
-		a { color: #a8432a; font-weight: 600; }
+		a { color: ${BRAND.primary}; font-weight: 600; }
 		@media (prefers-color-scheme: dark) { a { color: #e0846a; } }
 	</style>
 </head>

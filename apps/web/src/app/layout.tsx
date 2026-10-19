@@ -7,6 +7,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
 import "../index.css";
 import Providers from "@/components/providers";
+import { BRAND } from "@/lib/brand";
 import { LEGAL_PAGES, legalHref } from "@/lib/legal";
 import { publicPageUrl } from "@/lib/page-url";
 import { OG_IMAGE_PATH, ogImage, SITE_NAME } from "@/lib/share";
@@ -58,8 +59,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
 	width: "device-width",
 	initialScale: 1,
-	// The brand colour, as the manifest's theme_color: the address bar of the installed app.
-	themeColor: "#a8432a",
+	// The address bar of the installed app: the brand colour, and the dark background in dark mode.
+	themeColor: [
+		{ media: "(prefers-color-scheme: light)", color: BRAND.primary },
+		{ media: "(prefers-color-scheme: dark)", color: BRAND.darkBackground },
+	],
 };
 
 export default async function RootLayout({

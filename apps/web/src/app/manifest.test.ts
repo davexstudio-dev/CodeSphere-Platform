@@ -2,7 +2,9 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
 
+import { BRAND } from "@/lib/brand";
 import manifest from "./manifest";
+import { GET } from "./offline/route";
 
 describe("web app manifest", () => {
 	const m = manifest();
@@ -27,8 +29,15 @@ describe("web app manifest", () => {
 		}
 	});
 
-	test("the colours are hex values", () => {
+	test("the colours are hex values, the same everywhere they appear", async () => {
 		expect(m.theme_color).toMatch(/^#[0-9a-f]{6}$/);
 		expect(m.background_color).toMatch(/^#[0-9a-f]{6}$/);
+		expect(m.theme_color).toBe(BRAND.primary);
+		expect(m.background_color).toBe(BRAND.background);
+		// The offline page is HTML with its own CSS: it must carry the same colours.
+		const html = await GET().text();
+		for (const color of Object.values(BRAND)) {
+			expect(html).toContain(color);
+		}
 	});
 });
