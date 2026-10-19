@@ -5,6 +5,7 @@ import * as z from "zod";
 import { base, ExpectedVersion, Id, Page, PageInput, Timestamp } from "./base";
 import { Hackathon, JudgingCriterion, Milestone, Prize } from "./hackathons";
 import { MemberSummary } from "./members";
+import { organizationsAdminContract } from "./organizations";
 import { vitalsAdminContract } from "./vitals";
 import { watchAdminContract } from "./watch";
 
@@ -62,7 +63,8 @@ export const HackathonUpdate = z
 		slug: z.string(),
 		expectedVersion: ExpectedVersion,
 		name: z.string().trim().min(1).max(120).optional(),
-		organizer: z.string().trim().min(1).max(120).optional(),
+		/** Slug of a validated Organization (#257). */
+		organizationSlug: z.string().trim().min(1).max(120).optional(),
 		summary: z.string().trim().min(1).max(2000).optional(),
 		teamMin: z.number().int().min(1).max(50).optional(),
 		teamMax: z.number().int().min(1).max(50).optional(),
@@ -342,6 +344,7 @@ export const adminContract = {
 			.input(z.object({ id: z.string() }))
 			.output(AdminMember),
 	},
+	organizations: organizationsAdminContract,
 	webVitals: vitalsAdminContract,
 	watch: watchAdminContract,
 	auditLog: {

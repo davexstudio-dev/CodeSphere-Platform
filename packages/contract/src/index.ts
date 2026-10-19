@@ -7,6 +7,7 @@ import { hackathonsContract } from "./hackathons";
 import { healthContract } from "./health";
 import { markdownContract } from "./markdown";
 import { membersContract } from "./members";
+import { organizationsContract } from "./organizations";
 import { questionsContract } from "./questions";
 import { rankingsContract } from "./rankings";
 import { tagsContract } from "./tags";
@@ -23,6 +24,7 @@ export * from "./feed";
 export * from "./hackathons";
 export * from "./markdown";
 export * from "./members";
+export * from "./organizations";
 export * from "./questions";
 export * from "./rankings";
 export * from "./roles";
@@ -41,6 +43,7 @@ export const contract = {
 	hackathons: hackathonsContract,
 	markdown: markdownContract,
 	members: membersContract,
+	organizations: organizationsContract,
 	questions: questionsContract,
 	rankings: rankingsContract,
 	tags: tagsContract,

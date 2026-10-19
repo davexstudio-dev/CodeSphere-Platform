@@ -8,13 +8,18 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 
+import { organization } from "./organizations";
+
 // Hackathon (spec §2): informational only, the MVP lists the CADEV 2026. Seeded with its
 // starting values, then edited by an Admin; `version` guards concurrent edits (CONFLICT).
 export const hackathon = pgTable("hackathon", {
 	id: uuid("id").defaultRandom().primaryKey(),
 	slug: text("slug").notNull().unique(),
 	name: text("name").notNull(),
-	organizer: text("organizer").notNull(),
+	// The Organization that lists it (#257), replacing the former free-text organizer.
+	organizationId: uuid("organization_id")
+		.notNull()
+		.references(() => organization.id),
 	summary: text("summary").notNull(),
 	teamMin: integer("team_min").notNull(),
 	teamMax: integer("team_max").notNull(),

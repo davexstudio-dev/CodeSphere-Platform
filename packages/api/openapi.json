@@ -1479,7 +1479,7 @@
 										"minLength": 1,
 										"maxLength": 120
 									},
-									"organizer": {
+									"organizationSlug": {
 										"type": "string",
 										"minLength": 1,
 										"maxLength": 120
@@ -1638,6 +1638,9 @@
 										"organizer": {
 											"type": "string"
 										},
+										"organizationSlug": {
+											"type": "string"
+										},
 										"summary": {
 											"type": "string"
 										},
@@ -1747,6 +1750,7 @@
 										"slug",
 										"name",
 										"organizer",
+										"organizationSlug",
 										"summary",
 										"teamMin",
 										"teamMax",
@@ -6465,6 +6469,9 @@
 													"organizer": {
 														"type": "string"
 													},
+													"organizationSlug": {
+														"type": "string"
+													},
 													"summary": {
 														"type": "string"
 													},
@@ -6579,6 +6586,7 @@
 													"slug",
 													"name",
 													"organizer",
+													"organizationSlug",
 													"summary",
 													"teamMin",
 													"teamMax",
@@ -6707,6 +6715,9 @@
 										"organizer": {
 											"type": "string"
 										},
+										"organizationSlug": {
+											"type": "string"
+										},
 										"summary": {
 											"type": "string"
 										},
@@ -6816,6 +6827,7 @@
 										"slug",
 										"name",
 										"organizer",
+										"organizationSlug",
 										"summary",
 										"teamMin",
 										"teamMax",
@@ -8270,6 +8282,753 @@
 									"oneOf": [
 										{
 											"$ref": "#/components/schemas/NotFound"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/organizations/{slug}": {
+			"get": {
+				"operationId": "organizations.get",
+				"summary": "Organization profile",
+				"description": "The public profile of a validated Organization. A pending, rejected or suspended one is NOT_FOUND. Public.",
+				"tags": ["organizations"],
+				"parameters": [
+					{
+						"in": "path",
+						"required": true,
+						"name": "slug",
+						"schema": {
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 120
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"slug": {
+											"type": "string"
+										},
+										"name": {
+											"type": "string"
+										},
+										"website": {
+											"type": "string",
+											"format": "uri"
+										},
+										"description": {
+											"type": "string"
+										},
+										"country": {
+											"type": "string"
+										},
+										"validatedAt": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "date-time",
+													"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+												},
+												{
+													"type": "null"
+												}
+											]
+										}
+									},
+									"required": [
+										"slug",
+										"name",
+										"website",
+										"description",
+										"country",
+										"validatedAt"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/NotFound"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/organizations": {
+			"get": {
+				"operationId": "organizations.list",
+				"summary": "List validated Organizations",
+				"description": "Validated Organizations by name. Public.",
+				"tags": ["organizations"],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "cursor",
+						"schema": {
+							"type": "string"
+						},
+						"allowEmptyValue": true,
+						"allowReserved": true
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"default": 20,
+							"type": "integer",
+							"minimum": 1,
+							"maximum": 50
+						},
+						"allowEmptyValue": true,
+						"allowReserved": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"slug": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													},
+													"website": {
+														"type": "string",
+														"format": "uri"
+													},
+													"description": {
+														"type": "string"
+													},
+													"country": {
+														"type": "string"
+													},
+													"validatedAt": {
+														"anyOf": [
+															{
+																"type": "string",
+																"format": "date-time",
+																"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+															},
+															{
+																"type": "null"
+															}
+														]
+													}
+												},
+												"required": [
+													"slug",
+													"name",
+													"website",
+													"description",
+													"country",
+													"validatedAt"
+												],
+												"additionalProperties": false
+											}
+										},
+										"nextCursor": {
+											"type": ["string", "null"]
+										}
+									},
+									"required": ["items", "nextCursor"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"operationId": "organizations.request",
+				"summary": "Apply for an Organization",
+				"description": "A Member applies on behalf of an Organization: name, website, an email on its own domain and its country. An Admin validates it. At most 3 open applications per Member. Humans only.",
+				"tags": ["organizations"],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string",
+										"minLength": 2,
+										"maxLength": 120
+									},
+									"website": {
+										"type": "string",
+										"maxLength": 2048,
+										"format": "uri"
+									},
+									"contactEmail": {
+										"type": "string",
+										"maxLength": 254,
+										"format": "email",
+										"pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+									},
+									"country": {
+										"anyOf": [
+											{
+												"type": "string",
+												"minLength": 2,
+												"maxLength": 2
+											},
+											{
+												"type": "string",
+												"const": "OTHER"
+											}
+										]
+									},
+									"description": {
+										"default": "",
+										"type": "string",
+										"maxLength": 1000
+									}
+								},
+								"required": ["name", "website", "contactEmail", "country"]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"slug": {
+											"type": "string"
+										},
+										"name": {
+											"type": "string"
+										},
+										"website": {
+											"type": "string",
+											"format": "uri"
+										},
+										"description": {
+											"type": "string"
+										},
+										"country": {
+											"type": "string"
+										},
+										"validatedAt": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "date-time",
+													"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
+										"id": {
+											"type": "string"
+										},
+										"status": {
+											"type": "string",
+											"enum": ["pending", "validated", "rejected", "suspended"]
+										},
+										"statusReason": {
+											"type": ["string", "null"]
+										},
+										"contactEmail": {
+											"type": ["string", "null"]
+										},
+										"createdAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+										}
+									},
+									"required": [
+										"slug",
+										"name",
+										"website",
+										"description",
+										"country",
+										"validatedAt",
+										"id",
+										"status",
+										"statusReason",
+										"contactEmail",
+										"createdAt"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Unauthorized"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Forbidden"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Conflict2"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/me/organizations": {
+			"get": {
+				"operationId": "organizations.mine",
+				"summary": "My applications",
+				"description": "The Organizations the Member applied for, with their status.",
+				"tags": ["organizations"],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"slug": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													},
+													"website": {
+														"type": "string",
+														"format": "uri"
+													},
+													"description": {
+														"type": "string"
+													},
+													"country": {
+														"type": "string"
+													},
+													"validatedAt": {
+														"anyOf": [
+															{
+																"type": "string",
+																"format": "date-time",
+																"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+															},
+															{
+																"type": "null"
+															}
+														]
+													},
+													"id": {
+														"type": "string"
+													},
+													"status": {
+														"type": "string",
+														"enum": [
+															"pending",
+															"validated",
+															"rejected",
+															"suspended"
+														]
+													},
+													"statusReason": {
+														"type": ["string", "null"]
+													},
+													"contactEmail": {
+														"type": ["string", "null"]
+													},
+													"createdAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+													}
+												},
+												"required": [
+													"slug",
+													"name",
+													"website",
+													"description",
+													"country",
+													"validatedAt",
+													"id",
+													"status",
+													"statusReason",
+													"contactEmail",
+													"createdAt"
+												],
+												"additionalProperties": false
+											}
+										}
+									},
+									"required": ["items"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Unauthorized"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"

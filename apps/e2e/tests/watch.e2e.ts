@@ -116,14 +116,16 @@ test.describe("« Pour toi » feed", () => {
 		await skipTagsOnboarding(page);
 		await page.goto("/settings?tab=tags");
 		const toggle = page.getByRole("switch", { name: "Personnaliser mon fil" });
+		// Disabled until the preferences are loaded: a click before is ignored.
+		await expect(toggle).toBeEnabled();
 		await toggle.click();
 		await expect(toggle).not.toBeChecked();
 		await page.goto("/");
 		await expect(page.getByText("vous suivez web").first()).toBeVisible();
 		await page.goto("/settings?tab=tags");
-		await page.getByRole("switch", { name: "Personnaliser mon fil" }).click();
-		await expect(
-			page.getByRole("switch", { name: "Personnaliser mon fil" }),
-		).toBeChecked();
+		const back = page.getByRole("switch", { name: "Personnaliser mon fil" });
+		await expect(back).toBeEnabled();
+		await back.click();
+		await expect(back).toBeChecked();
 	});
 });

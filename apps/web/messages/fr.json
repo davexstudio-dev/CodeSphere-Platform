@@ -2,7 +2,8 @@
 	"footer": {
 		"build": "CodeSphere Platform v{version} · {sha}",
 		"nav": "Liens du pied de page",
-		"watch": "Veille"
+		"watch": "Veille",
+		"organizations": "Organisations"
 	},
 	"language": {
 		"label": "Langue",
@@ -589,6 +590,31 @@
 				"none": "Aucun domaine bloqué.",
 				"confirmBlock": "Bloquer {domain} ? Ses liens existants sont retirés."
 			}
+		},
+		"organizations": {
+			"title": "Organisations",
+			"description": "Demandes à valider, suspensions. Chaque décision est auditée.",
+			"none": "Rien dans cet état.",
+			"system": "créée par la plateforme",
+			"requestedBy": "demandée par {name}",
+			"validate": "Valider",
+			"reject": "Refuser",
+			"suspend": "Suspendre",
+			"reinstate": "Rétablir",
+			"reasonReject": "Motif du refus (montré au demandeur)",
+			"reasonSuspend": "Motif de la suspension",
+			"status": {
+				"pending": "À valider",
+				"validated": "Validées",
+				"rejected": "Refusées",
+				"suspended": "Suspendues"
+			},
+			"errors": {
+				"forbidden": "Action refusée.",
+				"conflict": "Cette demande a déjà été traitée. La liste est rechargée.",
+				"notFound": "Cette Organisation n'existe plus.",
+				"generic": "Une erreur est survenue. Réessayez."
+			}
 		}
 	},
 	"onboarding": {
@@ -918,7 +944,7 @@
 			"judging": "Jugement",
 			"discussion": "Discussion"
 		},
-		"organizedBy": "Organisé par {organizer}",
+		"organizedBy": "Organisé par",
 		"ask": "Poser une question",
 		"closesIn": "Clôture des soumissions dans",
 		"closed": "Les soumissions sont closes.",
@@ -1054,6 +1080,39 @@
 			"blocked": "Ce site n'est pas accepté.",
 			"tooMany": "Limite de 5 propositions par jour atteinte.",
 			"error": "Le lien n'a pas pu être proposé."
+		}
+	},
+	"organizations": {
+		"title": "Organisations",
+		"intro": "Entreprises, universités, startups et communautés validées par un Admin. Une Organisation validée peut lister des Hackathons.",
+		"apply": "Demander la validation d'une Organisation",
+		"applyTitle": "Demander la validation d'une Organisation",
+		"applyIntro": "Un Admin examine chaque demande. Votre adresse e-mail doit être sur le domaine de l'Organisation : elle n'est jamais affichée.",
+		"name": "Nom",
+		"website": "Site web",
+		"contactEmail": "E-mail sur le domaine de l'Organisation",
+		"contactEmailHint": "Pas d'adresse gmail, yahoo ou similaire : elle doit être sur le domaine du site.",
+		"country": "Pays",
+		"countryHint": "Pays (code ISO, ex. SN) ou OTHER",
+		"description": "Présentation (1000 caractères)",
+		"submit": "Envoyer la demande",
+		"applied": "Demande envoyée : un Admin va l'examiner.",
+		"mine": "Mes demandes",
+		"viewProfile": "Voir le profil public",
+		"validated": "Organisation validée",
+		"empty": "Aucune Organisation validée pour le moment.",
+		"unavailable": "La liste est indisponible pour le moment.",
+		"status": {
+			"pending": "En attente",
+			"validated": "Validée",
+			"rejected": "Refusée",
+			"suspended": "Suspendue"
+		},
+		"errors": {
+			"conflict": "Cette Organisation existe déjà, ou vous avez atteint 3 demandes ouvertes.",
+			"domain": "L'adresse e-mail doit être sur le domaine du site web (pas de messagerie publique).",
+			"forbidden": "Seul un Member peut faire une demande.",
+			"generic": "La demande a échoué. Réessayez."
 		}
 	}
 }

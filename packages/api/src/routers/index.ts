@@ -36,6 +36,10 @@ import { impl } from "../index";
 import { sanitizeMarkdown } from "../markdown/sanitizer";
 import { deleteMember } from "../members-delete";
 import { exportMember } from "../members-export";
+import {
+	createOrganizationsAdminHandlers,
+	createOrganizationsHandlers,
+} from "../organizations/handlers";
 import { ownProfile, publicProfile } from "../profile";
 import {
 	createAnswersHandlers,
@@ -522,6 +526,7 @@ export const appRouter = impl
 					}),
 			},
 			watch: createWatchAdminHandlers(),
+			organizations: createOrganizationsAdminHandlers(),
 			webVitals: {
 				byCountry: impl.admin.webVitals.byCountry
 					.use(isAdmin)
@@ -750,6 +755,7 @@ export const appRouter = impl
 		feed: { ...createFeedHandlers(), ...createMixedFeedHandlers() },
 		rankings: createRankingsHandlers(),
 		watch: createWatchHandlers(),
+		organizations: createOrganizationsHandlers(),
 		community: {
 			snapshot: impl.community.snapshot.handler(async ({ context }) => {
 				const { day, computedAt, figures } = await communitySnapshot(

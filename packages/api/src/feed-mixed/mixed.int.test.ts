@@ -32,7 +32,7 @@ describe.skipIf(!url)("mixed feed on Postgres", () => {
 	const other = `oth-${run}`;
 	const learned = `lrn-${run}`;
 	const feed = createMixedFeedService(db);
-	const at = new Date(Date.now() - 3_600_000);
+	const at = new Date(Date.now() - 60_000);
 	const ids: Record<string, string> = {};
 	let sourceId = "";
 

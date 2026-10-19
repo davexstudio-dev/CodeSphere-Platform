@@ -27,7 +27,10 @@ export const JudgingCriterion = z.object({
 export const Hackathon = z.object({
 	slug: z.string(),
 	name: z.string(),
+	/** Name of the Organization that lists it. */
 	organizer: z.string(),
+	/** Slug of that Organization, for its public profile. */
+	organizationSlug: z.string(),
 	summary: z.string(),
 	teamMin: z.number().int(),
 	teamMax: z.number().int(),

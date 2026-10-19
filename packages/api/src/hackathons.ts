@@ -6,11 +6,13 @@ import {
 	hackathonMilestone,
 	hackathonPrize,
 } from "@codesphere/db/schema/hackathons";
+import { organization } from "@codesphere/db/schema/organizations";
 import { asc, eq, inArray } from "drizzle-orm";
 import type * as z from "zod";
 
 type HackathonRow = typeof hackathon.$inferSelect;
 type Children = {
+	organization: { name: string; slug: string };
 	milestones: {
 		key: string;
 		label: string;
@@ -43,7 +45,8 @@ export function toHackathon(
 	return {
 		slug: row.slug,
 		name: row.name,
-		organizer: row.organizer,
+		organizer: children.organization.name,
+		organizationSlug: children.organization.slug,
 		summary: row.summary,
 		teamMin: row.teamMin,
 		teamMax: row.teamMax,
@@ -87,7 +90,20 @@ export async function loadHackathons(
 		return [];
 	}
 	const ids = rows.map((r) => r.id);
-	const [milestones, prizes, criteria] = await Promise.all([
+	const [organizations, milestones, prizes, criteria] = await Promise.all([
+		db
+			.select({
+				id: organization.id,
+				name: organization.name,
+				slug: organization.slug,
+			})
+			.from(organization)
+			.where(
+				inArray(
+					organization.id,
+					rows.map((r) => r.organizationId),
+				),
+			),
 		db
 			.select()
 			.from(hackathonMilestone)
@@ -103,6 +119,10 @@ export async function loadHackathons(
 	]);
 	return rows.map((row) =>
 		toHackathon(row, {
+			organization: organizations.find((o) => o.id === row.organizationId) ?? {
+				name: "",
+				slug: "",
+			},
 			milestones: milestones.filter((m) => m.hackathonId === row.id),
 			prizes: prizes.filter((p) => p.hackathonId === row.id),
 			criteria: criteria.filter((c) => c.hackathonId === row.id),

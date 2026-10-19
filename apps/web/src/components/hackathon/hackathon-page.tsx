@@ -177,7 +177,13 @@ function Header({ hackathon }: { hackathon: HackathonData }) {
 		<header className="grid gap-5 rounded-3xl border border-border bg-card p-5 md:grid-cols-[1fr_auto] md:items-end md:p-8">
 			<div className="grid gap-2">
 				<p className="text-muted-foreground text-sm">
-					{t("organizedBy", { organizer: hackathon.organizer })}
+					{t("organizedBy")}{" "}
+					<Link
+						href={`/organizations/${hackathon.organizationSlug}` as Route}
+						className="font-medium text-foreground hover:underline"
+					>
+						{hackathon.organizer}
+					</Link>
 				</p>
 				<h1 className="font-bold text-3xl tracking-tight md:text-4xl">
 					{hackathon.name}

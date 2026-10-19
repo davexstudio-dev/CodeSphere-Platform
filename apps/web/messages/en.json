@@ -2,7 +2,8 @@
 	"footer": {
 		"build": "CodeSphere Platform v{version} · {sha}",
 		"nav": "Footer links",
-		"watch": "Watch"
+		"watch": "Watch",
+		"organizations": "Organizations"
 	},
 	"language": {
 		"label": "Language",
@@ -589,6 +590,31 @@
 				"none": "No blocked domain.",
 				"confirmBlock": "Block {domain}? Its existing links are removed."
 			}
+		},
+		"organizations": {
+			"title": "Organizations",
+			"description": "Applications to validate, suspensions. Every decision is audited.",
+			"none": "Nothing in this state.",
+			"system": "created by the platform",
+			"requestedBy": "requested by {name}",
+			"validate": "Validate",
+			"reject": "Reject",
+			"suspend": "Suspend",
+			"reinstate": "Reinstate",
+			"reasonReject": "Reason for the rejection (shown to the applicant)",
+			"reasonSuspend": "Reason for the suspension",
+			"status": {
+				"pending": "To validate",
+				"validated": "Validated",
+				"rejected": "Rejected",
+				"suspended": "Suspended"
+			},
+			"errors": {
+				"forbidden": "Action refused.",
+				"conflict": "This application was already handled. The list is reloaded.",
+				"notFound": "This Organization no longer exists.",
+				"generic": "Something went wrong. Try again."
+			}
 		}
 	},
 	"onboarding": {
@@ -918,7 +944,7 @@
 			"judging": "Judging",
 			"discussion": "Discussion"
 		},
-		"organizedBy": "Organized by {organizer}",
+		"organizedBy": "Organized by",
 		"ask": "Ask a question",
 		"closesIn": "Submissions close in",
 		"closed": "Submissions are closed.",
@@ -1054,6 +1080,39 @@
 			"blocked": "This site is not accepted.",
 			"tooMany": "You reached the limit of 5 proposals a day.",
 			"error": "The link could not be proposed."
+		}
+	},
+	"organizations": {
+		"title": "Organizations",
+		"intro": "Companies, universities, startups and communities validated by an Admin. A validated Organization can list Hackathons.",
+		"apply": "Apply for an Organization",
+		"applyTitle": "Apply for an Organization",
+		"applyIntro": "An Admin reviews every application. Your email must be on the Organization's domain: it is never shown.",
+		"name": "Name",
+		"website": "Website",
+		"contactEmail": "Email on the Organization's domain",
+		"contactEmailHint": "No gmail, yahoo or similar address: it must be on the website's domain.",
+		"country": "Country",
+		"countryHint": "Country (ISO code, e.g. SN) or OTHER",
+		"description": "About (1000 characters)",
+		"submit": "Send the application",
+		"applied": "Application sent: an Admin will review it.",
+		"mine": "My applications",
+		"viewProfile": "View public profile",
+		"validated": "Validated Organization",
+		"empty": "No validated Organization yet.",
+		"unavailable": "The list is unavailable right now.",
+		"status": {
+			"pending": "Pending",
+			"validated": "Validated",
+			"rejected": "Rejected",
+			"suspended": "Suspended"
+		},
+		"errors": {
+			"conflict": "This Organization already exists, or you reached 3 open applications.",
+			"domain": "The email must be on the website's domain (no public mailbox).",
+			"forbidden": "Only a Member can apply.",
+			"generic": "The application failed. Try again."
 		}
 	}
 }

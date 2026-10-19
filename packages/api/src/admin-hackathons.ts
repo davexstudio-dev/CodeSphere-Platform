@@ -1,6 +1,7 @@
 import type { Hackathon, HackathonUpdate } from "@codesphere/contract";
 import type { Database } from "@codesphere/db";
 import { hackathon } from "@codesphere/db/schema/hackathons";
+import { organization } from "@codesphere/db/schema/organizations";
 import { and, eq, type SQL, sql } from "drizzle-orm";
 import type * as z from "zod";
 
@@ -12,7 +13,6 @@ type Current = z.infer<typeof Hackathon>;
 
 const SCALARS = [
 	"name",
-	"organizer",
 	"summary",
 	"teamMin",
 	"teamMax",
@@ -62,6 +62,33 @@ export async function updateHackathon(
 		};
 	}
 
+	// The organizer is an Organization an Admin has validated (#257).
+	let organizationId: string | undefined;
+	if (
+		input.organizationSlug !== undefined &&
+		input.organizationSlug !== current.organizationSlug
+	) {
+		const [org] = await db
+			.select({ id: organization.id })
+			.from(organization)
+			.where(
+				and(
+					eq(organization.slug, input.organizationSlug),
+					eq(organization.status, "validated"),
+				),
+			)
+			.limit(1);
+		if (!org) {
+			return {
+				ok: false,
+				code: "BAD_REQUEST",
+				path: "organizationSlug",
+				message: "The organizer must be a validated Organization.",
+			};
+		}
+		organizationId = org.id;
+	}
+
 	const next = {
 		...input,
 		verifiedAt: input.verifiedAt && iso(input.verifiedAt),
@@ -69,6 +96,7 @@ export async function updateHackathon(
 	const fields: string[] = SCALARS.filter(
 		(field) => next[field] !== undefined && !same(next[field], current[field]),
 	);
+	if (organizationId) fields.push("organizer");
 
 	const milestones = input.milestones?.map((m) => ({
 		...m,
@@ -115,7 +143,9 @@ export async function updateHackathon(
 		return { ok: true, hackathon: current };
 	}
 
-	const set: Partial<typeof hackathon.$inferInsert> = {};
+	const set: Partial<typeof hackathon.$inferInsert> = organizationId
+		? { organizationId }
+		: {};
 	for (const field of SCALARS) {
 		if (fields.includes(field)) {
 			Object.assign(set, {
