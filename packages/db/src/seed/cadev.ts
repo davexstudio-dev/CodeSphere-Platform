@@ -1,5 +1,8 @@
 // Starting values of the CADEV 2026 (spec §2, #61). The calendar is the one the organisers sent
-// the team (not published on their page), hence `sourceNote`. Prizes are left out until their
+// the team (not published on their page), hence `sourceNote`. On 19 October the submission deadline
+// moved from 25 October to 15 November and the contest opened to English speakers; the votes and
+// the jury moved by the same 21 days until their official calendar is known (the migration
+// `cadev_deadline_extended` does the same on an existing database). Prizes are left out until their
 // amounts are confirmed: an Admin adds them from the back-office.
 export type SeedHackathon = {
 	slug: string;
@@ -32,35 +35,36 @@ export const cadev2026: SeedHackathon = {
 	name: "Coupe d'Afrique des Développeurs 2026",
 	organizer: "Systalink",
 	summary:
-		"Concours en ligne pour équipes de développeurs de l'Afrique francophone.",
+		"Concours en ligne pour équipes de développeurs africains, francophones et anglophones.",
 	teamMin: 2,
 	teamMax: 5,
 	sourceUrl: "https://systalink.com/fr/coupe-afrique-des-developpeurs-cadev",
-	sourceNote: "Calendrier communiqué par les organisateurs.",
-	verifiedAt: utc("2026-10-11T00:00:00Z"),
+	sourceNote:
+		"Calendrier communiqué par les organisateurs. Clôture des soumissions repoussée au 15 novembre 2026 ; dates des votes et du jury décalées d'autant en attendant le calendrier officiel.",
+	verifiedAt: utc("2026-10-19T00:00:00Z"),
 	milestones: [
 		{
 			key: "submission_close",
 			label: "Clôture des soumissions",
-			startsAt: utc("2026-10-25T17:00:00Z"),
+			startsAt: utc("2026-11-15T17:00:00Z"),
 			endsAt: null,
 		},
 		{
 			key: "peer_vote",
 			label: "Votes entre participants d'un même pays (obligatoires)",
-			startsAt: utc("2026-10-25T18:00:00Z"),
-			endsAt: utc("2026-10-26T23:59:00Z"),
+			startsAt: utc("2026-11-15T18:00:00Z"),
+			endsAt: utc("2026-11-16T23:59:00Z"),
 		},
 		{
 			key: "public_vote",
 			label: "Vote du public",
-			startsAt: utc("2026-10-27T00:00:00Z"),
-			endsAt: utc("2026-10-30T23:59:00Z"),
+			startsAt: utc("2026-11-17T00:00:00Z"),
+			endsAt: utc("2026-11-20T23:59:00Z"),
 		},
 		{
 			key: "jury",
 			label: "Délibération du jury",
-			startsAt: utc("2026-11-01T00:00:00Z"),
+			startsAt: utc("2026-11-22T00:00:00Z"),
 			endsAt: null,
 		},
 	],

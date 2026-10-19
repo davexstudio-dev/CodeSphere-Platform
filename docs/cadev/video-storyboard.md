@@ -4,7 +4,7 @@ Décisions issues du ticket « Vidéo de démonstration CADEV » (#236 de la car
 
 ## Deux montages
 
-- **Maîtresse 16:9 de 3 minutes** pour le dossier et le jury. Elle se termine par « Essayez CodeSphere » et l'adresse du site, **sans appel à voter** (adresse et modalités du vote public non publiées, fichier soumis au plus tard le 25 oct. avant 17h00 GMT).
+- **Maîtresse 16:9 de 3 minutes** pour le dossier et le jury. Elle se termine par « Essayez CodeSphere » et l'adresse du site, **sans appel à voter** (adresse et modalités du vote public non publiées, fichier soumis au plus tard le 15 nov. avant 17h00 GMT, échéance repoussée du 25 oct.).
 - **Coupe 9:16 de 60 secondes** pour WhatsApp, LinkedIn et les réseaux, sous-titres français incrustés (on regarde souvent sans le son). Elle est **refaite le 27 oct.** avec le vrai lien de vote : problème, démo en une scène, appel à voter.
 
 ## Phrase d'accroche
@@ -42,7 +42,7 @@ Elle s'affiche en titre au début et revient en carton final. La démo ne prouve
 - **20 oct.** : premier tournage complet (version de secours avec l'interface actuelle).
 - **23 oct.** : retournage ciblé des plans dont l'interface a changé, montage final, avant la répétition générale. L'interface peut encore changer jusqu'au gel : retourner aussi le 24 au soir les plans touchés, ou figer plus tôt les écrans de la démo (à trancher, #236).
 - **24 oct. au soir** : gel des fonctionnalités.
-- **25 oct.** : soumission avant 17h00 GMT. **27 oct.** : coupe de 60 secondes avec le lien de vote.
+- **15 nov.** : soumission avant 17h00 GMT (cible interne : le calendrier de tournage est à revoir, l'échéance ayant été repoussée du 25 oct.). **17 nov.** : coupe de 60 secondes avec le lien de vote (à confirmer).
 
 ## Après le tournage
 
