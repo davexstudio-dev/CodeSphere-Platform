@@ -30,6 +30,10 @@ export async function deleteMember(
 		sql`DELETE FROM feed_muted WHERE user_id IN (${mine})`,
 		sql`DELETE FROM feed_affinity WHERE user_id IN (${mine})`,
 		sql`DELETE FROM watch_item_saves WHERE user_id IN (${mine})`,
+		// The Talent card, the applications and the reports the Member made (#258) go with the account.
+		sql`DELETE FROM talent_cards WHERE user_id IN (${mine})`,
+		sql`DELETE FROM job_applications WHERE user_id IN (${mine})`,
+		sql`DELETE FROM job_reports WHERE user_id IN (${mine})`,
 		sql`DELETE FROM account WHERE user_id IN (${mine})`,
 		sql`DELETE FROM apikey WHERE reference_id IN (${mine})
 			OR reference_id IN (SELECT id FROM "user" WHERE owner_id IN (${mine}))`,

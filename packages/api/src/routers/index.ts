@@ -33,6 +33,11 @@ import { isRead, isWatchSubmission } from "../exposure";
 import { createMixedFeedHandlers } from "../feed-mixed/handlers";
 import { loadHackathons } from "../hackathons";
 import { impl } from "../index";
+import {
+	createJobsAdminHandlers,
+	createJobsHandlers,
+	createTalentHandlers,
+} from "../jobs/handlers";
 import { sanitizeMarkdown } from "../markdown/sanitizer";
 import { deleteMember } from "../members-delete";
 import { exportMember } from "../members-export";
@@ -527,6 +532,7 @@ export const appRouter = impl
 			},
 			watch: createWatchAdminHandlers(),
 			organizations: createOrganizationsAdminHandlers(),
+			jobs: createJobsAdminHandlers(),
 			webVitals: {
 				byCountry: impl.admin.webVitals.byCountry
 					.use(isAdmin)
@@ -756,6 +762,8 @@ export const appRouter = impl
 		rankings: createRankingsHandlers(),
 		watch: createWatchHandlers(),
 		organizations: createOrganizationsHandlers(),
+		jobs: createJobsHandlers(),
+		talent: createTalentHandlers(),
 		community: {
 			snapshot: impl.community.snapshot.handler(async ({ context }) => {
 				const { day, computedAt, figures } = await communitySnapshot(

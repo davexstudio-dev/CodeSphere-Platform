@@ -25,6 +25,7 @@ import { useOutbox } from "@/components/outbox-provider";
 import { AgentsSection } from "@/components/settings/agents-section";
 import { FeedPersonalization } from "@/components/settings/feed-section";
 import { PrivacyActions } from "@/components/settings/privacy-section";
+import { TalentCardSection } from "@/components/settings/talent-section";
 import { waiting } from "@/lib/outbox";
 import { orpc } from "@/utils/orpc";
 
@@ -322,8 +323,9 @@ export default function SettingsPage() {
 					))}
 				</TabsList>
 				<div className="min-w-0 flex-1">
-					<TabsContent value="profile">
+					<TabsContent value="profile" className="flex flex-col gap-6">
 						<ProfileForm />
+						<TalentCardSection />
 					</TabsContent>
 					{/* Outside the profile form: each has its own actions, and forms do not nest. */}
 					<TabsContent value="tags" className="flex flex-col gap-6">

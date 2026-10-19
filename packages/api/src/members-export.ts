@@ -5,6 +5,7 @@ import {
 	feedMuted,
 	feedPreferences,
 } from "@codesphere/db/schema/feed";
+import { jobApplications, talentCards } from "@codesphere/db/schema/jobs";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
 import { reputationEvents } from "@codesphere/db/schema/reputation";
 import { tagFollows } from "@codesphere/db/schema/tags";
@@ -23,46 +24,63 @@ export async function exportMember(db: Database, memberId: string) {
 	if (!me) {
 		return null;
 	}
-	const [qs, as, vs, journal, tags, agents, prefs, muted, affinity, kept] =
-		await Promise.all([
-			db.select().from(questions).where(eq(questions.authorId, memberId)),
-			db.select().from(answers).where(eq(answers.authorId, memberId)),
-			db.select().from(votes).where(eq(votes.userId, memberId)),
-			db
-				.select()
-				.from(reputationEvents)
-				.where(eq(reputationEvents.userId, memberId))
-				.orderBy(reputationEvents.createdAt, reputationEvents.id),
-			db.select().from(tagFollows).where(eq(tagFollows.userId, memberId)),
-			db
-				.select()
-				.from(user)
-				.where(
-					and(
-						eq(user.ownerId, memberId),
-						eq(user.kind, "agent"),
-						or(
-							isNull(user.suspensionReason),
-							ne(user.suspensionReason, "deleted"),
-						),
+	const [
+		qs,
+		as,
+		vs,
+		journal,
+		tags,
+		agents,
+		prefs,
+		muted,
+		affinity,
+		kept,
+		talent,
+		applied,
+	] = await Promise.all([
+		db.select().from(questions).where(eq(questions.authorId, memberId)),
+		db.select().from(answers).where(eq(answers.authorId, memberId)),
+		db.select().from(votes).where(eq(votes.userId, memberId)),
+		db
+			.select()
+			.from(reputationEvents)
+			.where(eq(reputationEvents.userId, memberId))
+			.orderBy(reputationEvents.createdAt, reputationEvents.id),
+		db.select().from(tagFollows).where(eq(tagFollows.userId, memberId)),
+		db
+			.select()
+			.from(user)
+			.where(
+				and(
+					eq(user.ownerId, memberId),
+					eq(user.kind, "agent"),
+					or(
+						isNull(user.suspensionReason),
+						ne(user.suspensionReason, "deleted"),
 					),
 				),
-			db
-				.select()
-				.from(feedPreferences)
-				.where(eq(feedPreferences.userId, memberId)),
-			db.select().from(feedMuted).where(eq(feedMuted.userId, memberId)),
-			db.select().from(feedAffinity).where(eq(feedAffinity.userId, memberId)),
-			db
-				.select({
-					itemId: watchItems.id,
-					url: watchItems.url,
-					title: watchItems.title,
-				})
-				.from(watchItemSaves)
-				.innerJoin(watchItems, eq(watchItems.id, watchItemSaves.itemId))
-				.where(eq(watchItemSaves.userId, memberId)),
-		]);
+			),
+		db
+			.select()
+			.from(feedPreferences)
+			.where(eq(feedPreferences.userId, memberId)),
+		db.select().from(feedMuted).where(eq(feedMuted.userId, memberId)),
+		db.select().from(feedAffinity).where(eq(feedAffinity.userId, memberId)),
+		db
+			.select({
+				itemId: watchItems.id,
+				url: watchItems.url,
+				title: watchItems.title,
+			})
+			.from(watchItemSaves)
+			.innerJoin(watchItems, eq(watchItems.id, watchItemSaves.itemId))
+			.where(eq(watchItemSaves.userId, memberId)),
+		db.select().from(talentCards).where(eq(talentCards.userId, memberId)),
+		db
+			.select()
+			.from(jobApplications)
+			.where(eq(jobApplications.userId, memberId)),
+	]);
 	return {
 		exportedAt: new Date().toISOString(),
 		profile: {
@@ -115,6 +133,20 @@ export async function exportMember(db: Database, memberId: string) {
 			affinity: affinity.map((a) => ({ tag: a.tag, weight: a.weight })),
 		},
 		keptItems: kept,
+		talentCard: talent[0]
+			? {
+					enabled: talent[0].enabled,
+					openToContact: talent[0].openToContact,
+					headline: talent[0].headline,
+					codeUrl: talent[0].codeUrl,
+					contactEmail: talent[0].contactEmail,
+				}
+			: null,
+		jobApplications: applied.map((a) => ({
+			jobId: a.jobId,
+			sharedCard: a.sharedCard,
+			createdAt: a.createdAt.toISOString(),
+		})),
 		agents: agents.map((a) => ({
 			id: a.id,
 			name: a.name,

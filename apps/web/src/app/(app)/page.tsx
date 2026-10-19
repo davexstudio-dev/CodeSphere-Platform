@@ -22,6 +22,7 @@ import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import type * as z from "zod";
 import { FeedSkeleton, HomeFeed, useFeed } from "@/components/home-feed";
+import { JobsModule } from "@/components/jobs/jobs-module";
 import Link from "@/components/link";
 import { AskButton } from "@/components/site-header";
 import TagsOnboardingRedirect from "@/components/tags-onboarding-redirect";
@@ -304,6 +305,7 @@ function MemberHome({
 				<Banner hackathon={hackathon} variant="rail" />
 				<GettingStartedCard />
 				<FollowedTagsCard />
+				<JobsModule />
 			</aside>
 		</main>
 	);

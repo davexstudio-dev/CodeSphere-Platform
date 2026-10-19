@@ -5,6 +5,7 @@ import { communityContract } from "./community";
 import { feedContract } from "./feed";
 import { hackathonsContract } from "./hackathons";
 import { healthContract } from "./health";
+import { jobsContract, talentContract } from "./jobs";
 import { markdownContract } from "./markdown";
 import { membersContract } from "./members";
 import { organizationsContract } from "./organizations";
@@ -22,6 +23,7 @@ export * from "./community";
 export * from "./consent";
 export * from "./feed";
 export * from "./hackathons";
+export * from "./jobs";
 export * from "./markdown";
 export * from "./members";
 export * from "./organizations";
@@ -41,6 +43,8 @@ export const contract = {
 	feed: feedContract,
 	health: healthContract,
 	hackathons: hackathonsContract,
+	jobs: jobsContract,
+	talent: talentContract,
 	markdown: markdownContract,
 	members: membersContract,
 	organizations: organizationsContract,

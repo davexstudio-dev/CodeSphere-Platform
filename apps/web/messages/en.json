@@ -3,7 +3,8 @@
 		"build": "CodeSphere Platform v{version} · {sha}",
 		"nav": "Footer links",
 		"watch": "Watch",
-		"organizations": "Organizations"
+		"organizations": "Organizations",
+		"jobs": "Jobs"
 	},
 	"language": {
 		"label": "Language",
@@ -135,6 +136,21 @@
 			},
 			"unmute": "Stop hiding {name}",
 			"error": "Something went wrong. Try again."
+		},
+		"talent": {
+			"title": "Talent card",
+			"description": "An optional profile for recruiters (Reputation, strongest Tags, country, link to your code). Off by default.",
+			"enabled": "Turn on my Talent card",
+			"enabledHint": "Off, nobody sees it, except an Organization you share it with when applying.",
+			"openToContact": "Open to contact",
+			"openToContactHint": "Validated Organizations can find and contact you. Without it, an Organization does not contact you.",
+			"headline": "Headline (140 characters)",
+			"codeUrl": "Link to your code (GitHub, portfolio)",
+			"contactEmail": "Contact email for recruiters (optional)",
+			"save": "Save",
+			"preview": "What a recruiter sees",
+			"previewLine": "Reputation {reputation} · Strongest Tags: {tags} · Country: {country}",
+			"error": "Saving failed."
 		}
 	},
 	"agentProfile": {
@@ -613,6 +629,22 @@
 				"forbidden": "Action refused.",
 				"conflict": "This application was already handled. The list is reloaded.",
 				"notFound": "This Organization no longer exists.",
+				"generic": "Something went wrong. Try again."
+			}
+		},
+		"jobs": {
+			"title": "Jobs",
+			"description": "Reported postings. A founded report removes the posting; two suspend the Organization.",
+			"none": "No reported posting.",
+			"reports": "{count, plural, one {# report} other {# reports}}",
+			"uphold": "Founded: remove",
+			"dismiss": "Dismiss",
+			"reason": "Reason for the removal",
+			"suspended": "The Organization is suspended (two founded reports).",
+			"errors": {
+				"forbidden": "Action refused.",
+				"conflict": "Already handled.",
+				"notFound": "This posting has no pending report.",
 				"generic": "Something went wrong. Try again."
 			}
 		}
@@ -1113,6 +1145,77 @@
 			"domain": "The email must be on the website's domain (no public mailbox).",
 			"forbidden": "Only a Member can apply.",
 			"generic": "The application failed. Try again."
+		}
+	},
+	"jobs": {
+		"title": "Jobs",
+		"intro": "Postings from validated Organizations. Applying is always free: a posting that asks the candidate for money is refused.",
+		"publish": "Post a job",
+		"country": "Country (SN, CI…)",
+		"tag": "Tag",
+		"remote": "Remote",
+		"empty": "No posting for now.",
+		"more": "Show more",
+		"retry": "Try again",
+		"error": "Something went wrong. Try again.",
+		"notFound": "This posting does not exist or has expired.",
+		"applied": "Applied",
+		"appliedToast": "Noted: the Organization sees that you applied.",
+		"appliedShared": "You applied and shared your CodeSphere card.",
+		"appliedPlain": "You applied without sharing your card.",
+		"expires": "Expires on {date}",
+		"howToApply": "How to apply",
+		"free": "Applying is free. Never pay for an application: report the posting.",
+		"applyLink": "Apply on the Organization's site",
+		"applyWithCard": "Apply with my CodeSphere card",
+		"applyWithoutCard": "Apply without my card",
+		"applyHint": "You also apply on the site or by email above. Sharing your card shows it to this Organization for this posting only.",
+		"report": "Report",
+		"reportReason": "Why?",
+		"reportSend": "Send",
+		"reported": "Thanks, an Admin will take a look.",
+		"applicants": "Applications received",
+		"noApplicants": "Nobody applied through CodeSphere yet.",
+		"noCard": "Card not shared",
+		"reputation": "Reputation {count}",
+		"close": "Close the posting",
+		"confirmClose": "Close this posting now?",
+		"errors": {
+			"forbidden": "You cannot do that (you own this posting, or you are not signed in as a Member).",
+			"generic": "Something went wrong. Try again."
+		},
+		"module": {
+			"title": "Jobs for your Tags",
+			"all": "All postings"
+		},
+		"publishPage": {
+			"title": "Post a job",
+			"intro": "A posting lasts 30 days. Choose how to apply: a link or an email, not both.",
+			"signIn": "Sign in to post a job.",
+			"needOrganization": "You need a validated Organization to post.",
+			"applyOrganization": "Apply for an Organization",
+			"organization": "Organization",
+			"jobTitle": "Job title",
+			"description": "Description (at least 20 characters)",
+			"tags": "Tags, comma-separated (5 at most)",
+			"country": "Country",
+			"applyHint": "How to apply (only one of the two)",
+			"applyUrl": "Application link",
+			"applyEmail": "Application email",
+			"rules": "A posting that asks the candidate for money is refused. At most 5 live postings per Organization. Two founded reports suspend the Organization.",
+			"submit": "Post for 30 days",
+			"done": "Posting published.",
+			"mine": "My postings",
+			"live": "live",
+			"expired": "expired",
+			"removed": "removed",
+			"applicants": "{count, plural, =0 {no applications} one {# application} other {# applications}}",
+			"errors": {
+				"rule": "Posting refused: one way to apply only, and never a request for money from the candidate.",
+				"limit": "You already have 5 live postings.",
+				"forbidden": "Only the owner of a validated Organization can post.",
+				"generic": "Publishing failed. Try again."
+			}
 		}
 	}
 }

@@ -4,6 +4,7 @@ import * as z from "zod";
 
 import { base, ExpectedVersion, Id, Page, PageInput, Timestamp } from "./base";
 import { Hackathon, JudgingCriterion, Milestone, Prize } from "./hackathons";
+import { jobsAdminContract } from "./jobs";
 import { MemberSummary } from "./members";
 import { organizationsAdminContract } from "./organizations";
 import { vitalsAdminContract } from "./vitals";
@@ -344,6 +345,7 @@ export const adminContract = {
 			.input(z.object({ id: z.string() }))
 			.output(AdminMember),
 	},
+	jobs: jobsAdminContract,
 	organizations: organizationsAdminContract,
 	webVitals: vitalsAdminContract,
 	watch: watchAdminContract,

@@ -112,6 +112,24 @@ export const MemberExport = z.object({
 		),
 		affinity: z.array(z.object({ tag: z.string(), weight: z.number() })),
 	}),
+	/** The optional profile for recruiters (#258), when the Member ever set one. */
+	talentCard: z
+		.object({
+			enabled: z.boolean(),
+			openToContact: z.boolean(),
+			headline: z.string().nullable(),
+			codeUrl: z.string().nullable(),
+			contactEmail: z.string().nullable(),
+		})
+		.nullable(),
+	/** Job postings the Member applied to through CodeSphere. */
+	jobApplications: z.array(
+		z.object({
+			jobId: z.string(),
+			sharedCard: z.boolean(),
+			createdAt: z.string().datetime(),
+		}),
+	),
 	/** Watch items the Member kept for later. */
 	keptItems: z.array(
 		z.object({ itemId: z.string(), url: z.string(), title: z.string() }),

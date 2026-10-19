@@ -4,6 +4,7 @@ export * from "./auth";
 export * from "./community";
 export * from "./feed";
 export * from "./hackathons";
+export * from "./jobs";
 export * from "./organizations";
 export * from "./questions";
 export * from "./rate-limit";

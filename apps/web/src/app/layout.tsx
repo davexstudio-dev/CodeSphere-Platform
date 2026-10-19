@@ -121,6 +121,7 @@ export default async function RootLayout({
 										href: legalHref(page),
 									})),
 									{ label: footer("watch"), href: "/watch" },
+									{ label: footer("jobs"), href: "/jobs" },
 									{ label: footer("organizations"), href: "/organizations" },
 									{ label: roadmap("nav"), href: "/roadmap" },
 								]}

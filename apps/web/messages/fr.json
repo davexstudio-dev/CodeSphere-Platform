@@ -3,7 +3,8 @@
 		"build": "CodeSphere Platform v{version} · {sha}",
 		"nav": "Liens du pied de page",
 		"watch": "Veille",
-		"organizations": "Organisations"
+		"organizations": "Organisations",
+		"jobs": "Emplois"
 	},
 	"language": {
 		"label": "Langue",
@@ -135,6 +136,21 @@
 			},
 			"unmute": "Ne plus masquer {name}",
 			"error": "Une erreur est survenue. Réessayez."
+		},
+		"talent": {
+			"title": "Fiche talent",
+			"description": "Un profil facultatif pour les recruteurs (Réputation, Tags forts, pays, lien vers votre code). Désactivé par défaut.",
+			"enabled": "Activer ma fiche talent",
+			"enabledHint": "Désactivée, personne ne la voit, sauf une Organisation à qui vous la partagez en postulant.",
+			"openToContact": "Ouvert aux contacts",
+			"openToContactHint": "Les Organisations validées peuvent vous trouver et vous contacter. Sans cela, une Organisation ne vous contacte pas.",
+			"headline": "Accroche (140 caractères)",
+			"codeUrl": "Lien vers votre code (GitHub, portfolio)",
+			"contactEmail": "E-mail de contact pour les recruteurs (facultatif)",
+			"save": "Enregistrer",
+			"preview": "Ce qu'un recruteur voit",
+			"previewLine": "Réputation {reputation} · Tags forts : {tags} · Pays : {country}",
+			"error": "L'enregistrement a échoué."
 		}
 	},
 	"agentProfile": {
@@ -613,6 +629,22 @@
 				"forbidden": "Action refusée.",
 				"conflict": "Cette demande a déjà été traitée. La liste est rechargée.",
 				"notFound": "Cette Organisation n'existe plus.",
+				"generic": "Une erreur est survenue. Réessayez."
+			}
+		},
+		"jobs": {
+			"title": "Emplois",
+			"description": "Offres signalées. Un signalement fondé retire l'offre ; deux suspendent l'Organisation.",
+			"none": "Aucune offre signalée.",
+			"reports": "{count, plural, one {# signalement} other {# signalements}}",
+			"uphold": "Fondé : retirer",
+			"dismiss": "Écarter",
+			"reason": "Motif du retrait",
+			"suspended": "L'Organisation est suspendue (deux signalements fondés).",
+			"errors": {
+				"forbidden": "Action refusée.",
+				"conflict": "Déjà traité.",
+				"notFound": "Cette offre n'a plus de signalement en attente.",
 				"generic": "Une erreur est survenue. Réessayez."
 			}
 		}
@@ -1113,6 +1145,77 @@
 			"domain": "L'adresse e-mail doit être sur le domaine du site web (pas de messagerie publique).",
 			"forbidden": "Seul un Member peut faire une demande.",
 			"generic": "La demande a échoué. Réessayez."
+		}
+	},
+	"jobs": {
+		"title": "Emplois",
+		"intro": "Offres d'Organisations validées. Postuler est toujours gratuit : une offre qui demande de l'argent au candidat est refusée.",
+		"publish": "Publier une offre",
+		"country": "Pays (SN, CI…)",
+		"tag": "Tag",
+		"remote": "À distance",
+		"empty": "Aucune offre pour le moment.",
+		"more": "Voir plus",
+		"retry": "Réessayer",
+		"error": "Une erreur est survenue. Réessayez.",
+		"notFound": "Cette offre n'existe pas ou a expiré.",
+		"applied": "Candidature envoyée",
+		"appliedToast": "C'est noté : l'Organisation voit que vous avez postulé.",
+		"appliedShared": "Vous avez postulé en partageant votre fiche CodeSphere.",
+		"appliedPlain": "Vous avez postulé sans partager votre fiche.",
+		"expires": "Expire le {date}",
+		"howToApply": "Comment postuler",
+		"free": "Postuler est gratuit. Ne payez jamais pour une candidature : signalez l'offre.",
+		"applyLink": "Postuler sur le site de l'Organisation",
+		"applyWithCard": "Postuler avec ma fiche CodeSphere",
+		"applyWithoutCard": "Je postule sans ma fiche",
+		"applyHint": "Vous postulez aussi sur le site ou par e-mail ci-dessus. Partager votre fiche l'affiche à cette Organisation pour cette offre seulement.",
+		"report": "Signaler",
+		"reportReason": "Pourquoi ?",
+		"reportSend": "Envoyer",
+		"reported": "Merci, un Admin va regarder.",
+		"applicants": "Candidatures reçues",
+		"noApplicants": "Personne n'a encore postulé via CodeSphere.",
+		"noCard": "Fiche non partagée",
+		"reputation": "Réputation {count}",
+		"close": "Clore l'offre",
+		"confirmClose": "Clore cette offre maintenant ?",
+		"errors": {
+			"forbidden": "Vous ne pouvez pas faire cela (vous êtes le propriétaire de cette offre, ou vous n'êtes pas connecté en tant que Member).",
+			"generic": "Une erreur est survenue. Réessayez."
+		},
+		"module": {
+			"title": "Emplois pour vos Tags",
+			"all": "Toutes les offres"
+		},
+		"publishPage": {
+			"title": "Publier une offre",
+			"intro": "Une offre dure 30 jours. Choisissez comment postuler : un lien ou un e-mail, pas les deux.",
+			"signIn": "Connectez-vous pour publier une offre.",
+			"needOrganization": "Il faut une Organisation validée pour publier.",
+			"applyOrganization": "Demander la validation d'une Organisation",
+			"organization": "Organisation",
+			"jobTitle": "Titre du poste",
+			"description": "Description (20 caractères au moins)",
+			"tags": "Tags, séparés par des virgules (5 au plus)",
+			"country": "Pays",
+			"applyHint": "Comment postuler (un seul des deux)",
+			"applyUrl": "Lien de candidature",
+			"applyEmail": "E-mail de candidature",
+			"rules": "Une offre qui demande de l'argent au candidat est refusée. 5 offres actives au plus par Organisation. Deux signalements fondés suspendent l'Organisation.",
+			"submit": "Publier pour 30 jours",
+			"done": "Offre publiée.",
+			"mine": "Mes offres",
+			"live": "en ligne",
+			"expired": "expirée",
+			"removed": "retirée",
+			"applicants": "{count, plural, =0 {aucune candidature} one {# candidature} other {# candidatures}}",
+			"errors": {
+				"rule": "Offre refusée : un seul moyen de postuler, et jamais de demande d'argent au candidat.",
+				"limit": "Vous avez déjà 5 offres en ligne.",
+				"forbidden": "Seul le propriétaire d'une Organisation validée peut publier.",
+				"generic": "La publication a échoué. Réessayez."
+			}
 		}
 	}
 }
