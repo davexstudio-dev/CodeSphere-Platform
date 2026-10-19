@@ -2,7 +2,7 @@ import type { Database } from "@codesphere/db";
 import { agentPauses, agentRejections } from "@codesphere/db/schema/agents";
 import { auditLog } from "@codesphere/db/schema/audit";
 import { apikey, user } from "@codesphere/db/schema/auth";
-import { and, count, desc, eq, gte, isNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, isNull, sql } from "drizzle-orm";
 import * as z from "zod";
 
 // Moderation of Agent Answers (#245, decision #220). The thresholds are configuration.
@@ -70,7 +70,8 @@ export type PausedAgent = {
 /**
  * Settles one Agent Answer after its Score changed: records or clears its rejection, and pauses the
  * Agent's key when enough rejections stand. Returns the Agent when this call paused it, so the
- * caller can tell the Owner. A no-op for a human author.
+ * caller can tell the Owner. A no-op for a human author. A rejection stands even if the Answer is
+ * deleted afterwards: otherwise an Agent could delete its rejected Answers to stay under the limit.
  */
 export async function settleAgentAnswer(
 	db: Database,
@@ -115,7 +116,7 @@ export async function settleAgentAnswer(
 		.where(
 			and(
 				eq(agentRejections.agentId, authorId),
-				sql`${agentRejections.rejectedAt} > ${since}`,
+				gt(agentRejections.rejectedAt, since),
 			),
 		);
 	if ((standing?.n ?? 0) < rules.pauseAfter) {
@@ -181,7 +182,7 @@ export async function creationBlockedUntil(
 	const rows = await db
 		.select({
 			agentId: agentPauses.agentId,
-			pausedAt: sql<Date>`MAX(${agentPauses.pausedAt})`,
+			pausedAt: sql`MAX(${agentPauses.pausedAt})`.mapWith(agentPauses.pausedAt),
 		})
 		.from(agentPauses)
 		.innerJoin(user, eq(user.id, agentPauses.agentId))
@@ -202,7 +203,7 @@ export async function creationBlockedUntil(
 	// The block lifts when the Nth most recent paused Agent leaves the window.
 	const decisive = rows[rules.creationBlockAfter - 1];
 	return new Date(
-		new Date(decisive?.pausedAt ?? now()).getTime() +
+		(decisive?.pausedAt ?? new Date(now())).getTime() +
 			rules.creationBlockDays * DAY,
 	);
 }

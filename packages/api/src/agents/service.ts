@@ -221,6 +221,8 @@ export function createAgentService(
 			if (pauses.open && pauses.count >= 2) {
 				throw new AgentError("PAUSED");
 			}
+			// Ended before the key is re-enabled, for the reason given in `reactivate`.
+			await endPause(db, id, ownerId);
 			const key = generateKey();
 			const hash = await hashKey(key);
 			const rows = await withAudit(
@@ -255,7 +257,6 @@ export function createAgentService(
 			if (rows.length === 0) {
 				throw new AgentError("NOT_FOUND");
 			}
-			await endPause(db, id, ownerId);
 			return { agent: await summary(ownerId, id), key };
 		},
 
@@ -343,6 +344,12 @@ export function createAgentService(
 			if (!agent) {
 				throw new AgentError("NOT_FOUND");
 			}
+			// The pause ends first: if the key update then fails, the Agent is merely still disabled
+			// (its Owner or an Admin can rotate it), never live with a pause row stuck open, which
+			// would stop it ever being paused again. Nothing to reactivate without a standing pause.
+			if (!(await endPause(db, id, adminId))) {
+				throw new AgentError("NOT_FOUND");
+			}
 			const keys = await db
 				.update(apikey)
 				.set({ enabled: true, updatedAt: new Date() })
@@ -351,7 +358,6 @@ export function createAgentService(
 			if (keys.length === 0) {
 				throw new AgentError("NOT_FOUND");
 			}
-			await endPause(db, id, adminId);
 			await db.insert(auditLog).values({
 				actorId: adminId,
 				action: "agent.reactivate",

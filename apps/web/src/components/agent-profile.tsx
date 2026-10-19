@@ -34,7 +34,11 @@ export function AgentProfilePage({ id }: { id: string }) {
 			<main className="mx-auto max-w-3xl px-4 py-8">
 				<Alert variant="destructive">
 					<AlertCircleIcon />
-					<AlertTitle>{t("notFound")}</AlertTitle>
+					<AlertTitle>
+						{errorCodeOf(profile.error) === "NOT_FOUND"
+							? t("notFound")
+							: t("errorTitle")}
+					</AlertTitle>
 					<AlertDescription>
 						{errorCodeOf(profile.error) === "NOT_FOUND"
 							? t("notFoundHint")

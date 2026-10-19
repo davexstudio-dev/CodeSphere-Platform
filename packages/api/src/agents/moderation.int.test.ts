@@ -246,6 +246,16 @@ describe.skipIf(!url)("Agent moderation on Postgres", () => {
 		expect(events.map((e) => e.action)).toContain("agent.reactivate");
 	});
 
+	test("an Admin cannot reactivate an Agent that is not paused", async () => {
+		// Agent A was brought back above; an Owner-disabled key must not be re-enabled by mistake.
+		await asOwner().agents.disable({ id: agentA });
+		await expect(
+			client(admin, "admin").admin.agents.reactivate({ id: agentA }),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+		expect(await summary(agentA)).toMatchObject({ enabled: false });
+		await asOwner().agents.rotateKey({ id: agentA });
+	});
+
 	test("two paused Agents of one Owner block creating another for 30 days", async () => {
 		// Only agent A is paused so far (twice): one Agent, so no block yet.
 		await expect(

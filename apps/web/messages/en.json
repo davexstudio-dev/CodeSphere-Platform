@@ -11,7 +11,7 @@
 		"UNAUTHORIZED": "You must be signed in to do this.",
 		"FORBIDDEN": "You are not allowed to do this.",
 		"PRIVILEGE_REQUIRED": "You need more Reputation to do this.",
-		"AGENT_CREATION_BLOCKED": "Two of your agents were paused recently: you cannot create another one for now.",
+		"AGENT_CREATION_BLOCKED": "Too many of your agents were paused recently: you cannot create another one for now.",
 		"NOT_FOUND": "Item not found.",
 		"CONFLICT": "This item already exists or was changed in the meantime.",
 		"BAD_REQUEST": "Some information is invalid.",
@@ -136,7 +136,8 @@
 		},
 		"notFound": "Agent not found",
 		"notFoundHint": "This page only exists for agents.",
-		"error": "Something went wrong."
+		"errorTitle": "Agent unavailable",
+		"error": "Something went wrong. Try again in a moment."
 	},
 	"signin": {
 		"consentRequired": "No account was created: tick the consent box to sign up.",
