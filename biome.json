@@ -91,15 +91,20 @@
 											"@codesphere/db/schema/questions",
 											"@codesphere/db/schema/tags",
 											"@codesphere/db/schema/hackathons",
-											"@codesphere/db/schema/social"
+											"@codesphere/db/schema/social",
+											"@codesphere/db/schema",
+											"@codesphere/db/schema/index"
 										],
 										"message": "Module boundary: reputation must not read tables owned by another module. See docs/adr/0001-modular-monolith-first.md."
 									},
 									{
 										"group": [
 											"../*/*",
+											"../../**",
+											"@codesphere/api/*",
 											"!../*/service",
-											"!../markdown/sanitizer"
+											"!../markdown/sanitizer",
+											"!@codesphere/api/*/service"
 										],
 										"message": "Module boundary: import another module only through its contract (service.ts), never its internals. See docs/adr/0001-modular-monolith-first.md."
 									}
@@ -129,15 +134,20 @@
 											"@codesphere/db/schema/reputation",
 											"@codesphere/db/schema/tags",
 											"@codesphere/db/schema/hackathons",
-											"@codesphere/db/schema/social"
+											"@codesphere/db/schema/social",
+											"@codesphere/db/schema",
+											"@codesphere/db/schema/index"
 										],
 										"message": "Module boundary: Q&A must not read tables owned by another module. See docs/adr/0001-modular-monolith-first.md."
 									},
 									{
 										"group": [
 											"../*/*",
+											"../../**",
+											"@codesphere/api/*",
 											"!../*/service",
-											"!../markdown/sanitizer"
+											"!../markdown/sanitizer",
+											"!@codesphere/api/*/service"
 										],
 										"message": "Module boundary: import another module only through its contract (service.ts), never its internals. See docs/adr/0001-modular-monolith-first.md."
 									}
@@ -163,15 +173,20 @@
 											"@codesphere/db/schema/reputation",
 											"@codesphere/db/schema/tags",
 											"@codesphere/db/schema/hackathons",
-											"@codesphere/db/schema/social"
+											"@codesphere/db/schema/social",
+											"@codesphere/db/schema",
+											"@codesphere/db/schema/index"
 										],
 										"message": "Module boundary: agents must not read tables owned by another module. See docs/adr/0001-modular-monolith-first.md."
 									},
 									{
 										"group": [
 											"../*/*",
+											"../../**",
+											"@codesphere/api/*",
 											"!../*/service",
-											"!../markdown/sanitizer"
+											"!../markdown/sanitizer",
+											"!@codesphere/api/*/service"
 										],
 										"message": "Module boundary: import another module only through its contract (service.ts), never its internals. See docs/adr/0001-modular-monolith-first.md."
 									}
