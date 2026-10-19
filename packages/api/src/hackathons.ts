@@ -68,6 +68,7 @@ export function toHackathon(
 			scoredBy: JudgingCriterion.shape.scoredBy.parse(c.scoredBy),
 		})),
 		opensAt: row.opensAt ? row.opensAt.toISOString() : null,
+		teamsEnabled: row.teamsEnabled,
 		sourceUrl: row.sourceUrl,
 		sourceNote: row.sourceNote,
 		verifiedAt: row.verifiedAt.toISOString(),

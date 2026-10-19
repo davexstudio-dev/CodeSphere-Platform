@@ -9,6 +9,8 @@ export type SeedHackathon = {
 	name: string;
 	organizer: string;
 	summary: string;
+	/** Teams and submissions run on CodeSphere; off when the event registers elsewhere. */
+	teamsEnabled: boolean;
 	teamMin: number;
 	teamMax: number;
 	sourceUrl: string;
@@ -36,6 +38,8 @@ export const cadev2026: SeedHackathon = {
 	organizer: "Systalink",
 	summary:
 		"Concours en ligne pour équipes de développeurs africains, francophones et anglophones.",
+	// Registration and submission are on Systalink's Datacloud, not here.
+	teamsEnabled: false,
 	teamMin: 2,
 	teamMax: 5,
 	sourceUrl: "https://systalink.com/fr/coupe-afrique-des-developpeurs-cadev",

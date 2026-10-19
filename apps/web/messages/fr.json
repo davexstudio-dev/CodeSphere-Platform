@@ -387,7 +387,11 @@
 			"failure": {
 				"forbidden": "Action réservée au staff.",
 				"failed": "L'enregistrement a échoué. Réessayez."
-			}
+			},
+			"teamsEnabled": "Équipes sur CodeSphere",
+			"teamsEnabledHint": "Activé : les Members créent leur équipe et déposent leur projet ici. Désactivé : l'inscription se fait chez l'organisateur, l'onglet équipe est masqué et un lien vers sa page est affiché.",
+			"yes": "Oui",
+			"no": "Non"
 		},
 		"tags": {
 			"title": "Tags",
@@ -996,7 +1000,10 @@
 			"next": "Prochaine étape",
 			"team": "Équipes",
 			"teamSize": "De {min} à {max} membres",
-			"noMilestone": "Aucune étape à venir."
+			"noMilestone": "Aucune étape à venir.",
+			"externalTitle": "Inscription et dépôt chez l'organisateur",
+			"externalText": "Les équipes, l'inscription et le dépôt des projets se font sur le site de l'organisateur, pas ici. CodeSphere vous aide à préparer votre projet : posez vos questions et suivez le calendrier.",
+			"externalCta": "Aller au site de l'organisateur"
 		},
 		"timeline": {
 			"title": "Calendrier",

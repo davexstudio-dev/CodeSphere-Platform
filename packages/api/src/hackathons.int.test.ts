@@ -46,6 +46,11 @@ describe.skipIf(!url)("CADEV seed and hackathons.get on Postgres", () => {
 		expect(found.criteria.reduce((sum, c) => sum + c.weight, 0)).toBe(100);
 	});
 
+	test("the CADEV does not run teams here: it registers on the organiser's site", async () => {
+		const found = await client.hackathons.get({ slug });
+		expect(found.teamsEnabled).toBe(false);
+	});
+
 	test("an unknown slug gets NOT_FOUND", async () => {
 		await expect(
 			client.hackathons.get({ slug: `${slug}-missing` }),

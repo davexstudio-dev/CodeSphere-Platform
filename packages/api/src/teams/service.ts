@@ -27,6 +27,7 @@ export class TeamError extends Error {
 			| "CLOSED"
 			| "ALREADY_IN_TEAM"
 			| "TEAM_FULL"
+			| "DISABLED"
 			| "BAD_REQUEST",
 		readonly path?: string,
 	) {
@@ -146,7 +147,18 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 		return ctx;
 	}
 
-	const requireRegistrationOpen = (h: { registrationClose: Date | null }) => {
+	/** Teams run elsewhere for this event (an Admin turned them off): nothing is written here. */
+	const requireTeamsEnabled = (h: { teamsEnabled: boolean }) => {
+		if (!h.teamsEnabled) {
+			throw new TeamError("DISABLED");
+		}
+	};
+
+	const requireRegistrationOpen = (h: {
+		registrationClose: Date | null;
+		teamsEnabled: boolean;
+	}) => {
+		requireTeamsEnabled(h);
 		if (!isOpen(h.registrationClose, now())) {
 			throw new TeamError("CLOSED");
 		}
@@ -509,6 +521,7 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 			},
 		) {
 			const { hackathon: h, team } = await requireMember(userId, input.teamId);
+			requireTeamsEnabled(h);
 			if (!isOpen(h.submissionClose, now())) {
 				throw new TeamError("CLOSED");
 			}

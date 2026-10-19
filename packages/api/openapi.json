@@ -320,6 +320,7 @@
 									"closed",
 									"already_in_team",
 									"team_full",
+									"disabled",
 									"name_taken",
 									"ambiguous",
 									"version"
@@ -1564,6 +1565,9 @@
 											}
 										]
 									},
+									"teamsEnabled": {
+										"type": "boolean"
+									},
 									"milestones": {
 										"maxItems": 20,
 										"type": "array",
@@ -1792,6 +1796,9 @@
 												}
 											]
 										},
+										"teamsEnabled": {
+											"type": "boolean"
+										},
 										"verifiedAt": {
 											"type": "string",
 											"format": "date-time",
@@ -1817,6 +1824,7 @@
 										"sourceUrl",
 										"sourceNote",
 										"opensAt",
+										"teamsEnabled",
 										"verifiedAt",
 										"version"
 									],
@@ -6641,6 +6649,9 @@
 															}
 														]
 													},
+													"teamsEnabled": {
+														"type": "boolean"
+													},
 													"verifiedAt": {
 														"type": "string",
 														"format": "date-time",
@@ -6666,6 +6677,7 @@
 													"sourceUrl",
 													"sourceNote",
 													"opensAt",
+													"teamsEnabled",
 													"verifiedAt",
 													"version"
 												],
@@ -6895,6 +6907,9 @@
 												}
 											]
 										},
+										"teamsEnabled": {
+											"type": "boolean"
+										},
 										"verifiedAt": {
 											"type": "string",
 											"format": "date-time",
@@ -6920,6 +6935,7 @@
 										"sourceUrl",
 										"sourceNote",
 										"opensAt",
+										"teamsEnabled",
 										"verifiedAt",
 										"version"
 									],

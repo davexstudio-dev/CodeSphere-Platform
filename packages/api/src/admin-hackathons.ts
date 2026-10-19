@@ -20,6 +20,7 @@ const SCALARS = [
 	"sourceNote",
 	"verifiedAt",
 	"opensAt",
+	"teamsEnabled",
 ] as const;
 
 const same = (a: unknown, b: unknown) =>

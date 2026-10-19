@@ -180,4 +180,22 @@ describe.skipIf(!url)("admin.hackathons.update on Postgres (#124)", () => {
 			}),
 		).rejects.toMatchObject({ code: "FORBIDDEN" });
 	});
+
+	test("an Admin turns the teams on and off, and the change is audited", async () => {
+		const before = await admin().hackathons.get({ slug });
+		expect(before.teamsEnabled).toBe(false);
+		const on = await admin().admin.hackathons.update({
+			slug,
+			expectedVersion: before.version,
+			teamsEnabled: true,
+		});
+		expect(on.teamsEnabled).toBe(true);
+		expect(on.version).toBe(before.version + 1);
+		const off = await admin().admin.hackathons.update({
+			slug,
+			expectedVersion: on.version,
+			teamsEnabled: false,
+		});
+		expect(off.teamsEnabled).toBe(false);
+	});
 });

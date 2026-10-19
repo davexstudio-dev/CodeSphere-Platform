@@ -1,4 +1,5 @@
 import {
+	boolean,
 	index,
 	integer,
 	pgTable,
@@ -23,6 +24,9 @@ export const hackathon = pgTable("hackathon", {
 	summary: text("summary").notNull(),
 	// When the Hackathon opens (#261): a repository whose first commit is older is flagged.
 	opensAt: timestamp("opens_at"),
+	// Teams and submissions are run on CodeSphere (#261). Off for an event whose registration and
+	// submission live elsewhere (the CADEV: Systalink's Datacloud): the page then points to `sourceUrl`.
+	teamsEnabled: boolean("teams_enabled").default(true).notNull(),
 	teamMin: integer("team_min").notNull(),
 	teamMax: integer("team_max").notNull(),
 	sourceUrl: text("source_url").notNull(),
