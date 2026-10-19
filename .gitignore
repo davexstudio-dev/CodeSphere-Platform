@@ -72,3 +72,6 @@ deploy/.env.*
 
 # Lighthouse CI results (#248)
 .lighthouseci/
+
+# Service worker built by apps/web/scripts/build-sw.mjs (#249)
+apps/web/public/sw.js

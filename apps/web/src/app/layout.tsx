@@ -32,6 +32,13 @@ export async function generateMetadata(): Promise<Metadata> {
 	return {
 		title: SITE_NAME,
 		description: DESCRIPTION,
+		icons: {
+			icon: [
+				{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+				{ url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+			],
+			apple: "/icons/apple-touch-icon.png",
+		},
 		openGraph: {
 			type: "website",
 			title: SITE_NAME,
@@ -51,6 +58,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
 	width: "device-width",
 	initialScale: 1,
+	// The brand colour, as the manifest's theme_color: the address bar of the installed app.
+	themeColor: "#a8432a",
 };
 
 export default async function RootLayout({

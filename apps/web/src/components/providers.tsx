@@ -10,6 +10,7 @@ import { setupPersistence } from "@/lib/persist";
 import { createQueryClient } from "@/utils/orpc";
 
 import { OutboxProvider } from "./outbox-provider";
+import { PwaRegister } from "./pwa-register";
 import { ThemeProvider } from "./theme-provider";
 
 export default function Providers({
@@ -38,6 +39,7 @@ export default function Providers({
 		>
 			<QueryClientProvider client={queryClient}>
 				<OutboxProvider>{children}</OutboxProvider>
+				<PwaRegister />
 				<ReactQueryDevtools />
 			</QueryClientProvider>
 			<Toaster richColors />

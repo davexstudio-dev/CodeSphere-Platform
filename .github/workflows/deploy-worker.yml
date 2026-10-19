@@ -67,7 +67,8 @@ jobs:
         working-directory: apps/web
         env:
           NEXT_PUBLIC_SERVER_URL: https://${{ env.PREVIEW_DOMAIN }}
-        run: bunx opennextjs-cloudflare build
+        # cf:build compiles the service worker (public/sw.js, #249) before OpenNext bundles the assets.
+        run: bun run cf:build
 
       - name: Deploy
         working-directory: apps/web

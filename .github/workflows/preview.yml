@@ -173,7 +173,8 @@ jobs:
           NEXT_PUBLIC_SERVER_URL: https://${{ env.PREVIEW_NAME }}.${{ env.PREVIEW_DOMAIN }}
           # Every preview has its own Neon database (the database job): the app uses it.
           NEXT_PUBLIC_HAS_DATABASE: "true"
-        run: bunx opennextjs-cloudflare build
+        # cf:build compiles the service worker (public/sw.js, #249) before OpenNext bundles the assets.
+        run: bun run cf:build
 
       - uses: actions/upload-artifact@v4
         with:
