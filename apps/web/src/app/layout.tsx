@@ -82,6 +82,7 @@ export default async function RootLayout({
 	const locale = await getLocale();
 	const messages = await getMessages();
 	const t = await getTranslations("legal");
+	const roadmap = await getTranslations("roadmap");
 	// Drawn by src/proxy.ts for the CSP (#54).
 	const requestHeaders = await headers();
 	const nonce = requestHeaders.get("x-nonce") ?? undefined;
@@ -113,10 +114,13 @@ export default async function RootLayout({
 								version={process.env.APP_VERSION ?? "0.0.0"}
 								sha={process.env.GIT_SHA ?? "dev"}
 								navLabel={t("nav")}
-								links={LEGAL_PAGES.map((page) => ({
-									label: t(`pages.${page}.title`),
-									href: legalHref(page),
-								}))}
+								links={[
+									...LEGAL_PAGES.map((page) => ({
+										label: t(`pages.${page}.title`),
+										href: legalHref(page),
+									})),
+									{ label: roadmap("nav"), href: "/roadmap" },
+								]}
 							/>
 							<DataSaverToggle />
 						</Providers>

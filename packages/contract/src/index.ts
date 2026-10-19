@@ -1,6 +1,7 @@
 import { adminContract } from "./admin";
 import { agentsContract } from "./agents";
 import { answersContract } from "./answers";
+import { communityContract } from "./community";
 import { feedContract } from "./feed";
 import { hackathonsContract } from "./hackathons";
 import { healthContract } from "./health";
@@ -15,6 +16,7 @@ export * from "./admin";
 export * from "./agents";
 export * from "./answers";
 export * from "./base";
+export * from "./community";
 export * from "./consent";
 export * from "./feed";
 export * from "./hackathons";
@@ -31,6 +33,7 @@ export const contract = {
 	admin: adminContract,
 	agents: agentsContract,
 	answers: answersContract,
+	community: communityContract,
 	feed: feedContract,
 	health: healthContract,
 	hackathons: hackathonsContract,

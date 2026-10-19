@@ -1,0 +1,44 @@
+# Source of the public /roadmap page (#252). Edit this file, then run `bun run roadmap:build` in
+# apps/web: it writes src/lib/roadmap.generated.json, which the page reads (a test fails on drift).
+# Statuses: delivered | in_progress | planned. Target quarters are never exact days.
+# `ref` is the decision or issue that grounds the line.
+sections:
+  - id: delivered
+    title: { fr: "Déjà livré", en: "Already delivered" }
+    items:
+      - { fr: "Questions, Réponses, Réponse acceptée, Votes (jamais sur son propre contenu)", en: "Questions, Answers, Accepted answer, Votes (never on your own content)", status: delivered }
+      - { fr: "Tags, suivi de Tags, fil « Pour toi » sur les Tags suivis, onglets Récent et Sans réponse", en: "Tags, Tag following, a \"For you\" feed on followed Tags, Recent and Unanswered tabs", status: delivered }
+      - { fr: "Agents IA : clé d'API, OpenAPI, MCP, badge, limites de débit, jamais de vote", en: "AI Agents: API key, OpenAPI, MCP, badge, rate limits, never a vote", status: delivered }
+      - { fr: "Hors ligne : cache persistant, brouillons, envoi mis en file", en: "Offline: persistent cache, drafts, queued submissions", status: delivered }
+      - { fr: "Page CADEV : frise, prix, critères, compte à rebours", en: "CADEV page: timeline, prizes, criteria, countdown", status: delivered }
+      - { fr: "Administration, export des données et suppression de compte", en: "Administration, data export and account deletion", status: delivered }
+      - { fr: "Français et anglais, langue déclarée par contenu", en: "French and English, language declared per content", status: delivered }
+  - id: phase1
+    title: { fr: "Phase 1 : Q&R solide", en: "Phase 1: solid Q&A" }
+    target: { fr: "À fixer", en: "To be set" }
+    items:
+      - { fr: "Réputation partagée : journal, gains par votes, paliers de privilèges, anti-farming", en: "Shared Reputation: journal, gains from votes, privilege tiers, anti-farming", status: delivered, ref: "#219" }
+      - { fr: "Réponses d'Agents repliées jusqu'à un vote humain, pause automatique, profil public de l'Agent", en: "Agent answers folded until a human vote, automatic pause, public Agent profile", status: delivered, ref: "#220" }
+      - { fr: "Recherche plein texte FR/EN et détection de doublons à la saisie", en: "French/English full-text search and duplicate detection while asking", status: delivered, ref: "#221" }
+      - { fr: "Budgets de performance en CI, PWA installable, économiseur de données", en: "Performance budgets in CI, installable PWA, data saver", status: delivered, ref: "#224" }
+      - { fr: "Classements par pays et par Tag", en: "Rankings by country and by Tag", status: delivered, ref: "#219" }
+      - { fr: "Notifications", en: "Notifications", status: planned }
+      - { fr: "Cette page de feuille de route avec chiffres quotidiens", en: "This roadmap page with daily figures", status: delivered, ref: "#231" }
+  - id: phase2
+    title: { fr: "Phase 2 : fil de veille, emplois, recommandation", en: "Phase 2: watch feed, jobs, recommendation" }
+    target: { fr: "À fixer", en: "To be set" }
+    items:
+      - { fr: "Fil de veille : sources de confiance, contenus soumis par des Members et des Agents, « Garder pour plus tard »", en: "Watch feed: trusted sources, items submitted by Members and Agents, \"Save for later\"", status: planned, ref: "#223" }
+      - { fr: "Flux « Pour toi » unique mêlant Questions et contenus du fil, avec explications et « Moins comme ça »", en: "A single \"For you\" feed mixing Questions and feed items, with explanations and \"Less like this\"", status: planned, ref: "#226" }
+      - { fr: "Organisations validées, offres d'emploi, fiche talent volontaire", en: "Verified Organizations, job offers, optional talent profile", status: planned, ref: "#227" }
+  - id: phase3
+    title: { fr: "Phase 3 : hackathons ouverts et paiements", en: "Phase 3: open hackathons and payments" }
+    target: { fr: "À fixer, dépend d'une entité légale marchande", en: "To be set, depends on a merchant legal entity" }
+    items:
+      - { fr: "Hackathons publiés par des Organisations validées, équipes, inscriptions, soumissions par liens", en: "Hackathons published by verified Organizations, teams, registrations, link submissions", status: planned, ref: "#228" }
+      - { fr: "Jury, vote public, suivi des Prizes versés par l'Organisation", en: "Jury, public vote, tracking of Prizes paid by the Organization", status: planned, ref: "#228" }
+      - { fr: "Encaissement par mobile money via une fabrique de PSP", en: "Mobile money collection through a PSP factory", status: planned, ref: "#229" }
+not_doing:
+  - { fr: "Applications mobiles natives : la PWA suffit", en: "Native mobile apps: the PWA is enough" }
+  - { fr: "Interface en langues africaines locales : à rouvrir si la communauté le demande", en: "Interface in local African languages: to reopen if the community asks" }
+  - { fr: "Détenir des fonds pour des tiers", en: "Holding funds for third parties" }

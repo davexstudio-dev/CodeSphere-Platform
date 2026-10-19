@@ -110,7 +110,7 @@ async function pickUrls(origin, fetchJson, warn = () => {}) {
 			"Cloudflare challenged the runner: the preview cannot be audited",
 		);
 	}
-	const urls = [`${base}/`, `${base}/ask`];
+	const urls = [`${base}/`, `${base}/ask`, `${base}/roadmap`];
 	const lookup = async (path, key, page) => {
 		const response = await fetchJson(`${base}${path}`).catch(() => null);
 		const value = response?.body?.items?.[0]?.[key];

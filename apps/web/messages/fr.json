@@ -157,7 +157,11 @@
 	},
 	"dataSaver": {
 		"label": "Données allégées",
-		"options": { "auto": "Auto", "on": "Activé", "off": "Désactivé" },
+		"options": {
+			"auto": "Auto",
+			"on": "Activé",
+			"off": "Désactivé"
+		},
 		"hint": {
 			"auto": "Le mode données allégées suit le réglage de votre navigateur.",
 			"on": "Données allégées : ni images, ni animations, ni préchargement, listes plus courtes.",
@@ -878,5 +882,33 @@
 		"placeholder": "Ajouter un tag",
 		"remove": "Retirer {tag}",
 		"full": "{max} tags au maximum"
+	},
+	"roadmap": {
+		"nav": "Feuille de route",
+		"title": "Feuille de route",
+		"intro": "Où en est CodeSphere, ce qui vient ensuite et ce que nous ne ferons pas. Les trimestres sont des cibles, jamais des promesses de date.",
+		"community": "La communauté en chiffres",
+		"snapshot": "Chiffres du {date}, mis à jour une fois par jour.",
+		"unavailable": "Les chiffres sont indisponibles pour le moment.",
+		"activeMembers": "Membres actifs (30 jours)",
+		"questions": "Questions",
+		"answerRate": "Questions avec une réponse",
+		"median": "Délai médian avant la première réponse",
+		"medianNone": "Pas encore de réponse",
+		"minutes": "{count, plural, one {# minute} other {# minutes}}",
+		"hours": "{count, plural, one {# heure} other {# heures}}",
+		"acceptanceRate": "Réponses acceptées parmi les Questions répondues",
+		"countries": "Pays représentés",
+		"countriesNote": "Seuls les pays comptant au moins {min} Members sont comptés.",
+		"target": "Trimestre cible : {target}",
+		"status": {
+			"delivered": "Livré",
+			"in_progress": "En cours",
+			"planned": "Prévu"
+		},
+		"notDoing": "Ce que nous ne ferons pas maintenant",
+		"ideas": "Une idée ? Proposez-la",
+		"ideasHint": "Posez une Question avec le Tag « roadmap » : la communauté peut voter.",
+		"propose": "Proposer une idée"
 	}
 }

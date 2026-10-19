@@ -157,7 +157,11 @@
 	},
 	"dataSaver": {
 		"label": "Data saver",
-		"options": { "auto": "Auto", "on": "On", "off": "Off" },
+		"options": {
+			"auto": "Auto",
+			"on": "On",
+			"off": "Off"
+		},
 		"hint": {
 			"auto": "Data saver follows your browser's setting.",
 			"on": "Data saver is on: no images, no animations, no prefetching, shorter lists.",
@@ -878,5 +882,33 @@
 		"placeholder": "Add a Tag",
 		"remove": "Remove {tag}",
 		"full": "{max} Tags at most"
+	},
+	"roadmap": {
+		"nav": "Roadmap",
+		"title": "Roadmap",
+		"intro": "Where CodeSphere stands, what comes next and what we will not do. Quarters are targets, never promised dates.",
+		"community": "The community in numbers",
+		"snapshot": "Figures of {date}, updated once a day.",
+		"unavailable": "The figures are unavailable right now.",
+		"activeMembers": "Active Members (30 days)",
+		"questions": "Questions",
+		"answerRate": "Questions with an Answer",
+		"median": "Median time to first Answer",
+		"medianNone": "No Answer yet",
+		"minutes": "{count, plural, one {# minute} other {# minutes}}",
+		"hours": "{count, plural, one {# hour} other {# hours}}",
+		"acceptanceRate": "Answered Questions with an Accepted answer",
+		"countries": "Countries represented",
+		"countriesNote": "Only countries with at least {min} Members are counted.",
+		"target": "Target quarter: {target}",
+		"status": {
+			"delivered": "Delivered",
+			"in_progress": "In progress",
+			"planned": "Planned"
+		},
+		"notDoing": "What we will not do for now",
+		"ideas": "Got an idea? Share it",
+		"ideasHint": "Ask a Question with the \"roadmap\" Tag: the community can vote.",
+		"propose": "Suggest an idea"
 	}
 }

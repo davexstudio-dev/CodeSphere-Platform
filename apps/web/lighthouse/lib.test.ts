@@ -65,6 +65,7 @@ describe("pickUrls", () => {
 		expect(urls).toEqual([
 			"https://pr-1.example/",
 			"https://pr-1.example/ask",
+			"https://pr-1.example/roadmap",
 			"https://pr-1.example/questions/q%201",
 			"https://pr-1.example/hackathons/cadev-2026",
 		]);
@@ -79,7 +80,11 @@ describe("pickUrls", () => {
 			},
 			(message: string) => warnings.push(message),
 		);
-		expect(urls).toEqual(["https://pr-1.example/", "https://pr-1.example/ask"]);
+		expect(urls).toEqual([
+			"https://pr-1.example/",
+			"https://pr-1.example/ask",
+			"https://pr-1.example/roadmap",
+		]);
 		expect(warnings).toHaveLength(2);
 		expect(warnings[0]).toContain("question");
 		expect(warnings[1]).toContain("hackathon");

@@ -4629,6 +4629,148 @@
 				}
 			}
 		},
+		"/community/snapshot": {
+			"get": {
+				"operationId": "community.snapshot",
+				"summary": "Daily community figures",
+				"description": "Active Members (30 days), Questions, answer rate, median time to first Answer, acceptance rate and the number of countries with at least 5 Members. Computed once a day (UTC) and identical for every visitor. Aggregates only. Public.",
+				"tags": ["community"],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"day": {
+											"type": "string"
+										},
+										"computedAt": {
+											"type": "string",
+											"format": "date-time",
+											"x-native-type": "date"
+										},
+										"activeMembers": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"questions": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"answerRate": {
+											"type": "number"
+										},
+										"medianFirstAnswerMinutes": {
+											"anyOf": [
+												{
+													"type": "integer",
+													"minimum": -9007199254740991,
+													"maximum": 9007199254740991
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
+										"acceptanceRate": {
+											"type": "number"
+										},
+										"countries": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										}
+									},
+									"required": [
+										"day",
+										"computedAt",
+										"activeMembers",
+										"questions",
+										"answerRate",
+										"medianFirstAnswerMinutes",
+										"acceptanceRate",
+										"countries"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/feed/for-you": {
 			"get": {
 				"operationId": "feed.forYou",

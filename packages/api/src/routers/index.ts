@@ -20,6 +20,7 @@ import { createTag, deleteTag, listTags, renameTag } from "../admin-tags";
 import { createAgentsHandlers } from "../agents/handlers";
 import { AgentError, agentPreset, createAgentService } from "../agents/service";
 import { requireAdmin } from "../authorization";
+import { communitySnapshot } from "../community/service";
 import { decodeCursor, encodeCursor } from "../cursor";
 import { unexpectedErrors } from "../errors";
 import { isRead } from "../exposure";
@@ -37,7 +38,6 @@ import {
 } from "../questions/handlers";
 import { createQuestionService, QuestionError } from "../questions/service";
 import { consume, socialLimiter } from "../rate-limit";
-import { webVitalsByCountry } from "../vitals/service";
 import { createRankingsHandlers } from "../reputation/handlers";
 import { reputationOf } from "../reputation/service";
 import { isSuspended } from "../suspension";
@@ -48,6 +48,7 @@ import {
 	skipTagsOnboarding,
 	unfollowTag,
 } from "../tags";
+import { webVitalsByCountry } from "../vitals/service";
 
 // The authorization guard behind every admin procedure (spec §2). Throws the typed
 // UNAUTHORIZED / FORBIDDEN error declared on the admin contract.
@@ -714,6 +715,14 @@ export const appRouter = impl
 		votes: createVotesHandlers(),
 		feed: createFeedHandlers(),
 		rankings: createRankingsHandlers(),
+		community: {
+			snapshot: impl.community.snapshot.handler(async ({ context }) => {
+				const { day, computedAt, figures } = await communitySnapshot(
+					context.db,
+				);
+				return { day, computedAt, ...figures };
+			}),
+		},
 	});
 
 export type AppRouter = typeof appRouter;
