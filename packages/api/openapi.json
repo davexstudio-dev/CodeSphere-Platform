@@ -826,6 +826,9 @@
 																"p75": {
 																	"type": ["number", "null"]
 																},
+																"p75Above": {
+																	"type": ["number", "null"]
+																},
 																"goodShare": {
 																	"type": "number"
 																}
@@ -834,6 +837,7 @@
 																"metric",
 																"samples",
 																"p75",
+																"p75Above",
 																"goodShare"
 															],
 															"additionalProperties": false

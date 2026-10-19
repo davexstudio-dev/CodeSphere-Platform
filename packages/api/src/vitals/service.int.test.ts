@@ -53,7 +53,12 @@ describe.skipIf(!url)("web vitals on Postgres", () => {
 		const countryA = mine.find((c) => c.country === a);
 		const lcp = countryA?.metrics.find((m) => m.metric === "LCP");
 		// 4 samples, the 75th percentile is the 3rd: in the first bucket.
-		expect(lcp).toMatchObject({ samples: 4, p75: 500, goodShare: 0.75 });
+		expect(lcp).toMatchObject({
+			samples: 4,
+			p75: 500,
+			p75Above: null,
+			goodShare: 0.75,
+		});
 		expect(countryA?.metrics.find((m) => m.metric === "CLS")?.samples).toBe(2);
 		expect(mine.find((c) => c.country === b)?.metrics[0]).toMatchObject({
 			samples: 1,
@@ -62,6 +67,20 @@ describe.skipIf(!url)("web vitals on Postgres", () => {
 		});
 		// Most sampled first.
 		expect(mine.map((c) => c.country)).toEqual([a, b]);
+	});
+
+	test("a country whose 75th percentile is off the scale says so, instead of looking like no data", async () => {
+		for (let i = 0; i < 4; i++) {
+			await recordWebVital(
+				db,
+				{ metric: "INP", value: 5000, country: b },
+				() => now,
+			);
+		}
+		const inp = (await webVitalsByCountry(db, 7, () => now)).countries
+			.find((c) => c.country === b)
+			?.metrics.find((m) => m.metric === "INP");
+		expect(inp).toMatchObject({ p75: null, p75Above: 1200, goodShare: 0 });
 	});
 
 	test("only the last N days count", async () => {

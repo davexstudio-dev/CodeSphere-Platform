@@ -27,12 +27,21 @@ export default function VitalsPage() {
 	const report = useQuery(
 		orpc.admin.webVitals.byCountry.queryOptions({ input: { days } }),
 	);
-	const value = (metric: WebVitalMetric, p75: number | null) =>
-		p75 === null
-			? "—"
-			: metric === "CLS"
-				? format.number(p75, { maximumFractionDigits: 2 })
-				: `${format.number(p75)} ms`;
+	const amount = (metric: WebVitalMetric, n: number) =>
+		metric === "CLS"
+			? format.number(n, { maximumFractionDigits: 2 })
+			: `${format.number(n)} ms`;
+	// "> 10 000 ms" when the 75th percentile is off the scale, "—" with no data.
+	const value = (
+		metric: WebVitalMetric,
+		p75: number | null,
+		above: number | null,
+	) =>
+		p75 !== null
+			? amount(metric, p75)
+			: above !== null
+				? `> ${amount(metric, above)}`
+				: "—";
 
 	return (
 		<AdminFrame title={t("title")} description={t("description")}>
@@ -99,7 +108,7 @@ export default function VitalsPage() {
 																		: undefined
 															}
 														>
-															{value(metric, cell.p75)}
+															{value(metric, cell.p75, cell.p75Above)}
 														</span>
 														<span className="block text-muted-foreground text-xs">
 															{t("samples", { count: cell.samples })} ·{" "}

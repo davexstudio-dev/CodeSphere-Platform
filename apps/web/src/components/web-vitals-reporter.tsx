@@ -12,7 +12,14 @@ export function WebVitalsReporter() {
 			!shouldReport({
 				production: process.env.NODE_ENV === "production",
 				webdriver: navigator.webdriver,
-				doNotTrack: navigator.doNotTrack,
+				// The opt-out signals browsers expose, under their several names.
+				doNotTrack: [
+					navigator.doNotTrack,
+					(window as { doNotTrack?: string }).doNotTrack,
+					(navigator as { msDoNotTrack?: string }).msDoNotTrack,
+				],
+				globalPrivacyControl: (navigator as { globalPrivacyControl?: boolean })
+					.globalPrivacyControl,
 			})
 		) {
 			return;

@@ -153,10 +153,7 @@ export function createApp(deps: AppDeps) {
 
 	// Real-user Web Vitals (#251): no session needed, handled before the API middleware.
 	app.post("/api/v1/vitals", (c) =>
-		handleVitalsBeacon(c.req.raw, {
-			db: deps.db,
-			trustProxy: deps.trustProxy,
-		}),
+		handleVitalsBeacon(c.req.raw, { db: deps.db }),
 	);
 
 	const { resendWebhookSecret } = deps;

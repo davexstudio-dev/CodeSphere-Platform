@@ -10,9 +10,16 @@ export function vitalBody(metric: { name: string; value: number }): string {
 export function shouldReport(env: {
 	production: boolean;
 	webdriver?: boolean;
-	doNotTrack?: string | null;
+	/** `navigator.doNotTrack`, `window.doNotTrack` and `navigator.msDoNotTrack`: "1" or "yes" means do not track. */
+	doNotTrack?: (string | null | undefined)[];
+	/** Global Privacy Control (`navigator.globalPrivacyControl`). */
+	globalPrivacyControl?: boolean;
 }): boolean {
-	return env.production && !env.webdriver && env.doNotTrack !== "1";
+	const refused =
+		env.doNotTrack?.some((v) => v === "1" || v === "yes") ?? false;
+	return (
+		env.production && !env.webdriver && !refused && !env.globalPrivacyControl
+	);
 }
 
 /** Sends one report without delaying the page: `sendBeacon` survives the page closing; else `fetch` with keepalive. */

@@ -47,7 +47,6 @@
         "@orpc/json-schema": "catalog:",
         "@orpc/openapi": "catalog:",
         "@orpc/opentelemetry": "catalog:",
-        "@orpc/ratelimit": "2.0.0-beta.41",
         "@orpc/server": "catalog:",
         "@orpc/shared": "catalog:",
         "@orpc/zod": "catalog:",

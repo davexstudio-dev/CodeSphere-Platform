@@ -26,8 +26,15 @@ describe("shouldReport", () => {
 		expect(shouldReport({ production: true })).toBe(true);
 		expect(shouldReport({ production: false })).toBe(false);
 		expect(shouldReport({ production: true, webdriver: true })).toBe(false);
-		expect(shouldReport({ production: true, doNotTrack: "1" })).toBe(false);
-		expect(shouldReport({ production: true, doNotTrack: "0" })).toBe(true);
-		expect(shouldReport({ production: true, doNotTrack: null })).toBe(true);
+		expect(shouldReport({ production: true, doNotTrack: ["1"] })).toBe(false);
+		expect(shouldReport({ production: true, doNotTrack: [null, "yes"] })).toBe(
+			false,
+		);
+		expect(
+			shouldReport({ production: true, doNotTrack: ["0", null, undefined] }),
+		).toBe(true);
+		expect(shouldReport({ production: true, globalPrivacyControl: true })).toBe(
+			false,
+		);
 	});
 });

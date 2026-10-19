@@ -22,8 +22,10 @@ export const CountryWebVitals = z.object({
 		z.object({
 			metric: WebVitalMetric,
 			samples: z.number().int(),
-			/** 75th percentile, as the upper bound of its value bucket (conservative). Null when over the last bound. */
+			/** 75th percentile, as the upper bound of its value bucket (conservative). Null with no data or when above the last bound (then `p75Above` is set). */
 			p75: z.number().nullable(),
+			/** When the 75th percentile is above the last bucket edge, that edge ("more than"): tells an off-the-scale metric from no data. */
+			p75Above: z.number().nullable(),
 			/** Share of samples within the "good" threshold of Core Web Vitals, 0 to 1. */
 			goodShare: z.number(),
 		}),

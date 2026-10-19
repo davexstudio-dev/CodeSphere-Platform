@@ -61,6 +61,22 @@ export function p75(
 	return null;
 }
 
+/**
+ * When the 75th percentile is above the last edge, that edge ("more than this"); null otherwise. It
+ * tells a country whose 75th percentile is off the scale from one with no data, which `p75` alone
+ * reports the same way.
+ */
+export function p75Above(
+	metric: WebVitalMetric,
+	counts: BucketCounts,
+): number | null {
+	const total = [...counts.values()].reduce((sum, n) => sum + n, 0);
+	if (total === 0 || p75(metric, counts) !== null) {
+		return null;
+	}
+	return BUCKET_EDGES[metric].at(-1) ?? null;
+}
+
 /** The share of samples at or under the "good" threshold, 0 to 1 (0 with no sample). */
 export function goodShare(
 	metric: WebVitalMetric,

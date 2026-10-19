@@ -1,9 +1,15 @@
 import type { WebVitalMetric } from "@codesphere/contract";
 import type { Database } from "@codesphere/db";
 import { webVitals } from "@codesphere/db/schema/vitals";
-import { and, gte, lt, sql } from "drizzle-orm";
+import { gte, lt, sql } from "drizzle-orm";
 
-import { type BucketCounts, bucketOf, goodShare, p75 } from "./buckets";
+import {
+	type BucketCounts,
+	bucketOf,
+	goodShare,
+	p75,
+	p75Above,
+} from "./buckets";
 
 const DAY_MS = 86_400_000;
 /** Aggregates older than this are deleted: the table is for trends, not history. */
@@ -49,6 +55,7 @@ export async function recordWebVital(
 			set: { samples: sql`${webVitals.samples} + 1` },
 		});
 	if (random() < PURGE_ODDS) {
+		// A failed purge is only a missed clean-up: the next one retries.
 		await db
 			.delete(webVitals)
 			.where(lt(webVitals.day, utcDay(now() - RETENTION_DAYS * DAY_MS)))
@@ -70,7 +77,7 @@ export async function webVitalsByCountry(
 			samples: sql<number>`SUM(${webVitals.samples})::int`,
 		})
 		.from(webVitals)
-		.where(and(gte(webVitals.day, utcDay(now() - (days - 1) * DAY_MS))))
+		.where(gte(webVitals.day, utcDay(now() - (days - 1) * DAY_MS)))
 		.groupBy(webVitals.country, webVitals.metric, webVitals.bucket);
 
 	const byCountry = new Map<string, Map<WebVitalMetric, Map<number, number>>>();
@@ -88,6 +95,7 @@ export async function webVitalsByCountry(
 				metric,
 				samples: [...counts.values()].reduce((sum, n) => sum + n, 0),
 				p75: p75(metric, counts),
+				p75Above: p75Above(metric, counts),
 				goodShare: goodShare(metric, counts),
 			}),
 		),

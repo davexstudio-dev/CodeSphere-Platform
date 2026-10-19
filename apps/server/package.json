@@ -28,7 +28,6 @@
 		"@opentelemetry/semantic-conventions": "^1.43.0",
 		"@orpc/json-schema": "catalog:",
 		"@orpc/openapi": "catalog:",
-		"@orpc/ratelimit": "2.0.0-beta.41",
 		"@orpc/opentelemetry": "catalog:",
 		"@orpc/server": "catalog:",
 		"@orpc/shared": "catalog:",

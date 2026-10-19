@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { createDb } from "@codesphere/db";
 import { webVitals } from "@codesphere/db/schema/vitals";
 import { createLogger } from "@codesphere/logger";
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { createApp } from "./app";
 
@@ -90,22 +90,34 @@ describe.skipIf(!url)("Web Vitals beacon", () => {
 			(await post(JSON.stringify({ name: "LCP", value: "fast" }))).status,
 		).toBe(400);
 		expect((await post("x".repeat(600))).status).toBe(413);
+		// The cap is in bytes: 300 two-byte characters are 600 bytes, though only 300 characters.
+		expect((await post("é".repeat(300))).status).toBe(413);
 	});
 
 	test("a request without a country is counted under XX", async () => {
-		const before = await db
-			.select()
-			.from(webVitals)
-			.where(eq(webVitals.country, "XX"));
-		await post(JSON.stringify({ name: "TTFB", value: 300 }));
-		const after = await db
-			.select()
-			.from(webVitals)
-			.where(eq(webVitals.country, "XX"));
-		const total = (rows: typeof before) =>
+		const xx = () =>
+			db
+				.select()
+				.from(webVitals)
+				.where(and(eq(webVitals.country, "XX"), eq(webVitals.metric, "TTFB")));
+		const total = (rows: Awaited<ReturnType<typeof xx>>) =>
 			rows.reduce((sum, r) => sum + r.samples, 0);
-		expect(total(after)).toBe(total(before) + 1);
-		// Clean up what this test added to the shared XX bucket.
-		await db.delete(webVitals).where(eq(webVitals.country, "XX"));
+		const before = total(await xx());
+		await post(JSON.stringify({ name: "TTFB", value: 300 }));
+		expect(total(await xx())).toBe(before + 1);
+		// Put the shared XX bucket back as it was: take back the one sample this test added.
+		await db
+			.update(webVitals)
+			.set({ samples: sql`${webVitals.samples} - 1` })
+			.where(
+				and(
+					eq(webVitals.country, "XX"),
+					eq(webVitals.metric, "TTFB"),
+					eq(webVitals.bucket, 1),
+				),
+			);
+		await db
+			.delete(webVitals)
+			.where(and(eq(webVitals.samples, 0), eq(webVitals.country, "XX")));
 	});
 });

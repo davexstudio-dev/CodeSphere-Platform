@@ -7,6 +7,7 @@ import {
 	GOOD_THRESHOLD,
 	goodShare,
 	p75,
+	p75Above,
 	upperEdge,
 } from "./buckets";
 
@@ -57,6 +58,16 @@ describe("p75", () => {
 	test("is null with no sample, and when the percentile is in the overflow bucket", () => {
 		expect(p75("LCP", counts([]))).toBeNull();
 		expect(p75("LCP", counts([[9, 10]]))).toBeNull();
+	});
+});
+
+describe("p75Above", () => {
+	test("tells a 75th percentile off the scale from no data", () => {
+		const overflow = BUCKET_EDGES.LCP.length;
+		expect(p75("LCP", new Map([[overflow, 10]]))).toBeNull();
+		expect(p75Above("LCP", new Map([[overflow, 10]]))).toBe(10000);
+		expect(p75Above("LCP", new Map())).toBeNull();
+		expect(p75Above("LCP", new Map([[0, 10]]))).toBeNull();
 	});
 });
 
