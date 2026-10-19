@@ -32,6 +32,7 @@
       "dependencies": {
         "@codesphere/api": "workspace:*",
         "@codesphere/auth": "workspace:*",
+        "@codesphere/contract": "workspace:*",
         "@codesphere/db": "workspace:*",
         "@codesphere/email": "workspace:*",
         "@codesphere/logger": "workspace:*",
@@ -46,6 +47,7 @@
         "@orpc/json-schema": "catalog:",
         "@orpc/openapi": "catalog:",
         "@orpc/opentelemetry": "catalog:",
+        "@orpc/ratelimit": "2.0.0-beta.41",
         "@orpc/server": "catalog:",
         "@orpc/shared": "catalog:",
         "@orpc/zod": "catalog:",
@@ -94,6 +96,7 @@
         "serwist": "^9.5.13",
         "sonner": "catalog:",
         "varlock": "catalog:",
+        "web-vitals": "^6.2.3",
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -2160,6 +2163,8 @@
     "web": ["web@workspace:apps/web"],
 
     "web-streams-polyfill": ["web-streams-polyfill@4.0.0-beta.3", "", {}, "sha512-QW95TCTaHmsYfHDybGMwO5IJIM93I/6vTRk+daHTWFPhwh+C8Cg7j7XyKrwrj8Ib6vYXe0ocYNrmzY4xAAN6ug=="],
+
+    "web-vitals": ["web-vitals@6.2.3", "", {}, "sha512-Dmy+vdO1UPMqXiAtZSNayhl4f794Bxfd94W4HIj2HlYtczEQfEOon969memlcpcHrTuOKLa5baFjX7WbgmOq+A=="],
 
     "webidl-conversions": ["webidl-conversions@3.0.1", "", {}, "sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ=="],
 

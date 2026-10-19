@@ -409,6 +409,21 @@
 			"error": "The connection failed. Try again."
 		},
 		"kpi": "KPIs",
+		"vitals": {
+			"title": "Web Vitals",
+			"description": "Speed measured in real visitors' browsers, by country. No cookie and no personal data: each report only increments a counter.",
+			"lastDays": "Last {count, plural, one {# day} other {# days}}",
+			"country": "Country",
+			"unknown": "Unknown",
+			"samples": "{count, plural, one {# report} other {# reports}}",
+			"note": "Each cell: the 75th percentile (rounded up to the edge of its range) and the share of reports within the \"good\" threshold. LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1, FCP ≤ 1.8 s, TTFB ≤ 0.8 s.",
+			"unavailable": "Measurements unavailable",
+			"forbidden": "Staff only.",
+			"error": "Something went wrong.",
+			"retry": "Retry",
+			"loading": "Loading…",
+			"empty": "No measurement yet for this period."
+		},
 		"reputation": {
 			"title": "Cancelled votes",
 			"description": "Votes the anti-farming rules cancelled: one voter gave the same author too many votes in 30 days. They stay in the journal and count for nothing.",

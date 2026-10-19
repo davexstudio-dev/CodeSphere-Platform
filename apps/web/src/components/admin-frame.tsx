@@ -4,6 +4,7 @@ import { Button } from "@codesphere/ui/components/atoms/button";
 import { AdminShell } from "@codesphere/ui/components/organisms/admin-shell";
 import {
 	BarChart3Icon,
+	GaugeIcon,
 	LogOutIcon,
 	ScaleIcon,
 	ScrollTextIcon,
@@ -25,6 +26,7 @@ const NAV = [
 	{ key: "hackathons.title", href: "/admin/hackathons", icon: TrophyIcon },
 	{ key: "tags.title", href: "/admin/tags", icon: TagIcon },
 	{ key: "social.title", href: "/admin/social", icon: ShareIcon },
+	{ key: "vitals.title", href: "/admin/vitals", icon: GaugeIcon },
 	{ key: "reputation.title", href: "/admin/reputation", icon: ScaleIcon },
 	{ key: "audit.title", href: "/admin/audit", icon: ScrollTextIcon },
 ] as const;

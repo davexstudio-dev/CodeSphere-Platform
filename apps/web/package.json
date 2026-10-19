@@ -38,6 +38,7 @@
 		"serwist": "^9.5.13",
 		"sonner": "catalog:",
 		"varlock": "catalog:",
+		"web-vitals": "^6.2.3",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

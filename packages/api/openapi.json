@@ -768,6 +768,194 @@
 				}
 			}
 		},
+		"/admin/web-vitals": {
+			"get": {
+				"operationId": "admin.webVitals.byCountry",
+				"summary": "Real-user Web Vitals by country",
+				"description": "LCP, INP, CLS, FCP and TTFB measured in visitors' browsers over the last N days, by country: the sample count, the 75th percentile and the share within the good threshold. Aggregated on arrival, no personal data. Requires a staff role.",
+				"tags": ["admin"],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "days",
+						"schema": {
+							"default": 7,
+							"type": "integer",
+							"minimum": 1,
+							"maximum": 90
+						},
+						"allowEmptyValue": true,
+						"allowReserved": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"days": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"countries": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"country": {
+														"type": "string"
+													},
+													"metrics": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"properties": {
+																"metric": {
+																	"type": "string",
+																	"enum": ["LCP", "INP", "CLS", "FCP", "TTFB"]
+																},
+																"samples": {
+																	"type": "integer",
+																	"minimum": -9007199254740991,
+																	"maximum": 9007199254740991
+																},
+																"p75": {
+																	"type": ["number", "null"]
+																},
+																"goodShare": {
+																	"type": "number"
+																}
+															},
+															"required": [
+																"metric",
+																"samples",
+																"p75",
+																"goodShare"
+															],
+															"additionalProperties": false
+														}
+													}
+												},
+												"required": ["country", "metrics"],
+												"additionalProperties": false
+											}
+										}
+									},
+									"required": ["days", "countries"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Unauthorized"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Forbidden"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/admin/audit-log": {
 			"get": {
 				"operationId": "admin.auditLog.list",

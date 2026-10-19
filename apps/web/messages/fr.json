@@ -409,6 +409,21 @@
 			"error": "La connexion a échoué. Réessayez."
 		},
 		"kpi": "KPI",
+		"vitals": {
+			"title": "Web Vitals",
+			"description": "Vitesse mesurée dans les navigateurs de vrais visiteurs, par pays. Ni cookie ni donnée personnelle : chaque mesure ne fait qu'incrémenter un compteur.",
+			"lastDays": "{count, plural, one {Dernier jour} other {# derniers jours}}",
+			"country": "Pays",
+			"unknown": "Inconnu",
+			"samples": "{count, plural, one {# mesure} other {# mesures}}",
+			"note": "Chaque case : le 75e centile (arrondi à la borne de sa tranche) et la part des mesures dans le seuil « bon ». LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1, FCP ≤ 1,8 s, TTFB ≤ 0,8 s.",
+			"unavailable": "Mesures indisponibles",
+			"forbidden": "Réservé à l'équipe.",
+			"error": "Une erreur est survenue.",
+			"retry": "Réessayer",
+			"loading": "Chargement…",
+			"empty": "Aucune mesure pour cette période."
+		},
 		"reputation": {
 			"title": "Votes annulés",
 			"description": "Votes annulés par les garde-fous anti-farming : un même votant a donné trop de votes au même auteur en 30 jours. Ils restent dans le journal et ne comptent pas.",

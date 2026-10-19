@@ -24,6 +24,7 @@ export * from "./questions";
 export * from "./rankings";
 export * from "./roles";
 export * from "./tags";
+export * from "./vitals";
 export * from "./votes";
 
 export const contract = {

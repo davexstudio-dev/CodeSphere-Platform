@@ -37,6 +37,7 @@ import {
 } from "../questions/handlers";
 import { createQuestionService, QuestionError } from "../questions/service";
 import { consume, socialLimiter } from "../rate-limit";
+import { webVitalsByCountry } from "../vitals/service";
 import { createRankingsHandlers } from "../reputation/handlers";
 import { reputationOf } from "../reputation/service";
 import { isSuspended } from "../suspension";
@@ -485,6 +486,13 @@ export const appRouter = impl
 						}
 						return outcome.publication;
 					}),
+			},
+			webVitals: {
+				byCountry: impl.admin.webVitals.byCountry
+					.use(isAdmin)
+					.handler(({ context, input }) =>
+						webVitalsByCountry(context.db, input.days),
+					),
 			},
 			reputationFlags: {
 				list: impl.admin.reputationFlags.list

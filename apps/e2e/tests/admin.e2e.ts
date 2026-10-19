@@ -20,6 +20,7 @@ const MENUS = [
 	{ name: "Modération", path: "/admin" },
 	{ name: "Hackathon", path: "/admin/hackathons" },
 	{ name: "Tags", path: "/admin/tags" },
+	{ name: "Web Vitals", path: "/admin/vitals" },
 	{ name: "Journal d'audit", path: "/admin/audit" },
 ] as const;
 

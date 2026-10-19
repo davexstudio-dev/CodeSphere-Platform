@@ -27,6 +27,7 @@ import { MCPHandler } from "orpc-mcp/fetch";
 import { createContext } from "./context";
 import { reportRequestError } from "./report";
 import { handleResendWebhook } from "./resend-webhook";
+import { handleVitalsBeacon } from "./vitals";
 
 export type AppDeps = {
 	auth: ReturnType<typeof createAuth>;
@@ -148,6 +149,14 @@ export function createApp(deps: AppDeps) {
 
 	app.on(["POST", "GET"], "/api/auth/*", async (c) =>
 		deps.auth.handler(c.req.raw),
+	);
+
+	// Real-user Web Vitals (#251): no session needed, handled before the API middleware.
+	app.post("/api/v1/vitals", (c) =>
+		handleVitalsBeacon(c.req.raw, {
+			db: deps.db,
+			trustProxy: deps.trustProxy,
+		}),
 	);
 
 	const { resendWebhookSecret } = deps;
