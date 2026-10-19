@@ -172,4 +172,25 @@ describe.skipIf(!url)("admin.tags on Postgres (#125)", () => {
 			code: "FORBIDDEN",
 		});
 	});
+
+	test("a reserved Tag can be neither renamed nor deleted", async () => {
+		const reserved = await db
+			.select({ id: tag.id, version: tag.version })
+			.from(tag)
+			.where(eq(tag.name, "roadmap"))
+			.then((rows) => rows[0]);
+		if (!reserved) {
+			throw new Error("the roadmap Tag is not seeded");
+		}
+		await expect(
+			admin().admin.tags.delete({ id: reserved.id }),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+		await expect(
+			admin().admin.tags.rename({
+				id: reserved.id,
+				name: name("x"),
+				expectedVersion: reserved.version,
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+	});
 });

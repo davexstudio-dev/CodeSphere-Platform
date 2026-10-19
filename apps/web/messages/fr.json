@@ -1,6 +1,7 @@
 {
 	"footer": {
-		"build": "CodeSphere Platform v{version} · {sha}"
+		"build": "CodeSphere Platform v{version} · {sha}",
+		"nav": "Liens du pied de page"
 	},
 	"language": {
 		"label": "Langue",
@@ -909,6 +910,8 @@
 		"notDoing": "Ce que nous ne ferons pas maintenant",
 		"ideas": "Une idée ? Proposez-la",
 		"ideasHint": "Posez une Question avec le Tag « roadmap » : la communauté peut voter.",
-		"propose": "Proposer une idée"
+		"propose": "Proposer une idée",
+		"ideasRecent": "Idées récentes",
+		"ideasNone": "Aucune idée proposée pour le moment."
 	}
 }

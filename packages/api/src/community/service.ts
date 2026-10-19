@@ -10,6 +10,14 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 
 const DAY_MS = 86_400_000;
 const ACTIVE_WINDOW_DAYS = 30;
+const FAILURE_BACKOFF_MS = 60_000;
+type Snapshot = {
+	day: string;
+	computedAt: Date;
+	figures: CommunityFigures;
+};
+const inFlight = new Map<string, Promise<Snapshot>>();
+const failures = new Map<string, number>();
 
 const utcDay = (at: number) => new Date(at).toISOString().slice(0, 10);
 const round = (n: number, digits: number) => {
@@ -92,10 +100,30 @@ export async function computeCommunityFigures(
  * both return the stored row, so a day never shows two sets of figures. The aggregates are cheap at
  * the current scale; if a midnight stampede ever weighs on the database, take an advisory lock here.
  */
-export async function communitySnapshot(
+export function communitySnapshot(db: Database, now: () => number = Date.now) {
+	// One computation per isolate and day at a time: concurrent first visitors share it, and a
+	// failure is not retried by every request for the next minute.
+	const day = utcDay(now());
+	const pending = inFlight.get(day);
+	if (pending) {
+		return pending;
+	}
+	const failedAt = failures.get(day);
+	if (failedAt !== undefined && now() - failedAt < FAILURE_BACKOFF_MS) {
+		return Promise.reject(new Error("community snapshot recently failed"));
+	}
+	const run = loadSnapshot(db, now).catch((error) => {
+		failures.set(day, now());
+		throw error;
+	});
+	inFlight.set(day, run);
+	return run.finally(() => inFlight.delete(day));
+}
+
+async function loadSnapshot(
 	db: Database,
 	now: () => number = Date.now,
-) {
+): Promise<Snapshot> {
 	const day = utcDay(now());
 	const find = () =>
 		db

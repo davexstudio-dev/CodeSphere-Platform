@@ -1,6 +1,7 @@
 {
 	"footer": {
-		"build": "CodeSphere Platform v{version} · {sha}"
+		"build": "CodeSphere Platform v{version} · {sha}",
+		"nav": "Footer links"
 	},
 	"language": {
 		"label": "Language",
@@ -909,6 +910,8 @@
 		"notDoing": "What we will not do for now",
 		"ideas": "Got an idea? Share it",
 		"ideasHint": "Ask a Question with the \"roadmap\" Tag: the community can vote.",
-		"propose": "Suggest an idea"
+		"propose": "Suggest an idea",
+		"ideasRecent": "Recent ideas",
+		"ideasNone": "No idea suggested yet."
 	}
 }

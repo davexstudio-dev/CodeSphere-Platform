@@ -7,6 +7,11 @@ import { withAudit } from "./audit";
 /** Normalized form shared with the Tags of a Question: trimmed, lowercase. */
 export const normalizeTagName = (name: string) => name.trim().toLowerCase();
 
+/** Tags the product relies on: kept even when no Question uses them, and never renamed. */
+export const RESERVED_TAGS = ["roadmap"] as const;
+const isReserved = (name: string) =>
+	(RESERVED_TAGS as readonly string[]).includes(name);
+
 export type TagRow = {
 	id: string;
 	name: string;
@@ -90,7 +95,7 @@ export async function renameTag(
 	if (!before) {
 		return { ok: false, code: "NOT_FOUND" };
 	}
-	if (before.ownerHackathon) {
+	if (before.ownerHackathon || isReserved(before.name)) {
 		return { ok: false, code: "CONFLICT" };
 	}
 	const renamed = normalizeTagName(input.name);
@@ -147,14 +152,18 @@ export async function renameTag(
 	return after ? { ok: true, tag: after } : { ok: false, code: "NOT_FOUND" };
 }
 
-/** Deletes a Tag no Question uses and no Hackathon owns; anything else is CONFLICT. */
+/** Deletes a Tag no Question uses and no Hackathon owns, and that is not reserved; anything else is CONFLICT. */
 export async function deleteTag(
 	db: Database,
 	actorId: string,
 	id: string,
 ): Promise<{ ok: true } | { ok: false; code: "NOT_FOUND" | "CONFLICT" }> {
-	if (!(await findTag(db, id))) {
+	const found = await findTag(db, id);
+	if (!found) {
 		return { ok: false, code: "NOT_FOUND" };
+	}
+	if (isReserved(found.name)) {
+		return { ok: false, code: "CONFLICT" };
 	}
 	const removed = await withAudit(
 		db,

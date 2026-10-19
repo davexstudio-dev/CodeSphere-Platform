@@ -54,7 +54,7 @@ test.describe("in English", () => {
 	test("the footer links to it", async ({ page }) => {
 		await page.goto("/legal/terms");
 		await page
-			.getByRole("navigation", { name: /legal/i })
+			.getByRole("navigation", { name: "Footer links" })
 			.getByRole("link", { name: "Roadmap" })
 			.click();
 		await expect(page).toHaveURL(/\/roadmap$/);

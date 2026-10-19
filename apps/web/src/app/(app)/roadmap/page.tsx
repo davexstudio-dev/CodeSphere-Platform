@@ -29,6 +29,11 @@ export default async function Page() {
 		return null;
 	});
 
+	const ideas = await client.questions
+		.list({ tags: ["roadmap"], sort: "recent", limit: 5 })
+		.then((page) => page.items)
+		.catch(() => []);
+
 	const duration = (minutes: number) =>
 		minutes >= 120
 			? t("hours", { count: Math.round(minutes / 60) })
@@ -139,6 +144,27 @@ export default async function Page() {
 					{t("ideas")}
 				</h2>
 				<p className="text-muted-foreground">{t("ideasHint")}</p>
+				<h3 className="font-medium">{t("ideasRecent")}</h3>
+				{ideas.length === 0 ? (
+					<p className="text-muted-foreground text-sm">{t("ideasNone")}</p>
+				) : (
+					<ul className="flex flex-col gap-1">
+						{ideas.map((idea) => (
+							<li key={idea.id}>
+								<a
+									href={`/questions/${idea.id}` as Route}
+									className="hover:underline"
+								>
+									{idea.title}
+								</a>
+								<span className="text-muted-foreground text-xs">
+									{" "}
+									· {idea.score}
+								</span>
+							</li>
+						))}
+					</ul>
+				)}
 				<a
 					href={"/ask?tag=roadmap" as Route}
 					className="w-fit rounded-full bg-primary px-4 py-2 font-medium text-primary-foreground text-sm"
