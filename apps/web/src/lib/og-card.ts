@@ -24,11 +24,12 @@ export type CardText = {
 };
 
 const clip = (text: string, max: number) => {
-	const t = text.replace(/\s+/g, " ").trim();
+	// By code point, not UTF-16 unit: an emoji is never cut in half.
+	const t = [...text.replace(/\s+/g, " ").trim()];
 	if (t.length <= max) {
-		return t;
+		return t.join("");
 	}
-	const cut = t.slice(0, max);
+	const cut = t.slice(0, max).join("");
 	const space = cut.lastIndexOf(" ");
 	return `${(space > max / 2 ? cut.slice(0, space) : cut).trimEnd()}…`;
 };

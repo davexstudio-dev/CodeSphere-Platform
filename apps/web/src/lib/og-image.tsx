@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 
 import { BRAND } from "@/lib/brand";
 import { type CardInput, cardText, OG_SIZE } from "@/lib/og-card";
+import { publicPageUrl } from "@/lib/page-url";
 import { OG_IMAGE_PATH, SITE_NAME } from "@/lib/share";
 
 /** A found card is cached longer than the generic one served while the content cannot be read. */
@@ -32,7 +33,15 @@ function draw(card: CardInput | null) {
 				{SITE_NAME}
 			</div>
 			<div style={{ display: "flex", flexDirection: "column" }}>
-				<div style={{ display: "flex", fontSize: 68, lineHeight: 1.15 }}>
+				<div
+					style={{
+						display: "flex",
+						fontSize: 68,
+						lineHeight: 1.15,
+						wordBreak: "break-word",
+						overflow: "hidden",
+					}}
+				>
 					{text.title}
 				</div>
 				{text.subtitle ? (
@@ -48,10 +57,17 @@ function draw(card: CardInput | null) {
 					justifyContent: "space-between",
 				}}
 			>
-				<div style={{ display: "flex" }}>
-					{text.tags.map((tag) => (
+				<div
+					style={{
+						display: "flex",
+						flexWrap: "wrap",
+						flex: 1,
+						marginRight: 24,
+					}}
+				>
+					{text.tags.map((tag, index) => (
 						<div
-							key={tag}
+							key={index}
 							style={{
 								display: "flex",
 								fontSize: 28,
@@ -83,10 +99,10 @@ function draw(card: CardInput | null) {
 /**
  * `draw`, rendered now rather than while the response is piped: where next/og cannot rasterize
  * (the repo stubs sharp with an empty package, which next/og's Node build then mistakes for the
- * real one; the Worker build uses resvg and is unaffected), the answer is the static card instead
- * of a broken stream.
+ * real one; the Worker build uses resvg and is unaffected), the answer is the bytes of the static
+ * card, not a broken stream and not a redirect (unfurlers do not all follow one on an image).
  */
-export async function renderCard(card: CardInput | null, request: Request) {
+export async function renderCard(card: CardInput | null) {
 	try {
 		const image = draw(card);
 		return new Response(await image.arrayBuffer(), {
@@ -94,6 +110,21 @@ export async function renderCard(card: CardInput | null, request: Request) {
 			headers: image.headers,
 		});
 	} catch {
-		return Response.redirect(new URL(OG_IMAGE_PATH, request.url), 302);
+		const fallback = await fetch(await publicPageUrl(OG_IMAGE_PATH));
+		return new Response(fallback.body, {
+			status: fallback.status,
+			headers: {
+				"Content-Type": "image/png",
+				"Cache-Control": GENERIC_CACHE,
+			},
+		});
 	}
+}
+
+/** The card cannot be built because the content could not be read, not because it is unknown. */
+export function unavailable() {
+	return new Response(null, {
+		status: 503,
+		headers: { "Retry-After": "60", "Cache-Control": "no-store" },
+	});
 }

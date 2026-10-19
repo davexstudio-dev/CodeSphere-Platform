@@ -50,4 +50,9 @@ describe("cardText", () => {
 		const { subtitle } = cardText({ title: "t", subtitle: "x".repeat(100) });
 		expect(subtitle).toBe(`${"x".repeat(60)}…`);
 	});
+
+	test("never cuts an emoji in half", () => {
+		const { title } = cardText({ title: "😀".repeat(150) });
+		expect(title).toBe(`${"😀".repeat(110)}…`);
+	});
 });
