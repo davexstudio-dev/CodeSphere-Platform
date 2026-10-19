@@ -12,5 +12,6 @@ export * from "./rate-limit";
 export * from "./reputation";
 export * from "./social";
 export * from "./tags";
+export * from "./teams";
 export * from "./vitals";
 export * from "./watch";

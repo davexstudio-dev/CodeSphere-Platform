@@ -67,6 +67,7 @@ export function toHackathon(
 			// A bad value in the database fails loudly (INTERNAL_SERVER_ERROR) instead of being guessed.
 			scoredBy: JudgingCriterion.shape.scoredBy.parse(c.scoredBy),
 		})),
+		opensAt: row.opensAt ? row.opensAt.toISOString() : null,
 		sourceUrl: row.sourceUrl,
 		sourceNote: row.sourceNote,
 		verifiedAt: row.verifiedAt.toISOString(),

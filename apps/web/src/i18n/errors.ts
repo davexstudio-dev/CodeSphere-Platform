@@ -5,6 +5,10 @@ export const ERROR_CODES = [
 	"FORBIDDEN",
 	"PRIVILEGE_REQUIRED",
 	"AGENT_CREATION_BLOCKED",
+	// Teams of a Hackathon (#261).
+	"ALREADY_IN_TEAM",
+	"TEAM_FULL",
+	"CLOSED",
 	"NOT_FOUND",
 	"CONFLICT",
 	"BAD_REQUEST",

@@ -64,6 +64,10 @@ import {
 	skipTagsOnboarding,
 	unfollowTag,
 } from "../tags";
+import {
+	createTeamsAdminHandlers,
+	createTeamsHandlers,
+} from "../teams/handlers";
 import { webVitalsByCountry } from "../vitals/service";
 import {
 	createWatchAdminHandlers,
@@ -533,6 +537,7 @@ export const appRouter = impl
 			watch: createWatchAdminHandlers(),
 			organizations: createOrganizationsAdminHandlers(),
 			jobs: createJobsAdminHandlers(),
+			teams: createTeamsAdminHandlers(),
 			webVitals: {
 				byCountry: impl.admin.webVitals.byCountry
 					.use(isAdmin)
@@ -763,6 +768,7 @@ export const appRouter = impl
 		watch: createWatchHandlers(),
 		organizations: createOrganizationsHandlers(),
 		jobs: createJobsHandlers(),
+		teams: createTeamsHandlers(),
 		talent: createTalentHandlers(),
 		community: {
 			snapshot: impl.community.snapshot.handler(async ({ context }) => {

@@ -21,6 +21,8 @@ export const hackathon = pgTable("hackathon", {
 		.notNull()
 		.references(() => organization.id),
 	summary: text("summary").notNull(),
+	// When the Hackathon opens (#261): a repository whose first commit is older is flagged.
+	opensAt: timestamp("opens_at"),
 	teamMin: integer("team_min").notNull(),
 	teamMax: integer("team_max").notNull(),
 	sourceUrl: text("source_url").notNull(),

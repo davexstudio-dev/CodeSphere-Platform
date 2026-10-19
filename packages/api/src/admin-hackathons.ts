@@ -19,6 +19,7 @@ const SCALARS = [
 	"sourceUrl",
 	"sourceNote",
 	"verifiedAt",
+	"opensAt",
 ] as const;
 
 const same = (a: unknown, b: unknown) =>
@@ -92,6 +93,8 @@ export async function updateHackathon(
 	const next = {
 		...input,
 		verifiedAt: input.verifiedAt && iso(input.verifiedAt),
+		// null clears the opening; undefined leaves it.
+		opensAt: input.opensAt ? iso(input.opensAt) : input.opensAt,
 	};
 	const fields: string[] = SCALARS.filter(
 		(field) => next[field] !== undefined && !same(next[field], current[field]),
@@ -152,7 +155,11 @@ export async function updateHackathon(
 				[field]:
 					field === "verifiedAt"
 						? new Date(next.verifiedAt ?? "")
-						: next[field],
+						: field === "opensAt"
+							? next.opensAt
+								? new Date(next.opensAt)
+								: null
+							: next[field],
 			});
 		}
 	}

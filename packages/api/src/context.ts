@@ -7,6 +7,7 @@ import type { FeedRanking } from "./feed-mixed/ranking";
 import type { FarmingLimits, PrivilegeThresholds } from "./reputation/service";
 import type { SearchIndex } from "./search/service";
 import type { SocialAccounts } from "./social-accounts";
+import type { TeamDeps } from "./teams/service";
 import type { FetchText } from "./watch/ingest";
 import type { WriteQuota } from "./write-quota";
 
@@ -23,6 +24,8 @@ export type Context = {
 	writeQuota?: WriteQuota;
 	/** Reads a Source's feed (#255); the HTTPS fetch when absent, a fake in tests. */
 	watchFetch?: FetchText;
+	/** Teams and Submissions of the Hackathons (#261): the clock, the repository check, the GitHub requirement. */
+	teamDeps?: TeamDeps;
 	/** Coefficients of the « Pour toi » ranking (#256); the defaults of decision #226 when absent. */
 	feedRanking?: FeedRanking;
 	/** The search engine (#247); Postgres full-text search when absent. */

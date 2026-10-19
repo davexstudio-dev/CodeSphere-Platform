@@ -21,7 +21,10 @@
 		"BAD_REQUEST": "Certaines informations sont invalides.",
 		"TOO_MANY_REQUESTS": "Trop de requêtes. Réessayez dans quelques instants.",
 		"INTERNAL_SERVER_ERROR": "Une erreur inattendue est survenue.",
-		"retry": "Réessayer"
+		"retry": "Réessayer",
+		"ALREADY_IN_TEAM": "Vous êtes déjà dans une équipe de ce Hackathon.",
+		"TEAM_FULL": "Cette équipe est complète.",
+		"CLOSED": "C'est clos : la date limite est passée."
 	},
 	"settings": {
 		"title": "Réglages",
@@ -974,7 +977,9 @@
 			"prizes": "Prix",
 			"rules": "Règles",
 			"judging": "Jugement",
-			"discussion": "Discussion"
+			"discussion": "Discussion",
+			"team": "Mon équipe",
+			"gallery": "Galerie"
 		},
 		"organizedBy": "Organisé par",
 		"ask": "Poser une question",
@@ -1029,7 +1034,72 @@
 		"notFound": "Ce hackathon n'existe pas.",
 		"error": "Le hackathon n'a pas pu être chargé.",
 		"retry": "Réessayer",
-		"unavailable": "Les hackathons ne sont pas disponibles sur ce déploiement."
+		"unavailable": "Les hackathons ne sont pas disponibles sur ce déploiement.",
+		"team": {
+			"signIn": "Connectez-vous pour créer ou rejoindre une équipe.",
+			"signInButton": "Se connecter",
+			"createTitle": "Créer mon équipe",
+			"createHint": "Vous en êtes le capitaine : vous invitez les autres par lien ou par nom. Un Member n'est que dans une équipe par Hackathon.",
+			"teamName": "Nom de l'équipe",
+			"create": "Créer l'équipe",
+			"invited": "{by} vous invite dans l'équipe « {team} ».",
+			"accept": "Accepter",
+			"decline": "Refuser",
+			"size": "{count} sur {max} membres",
+			"registrationClosed": "inscriptions closes",
+			"captain": "Capitaine",
+			"remove": "Retirer",
+			"pending": "invité·e, sans réponse",
+			"inviteTitle": "Inviter",
+			"link": "Lien d'invitation",
+			"copy": "Copier",
+			"copied": "Lien copié.",
+			"rotate": "Nouveau lien",
+			"inviteByName": "Nom exact d'un Member",
+			"invite": "Inviter",
+			"leave": "Quitter l'équipe",
+			"disband": "Dissoudre l'équipe",
+			"confirmDisband": "Dissoudre l'équipe ? Sa soumission est supprimée.",
+			"errors": {
+				"already": "Vous êtes déjà dans une équipe de ce Hackathon.",
+				"full": "Cette équipe est complète.",
+				"closed": "C'est clos : les dates limites sont passées.",
+				"conflict": "Ce nom est déjà pris, ou plusieurs Members portent ce nom : utilisez le lien.",
+				"notFound": "Introuvable.",
+				"generic": "Une erreur est survenue. Réessayez."
+			},
+			"join": {
+				"title": "Rejoindre une équipe",
+				"intro": "Vous avez reçu un lien d'invitation. Rejoindre vous place dans cette équipe pour ce Hackathon.",
+				"button": "Rejoindre l'équipe",
+				"already": "Vous êtes déjà dans une équipe de ce Hackathon.",
+				"full": "Cette équipe est complète.",
+				"closed": "Les inscriptions sont closes.",
+				"invalid": "Ce lien n'est plus valable."
+			},
+			"submission": {
+				"title": "Soumission",
+				"hint": "Des liens seulement, pas de fichiers. Modifiable jusqu'à la date limite, puis figée et publiée dans la galerie.",
+				"frozen": "La date limite est passée : la soumission est figée.",
+				"projectTitle": "Titre du projet",
+				"description": "Description (Markdown, 20 caractères au moins)",
+				"repo": "Lien du dépôt",
+				"demo": "Lien de la démo",
+				"video": "Lien d'une vidéo (facultatif)",
+				"tags": "Tags, séparés par des virgules (5 au plus)",
+				"save": "Enregistrer la soumission",
+				"update": "Mettre à jour",
+				"saved": "Soumission enregistrée."
+			}
+		},
+		"gallery": {
+			"notYet": "La galerie s'ouvre à la date limite des soumissions.",
+			"empty": "Aucune soumission.",
+			"repo": "Dépôt",
+			"demo": "Démo",
+			"video": "Vidéo",
+			"more": "Voir plus"
+		}
 	},
 	"tagInput": {
 		"placeholder": "Ajouter un tag",

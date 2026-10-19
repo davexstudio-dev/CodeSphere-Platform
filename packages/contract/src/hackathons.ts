@@ -40,6 +40,8 @@ export const Hackathon = z.object({
 	sourceUrl: z.url(),
 	/** Where non-public information came from, shown next to « vérifié le ». */
 	sourceNote: z.string().nullable(),
+	/** When the Hackathon opens; null when unknown (no repository check then). */
+	opensAt: Timestamp.nullable(),
 	verifiedAt: Timestamp,
 	/** Increments on every edit; an Admin update with a stale version gets CONFLICT. */
 	version: z.number().int().min(1),

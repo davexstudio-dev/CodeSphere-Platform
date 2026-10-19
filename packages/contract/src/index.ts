@@ -12,6 +12,7 @@ import { organizationsContract } from "./organizations";
 import { questionsContract } from "./questions";
 import { rankingsContract } from "./rankings";
 import { tagsContract } from "./tags";
+import { teamsContract } from "./teams";
 import { votesContract } from "./votes";
 import { watchContract } from "./watch";
 
@@ -31,6 +32,7 @@ export * from "./questions";
 export * from "./rankings";
 export * from "./roles";
 export * from "./tags";
+export * from "./teams";
 export * from "./vitals";
 export * from "./votes";
 export * from "./watch";
@@ -51,6 +53,7 @@ export const contract = {
 	questions: questionsContract,
 	rankings: rankingsContract,
 	tags: tagsContract,
+	teams: teamsContract,
 	votes: votesContract,
 	watch: watchContract,
 };

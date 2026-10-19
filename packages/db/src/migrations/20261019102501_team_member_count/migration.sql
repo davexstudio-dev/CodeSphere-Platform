@@ -1,0 +1,1 @@
+ALTER TABLE "hackathon_teams" ADD COLUMN "member_count" integer DEFAULT 1 NOT NULL;

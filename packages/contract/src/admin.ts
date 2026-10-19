@@ -7,6 +7,7 @@ import { Hackathon, JudgingCriterion, Milestone, Prize } from "./hackathons";
 import { jobsAdminContract } from "./jobs";
 import { MemberSummary } from "./members";
 import { organizationsAdminContract } from "./organizations";
+import { teamsAdminContract } from "./teams";
 import { vitalsAdminContract } from "./vitals";
 import { watchAdminContract } from "./watch";
 
@@ -72,6 +73,7 @@ export const HackathonUpdate = z
 		sourceUrl: z.url().optional(),
 		sourceNote: z.string().trim().max(500).nullable().optional(),
 		verifiedAt: Timestamp.optional(),
+		opensAt: Timestamp.nullable().optional(),
 		milestones: z
 			.array(Milestone.extend({ label: z.string().trim().min(1).max(160) }))
 			.max(20)
@@ -347,6 +349,7 @@ export const adminContract = {
 	},
 	jobs: jobsAdminContract,
 	organizations: organizationsAdminContract,
+	teams: teamsAdminContract,
 	webVitals: vitalsAdminContract,
 	watch: watchAdminContract,
 	auditLog: {

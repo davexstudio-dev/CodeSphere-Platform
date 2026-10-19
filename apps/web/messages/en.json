@@ -21,7 +21,10 @@
 		"BAD_REQUEST": "Some information is invalid.",
 		"TOO_MANY_REQUESTS": "Too many requests. Try again in a moment.",
 		"INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
-		"retry": "Retry"
+		"retry": "Retry",
+		"ALREADY_IN_TEAM": "You are already in a team of this Hackathon.",
+		"TEAM_FULL": "This team is full.",
+		"CLOSED": "It is closed: the deadline has passed."
 	},
 	"settings": {
 		"title": "Settings",
@@ -974,7 +977,9 @@
 			"prizes": "Prizes",
 			"rules": "Rules",
 			"judging": "Judging",
-			"discussion": "Discussion"
+			"discussion": "Discussion",
+			"team": "My team",
+			"gallery": "Gallery"
 		},
 		"organizedBy": "Organized by",
 		"ask": "Ask a question",
@@ -1029,7 +1034,72 @@
 		"notFound": "This hackathon does not exist.",
 		"error": "The hackathon could not be loaded.",
 		"retry": "Retry",
-		"unavailable": "Hackathons are not available on this deployment."
+		"unavailable": "Hackathons are not available on this deployment.",
+		"team": {
+			"signIn": "Sign in to create or join a team.",
+			"signInButton": "Sign in",
+			"createTitle": "Create my team",
+			"createHint": "You are its captain: you invite the others by link or by name. A Member is in one team per Hackathon only.",
+			"teamName": "Team name",
+			"create": "Create the team",
+			"invited": "{by} invites you to the team “{team}”.",
+			"accept": "Accept",
+			"decline": "Decline",
+			"size": "{count} of {max} members",
+			"registrationClosed": "registration closed",
+			"captain": "Captain",
+			"remove": "Remove",
+			"pending": "invited, no answer yet",
+			"inviteTitle": "Invite",
+			"link": "Invitation link",
+			"copy": "Copy",
+			"copied": "Link copied.",
+			"rotate": "New link",
+			"inviteByName": "A Member's exact name",
+			"invite": "Invite",
+			"leave": "Leave the team",
+			"disband": "Disband the team",
+			"confirmDisband": "Disband the team? Its submission is deleted.",
+			"errors": {
+				"already": "You are already in a team of this Hackathon.",
+				"full": "This team is full.",
+				"closed": "It is closed: the deadlines have passed.",
+				"conflict": "This name is taken, or several Members have it: use the link.",
+				"notFound": "Not found.",
+				"generic": "Something went wrong. Try again."
+			},
+			"join": {
+				"title": "Join a team",
+				"intro": "You received an invitation link. Joining puts you in this team for this Hackathon.",
+				"button": "Join the team",
+				"already": "You are already in a team of this Hackathon.",
+				"full": "This team is full.",
+				"closed": "Registration is closed.",
+				"invalid": "This link is no longer valid."
+			},
+			"submission": {
+				"title": "Submission",
+				"hint": "Links only, no files. Editable until the deadline, then frozen and shown in the gallery.",
+				"frozen": "The deadline has passed: the submission is frozen.",
+				"projectTitle": "Project title",
+				"description": "Description (Markdown, at least 20 characters)",
+				"repo": "Repository link",
+				"demo": "Demo link",
+				"video": "Video link (optional)",
+				"tags": "Tags, comma-separated (5 at most)",
+				"save": "Save the submission",
+				"update": "Update",
+				"saved": "Submission saved."
+			}
+		},
+		"gallery": {
+			"notYet": "The gallery opens at the submission deadline.",
+			"empty": "No submission.",
+			"repo": "Repository",
+			"demo": "Demo",
+			"video": "Video",
+			"more": "Show more"
+		}
 	},
 	"tagInput": {
 		"placeholder": "Add a Tag",

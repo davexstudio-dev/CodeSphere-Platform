@@ -24,6 +24,8 @@ import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import type { z } from "zod";
+import { GalleryTab } from "@/components/hackathon/gallery-tab";
+import { TeamTab } from "@/components/hackathon/team-tab";
 import { FeedSkeleton, HomeFeed } from "@/components/home-feed";
 import Link from "@/components/link";
 import { ShareMenu } from "@/components/share-menu";
@@ -162,6 +164,12 @@ function HackathonView({ hackathon }: { hackathon: HackathonData }) {
 				</TabsContent>
 				<TabsContent value="discussion" className="pt-4">
 					{tab === "discussion" && <Discussion slug={hackathon.slug} />}
+				</TabsContent>
+				<TabsContent value="team" className="pt-4">
+					{tab === "team" && <TeamTab slug={hackathon.slug} />}
+				</TabsContent>
+				<TabsContent value="gallery" className="pt-4">
+					{tab === "gallery" && <GalleryTab slug={hackathon.slug} />}
 				</TabsContent>
 			</Tabs>
 		</Shell>
