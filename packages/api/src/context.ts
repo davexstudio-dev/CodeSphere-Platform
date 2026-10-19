@@ -4,6 +4,7 @@ import type { Logger } from "@codesphere/logger";
 import type { SocialPublisher } from "@codesphere/social";
 import type { AgentRules } from "./agents/moderation";
 import type { FarmingLimits, PrivilegeThresholds } from "./reputation/service";
+import type { SearchIndex } from "./search/service";
 import type { SocialAccounts } from "./social-accounts";
 import type { WriteQuota } from "./write-quota";
 
@@ -18,6 +19,8 @@ export type Context = {
 	privilegeThresholds?: PrivilegeThresholds;
 	/** Counters of the write limits (#246): shared through Postgres where there is a database. */
 	writeQuota?: WriteQuota;
+	/** The search engine (#247); Postgres full-text search when absent. */
+	searchIndex?: SearchIndex;
 	/** Moderation of Agent Answers (#245); the defaults of decision #220 when absent. */
 	agentRules?: AgentRules;
 	/** Anti-farming limits of the Reputation journal (#241); the defaults of decision #219 when absent. */

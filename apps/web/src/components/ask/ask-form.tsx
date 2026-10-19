@@ -350,10 +350,11 @@ function TitleStep({
 		const timer = setTimeout(() => setDebounced(value.trim()), 350);
 		return () => clearTimeout(timer);
 	}, [value]);
+	// Near-duplicates of the title being typed (#247): trigram similarity, accents and typos
+	// forgiven. A query for an older title is replaced by the one for the current title, and a
+	// failure is silent: the Member can always go on and submit.
 	const related = useQuery({
-		...orpc.questions.list.queryOptions({
-			input: { q: debounced, sort: "hot", limit: 5 },
-		}),
+		...orpc.questions.similar.queryOptions({ input: { title: debounced } }),
 		enabled: debounced.length >= 8,
 		meta: { silent: true },
 	});

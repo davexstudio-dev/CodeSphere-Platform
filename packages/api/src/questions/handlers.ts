@@ -4,6 +4,12 @@ import { requireAdmin } from "../authorization";
 import type { Context } from "../context";
 import { impl } from "../index";
 import { PrivilegeError } from "../reputation/service";
+import {
+	createPostgresSearchIndex,
+	decodeSearchCursor,
+	encodeSearchCursor,
+	InvalidSearchCursorError,
+} from "../search/service";
 import { createVoteService, VoteError } from "../votes/service";
 import { defaultWriteQuota } from "../write-quota";
 import { authorsById, UNKNOWN_AUTHOR, votesOf } from "./authors";
@@ -87,6 +93,50 @@ export function createQuestionsHandlers() {
 				}
 				throw err;
 			}
+		}),
+
+		search: impl.questions.search.handler(
+			async ({ context, input, errors }) => {
+				let offset: number;
+				try {
+					offset = decodeSearchCursor(input.cursor);
+				} catch (err) {
+					if (err instanceof InvalidSearchCursorError) {
+						throw errors.BAD_REQUEST({
+							data: {
+								issues: [{ path: ["cursor"], message: "Invalid cursor" }],
+							},
+						});
+					}
+					throw err;
+				}
+				const index =
+					context.searchIndex ?? createPostgresSearchIndex(context.db);
+				// One more than the page, to know whether another page follows.
+				const ids = await index.search({
+					text: input.q,
+					language: input.language,
+					limit: input.limit + 1,
+					offset,
+				});
+				const items = await createListingService(context.db).byIds(
+					ids.slice(0, input.limit),
+				);
+				return {
+					items,
+					nextCursor:
+						ids.length > input.limit
+							? encodeSearchCursor(offset + input.limit)
+							: null,
+				};
+			},
+		),
+
+		similar: impl.questions.similar.handler(async ({ context, input }) => {
+			const index =
+				context.searchIndex ?? createPostgresSearchIndex(context.db);
+			const ids = await index.similarTitles({ title: input.title, limit: 5 });
+			return { items: await createListingService(context.db).byIds(ids) };
 		}),
 
 		get: impl.questions.get.handler(async ({ context, input, errors }) => {
