@@ -11,8 +11,11 @@ describe("initialsOf", () => {
 		expect(initialsOf("élodie ñ")).toBe("ÉÑ");
 	});
 
-	test("an empty name has none", () => {
-		expect(initialsOf("")).toBe("");
-		expect(initialsOf("   ")).toBe("");
+	test("skips symbols, and a name with no letter or digit is a question mark", () => {
+		expect(initialsOf("@bob")).toBe("B");
+		expect(initialsOf("123")).toBe("1");
+		expect(initialsOf("")).toBe("?");
+		expect(initialsOf("   ")).toBe("?");
+		expect(initialsOf("🙂")).toBe("?");
 	});
 });

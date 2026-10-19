@@ -11,12 +11,12 @@
  * project that imports both wants the aliasing to be deliberate.
  */
 import { Blobatar as Generated } from "@blobatar/react";
-import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
 } from "@codesphere/ui/components/atoms/avatar";
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import type * as React from "react";
 
 /**
@@ -55,15 +55,21 @@ export type BlobatarProps = React.ComponentProps<typeof Avatar> & {
 	blobatar?: GeneratedOptions;
 };
 
-/** Up to two initials of a name: "Ada Lovelace" is "AL", "ada" is "A". */
+/**
+ * Up to two initials of a name: "Ada Lovelace" is "AL", "ada" is "A", "@bob" is "B". A name with no
+ * letter or digit at all has none: "?".
+ */
 export function initialsOf(name: string): string {
-	const letters = name
+	const initials = name
 		.trim()
 		.split(/\s+/)
-		.filter(Boolean)
-		.map((word) => Array.from(word)[0] ?? "");
-	const first = letters[0] ?? "";
-	const last = letters.length > 1 ? (letters.at(-1) ?? "") : "";
+		.map((word) => /[\p{L}\p{N}]/u.exec(word)?.[0])
+		.filter((letter): letter is string => Boolean(letter));
+	if (initials.length === 0) {
+		return "?";
+	}
+	const first = initials[0] ?? "";
+	const last = initials.length > 1 ? (initials.at(-1) ?? "") : "";
 	return `${first}${last}`.toUpperCase();
 }
 

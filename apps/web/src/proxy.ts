@@ -20,7 +20,8 @@ export function proxy(request: NextRequest) {
 	const response = NextResponse.next({ request: { headers: requestHeaders } });
 	response.headers.set("Content-Security-Policy", csp);
 	// The page differs with the browser's Save-Data header (data saver mode, #250).
-	response.headers.append("Vary", "Save-Data");
+	// ...and with the Member's stored choice, a cookie.
+	response.headers.append("Vary", "Save-Data, Cookie");
 	for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
 		response.headers.set(name, value);
 	}

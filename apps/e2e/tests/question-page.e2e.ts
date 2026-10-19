@@ -27,8 +27,7 @@ async function openFolded(page: Page) {
 		.locator("details > summary")
 		.filter({ hasText: "agent" })
 		.first()
-		.click({ timeout: 10_000 })
-		.catch(() => undefined);
+		.click();
 }
 const answerCard = (page: Page, body: string) =>
 	page.locator("article").filter({ hasText: body });
