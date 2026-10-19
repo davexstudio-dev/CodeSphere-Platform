@@ -17,9 +17,11 @@ import { RPCHandler } from "@orpc/server/fetch";
 import { ZodToJsonSchemaConverter } from "@orpc/zod";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { HTTPException } from "hono/http-exception";
 import { MCPHandler } from "orpc-mcp/fetch";
 
 import { createContext } from "./context";
+import { reportRequestError } from "./report";
 import { handleResendWebhook } from "./resend-webhook";
 
 export type AppDeps = {
@@ -94,17 +96,24 @@ export function createApp(deps: AppDeps) {
 	// Failures outside the oRPC procedures (auth handler, webhooks, middleware): oRPC ones are
 	// reported by `unexpectedErrors`.
 	app.onError((error, c) => {
-		c.get("logger").error({ err: error }, "request failed");
-		try {
-			deps.reporter?.capture(error, {
+		// Deliberate HTTP answers (413, 400, ...) are the client's doing, not a failure to track.
+		if (error instanceof HTTPException) {
+			return error.getResponse();
+		}
+		// requestLogger may not have run if it is what threw.
+		const logger = c.get("logger") ?? deps.logger;
+		logger.error({ err: error }, "request failed");
+		reportRequestError(
+			deps.reporter,
+			logger,
+			{
 				traceId: c.get("traceId"),
 				requestId: c.get("requestId"),
 				method: c.req.method,
 				path: c.req.path,
-			});
-		} catch (reportFailure) {
-			c.get("logger").warn({ err: reportFailure }, "error report failed");
-		}
+			},
+			error,
+		);
 		return c.json(
 			{
 				code: "INTERNAL_SERVER_ERROR",
@@ -118,7 +127,9 @@ export function createApp(deps: AppDeps) {
 		cors({
 			origin: deps.corsOrigin,
 			allowMethods: ["GET", "POST", "OPTIONS"],
-			allowHeaders: ["Content-Type", "Authorization"],
+			allowHeaders: ["Content-Type", "Authorization", "traceparent"],
+			// Lets the web app show the ids to quote to support (#253).
+			exposeHeaders: ["x-request-id", "x-trace-id"],
 			credentials: true,
 		}),
 	);

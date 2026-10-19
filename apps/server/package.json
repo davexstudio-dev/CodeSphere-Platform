@@ -31,7 +31,7 @@
 		"@orpc/server": "catalog:",
 		"@orpc/shared": "catalog:",
 		"@orpc/zod": "catalog:",
-		"@sentry/bun": "^11.8.0",
+		"@sentry/bun": "catalog:",
 		"better-auth": "catalog:",
 		"hono": "catalog:",
 		"orpc-mcp": "catalog:",

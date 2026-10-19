@@ -1,5 +1,6 @@
 // W3C Trace Context: version-traceid-parentid-flags, all lowercase hex.
-const TRACEPARENT = /^[\da-f]{2}-([\da-f]{32})-[\da-f]{16}-[\da-f]{2}$/;
+const TRACEPARENT =
+	/^(?!ff)[\da-f]{2}-([\da-f]{32})-(?!0{16})[\da-f]{16}-[\da-f]{2}$/;
 const NO_TRACE = "0".repeat(32);
 
 /** The trace id of an incoming `traceparent`, or a fresh 128-bit id when absent or malformed. */

@@ -1,18 +1,22 @@
 // Unexpected failures outside oRPC are logged, reported with the trace id and answered without detail (#253).
 import { describe, expect, test } from "bun:test";
 import { createLogger, type ErrorReporter } from "@codesphere/logger";
+import { HTTPException } from "hono/http-exception";
 
 import { createApp } from "./app";
 
 const TRACE = "4bf92f3577b34da6a3ce929d0e0e4736";
 
-function appWith(reporter?: ErrorReporter) {
+function appWith(
+	reporter?: ErrorReporter,
+	failure: Error = new Error("db password is hunter2"),
+) {
 	return createApp({
 		// The auth handler is the failing part: it stands for any uncaught error.
 		auth: {
 			api: { getSession: async () => null },
 			handler: async () => {
-				throw new Error("db password is hunter2");
+				throw failure;
 			},
 		} as never,
 		db: {} as never,
@@ -61,5 +65,16 @@ describe("uncaught errors", () => {
 		expect(
 			(await appWith().request("/api/auth/x", { method: "POST" })).status,
 		).toBe(500);
+	});
+
+	test("keep a deliberate HTTP answer and do not report it", async () => {
+		const captured: unknown[] = [];
+		const app = appWith(
+			{ capture: (error) => captured.push(error) },
+			new HTTPException(413, { message: "too large" }),
+		);
+		const response = await app.request("/api/auth/x", { method: "POST" });
+		expect(response.status).toBe(413);
+		expect(captured).toHaveLength(0);
 	});
 });

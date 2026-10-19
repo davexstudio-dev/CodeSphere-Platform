@@ -4,6 +4,7 @@ import type { LoggerEnv } from "@codesphere/logger";
 import type { Context as HonoContext } from "hono";
 
 import type { AppDeps } from "./app";
+import { reportRequestError } from "./report";
 
 export type CreateContextOptions = {
 	context: HonoContext<LoggerEnv>;
@@ -35,12 +36,17 @@ export async function createContext({
 		requestId: context.get("requestId"),
 		traceId: context.get("traceId"),
 		reportError: (error) =>
-			deps.reporter?.capture(error, {
-				traceId: context.get("traceId"),
-				requestId: context.get("requestId"),
-				method: context.req.method,
-				path: context.req.path,
-			}),
+			reportRequestError(
+				deps.reporter,
+				context.get("logger"),
+				{
+					traceId: context.get("traceId"),
+					requestId: context.get("requestId"),
+					method: context.req.method,
+					path: context.req.path,
+				},
+				error,
+			),
 		release: deps.release,
 		notifications: deps.notifications,
 		social: deps.social,

@@ -107,12 +107,15 @@ describe("trace id", () => {
 			undefined,
 			"garbage",
 			`00-${"0".repeat(32)}-00f067aa0ba902b7-01`,
+			`ff-${TRACE}-00f067aa0ba902b7-01`,
+			`00-${TRACE}-${"0".repeat(16)}-01`,
 		]) {
 			const response = await app.request("/ping", {
 				headers: traceparent ? { traceparent } : {},
 			});
 			expect(response.headers.get("x-trace-id")).toMatch(/^[\da-f]{32}$/);
 			expect(response.headers.get("x-trace-id")).not.toBe("0".repeat(32));
+			expect(response.headers.get("x-trace-id")).not.toBe(TRACE);
 		}
 	});
 });

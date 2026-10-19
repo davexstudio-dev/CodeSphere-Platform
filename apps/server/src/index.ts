@@ -5,11 +5,15 @@ import { auth, db, logger, notifications, social } from "./services";
 import { startTelemetry } from "./telemetry";
 
 const stopTelemetry = startTelemetry();
-if (stopTelemetry) {
-	// A SIGTERM listener replaces the default exit, so flush traces then exit explicitly.
+const reporter = createSentryReporter();
+if (stopTelemetry || reporter) {
+	// A SIGTERM listener replaces the default exit, so flush traces and error reports, then exit.
 	process.once(
 		"SIGTERM",
-		() => void stopTelemetry().finally(() => process.exit(0)),
+		() =>
+			void Promise.allSettled([stopTelemetry?.(), reporter?.flush()]).finally(
+				() => process.exit(0),
+			),
 	);
 }
 
@@ -24,7 +28,7 @@ const app = createApp({
 	notifications,
 	social,
 	resendWebhookSecret: ENV.RESEND_WEBHOOK_SECRET,
-	reporter: createSentryReporter(),
+	reporter,
 });
 
 export default app;

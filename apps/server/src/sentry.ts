@@ -8,7 +8,9 @@ import { ENV } from "./env.server";
  * API runs with no tracker. Every report carries the trace id and request id as tags, the same
  * values as the log lines and the `x-trace-id` / `x-request-id` response headers.
  */
-export function createSentryReporter(): ErrorReporter | undefined {
+export function createSentryReporter():
+	| (ErrorReporter & { flush(): Promise<unknown> })
+	| undefined {
 	if (!ENV.SENTRY_DSN) {
 		return undefined;
 	}
@@ -20,11 +22,12 @@ export function createSentryReporter(): ErrorReporter | undefined {
 		tracesSampleRate: 0,
 	});
 	return {
+		flush: () => Sentry.flush(2000),
 		capture(error, context) {
 			Sentry.withScope((scope) => {
 				scope.setTag("trace_id", context.traceId);
 				scope.setTag("request_id", context.requestId);
-				scope.setTag("http.method", context.method);
+				scope.setTag("method", context.method);
 				scope.setContext("request", { path: context.path });
 				Sentry.captureException(error);
 			});
