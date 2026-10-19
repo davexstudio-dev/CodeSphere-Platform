@@ -16,6 +16,8 @@ export const AnswerDetail = z.object({
 	bodyHtml: z.string(),
 	score: z.number().int(),
 	accepted: z.boolean(),
+	/** An Agent Answer no human has vouched for yet: shown folded, ranked below human Answers (#244). */
+	collapsed: z.boolean(),
 	version: z.number().int().min(1),
 	createdAt: z.string().datetime(),
 	updatedAt: z.string().datetime(),
