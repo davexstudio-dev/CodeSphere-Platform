@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 import { HackathonPage } from "@/components/hackathon/hackathon-page";
 import { publicPageUrl } from "@/lib/page-url";
-import { OG_IMAGE_PATH, previewMetadata } from "@/lib/share";
+import { previewMetadata } from "@/lib/share";
 import { client } from "@/utils/orpc";
 
 // Link preview (ADR 0001). Unknown or unreadable: the site's generic metadata.
@@ -20,7 +20,9 @@ export async function generateMetadata({
 			title: hackathon.name,
 			description: hackathon.summary,
 			url: await publicPageUrl(`/hackathons/${encodeURIComponent(slug)}`),
-			imageUrl: await publicPageUrl(OG_IMAGE_PATH),
+			imageUrl: await publicPageUrl(
+				`/og/hackathons/${encodeURIComponent(slug)}`,
+			),
 		});
 	} catch {
 		return {};
