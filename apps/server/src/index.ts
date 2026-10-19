@@ -1,5 +1,6 @@
 import { createApp } from "./app";
 import { ENV } from "./env.server";
+import { createSentryReporter } from "./sentry";
 import { auth, db, logger, notifications, social } from "./services";
 import { startTelemetry } from "./telemetry";
 
@@ -23,6 +24,7 @@ const app = createApp({
 	notifications,
 	social,
 	resendWebhookSecret: ENV.RESEND_WEBHOOK_SECRET,
+	reporter: createSentryReporter(),
 });
 
 export default app;

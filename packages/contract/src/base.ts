@@ -69,7 +69,7 @@ export const base = oc.errors({
 		}),
 	},
 	INTERNAL_SERVER_ERROR: {
-		data: z.object({ requestId: z.string() }),
+		data: z.object({ requestId: z.string(), traceId: z.string().optional() }),
 	},
 	TOO_MANY_REQUESTS: {
 		data: z.object({ retryAfter: z.number() }),

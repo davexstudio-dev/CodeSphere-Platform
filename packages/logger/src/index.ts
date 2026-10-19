@@ -8,9 +8,12 @@ import pino, {
 } from "pino";
 
 import { truncateIp } from "./ip";
+import { resolveTraceId } from "./trace";
 
 export type { Logger } from "pino";
 export { truncateIp } from "./ip";
+export { type ErrorReporter, noopReporter } from "./reporter";
+export { resolveTraceId } from "./trace";
 
 export type LoggerOptions = {
 	level?: LevelWithSilent;
@@ -55,9 +58,12 @@ export function createLogger(options: LoggerOptions = {}): Logger {
 		: pino(settings);
 }
 
-export type LoggerEnv = { Variables: { logger: Logger; requestId: string } };
+export type LoggerEnv = {
+	Variables: { logger: Logger; requestId: string; traceId: string };
+};
 
 const REQUEST_ID_HEADER = "x-request-id";
+const TRACE_ID_HEADER = "x-trace-id";
 
 // An incoming id is echoed and logged, so only a short, plain token is kept.
 const VALID_REQUEST_ID = /^[\w-]{1,64}$/;
@@ -78,6 +84,8 @@ function clientIp(forwardedFor: string | undefined): string | undefined {
  * One log line per request with its id, method, path, status, duration and truncated IP.
  * The id comes from `x-request-id` when a proxy set one, is returned in the response, and is
  * bound to a child logger the handlers read with `c.get("logger")`. No header is logged.
+ * The trace id (#253) comes from a valid W3C `traceparent` (Cloudflare, the web app, a caller) or
+ * is generated; it is logged, returned in `x-trace-id` and handed to the error reporter.
  */
 export function requestLogger(
 	logger: Logger,
@@ -89,10 +97,13 @@ export function requestLogger(
 			incoming && VALID_REQUEST_ID.test(incoming)
 				? incoming
 				: crypto.randomUUID();
-		const child = logger.child({ reqId: requestId });
+		const traceId = resolveTraceId(c.req.header("traceparent"));
+		const child = logger.child({ reqId: requestId, traceId });
 		c.set("requestId", requestId);
+		c.set("traceId", traceId);
 		c.set("logger", child);
 		c.header(REQUEST_ID_HEADER, requestId);
+		c.header(TRACE_ID_HEADER, traceId);
 		const start = performance.now();
 		await next();
 		child.info(

@@ -7,7 +7,10 @@ import type { AppDeps } from "./app";
 
 export type CreateContextOptions = {
 	context: HonoContext<LoggerEnv>;
-	deps: Pick<AppDeps, "auth" | "db" | "release" | "notifications" | "social">;
+	deps: Pick<
+		AppDeps,
+		"auth" | "db" | "release" | "notifications" | "social" | "reporter"
+	>;
 };
 
 export async function createContext({
@@ -30,6 +33,14 @@ export async function createContext({
 		session: sessionForRequest(session, carriesApiKey(headers)),
 		logger: context.get("logger"),
 		requestId: context.get("requestId"),
+		traceId: context.get("traceId"),
+		reportError: (error) =>
+			deps.reporter?.capture(error, {
+				traceId: context.get("traceId"),
+				requestId: context.get("requestId"),
+				method: context.req.method,
+				path: context.req.path,
+			}),
 		release: deps.release,
 		notifications: deps.notifications,
 		social: deps.social,

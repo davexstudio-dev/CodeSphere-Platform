@@ -12,6 +12,10 @@ export type Context = {
 	logger: Logger;
 	/** Id of the HTTP request, returned in `x-request-id` and in INTERNAL_SERVER_ERROR. */
 	requestId: string;
+	/** Trace id of the request (#253), shared with its log lines and error reports. */
+	traceId?: string;
+	/** Sends an unexpected error to the error tracker; absent where none is configured. */
+	reportError?: (error: unknown) => void;
 	/**
 	 * Seconds until the request's API key may be used again, when the key went over its 120
 	 * requests per minute (spec §3): every procedure then answers TOO_MANY_REQUESTS, not

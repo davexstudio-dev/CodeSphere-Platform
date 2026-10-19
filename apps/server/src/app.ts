@@ -4,7 +4,12 @@ import { openApiDocument } from "@codesphere/api/openapi";
 import { appRouter } from "@codesphere/api/routers/index";
 import type { createAuth } from "@codesphere/auth";
 import type { Database } from "@codesphere/db";
-import { type Logger, type LoggerEnv, requestLogger } from "@codesphere/logger";
+import {
+	type ErrorReporter,
+	type Logger,
+	type LoggerEnv,
+	requestLogger,
+} from "@codesphere/logger";
 import { SmartCoercionHandlerPlugin } from "@orpc/json-schema";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { OpenAPIReferenceHandlerPlugin } from "@orpc/openapi/plugins";
@@ -30,6 +35,8 @@ export type AppDeps = {
 	social?: ApiContext["social"];
 	/** Serve the OpenAPI spec and its reference UI under /api/v1. Off on the public deployments. */
 	apiDocs: boolean;
+	/** Error tracker for unexpected failures (#253); absent where none is configured. */
+	reporter?: ErrorReporter;
 	/** Signing secret of the Resend webhook (#200); without it, /webhooks/resend is not mounted. */
 	resendWebhookSecret?: string;
 };
@@ -84,6 +91,28 @@ export function createApp(deps: AppDeps) {
 	const apiHandler = restHandler(deps.apiDocs);
 
 	app.use(requestLogger(deps.logger, { trustProxy: deps.trustProxy }));
+	// Failures outside the oRPC procedures (auth handler, webhooks, middleware): oRPC ones are
+	// reported by `unexpectedErrors`.
+	app.onError((error, c) => {
+		c.get("logger").error({ err: error }, "request failed");
+		try {
+			deps.reporter?.capture(error, {
+				traceId: c.get("traceId"),
+				requestId: c.get("requestId"),
+				method: c.req.method,
+				path: c.req.path,
+			});
+		} catch (reportFailure) {
+			c.get("logger").warn({ err: reportFailure }, "error report failed");
+		}
+		return c.json(
+			{
+				code: "INTERNAL_SERVER_ERROR",
+				data: { requestId: c.get("requestId"), traceId: c.get("traceId") },
+			},
+			500,
+		);
+	});
 	app.use(
 		"/*",
 		cors({
