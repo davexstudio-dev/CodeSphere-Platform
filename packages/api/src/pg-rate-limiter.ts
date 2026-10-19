@@ -1,0 +1,55 @@
+import type { Database } from "@codesphere/db";
+import { rateLimits } from "@codesphere/db/schema/rate-limit";
+import { lt, sql } from "drizzle-orm";
+
+/** What `consume` needs from a limiter; the oRPC memory limiter and this one both fit. */
+export type Limiter = {
+	limit(key: string): Promise<{ success: boolean; reset?: number }>;
+};
+
+/** A fixed-window limiter every instance shares, because the counters live in Postgres (#246). */
+export type LimiterFactory = (options: {
+	/** Distinguishes limiters that share a key space (e.g. "question:agent"). */
+	name: string;
+	maxRequests: number;
+	windowMs: number;
+}) => Limiter;
+
+// About one call in a hundred also purges the expired windows: no scheduler is needed, and a purge
+// that fails is only a missed clean-up.
+const PURGE_ODDS = 0.01;
+
+export function postgresLimiters(
+	db: Database,
+	now: () => number = Date.now,
+	random: () => number = Math.random,
+): LimiterFactory {
+	return ({ name, maxRequests, windowMs }) => ({
+		async limit(key) {
+			const at = now();
+			const windowStart = Math.floor(at / windowMs) * windowMs;
+			const reset = windowStart + windowMs;
+			// One statement: the increment is atomic, so concurrent writes on any instance are all counted.
+			const [row] = await db
+				.insert(rateLimits)
+				.values({
+					key: `${name}:${key}`,
+					windowStart,
+					hits: 1,
+					expiresAt: reset,
+				})
+				.onConflictDoUpdate({
+					target: [rateLimits.key, rateLimits.windowStart],
+					set: { hits: sql`${rateLimits.hits} + 1` },
+				})
+				.returning({ hits: rateLimits.hits });
+			if (random() < PURGE_ODDS) {
+				await db
+					.delete(rateLimits)
+					.where(lt(rateLimits.expiresAt, at))
+					.catch(() => undefined);
+			}
+			return { success: (row?.hits ?? 1) <= maxRequests, reset };
+		},
+	});
+}

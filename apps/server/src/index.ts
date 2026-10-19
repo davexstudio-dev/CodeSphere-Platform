@@ -1,4 +1,5 @@
 import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
+import { postgresWriteQuota } from "@codesphere/api/write-quota";
 
 import { createApp } from "./app";
 import { ENV } from "./env.server";
@@ -31,6 +32,7 @@ const app = createApp({
 	social,
 	resendWebhookSecret: ENV.RESEND_WEBHOOK_SECRET,
 	reporter,
+	writeQuota: postgresWriteQuota(db),
 	privilegeThresholds: parsePrivilegeThresholds(ENV.PRIVILEGE_THRESHOLDS),
 });
 

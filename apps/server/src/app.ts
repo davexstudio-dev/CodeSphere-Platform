@@ -3,6 +3,7 @@ import { exposedOverMCP, exposedOverOpenAPI } from "@codesphere/api/exposure";
 import { openApiDocument } from "@codesphere/api/openapi";
 import type { PrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { appRouter } from "@codesphere/api/routers/index";
+import type { WriteQuota } from "@codesphere/api/write-quota";
 import type { createAuth } from "@codesphere/auth";
 import type { Database } from "@codesphere/db";
 import {
@@ -38,6 +39,8 @@ export type AppDeps = {
 	social?: ApiContext["social"];
 	/** Serve the OpenAPI spec and its reference UI under /api/v1. Off on the public deployments. */
 	apiDocs: boolean;
+	/** Counters of the write limits, shared through the database (#246); per process when absent. */
+	writeQuota?: WriteQuota;
 	/** Reputation needed for each Privilege (#240); the defaults when absent. */
 	privilegeThresholds?: PrivilegeThresholds;
 	/** Error tracker for unexpected failures (#253); absent where none is configured. */

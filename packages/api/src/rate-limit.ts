@@ -8,7 +8,10 @@ const HOUR = 60 * 60 * 1000;
 export const QUESTIONS_PER_HOUR = 10;
 export const ANSWERS_PER_HOUR = 30;
 
-type Limiter = Pick<MemoryRateLimiter, "limit">;
+// What `consume` reads: the oRPC memory limiter and the Postgres one (pg-rate-limiter.ts) both fit.
+type Limiter = {
+	limit(key: string): Promise<{ success: boolean; reset?: number }>;
+};
 
 export const questionLimiter = new MemoryRateLimiter({
 	maxRequests: QUESTIONS_PER_HOUR,

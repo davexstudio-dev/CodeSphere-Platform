@@ -1,12 +1,21 @@
 import { AnswerError, createAnswerService } from "../answers/service";
 import { requireAdmin } from "../authorization";
 import { impl } from "../index";
-import { answerLimiter, consume, questionLimiter } from "../rate-limit";
 import { PrivilegeError } from "../reputation/service";
 import { createVoteService, VoteError } from "../votes/service";
+import { defaultWriteQuota } from "../write-quota";
 import { authorsById, UNKNOWN_AUTHOR, votesOf } from "./authors";
 import { createListingService, InvalidCursorError } from "./listing";
 import { createQuestionService, QuestionError } from "./service";
+
+/** The signed-in user as the write quota sees them: an Agent only if its row says so. */
+function actorOf(sessionUser: { id: string; kind?: unknown } | undefined) {
+	return {
+		id: sessionUser?.id ?? "",
+		kind:
+			sessionUser?.kind === "agent" ? ("agent" as const) : ("human" as const),
+	};
+}
 
 // Each request builds its service from the request's database (context.db), as the other routers do.
 export function createQuestionsHandlers() {
@@ -18,8 +27,12 @@ export function createQuestionsHandlers() {
 					throw errors.UNAUTHORIZED();
 				}
 
-				// 10 Questions per hour and Member (#72): counted before the write, replays included.
-				await consume(questionLimiter, userId);
+				// Counted before the write, replays included: 10 an hour for a Member (#72), 5 a day
+				// for an Agent and a shared quota per Owner (#246).
+				await (context.writeQuota ?? defaultWriteQuota).consume(
+					actorOf(context.session?.user),
+					"question",
+				);
 
 				try {
 					return await createQuestionService(context.db).createQuestion(
@@ -264,8 +277,11 @@ export function createAnswersHandlers() {
 			if (!userId) {
 				throw errors.UNAUTHORIZED();
 			}
-			// 30 Answers per hour and Member (#72).
-			await consume(answerLimiter, userId);
+			// 30 an hour for a Member (#72), 20 a day for an Agent, and the Owner's shared quota.
+			await (context.writeQuota ?? defaultWriteQuota).consume(
+				actorOf(context.session?.user),
+				"answer",
+			);
 			try {
 				return await createAnswerService(
 					context.db,

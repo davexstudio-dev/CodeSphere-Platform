@@ -2,6 +2,7 @@ export * from "./audit";
 export * from "./auth";
 export * from "./hackathons";
 export * from "./questions";
+export * from "./rate-limit";
 export * from "./reputation";
 export * from "./social";
 export * from "./tags";

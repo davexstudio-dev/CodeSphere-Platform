@@ -5,6 +5,7 @@ import type { SocialPublisher } from "@codesphere/social";
 
 import type { FarmingLimits, PrivilegeThresholds } from "./reputation/service";
 import type { SocialAccounts } from "./social-accounts";
+import type { WriteQuota } from "./write-quota";
 
 export type Context = {
 	session: Session | null;
@@ -15,6 +16,8 @@ export type Context = {
 	requestId: string;
 	/** Reputation needed for each Privilege (#240); the defaults of decision #219 when absent. */
 	privilegeThresholds?: PrivilegeThresholds;
+	/** Counters of the write limits (#246): shared through Postgres where there is a database. */
+	writeQuota?: WriteQuota;
 	/** Anti-farming limits of the Reputation journal (#241); the defaults of decision #219 when absent. */
 	farmingLimits?: FarmingLimits;
 	/** Trace id of the request (#253), shared with its log lines and error reports. */
