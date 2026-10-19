@@ -69,3 +69,6 @@ temp
 # deploy secrets (server only)
 deploy/.env.*
 !deploy/.env*.example
+
+# Lighthouse CI results (#248)
+.lighthouseci/

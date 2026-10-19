@@ -189,6 +189,8 @@ jobs:
   deploy:
     name: Deploy preview
     needs: [database, build]
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
     # always(): a failed or skipped stage must turn THIS check red. Without it the job would be
     # skipped, and a skipped required check counts as passed for the merge rule.
     if: >
@@ -308,6 +310,66 @@ jobs:
             const marker = '<!-- preview-url -->';
             const sha = context.payload.pull_request.head.sha.slice(0, 7);
             const body = `${marker}\n**Preview:** ${process.env.PREVIEW_URL}\n\nCommit \`${sha}\`. Removed when this pull request closes.`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            const existing = comments.find((c) => c.body?.startsWith(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+  # Stage 4: Lighthouse CI against the preview (#248, budgets of map #224). The budgets live in
+  # apps/web/lighthouse/lib.cjs: LCP and initial JS fail the pull request at once, the other
+  # budgets warn until 2 Nov 2026. The results are a table in the job summary and one PR comment.
+  lighthouse:
+    name: Lighthouse budgets
+    needs: deploy
+    if: >
+      always() &&
+      needs.deploy.result == 'success' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/web
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Pick the pages to audit
+        id: pages
+        working-directory: apps/web
+        env:
+          PREVIEW_URL: ${{ needs.deploy.outputs.url }}
+        run: echo "urls=$(node lighthouse/run.cjs urls "$PREVIEW_URL")" >> "$GITHUB_OUTPUT"
+      - name: Lighthouse CI
+        id: lhci
+        working-directory: apps/web
+        env:
+          LHCI_URLS: ${{ steps.pages.outputs.urls }}
+        run: npx --yes @lhci/cli@0.15.1 autorun --config=lighthouserc.cjs
+      - name: Report
+        if: always() && steps.pages.outcome == 'success'
+        working-directory: apps/web
+        run: |
+          if [ -f .lighthouseci/manifest.json ]; then
+            node lighthouse/run.cjs report > "$RUNNER_TEMP/lighthouse.md"
+            cat "$RUNNER_TEMP/lighthouse.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Comment the results
+        if: always() && steps.pages.outcome == 'success'
+        uses: actions/github-script@v7
+        env:
+          REPORT: ${{ runner.temp }}/lighthouse.md
+        with:
+          script: |
+            const fs = require('node:fs');
+            if (!fs.existsSync(process.env.REPORT)) return;
+            const marker = '<!-- lighthouse -->';
+            const body = `${marker}\n**Lighthouse budgets**\n\n${fs.readFileSync(process.env.REPORT, 'utf8')}`;
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
             const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
