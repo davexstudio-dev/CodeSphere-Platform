@@ -5,6 +5,8 @@ import { answers, questions, votes } from "@codesphere/db/schema/questions";
 import { reputationEvents } from "@codesphere/db/schema/reputation";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
+export * from "./privileges";
+
 // What each action is worth (decision #219, phase 1: only Votes and acceptances count). Changing a
 // value applies to new events; a retraction gives back exactly what its source had granted.
 export const REPUTATION_POINTS = {

@@ -1,7 +1,12 @@
 import type { Database } from "@codesphere/db";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
 import { and, eq, isNull, sql } from "drizzle-orm";
-import { settleVote } from "../reputation/service";
+import {
+	DEFAULT_PRIVILEGE_THRESHOLDS,
+	type PrivilegeThresholds,
+	requirePrivilege,
+	settleVote,
+} from "../reputation/service";
 
 export class VoteError extends Error {
 	constructor(readonly code: "NOT_FOUND" | "FORBIDDEN") {
@@ -14,7 +19,10 @@ export type VoteTarget = {
 	targetId: string;
 };
 
-export function createVoteService(db: Database) {
+export function createVoteService(
+	db: Database,
+	thresholds: PrivilegeThresholds = DEFAULT_PRIVILEGE_THRESHOLDS,
+) {
 	// The author of a live target: a deleted or unknown one is NOT_FOUND.
 	async function authorOf({ targetType, targetId }: VoteTarget) {
 		const table = targetType === "question" ? questions : answers;
@@ -55,6 +63,9 @@ export function createVoteService(db: Database) {
 	return {
 		async cast(voterId: string, target: VoteTarget, value: "up" | "down") {
 			const authorId = await guard(voterId, target);
+			if (value === "down") {
+				await requirePrivilege(db, { id: voterId }, "downvote", thresholds);
+			}
 			const signed = value === "up" ? 1 : -1;
 			await db
 				.insert(votes)

@@ -10,7 +10,13 @@ export type CreateContextOptions = {
 	context: HonoContext<LoggerEnv>;
 	deps: Pick<
 		AppDeps,
-		"auth" | "db" | "release" | "notifications" | "social" | "reporter"
+		| "auth"
+		| "db"
+		| "release"
+		| "notifications"
+		| "social"
+		| "reporter"
+		| "privilegeThresholds"
 	>;
 };
 
@@ -48,6 +54,7 @@ export async function createContext({
 				error,
 			),
 		release: deps.release,
+		privilegeThresholds: deps.privilegeThresholds,
 		notifications: deps.notifications,
 		social: deps.social,
 	};

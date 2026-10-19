@@ -2,6 +2,7 @@ import { AnswerError, createAnswerService } from "../answers/service";
 import { requireAdmin } from "../authorization";
 import { impl } from "../index";
 import { answerLimiter, consume, questionLimiter } from "../rate-limit";
+import { PrivilegeError } from "../reputation/service";
 import { createVoteService, VoteError } from "../votes/service";
 import { authorsById, UNKNOWN_AUTHOR, votesOf } from "./authors";
 import { createListingService, InvalidCursorError } from "./listing";
@@ -365,12 +366,24 @@ export function createVotesHandlers() {
 		cast: impl.votes.cast.handler(async ({ context, input, errors }) => {
 			const userId = voter(context, errors);
 			try {
-				return await createVoteService(context.db).cast(
+				return await createVoteService(
+					context.db,
+					context.privilegeThresholds,
+				).cast(
 					userId,
 					{ targetType: input.targetType, targetId: input.targetId },
 					input.value,
 				);
 			} catch (err) {
+				if (err instanceof PrivilegeError) {
+					throw errors.PRIVILEGE_REQUIRED({
+						data: {
+							privilege: err.privilege,
+							required: err.required,
+							current: err.current,
+						},
+					});
+				}
 				throw refusal(err, errors);
 			}
 		}),

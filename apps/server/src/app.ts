@@ -1,6 +1,7 @@
 import type { Context as ApiContext } from "@codesphere/api/context";
 import { exposedOverMCP, exposedOverOpenAPI } from "@codesphere/api/exposure";
 import { openApiDocument } from "@codesphere/api/openapi";
+import type { PrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { appRouter } from "@codesphere/api/routers/index";
 import type { createAuth } from "@codesphere/auth";
 import type { Database } from "@codesphere/db";
@@ -37,6 +38,8 @@ export type AppDeps = {
 	social?: ApiContext["social"];
 	/** Serve the OpenAPI spec and its reference UI under /api/v1. Off on the public deployments. */
 	apiDocs: boolean;
+	/** Reputation needed for each Privilege (#240); the defaults when absent. */
+	privilegeThresholds?: PrivilegeThresholds;
 	/** Error tracker for unexpected failures (#253); absent where none is configured. */
 	reporter?: ErrorReporter;
 	/** Signing secret of the Resend webhook (#200); without it, /webhooks/resend is not mounted. */

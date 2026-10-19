@@ -4,7 +4,7 @@
 //
 // States: pending → sending → sent | rejected (with its reason) | abandoned (after 30 days).
 // A network failure retries with a growing delay, a 429 waits for `retryAfter`, and a refusal
-// (FORBIDDEN, NOT_FOUND, CONFLICT, BAD_REQUEST) is never retried: the Member corrects it.
+// (FORBIDDEN, PRIVILEGE_REQUIRED, NOT_FOUND, CONFLICT, BAD_REQUEST) is never retried: the Member corrects it.
 
 import type {
 	CreateAnswerInput,
@@ -31,6 +31,7 @@ export type OutboxState =
 /** Refusals worth showing the Member; anything else is retried. */
 export type RejectionCode =
 	| "FORBIDDEN"
+	| "PRIVILEGE_REQUIRED"
 	| "NOT_FOUND"
 	| "CONFLICT"
 	| "BAD_REQUEST";
@@ -58,6 +59,7 @@ const MAX_BACKOFF = 5 * 60 * SECOND;
 
 const REJECTED: readonly RejectionCode[] = [
 	"FORBIDDEN",
+	"PRIVILEGE_REQUIRED",
 	"NOT_FOUND",
 	"CONFLICT",
 	"BAD_REQUEST",

@@ -10,6 +10,7 @@
 	"errors": {
 		"UNAUTHORIZED": "Vous devez être connecté pour effectuer cette action.",
 		"FORBIDDEN": "Vous n'avez pas le droit d'effectuer cette action.",
+		"PRIVILEGE_REQUIRED": "Il vous faut plus de Réputation pour faire cela.",
 		"NOT_FOUND": "Élément introuvable.",
 		"CONFLICT": "Cet élément existe déjà ou a été modifié entre-temps.",
 		"BAD_REQUEST": "Certaines informations sont invalides.",

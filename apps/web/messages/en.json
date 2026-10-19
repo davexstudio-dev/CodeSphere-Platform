@@ -10,6 +10,7 @@
 	"errors": {
 		"UNAUTHORIZED": "You must be signed in to do this.",
 		"FORBIDDEN": "You are not allowed to do this.",
+		"PRIVILEGE_REQUIRED": "You need more Reputation to do this.",
 		"NOT_FOUND": "Item not found.",
 		"CONFLICT": "This item already exists or was changed in the meantime.",
 		"BAD_REQUEST": "Some information is invalid.",

@@ -52,6 +52,26 @@ export const Page = <T extends z.ZodType>(item: T) =>
 		nextCursor: z.string().nullable(),
 	});
 
+/** Moderation and editing powers unlocked by Reputation (decision #219, glossary: Privilege). */
+export const PRIVILEGES = [
+	"flag",
+	"propose_tag_edit",
+	"downvote",
+	"close_vote",
+	"edit_tags",
+] as const;
+export const PrivilegeName = z.enum(PRIVILEGES);
+export type PrivilegeName = z.infer<typeof PrivilegeName>;
+
+/** Refusal of a Privilege the Member has not earned yet: says what is needed and what they have. */
+export const PrivilegeRequired = {
+	data: z.object({
+		privilege: PrivilegeName,
+		required: z.number().int(),
+		current: z.number().int(),
+	}),
+};
+
 /**
  * Base builder for every contract. Standard codes (UNAUTHORIZED, FORBIDDEN,
  * NOT_FOUND, CONFLICT) need no schema; only errors that carry data are typed.

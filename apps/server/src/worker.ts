@@ -1,3 +1,4 @@
+import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { createAuth } from "@codesphere/auth";
 import { type Database, DatabaseUnavailableError } from "@codesphere/db";
 import { createEdgeDb } from "@codesphere/db/edge";
@@ -40,6 +41,7 @@ export type WorkerEnv = {
 		| "debug"
 		| "trace"
 		| "silent";
+	PRIVILEGE_THRESHOLDS?: string;
 	APP_VERSION?: string;
 	GIT_SHA?: string;
 };
@@ -102,6 +104,7 @@ function buildApp(env: WorkerEnv) {
 		},
 		// The public Worker never serves the spec or its UI: they are for development only.
 		apiDocs: false,
+		privilegeThresholds: parsePrivilegeThresholds(env.PRIVILEGE_THRESHOLDS),
 		notifications: createNotifications(env, logger),
 		resendWebhookSecret: env.RESEND_WEBHOOK_SECRET,
 	};

@@ -19,6 +19,15 @@ export function testContext(overrides: Partial<Context> = {}): Context {
 		db: unavailableDb,
 		logger: createLogger({ level: "silent" }),
 		requestId: "test",
+		// Every Privilege is open so suites about other features need no earned Reputation; the
+		// Privilege suites pass the real thresholds.
+		privilegeThresholds: {
+			flag: 0,
+			propose_tag_edit: 0,
+			downvote: 0,
+			close_vote: 0,
+			edit_tags: 0,
+		},
 		release: { version: "test", commit: "test" },
 		...overrides,
 	};

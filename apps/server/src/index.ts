@@ -1,3 +1,5 @@
+import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
+
 import { createApp } from "./app";
 import { ENV } from "./env.server";
 import { createSentryReporter } from "./sentry";
@@ -29,6 +31,7 @@ const app = createApp({
 	social,
 	resendWebhookSecret: ENV.RESEND_WEBHOOK_SECRET,
 	reporter,
+	privilegeThresholds: parsePrivilegeThresholds(ENV.PRIVILEGE_THRESHOLDS),
 });
 
 export default app;

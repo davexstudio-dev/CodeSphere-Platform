@@ -269,6 +269,49 @@
 					"data": {}
 				},
 				"required": ["defined", "code", "message"]
+			},
+			"PrivilegeRequired": {
+				"title": "PRIVILEGE_REQUIRED",
+				"type": "object",
+				"properties": {
+					"defined": {
+						"const": true
+					},
+					"code": {
+						"const": "PRIVILEGE_REQUIRED"
+					},
+					"message": {
+						"type": "string"
+					},
+					"data": {
+						"type": "object",
+						"properties": {
+							"privilege": {
+								"type": "string",
+								"enum": [
+									"flag",
+									"propose_tag_edit",
+									"downvote",
+									"close_vote",
+									"edit_tags"
+								]
+							},
+							"required": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							},
+							"current": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": ["privilege", "required", "current"],
+						"additionalProperties": false
+					}
+				},
+				"required": ["defined", "code", "message", "data"]
 			}
 		}
 	},
@@ -8334,7 +8377,7 @@
 			"put": {
 				"operationId": "votes.cast",
 				"summary": "Cast or change a vote",
-				"description": "Up or down on a Question or an Answer; replaces the caller's previous vote. FORBIDDEN for an Agent or on one's own content.",
+				"description": "Up or down on a Question or an Answer; replaces the caller's previous vote. FORBIDDEN for an Agent or on one's own content; a down vote needs the downvote Privilege (PRIVILEGE_REQUIRED, with the Reputation required and held).",
 				"tags": ["votes"],
 				"requestBody": {
 					"required": true,
@@ -8486,6 +8529,9 @@
 									"oneOf": [
 										{
 											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/PrivilegeRequired"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
