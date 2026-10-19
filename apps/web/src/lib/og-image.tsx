@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-
+import { errorCodeOf } from "@/i18n/errors";
 import { BRAND } from "@/lib/brand";
 import { type CardInput, cardText, OG_SIZE } from "@/lib/og-card";
 import { publicPageUrl } from "@/lib/page-url";
@@ -127,4 +127,10 @@ export function unavailable() {
 		status: 503,
 		headers: { "Retry-After": "60", "Cache-Control": "no-store" },
 	});
+}
+
+/** The content is unknown, not unreachable: no such id or slug, or one that is not an id at all. */
+export function isUnknown(error: unknown) {
+	const code = errorCodeOf(error);
+	return code === "NOT_FOUND" || code === "BAD_REQUEST";
 }

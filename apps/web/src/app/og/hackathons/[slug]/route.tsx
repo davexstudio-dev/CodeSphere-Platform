@@ -1,5 +1,4 @@
-import { errorCodeOf } from "@/i18n/errors";
-import { renderCard, unavailable } from "@/lib/og-image";
+import { isUnknown, renderCard, unavailable } from "@/lib/og-image";
 import { client } from "@/utils/orpc";
 
 // The share card of a Hackathon (#262, ADR 0001): its name and organizer. Unknown or unreadable:
@@ -16,9 +15,8 @@ export async function GET(
 			subtitle: hackathon.organizer,
 		});
 	} catch (error) {
-		// Unknown content: the generic card. An outage must not be cached as if it were the card.
-		return errorCodeOf(error) === "NOT_FOUND"
-			? renderCard(null)
-			: unavailable();
+		// Unknown content (or an id that is no id): the generic card. An outage must not be cached as if
+		// it were the card.
+		return isUnknown(error) ? renderCard(null) : unavailable();
 	}
 }
