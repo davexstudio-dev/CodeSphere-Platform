@@ -3,6 +3,7 @@ import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
 import { and, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { sanitizeMarkdown } from "../markdown/sanitizer";
 import {
 	FARMING_LIMITS,
@@ -81,11 +82,15 @@ export function createAnswerService(
 		if (agentRows.length === 0) {
 			return new Set<string>();
 		}
-		const vouched = await db
-			.selectDistinct({ id: votes.targetId })
+		// Up votes on these Answers by human Members; the Owner's own is dropped below.
+		const voter = alias(user, "voter");
+		const upvotes = await db
+			.select({ answerId: votes.targetId, voterId: votes.userId })
 			.from(votes)
-			.innerJoin(answers, eq(answers.id, votes.targetId))
-			.innerJoin(user, eq(user.id, answers.authorId))
+			.innerJoin(
+				voter,
+				and(eq(voter.id, votes.userId), eq(voter.kind, "human")),
+			)
 			.where(
 				and(
 					eq(votes.targetType, "answer"),
@@ -94,11 +99,16 @@ export function createAnswerService(
 						votes.targetId,
 						agentRows.map((row) => row.id),
 					),
-					// Not the Owner: a NULL owner (an Agent without one) vouches nobody out.
-					sql`${votes.userId} IS DISTINCT FROM ${user.ownerId}`,
 				),
 			);
-		const unfolded = new Set(vouched.map((v) => v.id));
+		const unfolded = new Set(
+			upvotes
+				.filter((v) => {
+					const row = agentRows.find((r) => r.id === v.answerId);
+					return v.voterId !== byAuthor.get(row?.authorId ?? "")?.ownerId;
+				})
+				.map((v) => v.answerId),
+		);
 		return new Set(
 			agentRows
 				.filter((row) => {
@@ -109,6 +119,12 @@ export function createAnswerService(
 				})
 				.map((row) => row.id),
 		);
+	}
+
+	/** One Answer as the API returns it, with its fold state worked out against its Question. */
+	async function view(row: Row, q: QuestionRow) {
+		const folded = await foldedAmong([row], q);
+		return toDTO(row, q.acceptedAnswerId, folded.has(row.id));
 	}
 
 	const toDTO = (
@@ -171,11 +187,7 @@ export function createAnswerService(
 			const q = await findQuestion(input.questionId);
 			const replay = await byAuthorAndKey(authorId, input.idempotencyKey);
 			if (replay) {
-				return toDTO(
-					replay,
-					q.acceptedAnswerId,
-					(await foldedAmong([replay], q)).has(replay.id),
-				);
+				return view(replay, q);
 			}
 			if (q.status === "closed") {
 				throw new AnswerError("CONFLICT");
@@ -194,11 +206,7 @@ export function createAnswerService(
 				if (!row) {
 					throw new Error("INSERT returned no row");
 				}
-				return toDTO(
-					row,
-					q.acceptedAnswerId,
-					(await foldedAmong([row], q)).has(row.id),
-				);
+				return view(row, q);
 			} catch (err) {
 				if (!isUniqueViolation(err)) {
 					throw err;
@@ -206,11 +214,7 @@ export function createAnswerService(
 				// A racing replay of this key, or the Member's other Answer to this Question.
 				const existing = await byAuthorAndKey(authorId, input.idempotencyKey);
 				if (existing) {
-					return toDTO(
-						existing,
-						q.acceptedAnswerId,
-						(await foldedAmong([existing], q)).has(existing.id),
-					);
+					return view(existing, q);
 				}
 				throw new AnswerError("CONFLICT");
 			}
@@ -245,11 +249,7 @@ export function createAnswerService(
 				throw new AnswerError("CONFLICT", current.version);
 			}
 			const q = await findQuestion(updated.questionId);
-			return toDTO(
-				updated,
-				q.acceptedAnswerId,
-				(await foldedAmong([updated], q)).has(updated.id),
-			);
+			return view(updated, q);
 		},
 
 		/** Soft delete. Deleting the Accepted answer clears it: the Question is open again. */
@@ -302,16 +302,12 @@ export function createAnswerService(
 				throw new AnswerError("FORBIDDEN");
 			}
 			// An Agent's Answer is accepted by a human only: an Agent cannot vouch for an Agent.
-			const [actor] = await db
-				.select({ kind: user.kind })
+			const kinds = await db
+				.select({ id: user.id, kind: user.kind })
 				.from(user)
-				.where(eq(user.id, actorId))
-				.limit(1);
-			const [writer] = await db
-				.select({ kind: user.kind })
-				.from(user)
-				.where(eq(user.id, a.authorId))
-				.limit(1);
+				.where(inArray(user.id, [actorId, a.authorId]));
+			const actor = kinds.find((k) => k.id === actorId);
+			const writer = kinds.find((k) => k.id === a.authorId);
 			if (writer?.kind === "agent" && actor?.kind !== "human") {
 				throw new AnswerError("FORBIDDEN");
 			}
@@ -324,16 +320,7 @@ export function createAnswerService(
 				})
 				.where(eq(questions.id, q.id));
 			await settleAcceptance(db, q.id, limits);
-			return toDTO(
-				a,
-				a.id,
-				(
-					await foldedAmong([a], {
-						acceptedAnswerId: a.id,
-						authorId: q.authorId,
-					})
-				).has(a.id),
-			);
+			return view(a, { acceptedAnswerId: a.id, authorId: q.authorId });
 		},
 	};
 }
