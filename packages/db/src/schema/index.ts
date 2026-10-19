@@ -6,6 +6,7 @@ export * from "./feed";
 export * from "./hackathons";
 export * from "./jobs";
 export * from "./organizations";
+export * from "./outbox";
 export * from "./questions";
 export * from "./rate-limit";
 export * from "./reputation";

@@ -1,5 +1,6 @@
 import { parseAgentRules } from "@codesphere/api/agents/moderation";
 import { parseFeedRanking } from "@codesphere/api/feed-mixed/ranking";
+import { startOutboxRelay } from "@codesphere/api/outbox/loop";
 import { parseFarmingLimits } from "@codesphere/api/reputation/farming";
 import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { postgresWriteQuota } from "@codesphere/api/write-quota";
@@ -40,6 +41,12 @@ const app = createApp({
 	farmingLimits: parseFarmingLimits(ENV.FARMING_LIMITS),
 	feedRanking: parseFeedRanking(ENV.FEED_RANKING),
 	privilegeThresholds: parsePrivilegeThresholds(ENV.PRIVILEGE_THRESHOLDS),
+});
+
+// No Cloudflare Queues on the Bun server: the relay hands the outbox's events to the consumers in
+// process, with the same guarantees (docs/outbox.md).
+startOutboxRelay(db, {
+	onError: (error) => logger.warn({ err: error }, "outbox relay failed"),
 });
 
 export default app;

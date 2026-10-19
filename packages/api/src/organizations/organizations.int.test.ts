@@ -8,6 +8,7 @@ import { auditLog } from "@codesphere/db/schema/audit";
 import { user } from "@codesphere/db/schema/auth";
 import { hackathon } from "@codesphere/db/schema/hackathons";
 import { organization } from "@codesphere/db/schema/organizations";
+import { outboxEvents } from "@codesphere/db/schema/outbox";
 import { cadev2026 } from "@codesphere/db/seed/cadev";
 import { seedHackathon } from "@codesphere/db/seed/seed";
 import { createRouterClient } from "@orpc/server";
@@ -112,6 +113,27 @@ describe.skipIf(!url)("organizations on Postgres", () => {
 				(o) => o.slug,
 			),
 		).toContain(created.slug);
+	});
+
+	test("each application and decision leaves an event in the outbox, in the same statement", async () => {
+		const created = await as(admin, "admin").organizations.request(
+			application(name("ev")),
+		);
+		await as(admin, "admin").admin.organizations.validate({
+			id: created.id,
+			expectedVersion: 1,
+		});
+		const events = await db
+			.select({ type: outboxEvents.type })
+			.from(outboxEvents)
+			.where(eq(outboxEvents.aggregateId, created.id));
+		expect(events.map((e) => e.type).sort()).toEqual([
+			"organization.applied",
+			"organization.validated",
+		]);
+		await db
+			.delete(outboxEvents)
+			.where(eq(outboxEvents.aggregateId, created.id));
 	});
 
 	test("the contact email must be on the website's domain", async () => {

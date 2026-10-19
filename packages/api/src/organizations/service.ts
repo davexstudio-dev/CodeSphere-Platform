@@ -11,6 +11,7 @@ import { slugify } from "@codesphere/db/slug";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 
 import { withAudit } from "../audit";
+import { outboxInsert } from "../outbox/events";
 import { emailMatchesWebsite } from "./rules";
 
 export class OrganizationError extends Error {
@@ -159,6 +160,13 @@ export function createOrganizationService(db: Database) {
 					})
 					.onConflictDoNothing({ target: organization.slug })
 					.returning({ id: organization.id }),
+				[
+					outboxInsert({
+						type: "organization.applied",
+						aggregateType: "organization",
+						aggregateIdColumn: "id",
+					}),
+				],
 			);
 			const id = rows[0]?.id as string | undefined;
 			const created = id ? await byId(id) : undefined;
@@ -291,6 +299,14 @@ export function createOrganizationService(db: Database) {
 							),
 						)
 						.returning({ id: organization.id }),
+					[
+						outboxInsert({
+							type: `organization.${rule.to}`,
+							aggregateType: "organization",
+							aggregateIdColumn: "id",
+							payload: { decision },
+						}),
+					],
 				);
 				if (rows.length === 0) {
 					throw new OrganizationError(

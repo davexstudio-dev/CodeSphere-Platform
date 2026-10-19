@@ -27,6 +27,7 @@ import {
 } from "drizzle-orm";
 
 import { withAudit } from "../audit";
+import { outboxInsert } from "../outbox/events";
 import { reputationsOf } from "../reputation/read";
 import {
 	applyChannel,
@@ -652,6 +653,12 @@ export function createJobService(
 						}),
 					[
 						sql`UPDATE job_reports SET outcome = 'upheld' WHERE job_id IN (SELECT id FROM m) AND outcome IS NULL`,
+						outboxInsert({
+							type: "job.removed",
+							aggregateType: "job",
+							aggregateIdColumn: "id",
+							payload: { reason: "report upheld" },
+						}),
 					],
 				);
 				const organizationId = rows[0]?.organization_id as string | undefined;
