@@ -34,7 +34,9 @@ test("create a team, join by link, submit a project", async ({
 	// Already in a team: a second join with the same link is refused.
 	await mate.goto(new URL(link).pathname);
 	await mate.getByRole("button", { name: "Rejoindre l'équipe" }).click();
-	await expect(mate.locator("p[role=alert]")).toContainText("déjà dans une équipe");
+	await expect(mate.locator("p[role=alert]")).toContainText(
+		"déjà dans une équipe",
+	);
 
 	await captain.goto(`/hackathons/${SLUG}?tab=team`);
 	await captain.getByLabel("Titre du projet").fill(`Projet ${run}`);

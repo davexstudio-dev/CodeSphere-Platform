@@ -71,16 +71,26 @@ export const SaveSubmissionInput = z.object({
 	expectedVersion: z.number().int().min(1).optional(),
 });
 
+// The refusals a Member can run into. Business refusals are CONFLICT (HTTP 409) with a `reason`, so
+// they are not mistaken for server errors: CLOSED (a deadline passed), ALREADY_IN_TEAM, TEAM_FULL.
+export const TeamConflict = z.object({
+	reason: z
+		.enum([
+			"closed",
+			"already_in_team",
+			"team_full",
+			"name_taken",
+			"ambiguous",
+			"version",
+		])
+		.optional(),
+});
+
 const memberErrors = {
 	UNAUTHORIZED: {},
 	FORBIDDEN: {},
 	NOT_FOUND: {},
-	CONFLICT: {},
-	/** The registration or submission deadline passed. */
-	CLOSED: {},
-	/** The Member is already in a Team of this Hackathon. */
-	ALREADY_IN_TEAM: {},
-	TEAM_FULL: {},
+	CONFLICT: { data: TeamConflict },
 } as const;
 const TeamRef = z.object({ teamId: z.uuid() });
 

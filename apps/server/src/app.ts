@@ -54,6 +54,8 @@ export type AppDeps = {
 	agentRules?: AgentRules;
 	/** Reputation needed for each Privilege (#240); the defaults when absent. */
 	privilegeThresholds?: PrivilegeThresholds;
+	/** Teams and Submissions of the Hackathons (#261): the GitHub-account requirement. */
+	teamDeps?: ApiContext["teamDeps"];
 	/** Error tracker for unexpected failures (#253); absent where none is configured. */
 	reporter?: ErrorReporter;
 	/** Signing secret of the Resend webhook (#200); without it, /webhooks/resend is not mounted. */

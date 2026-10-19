@@ -36,6 +36,9 @@ export class TeamError extends Error {
 
 export class InvalidTeamCursorError extends Error {}
 
+/** Repositories read per run of the check: GitHub allows 60 anonymous requests an hour. */
+export const MAX_REPOSITORY_CHECKS = 25;
+
 const constraintOf = (error: unknown): string | undefined => {
 	const { code, constraint, cause } = (error ?? {}) as {
 		code?: unknown;
@@ -64,11 +67,11 @@ export type TeamDeps = {
 export function createTeamService(db: Database, deps: TeamDeps = {}) {
 	const now = () => (deps.now ?? (() => new Date()))();
 
-	async function hackathonBySlug(slug: string) {
-		const [row] = await db
-			.select()
-			.from(hackathon)
-			.where(eq(hackathon.slug, slug));
+	const hackathonBySlug = (slug: string) =>
+		loadHackathon(eq(hackathon.slug, slug));
+
+	async function loadHackathon(where: ReturnType<typeof eq>) {
+		const [row] = await db.select().from(hackathon).where(where);
 		if (!row) {
 			throw new TeamError("NOT_FOUND");
 		}
@@ -102,11 +105,10 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 	/** The Hackathon of a Team, with its dates. */
 	async function context(teamId: string) {
 		const team = await teamRow(teamId);
-		const [h] = await db
-			.select({ slug: hackathon.slug })
-			.from(hackathon)
-			.where(eq(hackathon.id, team.hackathonId));
-		return { team, hackathon: await hackathonBySlug(h?.slug ?? "") };
+		return {
+			team,
+			hackathon: await loadHackathon(eq(hackathon.id, team.hackathonId)),
+		};
 	}
 
 	async function requireMember(userId: string, teamId: string) {
@@ -266,6 +268,11 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 			if (rows.length === 0) {
 				throw new TeamError("TEAM_FULL");
 			}
+			// Joined: the Member's other invitations of this Hackathon are no longer open.
+			await db.execute(sql`
+				DELETE FROM hackathon_team_invites
+				WHERE user_id = ${userId}
+					AND team_id IN (SELECT id FROM hackathon_teams WHERE hackathon_id = (SELECT hackathon_id FROM hackathon_teams WHERE id = ${teamId}::uuid))`);
 		} catch (error) {
 			if (constraintOf(error)?.startsWith("hackathon_team_members")) {
 				throw new TeamError("ALREADY_IN_TEAM");
@@ -316,7 +323,11 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 						)
 						SELECT id FROM t`),
 				);
-				return view(rows[0]?.id ?? "", userId);
+				const id = rows[0]?.id;
+				if (!id) {
+					throw new TeamError("CONFLICT");
+				}
+				return view(id, userId);
 			} catch (error) {
 				const constraint = constraintOf(error);
 				if (constraint?.startsWith("hackathon_team_members")) {
@@ -521,10 +532,6 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 				demoUrl: input.demoUrl,
 				videoUrl: input.videoUrl ?? null,
 				tags: [...new Set(input.tags)],
-				// A new link is checked again.
-				earlyCommitFlag: false,
-				earlyCommitAt: null,
-				checkedAt: null,
 			};
 			if (input.expectedVersion === undefined) {
 				const created = await db
@@ -536,10 +543,21 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 					throw new TeamError("CONFLICT", "version");
 				}
 			} else {
+				// A new repository link is checked again; the same one keeps its flag, so editing a title
+				// does not clear what an Admin found.
+				const [before] = await db
+					.select({ repoUrl: hackathonSubmissions.repoUrl })
+					.from(hackathonSubmissions)
+					.where(eq(hackathonSubmissions.teamId, team.id));
+				const relink =
+					before && before.repoUrl !== input.repoUrl
+						? { earlyCommitFlag: false, earlyCommitAt: null, checkedAt: null }
+						: {};
 				const updated = await db
 					.update(hackathonSubmissions)
 					.set({
 						...values,
+						...relink,
 						version: sql`${hackathonSubmissions.version} + 1`,
 						updatedAt: now(),
 					})
@@ -609,32 +627,7 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 					})
 					.from(hackathonSubmissions)
 					.where(eq(hackathonSubmissions.hackathonId, h.id));
-				let checked = 0;
-				let flagged = 0;
-				for (const row of rows) {
-					let first: Date | null = null;
-					try {
-						first = await check(row.repoUrl);
-					} catch {
-						first = null;
-					}
-					if (!first || !h.opensAt) {
-						continue;
-					}
-					const early = first.getTime() < h.opensAt.getTime();
-					await db
-						.update(hackathonSubmissions)
-						.set({
-							earlyCommitFlag: early,
-							earlyCommitAt: first,
-							checkedAt: now(),
-						})
-						.where(eq(hackathonSubmissions.id, row.id));
-					checked++;
-					if (early) {
-						flagged++;
-					}
-				}
+				// Audited first: the work below can be long, and a timeout must not leave it unrecorded.
 				await withAudit(
 					db,
 					{
@@ -650,6 +643,38 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 						.where(eq(hackathon.id, h.id))
 						.returning({ id: hackathon.id }),
 				);
+				let checked = 0;
+				let flagged = 0;
+				// A few repositories at a time, at most MAX_REPOSITORY_CHECKS per run: GitHub rate-limits.
+				const batch = rows.slice(0, MAX_REPOSITORY_CHECKS);
+				for (let i = 0; i < batch.length; i += 5) {
+					await Promise.all(
+						batch.slice(i, i + 5).map(async (row) => {
+							let first: Date | null = null;
+							try {
+								first = await check(row.repoUrl);
+							} catch {
+								first = null;
+							}
+							if (!first || !h.opensAt) {
+								return;
+							}
+							const early = first.getTime() < h.opensAt.getTime();
+							await db
+								.update(hackathonSubmissions)
+								.set({
+									earlyCommitFlag: early,
+									earlyCommitAt: first,
+									checkedAt: now(),
+								})
+								.where(eq(hackathonSubmissions.id, row.id));
+							checked++;
+							if (early) {
+								flagged++;
+							}
+						}),
+					);
+				}
 				return { checked, flagged, unchecked: rows.length - checked };
 			},
 

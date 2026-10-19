@@ -140,7 +140,10 @@ describe.skipIf(!url)("teams on Postgres", () => {
 		expect(team.inviteToken).not.toBeNull();
 		await expect(
 			as(ana).teams.create({ slug, name: `Beta ${run}` }),
-		).rejects.toMatchObject({ code: "ALREADY_IN_TEAM" });
+		).rejects.toMatchObject({
+			code: "CONFLICT",
+			data: { reason: "already_in_team" },
+		});
 		await expect(
 			as(ben).teams.create({ slug, name: `Alpha ${run}` }),
 		).rejects.toMatchObject({ code: "CONFLICT" });
@@ -159,11 +162,13 @@ describe.skipIf(!url)("teams on Postgres", () => {
 		expect(joined.members.map((m) => m.id)).toEqual([ana, ben]);
 		expect(joined.inviteToken).toBeNull();
 		await expect(as(ben).teams.joinByLink({ token })).rejects.toMatchObject({
-			code: "ALREADY_IN_TEAM",
+			code: "CONFLICT",
+			data: { reason: "already_in_team" },
 		});
 		await as(cai).teams.joinByLink({ token });
 		await expect(as(dee).teams.joinByLink({ token })).rejects.toMatchObject({
-			code: "TEAM_FULL",
+			code: "CONFLICT",
+			data: { reason: "team_full" },
 		});
 		await expect(
 			as(dee).teams.joinByLink({ token: "not-a-real-token-at-all" }),
@@ -250,7 +255,10 @@ describe.skipIf(!url)("teams on Postgres", () => {
 		).rejects.toMatchObject({ code: "NOT_FOUND" });
 		await expect(
 			as(ana).teams.invite({ teamId: team.id, name: `Member Ben ${run}` }),
-		).rejects.toMatchObject({ code: "ALREADY_IN_TEAM" });
+		).rejects.toMatchObject({
+			code: "CONFLICT",
+			data: { reason: "already_in_team" },
+		});
 		await as(ana).teams.invite({ teamId: team.id, name: `Member Dee ${run}` });
 		expect(
 			(await as(dee).teams.respond({ teamId: team.id, accept: false })).team,
@@ -297,7 +305,7 @@ describe.skipIf(!url)("teams on Postgres", () => {
 			as(ana).teams.saveSubmission(
 				submission(team.id, { title: "Trop tard", expectedVersion: 2 }),
 			),
-		).rejects.toMatchObject({ code: "CLOSED" });
+		).rejects.toMatchObject({ code: "CONFLICT", data: { reason: "closed" } });
 		const gallery = await anonymous().teams.gallery({ slug, limit: 20 });
 		expect(gallery.open).toBe(true);
 		expect(gallery.items[0]).toMatchObject({
@@ -316,13 +324,13 @@ describe.skipIf(!url)("teams on Postgres", () => {
 		now = new Date(CLOSE);
 		await expect(
 			as(eli).teams.create({ slug, name: `Late ${run}` }),
-		).rejects.toMatchObject({ code: "CLOSED" });
+		).rejects.toMatchObject({ code: "CONFLICT", data: { reason: "closed" } });
 		await expect(
 			as(eli).teams.joinByLink({ token: team.inviteToken ?? "" }),
-		).rejects.toMatchObject({ code: "CLOSED" });
+		).rejects.toMatchObject({ code: "CONFLICT", data: { reason: "closed" } });
 		await expect(
 			as(ben).teams.leave({ teamId: team.id }),
-		).rejects.toMatchObject({ code: "CLOSED" });
+		).rejects.toMatchObject({ code: "CONFLICT", data: { reason: "closed" } });
 		expect((await as(ana).teams.mine({ slug }))?.registrationOpen).toBe(false);
 		now = new Date("2099-06-01T00:00:00Z");
 	});

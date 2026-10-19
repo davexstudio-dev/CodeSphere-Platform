@@ -40,6 +40,7 @@ const app = createApp({
 	agentRules: parseAgentRules(ENV.AGENT_RULES),
 	farmingLimits: parseFarmingLimits(ENV.FARMING_LIMITS),
 	feedRanking: parseFeedRanking(ENV.FEED_RANKING),
+	teamDeps: { requireGithub: ENV.HACKATHON_REQUIRE_GITHUB },
 	privilegeThresholds: parsePrivilegeThresholds(ENV.PRIVILEGE_THRESHOLDS),
 });
 

@@ -17,6 +17,7 @@ export type CreateContextOptions = {
 		| "social"
 		| "reporter"
 		| "privilegeThresholds"
+		| "teamDeps"
 		| "writeQuota"
 		| "agentRules"
 		| "farmingLimits"
@@ -59,6 +60,7 @@ export async function createContext({
 			),
 		release: deps.release,
 		privilegeThresholds: deps.privilegeThresholds,
+		teamDeps: deps.teamDeps,
 		writeQuota: deps.writeQuota,
 		agentRules: deps.agentRules,
 		farmingLimits: deps.farmingLimits,

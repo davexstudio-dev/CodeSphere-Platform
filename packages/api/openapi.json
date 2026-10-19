@@ -298,56 +298,38 @@
 				},
 				"required": ["defined", "code", "message"]
 			},
-			"Closed": {
-				"title": "CLOSED",
+			"Conflict3": {
+				"title": "CONFLICT",
 				"type": "object",
 				"properties": {
 					"defined": {
 						"const": true
 					},
 					"code": {
-						"const": "CLOSED"
+						"const": "CONFLICT"
 					},
 					"message": {
 						"type": "string"
 					},
-					"data": {}
+					"data": {
+						"type": "object",
+						"properties": {
+							"reason": {
+								"type": "string",
+								"enum": [
+									"closed",
+									"already_in_team",
+									"team_full",
+									"name_taken",
+									"ambiguous",
+									"version"
+								]
+							}
+						},
+						"additionalProperties": false
+					}
 				},
-				"required": ["defined", "code", "message"]
-			},
-			"AlreadyInTeam": {
-				"title": "ALREADY_IN_TEAM",
-				"type": "object",
-				"properties": {
-					"defined": {
-						"const": true
-					},
-					"code": {
-						"const": "ALREADY_IN_TEAM"
-					},
-					"message": {
-						"type": "string"
-					},
-					"data": {}
-				},
-				"required": ["defined", "code", "message"]
-			},
-			"TeamFull": {
-				"title": "TEAM_FULL",
-				"type": "object",
-				"properties": {
-					"defined": {
-						"const": true
-					},
-					"code": {
-						"const": "TEAM_FULL"
-					},
-					"message": {
-						"type": "string"
-					},
-					"data": {}
-				},
-				"required": ["defined", "code", "message"]
+				"required": ["defined", "code", "message", "data"]
 			},
 			"PrivilegeRequired": {
 				"title": "PRIVILEGE_REQUIRED",
@@ -15660,7 +15642,7 @@
 								"schema": {
 									"oneOf": [
 										{
-											"$ref": "#/components/schemas/Conflict2"
+											"$ref": "#/components/schemas/Conflict3"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -15695,15 +15677,6 @@
 									"oneOf": [
 										{
 											"$ref": "#/components/schemas/InternalServerError"
-										},
-										{
-											"$ref": "#/components/schemas/Closed"
-										},
-										{
-											"$ref": "#/components/schemas/AlreadyInTeam"
-										},
-										{
-											"$ref": "#/components/schemas/TeamFull"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -15988,7 +15961,7 @@
 								"schema": {
 									"oneOf": [
 										{
-											"$ref": "#/components/schemas/Conflict2"
+											"$ref": "#/components/schemas/Conflict3"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -16023,15 +15996,6 @@
 									"oneOf": [
 										{
 											"$ref": "#/components/schemas/InternalServerError"
-										},
-										{
-											"$ref": "#/components/schemas/Closed"
-										},
-										{
-											"$ref": "#/components/schemas/AlreadyInTeam"
-										},
-										{
-											"$ref": "#/components/schemas/TeamFull"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -16321,7 +16285,7 @@
 								"schema": {
 									"oneOf": [
 										{
-											"$ref": "#/components/schemas/Conflict2"
+											"$ref": "#/components/schemas/Conflict3"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -16356,15 +16320,6 @@
 									"oneOf": [
 										{
 											"$ref": "#/components/schemas/InternalServerError"
-										},
-										{
-											"$ref": "#/components/schemas/Closed"
-										},
-										{
-											"$ref": "#/components/schemas/AlreadyInTeam"
-										},
-										{
-											"$ref": "#/components/schemas/TeamFull"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -16810,7 +16765,7 @@
 								"schema": {
 									"oneOf": [
 										{
-											"$ref": "#/components/schemas/Conflict2"
+											"$ref": "#/components/schemas/Conflict3"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -16845,15 +16800,6 @@
 									"oneOf": [
 										{
 											"$ref": "#/components/schemas/InternalServerError"
-										},
-										{
-											"$ref": "#/components/schemas/Closed"
-										},
-										{
-											"$ref": "#/components/schemas/AlreadyInTeam"
-										},
-										{
-											"$ref": "#/components/schemas/TeamFull"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -16997,7 +16943,7 @@
 								"schema": {
 									"oneOf": [
 										{
-											"$ref": "#/components/schemas/Conflict2"
+											"$ref": "#/components/schemas/Conflict3"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -17032,15 +16978,6 @@
 									"oneOf": [
 										{
 											"$ref": "#/components/schemas/InternalServerError"
-										},
-										{
-											"$ref": "#/components/schemas/Closed"
-										},
-										{
-											"$ref": "#/components/schemas/AlreadyInTeam"
-										},
-										{
-											"$ref": "#/components/schemas/TeamFull"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -17328,7 +17265,7 @@
 								"schema": {
 									"oneOf": [
 										{
-											"$ref": "#/components/schemas/Conflict2"
+											"$ref": "#/components/schemas/Conflict3"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -17363,15 +17300,6 @@
 									"oneOf": [
 										{
 											"$ref": "#/components/schemas/InternalServerError"
-										},
-										{
-											"$ref": "#/components/schemas/Closed"
-										},
-										{
-											"$ref": "#/components/schemas/AlreadyInTeam"
-										},
-										{
-											"$ref": "#/components/schemas/TeamFull"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -17656,7 +17584,7 @@
 								"schema": {
 									"oneOf": [
 										{
-											"$ref": "#/components/schemas/Conflict2"
+											"$ref": "#/components/schemas/Conflict3"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -17691,15 +17619,6 @@
 									"oneOf": [
 										{
 											"$ref": "#/components/schemas/InternalServerError"
-										},
-										{
-											"$ref": "#/components/schemas/Closed"
-										},
-										{
-											"$ref": "#/components/schemas/AlreadyInTeam"
-										},
-										{
-											"$ref": "#/components/schemas/TeamFull"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -17843,7 +17762,7 @@
 								"schema": {
 									"oneOf": [
 										{
-											"$ref": "#/components/schemas/Conflict2"
+											"$ref": "#/components/schemas/Conflict3"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -17878,15 +17797,6 @@
 									"oneOf": [
 										{
 											"$ref": "#/components/schemas/InternalServerError"
-										},
-										{
-											"$ref": "#/components/schemas/Closed"
-										},
-										{
-											"$ref": "#/components/schemas/AlreadyInTeam"
-										},
-										{
-											"$ref": "#/components/schemas/TeamFull"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -18224,7 +18134,7 @@
 								"schema": {
 									"oneOf": [
 										{
-											"$ref": "#/components/schemas/Conflict2"
+											"$ref": "#/components/schemas/Conflict3"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -18259,15 +18169,6 @@
 									"oneOf": [
 										{
 											"$ref": "#/components/schemas/InternalServerError"
-										},
-										{
-											"$ref": "#/components/schemas/Closed"
-										},
-										{
-											"$ref": "#/components/schemas/AlreadyInTeam"
-										},
-										{
-											"$ref": "#/components/schemas/TeamFull"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"

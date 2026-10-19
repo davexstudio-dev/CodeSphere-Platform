@@ -9,6 +9,7 @@ import { useState } from "react";
 import SsoLoginDialog from "@/components/sso-login-dialog";
 import { errorCodeOf } from "@/i18n/errors";
 import { authClient } from "@/lib/auth-client";
+import { teamConflictReason } from "@/lib/team-errors";
 import { orpc } from "@/utils/orpc";
 
 /** Joins the Team of an invitation link after an explicit click: a link opened by a crawler does nothing. */
@@ -23,6 +24,7 @@ export function JoinTeam({ token }: { token: string }) {
 				router.push(`/hackathons/${team.hackathonSlug}?tab=team` as never),
 		}),
 	);
+	const reason = join.error ? teamConflictReason(join.error) : null;
 	const code = join.error ? errorCodeOf(join.error) : null;
 	return (
 		<main className="mx-auto grid max-w-md gap-4 px-4 py-10">
@@ -30,11 +32,11 @@ export function JoinTeam({ token }: { token: string }) {
 			<p className="text-muted-foreground">{t("intro")}</p>
 			{code && (
 				<p role="alert" className="text-destructive text-sm">
-					{code === "ALREADY_IN_TEAM"
+					{reason === "already_in_team"
 						? t("already")
-						: code === "TEAM_FULL"
+						: reason === "team_full"
 							? t("full")
-							: code === "CLOSED"
+							: reason === "closed"
 								? t("closed")
 								: t("invalid")}
 				</p>

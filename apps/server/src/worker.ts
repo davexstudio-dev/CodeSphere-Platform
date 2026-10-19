@@ -62,6 +62,7 @@ export type WorkerEnv = {
 	AGENT_RULES?: string;
 	FARMING_LIMITS?: string;
 	FEED_RANKING?: string;
+	HACKATHON_REQUIRE_GITHUB?: string;
 	/** Cloudflare Queues producer of the events (#259); without it the Worker has no queue to drain into. */
 	EVENTS?: QueueBinding;
 	APP_VERSION?: string;
@@ -130,6 +131,7 @@ function buildApp(env: WorkerEnv) {
 		agentRules: parseAgentRules(env.AGENT_RULES),
 		farmingLimits: parseFarmingLimits(env.FARMING_LIMITS),
 		feedRanking: parseFeedRanking(env.FEED_RANKING),
+		teamDeps: { requireGithub: env.HACKATHON_REQUIRE_GITHUB === "true" },
 		privilegeThresholds: parsePrivilegeThresholds(env.PRIVILEGE_THRESHOLDS),
 		notifications: createNotifications(env, logger),
 		resendWebhookSecret: env.RESEND_WEBHOOK_SECRET,
@@ -143,7 +145,7 @@ export function apiFetch(
 	env: WorkerEnv,
 	ctx: WorkerContext,
 ): Response | Promise<Response> {
-	const key = `${env.BETTER_AUTH_URL}|${env.DATABASE_URL ?? ""}|${env.PRIVILEGE_THRESHOLDS ?? ""}|${env.AGENT_RULES ?? ""}|${env.FARMING_LIMITS ?? ""}|${env.FEED_RANKING ?? ""}`;
+	const key = `${env.BETTER_AUTH_URL}|${env.DATABASE_URL ?? ""}|${env.PRIVILEGE_THRESHOLDS ?? ""}|${env.AGENT_RULES ?? ""}|${env.FARMING_LIMITS ?? ""}|${env.FEED_RANKING ?? ""}|${env.HACKATHON_REQUIRE_GITHUB ?? ""}`;
 	if (!cached || cached.key !== key) {
 		cached = { key, app: buildApp(env) };
 	}

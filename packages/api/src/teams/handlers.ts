@@ -1,4 +1,6 @@
+import type { TeamConflict } from "@codesphere/contract/teams";
 import { ORPCError } from "@orpc/server";
+import type { z } from "zod";
 
 import { requireAdmin } from "../authorization";
 import { impl } from "../index";
@@ -14,10 +16,10 @@ type Errors = Partial<{
 	UNAUTHORIZED: () => Error;
 	FORBIDDEN: (options?: { message?: string }) => Error;
 	NOT_FOUND: () => Error;
-	CONFLICT: (options?: { message?: string }) => Error;
-	CLOSED: () => Error;
-	ALREADY_IN_TEAM: () => Error;
-	TEAM_FULL: () => Error;
+	CONFLICT: (options: {
+		message?: string;
+		data: { reason?: TeamConflictReason };
+	}) => Error;
 	BAD_REQUEST: (options: {
 		data: { issues: { path: string[]; message: string }[] };
 	}) => Error;
@@ -30,6 +32,24 @@ const MESSAGES: Record<string, string> = {
 	version: "The submission changed since you opened it: reload it.",
 	github: "Link a GitHub account to submit.",
 };
+
+type TeamConflictReason = NonNullable<z.infer<typeof TeamConflict>["reason"]>;
+
+const REASONS = {
+	CLOSED: "closed",
+	ALREADY_IN_TEAM: "already_in_team",
+	TEAM_FULL: "team_full",
+} as const;
+
+// Why a refusal is a CONFLICT: its own reason, or the path that named it (name, ambiguous, version).
+const reasonOf = (err: TeamError): TeamConflictReason | undefined =>
+	err.code in REASONS
+		? REASONS[err.code as keyof typeof REASONS]
+		: err.path === "name"
+			? "name_taken"
+			: err.path === "ambiguous" || err.path === "version"
+				? err.path
+				: undefined;
 
 // The typed refusal of the service.
 const refuse = (err: unknown, errors: Errors) => {
@@ -48,13 +68,13 @@ const refuse = (err: unknown, errors: Errors) => {
 			case "FORBIDDEN":
 				return errors.FORBIDDEN?.({ message }) ?? err;
 			case "CONFLICT":
-				return errors.CONFLICT?.({ message }) ?? err;
+				return (
+					errors.CONFLICT?.({ message, data: { reason: reasonOf(err) } }) ?? err
+				);
 			case "CLOSED":
-				return errors.CLOSED?.() ?? err;
 			case "ALREADY_IN_TEAM":
-				return errors.ALREADY_IN_TEAM?.() ?? err;
 			case "TEAM_FULL":
-				return errors.TEAM_FULL?.() ?? err;
+				return errors.CONFLICT?.({ data: { reason: reasonOf(err) } }) ?? err;
 			case "BAD_REQUEST":
 				return (
 					errors.BAD_REQUEST?.({

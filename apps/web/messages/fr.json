@@ -21,10 +21,7 @@
 		"BAD_REQUEST": "Certaines informations sont invalides.",
 		"TOO_MANY_REQUESTS": "Trop de requêtes. Réessayez dans quelques instants.",
 		"INTERNAL_SERVER_ERROR": "Une erreur inattendue est survenue.",
-		"retry": "Réessayer",
-		"ALREADY_IN_TEAM": "Vous êtes déjà dans une équipe de ce Hackathon.",
-		"TEAM_FULL": "Cette équipe est complète.",
-		"CLOSED": "C'est clos : la date limite est passée."
+		"retry": "Réessayer"
 	},
 	"settings": {
 		"title": "Réglages",

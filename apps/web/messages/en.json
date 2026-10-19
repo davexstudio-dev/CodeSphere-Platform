@@ -21,10 +21,7 @@
 		"BAD_REQUEST": "Some information is invalid.",
 		"TOO_MANY_REQUESTS": "Too many requests. Try again in a moment.",
 		"INTERNAL_SERVER_ERROR": "An unexpected error occurred.",
-		"retry": "Retry",
-		"ALREADY_IN_TEAM": "You are already in a team of this Hackathon.",
-		"TEAM_FULL": "This team is full.",
-		"CLOSED": "It is closed: the deadline has passed."
+		"retry": "Retry"
 	},
 	"settings": {
 		"title": "Settings",

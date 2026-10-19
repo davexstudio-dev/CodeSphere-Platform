@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import SsoLoginDialog from "@/components/sso-login-dialog";
 import { errorCodeOf } from "@/i18n/errors";
 import { authClient } from "@/lib/auth-client";
+import { teamConflictReason } from "@/lib/team-errors";
 import { orpc } from "@/utils/orpc";
 
 /** « Mon équipe » (#261): create or join a Team, invite, and the Team's Submission. */
@@ -33,13 +34,14 @@ export function TeamTab({ slug }: { slug: string }) {
 		void queryClient.invalidateQueries({ queryKey: orpc.teams.key() });
 	};
 	const failed = (error: unknown) => {
+		const reason = teamConflictReason(error);
 		const code = errorCodeOf(error);
 		toast.error(
-			code === "ALREADY_IN_TEAM"
+			reason === "already_in_team"
 				? t("errors.already")
-				: code === "TEAM_FULL"
+				: reason === "team_full"
 					? t("errors.full")
-					: code === "CLOSED"
+					: reason === "closed"
 						? t("errors.closed")
 						: code === "CONFLICT"
 							? t("errors.conflict")
@@ -309,7 +311,9 @@ function SubmissionForm({
 			setVideoUrl(current.videoUrl ?? "");
 			setTags(current.tags.join(", "));
 		}
-	}, [current]);
+		// Only a new saved version resets the fields: a refetch must not erase what is being typed.
+		// biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the version on purpose
+	}, [current?.version]);
 	const save = useMutation(
 		orpc.teams.saveSubmission.mutationOptions({
 			onSuccess: () => {
