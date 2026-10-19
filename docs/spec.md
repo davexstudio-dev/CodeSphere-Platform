@@ -19,10 +19,10 @@ Plateforme d'échange pour développeurs africains, par des développeurs : Q&R 
 | Questions, réponses, votes, hors-ligne, agents, API, MCP | 17–21 oct. (contrôle le 21) |
 | Admin minimal, intégration | 21–22 oct. |
 | Sécurité, pages légales, contenu de démo, répétition générale (23), dossier, **gel des fonctionnalités le 24 au soir** (`fix/*` seulement, sur décision du capitaine) | 23–24 oct. |
-| **Dépôt** le lendemain du gel ; limite officielle confirmée le 2026-10-09 | **25 oct. avant 17h00 GMT** |
-| Vote entre participants d'un même pays, **obligatoire pour la prise en compte de la soumission** | 25 oct. 18h – 26 oct. 23h59 |
-| Vote du public (10 % des points) | 27–30 oct., 23h59 |
-| Délibération du jury | 1er nov. |
+| **Dépôt** ; limite d'abord confirmée le 2026-10-09 au 25 oct., **repoussée au 15 nov. le 2026-10-19** par les organisateurs (heure supposée inchangée) | **15 nov. avant 17h00 GMT** |
+| Vote entre participants d'un même pays, **obligatoire pour la prise en compte de la soumission** | 15 nov. 18h – 16 nov. 23h59 (décalé de 21 jours, calendrier officiel à confirmer) |
+| Vote du public (10 % des points) | 17–20 nov., 23h59 (décalé de 21 jours, à confirmer) |
+| Délibération du jury | 22 nov. (décalé de 21 jours, à confirmer) |
 | Proclamation des résultats | à confirmer (15 nov. dans l'ancien règlement) |
 
 Points de contrôle : 13, 17 et 21 oct. (staging à jour, parcours de démo rejoué, CI verte), gel le 24 au soir, répétition générale le 23. Obligations : déploiement sur un produit payant Systalink (Cloud Server Business, Dakar) ; composants tiers sous licence permissive uniquement (MIT, Apache 2.0, BSD ; GPL/AGPL/LGPL = irrecevable, art. 6 du règlement ; MPL-2.0 acceptée par l'organisateur, présente via `lightningcss`, à déclarer dans la partie « technologies » à la création du projet) ; usage de l'IA déclaré ; équipe de 4. Jury : pertinence 25 %, qualité technique 30 %, UX 20 %, innovation 15 %, public 10 %.

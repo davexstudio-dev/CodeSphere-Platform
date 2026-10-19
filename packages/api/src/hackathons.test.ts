@@ -9,6 +9,7 @@ const row = {
 	name: "Coupe d'Afrique des Développeurs 2026",
 	organizationId: "o1",
 	opensAt: null,
+	teamsEnabled: true,
 	summary: "Concours en ligne.",
 	teamMin: 2,
 	teamMax: 5,

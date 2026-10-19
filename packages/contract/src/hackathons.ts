@@ -42,6 +42,8 @@ export const Hackathon = z.object({
 	sourceNote: z.string().nullable(),
 	/** When the Hackathon opens; null when unknown (no repository check then). */
 	opensAt: Timestamp.nullable(),
+	/** Teams and submissions run on CodeSphere; false when the event registers elsewhere (sourceUrl). */
+	teamsEnabled: z.boolean(),
 	verifiedAt: Timestamp,
 	/** Increments on every edit; an Admin update with a stale version gets CONFLICT. */
 	version: z.number().int().min(1),

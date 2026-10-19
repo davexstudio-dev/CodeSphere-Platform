@@ -2,6 +2,7 @@
 
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { Input } from "@codesphere/ui/components/atoms/input";
+import { Switch } from "@codesphere/ui/components/atoms/switch";
 import { Textarea } from "@codesphere/ui/components/atoms/textarea";
 import {
 	Alert,
@@ -42,6 +43,8 @@ type Draft = {
 	teamMin: number;
 	teamMax: number;
 	sourceNote: string;
+	/** Teams and submissions run on CodeSphere (false: the event registers elsewhere). */
+	teamsEnabled: boolean;
 	milestones: {
 		key: string;
 		label: string;
@@ -85,6 +88,7 @@ export default function AdminHackathonsPage() {
 				teamMin: hackathon.teamMin,
 				teamMax: hackathon.teamMax,
 				sourceNote: hackathon.sourceNote ?? "",
+				teamsEnabled: hackathon.teamsEnabled,
 				milestones: hackathon.milestones.map((m) => ({
 					key: m.key,
 					label: m.label,
@@ -155,6 +159,7 @@ export default function AdminHackathonsPage() {
 			teamMin: draft.teamMin,
 			teamMax: draft.teamMax,
 			sourceNote: draft.sourceNote.trim() || null,
+			teamsEnabled: draft.teamsEnabled,
 			milestones: draft.milestones.flatMap((m) => {
 				const startsAt = fromLocalInput(m.startsAt);
 				return startsAt
@@ -292,6 +297,20 @@ export default function AdminHackathonsPage() {
 												id="h-summary"
 												value={draft.summary}
 												onChange={(e) => set("summary", e.target.value)}
+											/>
+										</Field>
+										<Field
+											id="h-teams"
+											label={t("teamsEnabled")}
+											description={t("teamsEnabledHint")}
+										>
+											<Switch
+												id="h-teams"
+												aria-label={t("teamsEnabled")}
+												checked={draft.teamsEnabled}
+												onCheckedChange={(checked) =>
+													set("teamsEnabled", checked)
+												}
 											/>
 										</Field>
 										<Field
@@ -475,6 +494,10 @@ export default function AdminHackathonsPage() {
 													}),
 												},
 												{ label: t("summary"), value: hackathon.summary },
+												{
+													label: t("teamsEnabled"),
+													value: hackathon.teamsEnabled ? t("yes") : t("no"),
+												},
 												{
 													label: t("sourceNote"),
 													value: hackathon.sourceNote ?? "—",

@@ -18,6 +18,7 @@ import {
 } from "@codesphere/ui/components/molecules/tabs";
 import { Timeline } from "@codesphere/ui/components/molecules/timeline";
 import { useDataSaver } from "@codesphere/ui/lib/data-saver";
+import { cn } from "@codesphere/ui/lib/utils";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon, ExternalLinkIcon } from "lucide-react";
 import type { Route } from "next";
@@ -123,8 +124,15 @@ function HackathonView({ hackathon }: { hackathon: HackathonData }) {
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
+	// Where teams run elsewhere (the Admin turned them off), their tabs are not offered.
+	const tabs = HACKATHON_TABS.filter(
+		(key) => hackathon.teamsEnabled || (key !== "team" && key !== "gallery"),
+	);
 	const requested = searchParams.get("tab");
-	const tab: HackathonTab = isHackathonTab(requested) ? requested : "overview";
+	const tab: HackathonTab =
+		isHackathonTab(requested) && tabs.includes(requested)
+			? requested
+			: "overview";
 	const setTab = (next: HackathonTab) =>
 		router.replace(`${pathname}?tab=${next}` as Route, { scroll: false });
 
@@ -133,11 +141,18 @@ function HackathonView({ hackathon }: { hackathon: HackathonData }) {
 			<Header hackathon={hackathon} />
 			<Tabs
 				value={tab}
-				onValueChange={(value) => isHackathonTab(value) && setTab(value)}
+				onValueChange={(value) =>
+					isHackathonTab(value) && tabs.includes(value) && setTab(value)
+				}
 			>
-				{/* On a phone, the six tabs sit in two rows of three: all visible, none hidden off screen. */}
-				<TabsList className="grid w-full grid-cols-3 rounded-2xl md:inline-flex md:w-fit md:rounded-full">
-					{HACKATHON_TABS.map((key) => (
+				{/* On a phone, the tabs sit in rows of three (two with four): all visible, none hidden off screen. */}
+				<TabsList
+					className={cn(
+						"grid w-full rounded-2xl md:inline-flex md:w-fit md:rounded-full",
+						tabs.length > 4 ? "grid-cols-3" : "grid-cols-2",
+					)}
+				>
+					{tabs.map((key) => (
 						<TabsTrigger
 							key={key}
 							value={key}
@@ -165,12 +180,16 @@ function HackathonView({ hackathon }: { hackathon: HackathonData }) {
 				<TabsContent value="discussion" className="pt-4">
 					{tab === "discussion" && <Discussion slug={hackathon.slug} />}
 				</TabsContent>
-				<TabsContent value="team" className="pt-4">
-					{tab === "team" && <TeamTab slug={hackathon.slug} />}
-				</TabsContent>
-				<TabsContent value="gallery" className="pt-4">
-					{tab === "gallery" && <GalleryTab slug={hackathon.slug} />}
-				</TabsContent>
+				{hackathon.teamsEnabled && (
+					<>
+						<TabsContent value="team" className="pt-4">
+							{tab === "team" && <TeamTab slug={hackathon.slug} />}
+						</TabsContent>
+						<TabsContent value="gallery" className="pt-4">
+							{tab === "gallery" && <GalleryTab slug={hackathon.slug} />}
+						</TabsContent>
+					</>
+				)}
 			</Tabs>
 		</Shell>
 	);
@@ -264,6 +283,24 @@ function Overview({ hackathon }: { hackathon: HackathonData }) {
 					<p className="text-muted-foreground">{t("overview.noMilestone")}</p>
 				)}
 			</section>
+			{!hackathon.teamsEnabled && (
+				<section className="grid gap-2 rounded-2xl border border-primary/40 bg-primary/5 p-5 sm:col-span-2">
+					<h2 className="font-semibold text-lg">
+						{t("overview.externalTitle")}
+					</h2>
+					<p className="text-muted-foreground text-sm">
+						{t("overview.externalText")}
+					</p>
+					<a
+						href={hackathon.sourceUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="w-fit font-medium text-primary text-sm underline"
+					>
+						{t("overview.externalCta")}
+					</a>
+				</section>
+			)}
 			<section className="grid gap-1 rounded-2xl border border-border p-5">
 				<h2 className="font-medium text-muted-foreground text-sm">
 					{t("overview.team")}

@@ -41,6 +41,7 @@ describe.skipIf(!url)("mixed feed on Postgres", () => {
 		authorId: string,
 		tags: string[],
 		language: "fr" | "en" = "fr",
+		createdAt: Date = at,
 	) => {
 		const [row] = await db
 			.insert(questions)
@@ -52,7 +53,7 @@ describe.skipIf(!url)("mixed feed on Postgres", () => {
 				bodyHtml: "<p>b</p>",
 				language,
 				tags,
-				createdAt: at,
+				createdAt,
 			})
 			.returning({ id: questions.id });
 		ids[key] = row?.id ?? "";
@@ -266,6 +267,18 @@ describe.skipIf(!url)("mixed feed on Postgres", () => {
 	test("never more than two in a row from the same Source", async () => {
 		for (const k of ["s1", "s2", "s3", "s4"]) {
 			await link(k, [`zz-${k}`], { sourceId });
+		}
+		// Items of another Source that rank BELOW the four: the page can then interleave them. The
+		// other fixtures of this file tie with the four on the hot score and are ordered by random
+		// ids, so without these the four could end up last and contiguous (a run of 3 or 4).
+		for (const key of ["old1", "old2"]) {
+			await ask(
+				key,
+				us,
+				[other, `zz-${key}`],
+				"fr",
+				new Date(at.getTime() - 3_600_000),
+			);
 		}
 		const page = await mine();
 		const keys = page.items

@@ -74,6 +74,7 @@ export const HackathonUpdate = z
 		sourceNote: z.string().trim().max(500).nullable().optional(),
 		verifiedAt: Timestamp.optional(),
 		opensAt: Timestamp.nullable().optional(),
+		teamsEnabled: z.boolean().optional(),
 		milestones: z
 			.array(Milestone.extend({ label: z.string().trim().min(1).max(160) }))
 			.max(20)

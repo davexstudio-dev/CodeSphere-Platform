@@ -39,6 +39,7 @@ const REASONS = {
 	CLOSED: "closed",
 	ALREADY_IN_TEAM: "already_in_team",
 	TEAM_FULL: "team_full",
+	DISABLED: "disabled",
 } as const;
 
 // Why a refusal is a CONFLICT: its own reason, or the path that named it (name, ambiguous, version).
@@ -74,6 +75,7 @@ const refuse = (err: unknown, errors: Errors) => {
 			case "CLOSED":
 			case "ALREADY_IN_TEAM":
 			case "TEAM_FULL":
+			case "DISABLED":
 				return errors.CONFLICT?.({ data: { reason: reasonOf(err) } }) ?? err;
 			case "BAD_REQUEST":
 				return (

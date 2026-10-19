@@ -387,7 +387,11 @@
 			"failure": {
 				"forbidden": "Staff only.",
 				"failed": "Saving failed. Try again."
-			}
+			},
+			"teamsEnabled": "Teams on CodeSphere",
+			"teamsEnabledHint": "On: Members create their team and submit their project here. Off: registration is on the organiser's site, the team tab is hidden and a link to its page is shown.",
+			"yes": "Yes",
+			"no": "No"
 		},
 		"tags": {
 			"title": "Tags",
@@ -996,7 +1000,10 @@
 			"next": "Next step",
 			"team": "Teams",
 			"teamSize": "{min} to {max} members",
-			"noMilestone": "No upcoming step."
+			"noMilestone": "No upcoming step.",
+			"externalTitle": "Register and submit on the organiser's site",
+			"externalText": "Teams, registration and project submission happen on the organiser's site, not here. CodeSphere helps you prepare your project: ask your questions and follow the schedule.",
+			"externalCta": "Go to the organiser's site"
 		},
 		"timeline": {
 			"title": "Schedule",

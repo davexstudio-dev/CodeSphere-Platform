@@ -109,6 +109,7 @@ describe.skipIf(!url)("teams on Postgres", () => {
 				...cadev2026,
 				slug: s,
 				organizer: `Team Org ${run}`,
+				teamsEnabled: true,
 				teamMin: 1,
 				teamMax: 3,
 				milestones,
@@ -389,5 +390,54 @@ describe.skipIf(!url)("teams on Postgres", () => {
 			).submission?.version,
 		).toBe(3);
 		requireGithub = false;
+	});
+
+	test("an event whose teams run elsewhere refuses every write, and its tabs stay empty", async () => {
+		const slug3 = `it-team3-${run}`;
+		await seedHackathon(db, {
+			...cadev2026,
+			slug: slug3,
+			organizer: `Team Org ${run}`,
+			teamsEnabled: true,
+			teamMin: 1,
+			teamMax: 3,
+			milestones: [
+				{
+					key: "submission_close",
+					label: "Clôture",
+					startsAt: CLOSE,
+					endsAt: null,
+				},
+			],
+		});
+		const [off] = await db
+			.select({ id: hackathon.id })
+			.from(hackathon)
+			.where(eq(hackathon.slug, slug3));
+		const mine = await as(ana).teams.create({
+			slug: slug3,
+			name: `Gamma ${run}`,
+		});
+		const token =
+			(await as(ana).teams.mine({ slug: slug3 }))?.inviteToken ?? "";
+		await db
+			.update(hackathon)
+			.set({ teamsEnabled: false })
+			.where(eq(hackathon.id, off?.id ?? ""));
+		const refused = { code: "CONFLICT", data: { reason: "disabled" } };
+		await expect(
+			as(ben).teams.create({ slug: slug3, name: `Delta ${run}` }),
+		).rejects.toMatchObject(refused);
+		await expect(as(ben).teams.joinByLink({ token })).rejects.toMatchObject(
+			refused,
+		);
+		await expect(
+			as(ana).teams.saveSubmission(submission(mine.id)),
+		).rejects.toMatchObject(refused);
+		await db
+			.update(hackathon)
+			.set({ teamsEnabled: true })
+			.where(eq(hackathon.id, off?.id ?? ""));
+		await as(ben).teams.create({ slug: slug3, name: `Delta ${run}` });
 	});
 });

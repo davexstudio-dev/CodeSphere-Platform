@@ -72,13 +72,14 @@ export const SaveSubmissionInput = z.object({
 });
 
 // The refusals a Member can run into. Business refusals are CONFLICT (HTTP 409) with a `reason`, so
-// they are not mistaken for server errors: CLOSED (a deadline passed), ALREADY_IN_TEAM, TEAM_FULL.
+// they are not mistaken for server errors: CLOSED (a deadline passed), ALREADY_IN_TEAM, TEAM_FULL, DISABLED (the event runs its teams elsewhere).
 export const TeamConflict = z.object({
 	reason: z
 		.enum([
 			"closed",
 			"already_in_team",
 			"team_full",
+			"disabled",
 			"name_taken",
 			"ambiguous",
 			"version",
