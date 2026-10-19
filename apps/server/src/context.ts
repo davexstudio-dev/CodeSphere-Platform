@@ -19,6 +19,7 @@ export type CreateContextOptions = {
 		| "privilegeThresholds"
 		| "writeQuota"
 		| "agentRules"
+		| "farmingLimits"
 	>;
 };
 
@@ -59,6 +60,7 @@ export async function createContext({
 		privilegeThresholds: deps.privilegeThresholds,
 		writeQuota: deps.writeQuota,
 		agentRules: deps.agentRules,
+		farmingLimits: deps.farmingLimits,
 		notifications: deps.notifications,
 		social: deps.social,
 	};

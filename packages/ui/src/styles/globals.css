@@ -144,3 +144,21 @@
     @apply font-sans;
   }
 }
+
+/* Data saver mode (#250): no animation or transition, no smooth scrolling. */
+:root[data-data-saver="true"],
+:root[data-data-saver="true"] *,
+:root[data-data-saver="true"] *::before,
+:root[data-data-saver="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* Data saver mode (#250): system fonts only. Without the next/font classes the two variables below
+   are undefined, which would invalidate the whole font-family (the theme inlines
+   `var(--font-outfit), ui-sans-serif, ...`, so overriding --font-sans would change nothing). */
+:root[data-data-saver="true"] {
+  --font-outfit: ui-sans-serif;
+  --font-jetbrains-mono: ui-monospace;
+}

@@ -12,11 +12,10 @@ import {
 	TagIcon,
 	TrophyIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-
 import { useAdminIdentity } from "@/components/admin-identity";
+import Link from "@/components/link";
 import LocaleSwitcher from "@/components/locale-switcher";
 import { authClient } from "@/lib/auth-client";
 

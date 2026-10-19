@@ -3,10 +3,12 @@
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { Input } from "@codesphere/ui/components/atoms/input";
 import { Skeleton } from "@codesphere/ui/components/atoms/skeleton";
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { pageSizeFor } from "@/lib/data-saver";
 import { orpc } from "@/utils/orpc";
 
 type Scope =
@@ -16,6 +18,7 @@ type Scope =
 /** Reputation rankings (#242): pick a country shown publicly, or type a Tag. */
 export function RankingsPage() {
 	const t = useTranslations("rankings");
+	const pageSize = pageSizeFor(20, useDataSaver());
 	const [scope, setScope] = useState<Scope | null>(null);
 	const [tag, setTag] = useState("");
 	const countries = useQuery(orpc.rankings.countries.queryOptions());
@@ -24,7 +27,7 @@ export function RankingsPage() {
 		orpc.rankings.byCountry.infiniteOptions({
 			input: (cursor: string | undefined) => ({
 				country: scope?.value ?? "",
-				limit: 20,
+				limit: pageSize,
 				cursor,
 			}),
 			initialPageParam: undefined as string | undefined,
@@ -36,7 +39,7 @@ export function RankingsPage() {
 		orpc.rankings.byTag.infiniteOptions({
 			input: (cursor: string | undefined) => ({
 				tag: scope?.value ?? "",
-				limit: 20,
+				limit: pageSize,
 				cursor,
 			}),
 			initialPageParam: undefined as string | undefined,

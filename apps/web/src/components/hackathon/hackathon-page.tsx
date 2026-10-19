@@ -17,17 +17,18 @@ import {
 	TabsTrigger,
 } from "@codesphere/ui/components/molecules/tabs";
 import { Timeline } from "@codesphere/ui/components/molecules/timeline";
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon, ExternalLinkIcon } from "lucide-react";
 import type { Route } from "next";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import type { z } from "zod";
-
 import { FeedSkeleton, HomeFeed } from "@/components/home-feed";
+import Link from "@/components/link";
 import { ShareMenu } from "@/components/share-menu";
 import { errorCodeOf } from "@/i18n/errors";
+import { pageSizeFor } from "@/lib/data-saver";
 import { HAS_DATABASE } from "@/lib/deployment";
 import {
 	HACKATHON_TABS,
@@ -389,11 +390,12 @@ function Judging({ hackathon }: { hackathon: HackathonData }) {
 function Discussion({ slug }: { slug: string }) {
 	const t = useTranslations("hackathon.discussion");
 	const mounted = useMounted();
+	const pageSize = pageSizeFor(20, useDataSaver());
 	const questions = useInfiniteQuery(
 		orpc.questions.list.infiniteOptions({
 			input: (cursor: string | undefined) => ({
 				cursor,
-				limit: 20,
+				limit: pageSize,
 				tags: [slug],
 				sort: "recent" as const,
 			}),

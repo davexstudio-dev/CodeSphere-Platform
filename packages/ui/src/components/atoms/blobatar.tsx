@@ -11,6 +11,7 @@
  * project that imports both wants the aliasing to be deliberate.
  */
 import { Blobatar as Generated } from "@blobatar/react";
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import {
 	Avatar,
 	AvatarFallback,
@@ -54,6 +55,18 @@ export type BlobatarProps = React.ComponentProps<typeof Avatar> & {
 	blobatar?: GeneratedOptions;
 };
 
+/** Up to two initials of a name: "Ada Lovelace" is "AL", "ada" is "A". */
+export function initialsOf(name: string): string {
+	const letters = name
+		.trim()
+		.split(/\s+/)
+		.filter(Boolean)
+		.map((word) => Array.from(word)[0] ?? "");
+	return (
+		letters.length > 1 ? letters[0] + letters.at(-1) : (letters[0] ?? "")
+	).toUpperCase();
+}
+
 export function Blobatar({
 	name,
 	src,
@@ -61,6 +74,14 @@ export function Blobatar({
 	blobatar,
 	...props
 }: BlobatarProps) {
+	// Data saver mode (#250): no picture and no generated artwork, just the initials.
+	if (useDataSaver()) {
+		return (
+			<Avatar {...props}>
+				<AvatarFallback>{initialsOf(name)}</AvatarFallback>
+			</Avatar>
+		);
+	}
 	return (
 		<Avatar {...props}>
 			{src ? <AvatarImage src={src} alt={alt ?? name} /> : null}

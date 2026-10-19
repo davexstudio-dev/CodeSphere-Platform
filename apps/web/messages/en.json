@@ -155,6 +155,15 @@
 		"retry": "Retry",
 		"more": "Show more"
 	},
+	"dataSaver": {
+		"label": "Data saver",
+		"options": { "auto": "Auto", "on": "On", "off": "Off" },
+		"hint": {
+			"auto": "Data saver follows your browser's setting.",
+			"on": "Data saver is on: no images, no animations, no prefetching, shorter lists.",
+			"off": "Data saver is off."
+		}
+	},
 	"signin": {
 		"consentRequired": "No account was created: tick the consent box to sign up.",
 		"failed": "Sign-in failed.",

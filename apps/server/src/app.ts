@@ -2,6 +2,7 @@ import type { AgentRules } from "@codesphere/api/agents/moderation";
 import type { Context as ApiContext } from "@codesphere/api/context";
 import { exposedOverMCP, exposedOverOpenAPI } from "@codesphere/api/exposure";
 import { openApiDocument } from "@codesphere/api/openapi";
+import type { FarmingLimits } from "@codesphere/api/reputation/farming";
 import type { PrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { appRouter } from "@codesphere/api/routers/index";
 import type { WriteQuota } from "@codesphere/api/write-quota";
@@ -42,6 +43,8 @@ export type AppDeps = {
 	apiDocs: boolean;
 	/** Counters of the write limits, shared through the database (#246); per process when absent. */
 	writeQuota?: WriteQuota;
+	/** Anti-farming limits of the Reputation journal (#241); the defaults when absent. */
+	farmingLimits?: FarmingLimits;
 	/** Moderation of Agent Answers (#245); the defaults when absent. */
 	agentRules?: AgentRules;
 	/** Reputation needed for each Privilege (#240); the defaults when absent. */

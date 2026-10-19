@@ -1,13 +1,19 @@
 import { AppFooter } from "@codesphere/ui/components/organisms/app-footer";
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Outfit } from "next/font/google";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
 import "../index.css";
+import { DataSaver, DataSaverToggle } from "@/components/data-saver";
 import Providers from "@/components/providers";
 import { BRAND } from "@/lib/brand";
+import {
+	DATA_SAVER_COOKIE,
+	parsePreference,
+	resolveDataSaver,
+} from "@/lib/data-saver";
 import { LEGAL_PAGES, legalHref } from "@/lib/legal";
 import { publicPageUrl } from "@/lib/page-url";
 import { OG_IMAGE_PATH, ogImage, SITE_NAME } from "@/lib/share";
@@ -17,11 +23,15 @@ const outfit = Outfit({
 	subsets: ["latin", "latin-ext"],
 	variable: "--font-outfit",
 	display: "swap",
+	// No preload: Next sends it as a Link header on every response, which data saver mode (#250)
+	// cannot turn off per request. The files load when the first text uses them.
+	preload: false,
 });
 const jetbrainsMono = JetBrains_Mono({
 	subsets: ["latin", "latin-ext"],
 	variable: "--font-jetbrains-mono",
 	display: "swap",
+	preload: false,
 });
 
 const DESCRIPTION = "Plateforme d'échange pour développeurs africains";
@@ -73,28 +83,44 @@ export default async function RootLayout({
 	const messages = await getMessages();
 	const t = await getTranslations("legal");
 	// Drawn by src/proxy.ts for the CSP (#54).
-	const nonce = (await headers()).get("x-nonce") ?? undefined;
+	const requestHeaders = await headers();
+	const nonce = requestHeaders.get("x-nonce") ?? undefined;
+	// Data saver mode (#250): the Member's choice, else the browser's Save-Data header. System fonts
+	// only in this mode: the font classes are not applied, so the font files are never requested.
+	const preference = parsePreference(
+		(await cookies()).get(DATA_SAVER_COOKIE)?.value,
+	);
+	const dataSaver = resolveDataSaver(
+		preference,
+		requestHeaders.get("save-data"),
+	);
 
 	return (
 		<html
 			lang={locale}
-			className={`${outfit.variable} ${jetbrainsMono.variable}`}
+			className={
+				dataSaver ? undefined : `${outfit.variable} ${jetbrainsMono.variable}`
+			}
+			data-data-saver={dataSaver ? "true" : undefined}
 			suppressHydrationWarning
 		>
 			<body>
 				<NextIntlClientProvider locale={locale} messages={messages}>
-					<Providers nonce={nonce}>
-						{children}
-						<AppFooter
-							version={process.env.APP_VERSION ?? "0.0.0"}
-							sha={process.env.GIT_SHA ?? "dev"}
-							navLabel={t("nav")}
-							links={LEGAL_PAGES.map((page) => ({
-								label: t(`pages.${page}.title`),
-								href: legalHref(page),
-							}))}
-						/>
-					</Providers>
+					<DataSaver active={dataSaver} preference={preference}>
+						<Providers nonce={nonce}>
+							{children}
+							<AppFooter
+								version={process.env.APP_VERSION ?? "0.0.0"}
+								sha={process.env.GIT_SHA ?? "dev"}
+								navLabel={t("nav")}
+								links={LEGAL_PAGES.map((page) => ({
+									label: t(`pages.${page}.title`),
+									href: legalHref(page),
+								}))}
+							/>
+							<DataSaverToggle />
+						</Providers>
+					</DataSaver>
 				</NextIntlClientProvider>
 			</body>
 		</html>

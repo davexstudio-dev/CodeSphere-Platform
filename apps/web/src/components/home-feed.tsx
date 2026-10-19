@@ -4,12 +4,14 @@ import type { QuestionListItem } from "@codesphere/contract";
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { Skeleton } from "@codesphere/ui/components/atoms/skeleton";
 import { QuestionFeed } from "@codesphere/ui/components/organisms/question-feed";
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { Route } from "next";
-import Link from "next/link";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
+import Link from "@/components/link";
 
+import { pageSizeFor } from "@/lib/data-saver";
 import { HAS_DATABASE } from "@/lib/deployment";
 import { type FeedFilter, visibleItems } from "@/lib/home";
 import { useMounted } from "@/lib/use-mounted";
@@ -25,6 +27,8 @@ const PAGE_SIZE = 20;
  * so pages never repeat a Question.
  */
 export function useFeed(tab: FeedTab, signedIn: boolean, filter: FeedFilter) {
+	// Shorter pages in data saver mode (#250).
+	const pageSize = pageSizeFor(PAGE_SIZE, useDataSaver());
 	const forYou = tab === "forYou" && signedIn;
 	const language =
 		filter.language === "fr" || filter.language === "en"
@@ -33,7 +37,7 @@ export function useFeed(tab: FeedTab, signedIn: boolean, filter: FeedFilter) {
 	const country = filter.country === "all" ? undefined : filter.country;
 	const personal = useInfiniteQuery({
 		...orpc.feed.forYou.infiniteOptions({
-			input: (cursor: string | undefined) => ({ cursor, limit: PAGE_SIZE }),
+			input: (cursor: string | undefined) => ({ cursor, limit: pageSize }),
 			initialPageParam: undefined,
 			getNextPageParam: (last) => last.nextCursor ?? undefined,
 		}),
@@ -43,7 +47,7 @@ export function useFeed(tab: FeedTab, signedIn: boolean, filter: FeedFilter) {
 		...orpc.questions.list.infiniteOptions({
 			input: (cursor: string | undefined) => ({
 				cursor,
-				limit: PAGE_SIZE,
+				limit: pageSize,
 				language,
 				country,
 				sort:

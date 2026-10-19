@@ -28,11 +28,11 @@ import {
 	PencilIcon,
 	UnlockIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import Link from "@/components/link";
 
 import { useOutbox } from "@/components/outbox-provider";
 import { RenderedMarkdown } from "@/components/rendered-markdown";

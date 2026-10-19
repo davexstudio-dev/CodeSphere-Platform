@@ -155,6 +155,15 @@
 		"retry": "Réessayer",
 		"more": "Afficher plus"
 	},
+	"dataSaver": {
+		"label": "Données allégées",
+		"options": { "auto": "Auto", "on": "Activé", "off": "Désactivé" },
+		"hint": {
+			"auto": "Le mode données allégées suit le réglage de votre navigateur.",
+			"on": "Données allégées : ni images, ni animations, ni préchargement, listes plus courtes.",
+			"off": "Mode données allégées désactivé."
+		}
+	},
 	"signin": {
 		"consentRequired": "Aucun compte n'a été créé : cochez la case de consentement pour vous inscrire.",
 		"failed": "La connexion a échoué.",

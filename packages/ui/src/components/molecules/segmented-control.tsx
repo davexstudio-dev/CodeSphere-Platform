@@ -7,12 +7,15 @@ type SegmentedControlProps<T extends string> = Omit<
 	options: readonly T[];
 	value: T;
 	onValueChange: (value: T) => void;
+	/** What each option shows, when it should read differently from its value. */
+	labels?: Partial<Record<T, string>>;
 };
 
 function SegmentedControl<T extends string>({
 	options,
 	value,
 	onValueChange,
+	labels,
 	className,
 	...props
 }: SegmentedControlProps<T>) {
@@ -42,7 +45,7 @@ function SegmentedControl<T extends string>({
 								: "text-muted-foreground hover:text-foreground",
 						)}
 					>
-						{option}
+						{labels?.[option] ?? option}
 					</button>
 				);
 			})}

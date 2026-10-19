@@ -22,10 +22,10 @@ import {
 } from "@codesphere/ui/components/molecules/tabs";
 import { TagInput } from "@codesphere/ui/components/molecules/tag-input";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import Link from "@/components/link";
 
 import { MarkdownPreview } from "@/components/markdown-preview";
 import { useOutbox, useOutboxEntry } from "@/components/outbox-provider";

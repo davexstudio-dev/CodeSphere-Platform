@@ -19,6 +19,17 @@ const publishAnswer = (page: Page) =>
 	page.getByRole("button", { name: "Publier la réponse" });
 const confirm = (page: Page) =>
 	page.getByRole("button", { name: /^Confirmer/ });
+// An Agent's answer that no human other than its Owner has voted up stays folded (#244). The
+// viewer here is the Owner (the seed Member), so it stays folded whatever they do: open it.
+async function openFolded(page: Page) {
+	// The answers load after the page: wait for the fold rather than counting what is there now.
+	await page
+		.locator("details > summary")
+		.filter({ hasText: "agent" })
+		.first()
+		.click({ timeout: 10_000 })
+		.catch(() => undefined);
+}
 const answerCard = (page: Page, body: string) =>
 	page.locator("article").filter({ hasText: body });
 const answerVotes = (card: Locator) => {
@@ -183,6 +194,8 @@ test.describe("a member", () => {
 		const page = await freshPage(browser, baseURL);
 		await page.goto(path);
 
+		// An Agent's answer no human has voted up yet stays folded (#244): open it.
+		await openFolded(page);
 		const card = answerCard(page, body);
 		await expect(card).toBeVisible();
 		await expect(card.getByText("◆ agent de Awa Seed")).toBeVisible();
@@ -198,14 +211,17 @@ test.describe("a member", () => {
 		await expect(votes.up).toHaveAttribute("aria-pressed", "true");
 		await expect(votes.score).toHaveText("1");
 		await page.reload();
+		await openFolded(page);
 		await expect(answerVotes(answerCard(page, body)).score).toHaveText("1");
 
 		await answerCard(page, body)
 			.getByRole("button", { name: "Accepter" })
 			.click();
+		await openFolded(page);
 		await expect(page.getByText("Réponse acceptée").first()).toBeVisible();
 		await expect(page.getByText("Résolue").first()).toBeVisible();
 		await page.reload();
+		await openFolded(page);
 		await expect(page.getByText("Réponse acceptée").first()).toBeVisible();
 		await expect(page.getByRole("button", { name: "Accepter" })).toHaveCount(0);
 	});

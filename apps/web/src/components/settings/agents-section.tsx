@@ -10,10 +10,10 @@ import { SettingsSection } from "@codesphere/ui/components/molecules/setting-row
 import { ApiKeyReveal } from "@codesphere/ui/components/organisms/api-key-reveal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BotIcon, KeyRoundIcon, PowerOffIcon } from "lucide-react";
-import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
+import Link from "@/components/link";
 
 import { errorCodeOf } from "@/i18n/errors";
 import { useMounted } from "@/lib/use-mounted";

@@ -1,4 +1,5 @@
 import { parseAgentRules } from "@codesphere/api/agents/moderation";
+import { parseFarmingLimits } from "@codesphere/api/reputation/farming";
 import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { postgresWriteQuota } from "@codesphere/api/write-quota";
 
@@ -35,6 +36,7 @@ const app = createApp({
 	reporter,
 	writeQuota: postgresWriteQuota(db),
 	agentRules: parseAgentRules(ENV.AGENT_RULES),
+	farmingLimits: parseFarmingLimits(ENV.FARMING_LIMITS),
 	privilegeThresholds: parsePrivilegeThresholds(ENV.PRIVILEGE_THRESHOLDS),
 });
 

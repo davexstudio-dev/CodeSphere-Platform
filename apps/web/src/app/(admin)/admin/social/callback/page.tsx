@@ -8,12 +8,11 @@ import {
 } from "@codesphere/ui/components/molecules/alert";
 import { useMutation } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
-
 import AdminFrame from "@/components/admin-frame";
+import Link from "@/components/link";
 import { connectErrorMessage } from "@/lib/admin-social";
 import { orpc } from "@/utils/orpc";
 

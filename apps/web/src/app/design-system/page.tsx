@@ -219,8 +219,8 @@ import {
 	TriangleAlertIcon,
 	WifiOffIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
+import Link from "@/components/link";
 import { auditEntries, moderationRows } from "./sample-data";
 
 const TABS = ["Pour toi", "Récents", "Sans réponse"] as const;

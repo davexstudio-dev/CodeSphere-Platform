@@ -8,8 +8,8 @@ import {
 } from "@codesphere/ui/components/molecules/alert";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon, BotIcon } from "lucide-react";
-import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
+import Link from "@/components/link";
 
 import { errorCodeOf } from "@/i18n/errors";
 import { orpc } from "@/utils/orpc";
