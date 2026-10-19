@@ -26,6 +26,8 @@ export const AuditEvent = z.object({
 export const ReputationFlag = z.object({
 	id: z.string(),
 	reason: z.enum(["new_account", "repeat_voter", "daily_cap"]),
+	/** A vote, or an acceptance (whose "voter" is then the Question's author). */
+	cause: z.enum(["vote", "accept"]),
 	/** The points that were not counted. */
 	points: z.number().int(),
 	kind: z.string(),

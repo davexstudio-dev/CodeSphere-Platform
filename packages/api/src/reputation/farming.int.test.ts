@@ -17,6 +17,13 @@ import { reputationOf } from "./read";
 
 const url = process.env.TEST_DATABASE_URL;
 const DAY = 86_400_000;
+const NO_PRIVILEGE_THRESHOLDS = {
+	flag: 0,
+	propose_tag_edit: 0,
+	downvote: 0,
+	close_vote: 0,
+	edit_tags: 0,
+};
 
 describe.skipIf(!url)("anti-farming on Postgres", () => {
 	const db = createDb({ DATABASE_URL: url ?? "" });
@@ -31,7 +38,7 @@ describe.skipIf(!url)("anti-farming on Postgres", () => {
 	const answerIds: string[] = [];
 
 	const vote = (limits: FarmingLimits = FARMING_LIMITS) =>
-		createVoteService(db, undefined, limits);
+		createVoteService(db, NO_PRIVILEGE_THRESHOLDS, limits);
 	const reputation = async (id: string) =>
 		(await reputationOf(db, { id, kind: "human" })) ?? 0;
 	const journal = (userId: string) =>
@@ -233,6 +240,141 @@ describe.skipIf(!url)("anti-farming on Postgres", () => {
 			targetId: targets[2] ?? "",
 		});
 		expect(await reputation(author)).toBe(before + 10);
+	});
+
+	test("a vote retracted and cast again does not use the daily cap up twice", async () => {
+		const limits = { ...FARMING_LIMITS, dailyGainCap: 10 };
+		// A fresh author: the shared one has gained more than 10 today in the tests above.
+		const owner = `it-farm-cycle-${run}`;
+		await db
+			.insert(user)
+			.values({ id: owner, name: owner, email: `${owner}@example.com` });
+		ids.push(owner);
+		const [q] = await db
+			.insert(questions)
+			.values({
+				authorId: owner,
+				idempotencyKey: crypto.randomUUID(),
+				title: "Q",
+				body: "b",
+				bodyHtml: "<p>b</p>",
+				language: "en",
+				tags: ["sql"],
+			})
+			.returning();
+		questionIds.push(q?.id ?? "");
+		const target = { targetType: "question" as const, targetId: q?.id ?? "" };
+		for (let cycle = 0; cycle < 4; cycle++) {
+			await vote(limits).cast(veteran, target, "up");
+			await vote(limits).retract(veteran, target);
+		}
+		await vote(limits).cast(veteran, target, "up");
+		// +5 for a Question, net, whatever the cycles: the cap of 10 was never reached.
+		expect(await reputation(owner)).toBe(5);
+		expect(
+			(await journal(owner)).filter((e) => e.voidedReason === "daily_cap"),
+		).toHaveLength(0);
+	});
+
+	test("votes since retracted do not count towards the repeat limit", async () => {
+		const limits = { ...FARMING_LIMITS, repeatVoterMax: 1 };
+		const [first, second] = [await newQuestion(), await newQuestion()];
+		const before = await reputation(author);
+		const voter = `it-farm-retract-${run}`;
+		await db.insert(user).values({
+			id: voter,
+			name: voter,
+			email: `${voter}@example.com`,
+			createdAt: new Date(Date.now() - 30 * DAY),
+		});
+		ids.push(voter);
+		await vote(limits).cast(
+			voter,
+			{ targetType: "question", targetId: first },
+			"up",
+		);
+		await vote(limits).retract(voter, {
+			targetType: "question",
+			targetId: first,
+		});
+		// The first vote is gone: the second is the voter's only one, within the limit of 1.
+		await vote(limits).cast(
+			voter,
+			{ targetType: "question", targetId: second },
+			"up",
+		);
+		expect(await reputation(author)).toBe(before + 5);
+		expect(
+			(await journal(author)).filter(
+				(e) => e.actorId === voter && e.voidedReason === "repeat_voter",
+			),
+		).toHaveLength(0);
+	});
+
+	test("the account age is judged when the vote is cast or changed, not at its first date", async () => {
+		const young = `it-farm-young-${run}`;
+		await db
+			.insert(user)
+			.values({ id: young, name: young, email: `${young}@example.com` });
+		ids.push(young);
+		const target = {
+			targetType: "question" as const,
+			targetId: await newQuestion(),
+		};
+		const before = await reputation(author);
+		await vote().cast(young, target, "up");
+		expect(await reputation(author)).toBe(before);
+		// The account ages past 7 days; the Member changes then restores their vote.
+		await db
+			.update(user)
+			.set({ createdAt: new Date(Date.now() - 30 * DAY) })
+			.where(eq(user.id, young));
+		await vote().cast(young, target, "down");
+		await vote().cast(young, target, "up");
+		expect(await reputation(author)).toBe(before + 5);
+	});
+
+	test("what a cap already cancelled is not counted again when room appears", async () => {
+		const [capped] = await db
+			.insert(user)
+			.values({
+				id: `it-farm-regrant-${run}`,
+				name: "regrant",
+				email: `regrant-${run}@example.com`,
+			})
+			.returning();
+		const owner = capped?.id ?? "";
+		ids.push(owner);
+		const [q] = await db
+			.insert(questions)
+			.values({
+				authorId: owner,
+				idempotencyKey: crypto.randomUUID(),
+				title: "Q",
+				body: "b",
+				bodyHtml: "<p>b</p>",
+				language: "en",
+				tags: ["sql"],
+			})
+			.returning();
+		questionIds.push(q?.id ?? "");
+		const target = { targetType: "question" as const, targetId: q?.id ?? "" };
+		await vote({ ...FARMING_LIMITS, dailyGainCap: 0 }).cast(
+			veteran,
+			target,
+			"up",
+		);
+		expect(await reputation(owner)).toBe(0);
+		// Same vote settled again once the cap would allow it: still one journal line, voided.
+		await vote({ ...FARMING_LIMITS, dailyGainCap: 200 }).cast(
+			veteran,
+			target,
+			"up",
+		);
+		expect(await reputation(owner)).toBe(0);
+		expect(await journal(owner)).toMatchObject([
+			{ voidedReason: "daily_cap", points: 5 },
+		]);
 	});
 
 	test("acceptance also counts against the daily cap", async () => {

@@ -1044,6 +1044,10 @@
 														"type": "string",
 														"enum": ["new_account", "repeat_voter", "daily_cap"]
 													},
+													"cause": {
+														"type": "string",
+														"enum": ["vote", "accept"]
+													},
 													"points": {
 														"type": "integer",
 														"minimum": -9007199254740991,
@@ -1094,6 +1098,7 @@
 												"required": [
 													"id",
 													"reason",
+													"cause",
 													"points",
 													"kind",
 													"voter",

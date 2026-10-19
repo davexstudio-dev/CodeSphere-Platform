@@ -121,18 +121,20 @@ async function settle(
 			// Only a gain counts against the cap, never the refund of a cost.
 			const gainedToday =
 				gains.get(g.userId) ?? (await gainedSinceMidnight(db, g.userId));
+			// What a cap already cancelled for this source stays cancelled: counting it again
+			// when room appears would journal the same vote twice, once voided and once counted.
+			const pending = g.points - voidedBefore(g, "daily_cap");
+			if (pending <= 0) {
+				continue;
+			}
 			const room = Math.max(0, limits.dailyGainCap - gainedToday);
-			const allowed = Math.min(g.points, room);
-			const over = Math.max(
-				0,
-				g.points - allowed - voidedBefore(g, "daily_cap"),
-			);
+			const allowed = Math.min(pending, room);
 			gains.set(g.userId, gainedToday + allowed);
 			if (allowed > 0) {
 				inserts.push({ ...g, points: allowed, ...source });
 			}
-			if (over > 0) {
-				toVoid.push({ ...g, points: over, why: "daily_cap" });
+			if (pending > allowed) {
+				toVoid.push({ ...g, points: pending - allowed, why: "daily_cap" });
 			}
 		} else {
 			inserts.push({ ...g, ...source });
@@ -146,7 +148,11 @@ async function settle(
 	}
 }
 
-/** What a Member has gained today and the journal counts: the base of the daily cap. */
+/**
+ * What a Member has gained today, net, and the journal counts: the base of the daily cap. Net, so a
+ * vote that is retracted and cast again does not use the cap up twice; never below zero, so a bad
+ * day does not widen tomorrow's room.
+ */
 async function gainedSinceMidnight(db: Database, userId: string) {
 	const [row] = await db
 		.select({
@@ -157,11 +163,10 @@ async function gainedSinceMidnight(db: Database, userId: string) {
 			and(
 				eq(reputationEvents.userId, userId),
 				isNull(reputationEvents.voidedReason),
-				sql`${reputationEvents.points} > 0`,
 				gte(reputationEvents.createdAt, sql`date_trunc('day', now())`),
 			),
 		);
-	return row?.total ?? 0;
+	return Math.max(0, row?.total ?? 0);
 }
 
 // Agents earn nothing (spec §2), and neither does their Owner for what they post: the author of an
@@ -186,7 +191,7 @@ export async function settleVote(
 	limits: FarmingLimits = FARMING_LIMITS,
 ) {
 	const [vote] = await db
-		.select({ value: votes.value, castAt: votes.createdAt })
+		.select({ value: votes.value })
 		.from(votes)
 		.where(
 			and(
@@ -228,7 +233,7 @@ export async function settleVote(
 	if (vote && received.length > 0) {
 		const blocked = await blockedReason(
 			db,
-			{ voterId, authorId, target, castAt: vote.castAt },
+			{ voterId, authorId, target },
 			limits,
 		);
 		for (const g of received) {
@@ -246,7 +251,9 @@ export async function settleVote(
 /**
  * Why the points a vote grants its author must not count, if a rule says so: a voter whose account
  * was under `minAccountAgeDays` old when voting, or one who already gave this author more than
- * `repeatVoterMax` votes (other targets, counted ones) within the window. Closed circles are caught
+ * `repeatVoterMax` votes (other targets, still standing) within the window. Like every settlement
+ * this reads then writes without a transaction, so a burst of parallel votes can overshoot a limit
+ * by the size of the burst; the next settlement of the same voter is judged on the true total. Closed circles are caught
  * the same way, voter by voter; graph detection is out of scope.
  */
 async function blockedReason(
@@ -255,7 +262,6 @@ async function blockedReason(
 		voterId: string;
 		authorId: string;
 		target: { targetType: "question" | "answer"; targetId: string };
-		castAt: Date;
 	},
 	limits: FarmingLimits,
 ): Promise<VoidedReason | undefined> {
@@ -264,15 +270,14 @@ async function blockedReason(
 		.from(user)
 		.where(eq(user.id, v.voterId))
 		.limit(1);
-	const ageMs = voter ? v.castAt.getTime() - voter.createdAt.getTime() : 0;
+	// Judged when the vote is settled, i.e. cast or changed: the stored vote keeps its first date.
+	const ageMs = voter ? Date.now() - voter.createdAt.getTime() : 0;
 	if (ageMs < limits.minAccountAgeDays * 86_400_000) {
 		return "new_account";
 	}
 	if (Number.isFinite(limits.repeatVoterMax)) {
-		const [row] = await db
-			.select({
-				count: sql<number>`COUNT(DISTINCT ${reputationEvents.targetId})::int`,
-			})
+		const rows = await db
+			.select({ targetId: reputationEvents.targetId })
 			.from(reputationEvents)
 			.where(
 				and(
@@ -290,8 +295,11 @@ async function blockedReason(
 					),
 					sql`NOT (${reputationEvents.targetType} = ${v.target.targetType} AND ${reputationEvents.targetId} = ${v.target.targetId})`,
 				),
-			);
-		if ((row?.count ?? 0) >= limits.repeatVoterMax) {
+			)
+			// Votes since retracted net to zero and do not count.
+			.groupBy(reputationEvents.targetType, reputationEvents.targetId)
+			.having(sql`SUM(${reputationEvents.points}) <> 0`);
+		if (rows.length >= limits.repeatVoterMax) {
 			return "repeat_voter";
 		}
 	}

@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "f1bb3215-862e-4a59-b377-4cf3399e19c6",
+  "id": "cf095ccb-3b75-40c7-a24c-6ff60f0b5e05",
   "prevIds": [
     "6fb598a8-dd4a-46d6-802e-51582a7fc3cc"
   ],
@@ -2933,6 +2933,13 @@
         },
         {
           "value": "created_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "id",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,

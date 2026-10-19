@@ -537,6 +537,7 @@ export const appRouter = impl
 								id: event.id,
 								// Non-null: the query filters on a reason.
 								reason: event.voidedReason ?? "repeat_voter",
+								cause: event.cause,
 								points: event.points,
 								kind: event.kind,
 								voter: { id: event.actorId, name: voterName },

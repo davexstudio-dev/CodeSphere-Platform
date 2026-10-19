@@ -10,7 +10,8 @@ import {
 import { user } from "./auth";
 
 // Reputation journal (#239, decision #219): append-only, a Member's Reputation is the sum of the
-// `points` of the rows that are not voided. A row is never updated or deleted: retracting a Vote or changing the Accepted answer
+// `points` of the rows that are not voided (every sum must exclude `voided_reason IS NOT NULL`, see
+// read.ts). A row is never updated or deleted: retracting a Vote or changing the Accepted answer
 // appends the opposite points. Each row names its source, the Vote (`cause` vote, `actorId` the voter,
 // the voted target) or the acceptance (`cause` accept, `actorId` the Question's author, the
 // Question), so the points a source still grants can be summed and corrected.
@@ -48,7 +49,7 @@ export const reputationEvents = pgTable(
 		createdAt: timestamp("created_at", { precision: 3 }).defaultNow().notNull(),
 	},
 	(t) => [
-		index("reputation_events_voided_idx").on(t.voidedReason, t.createdAt),
+		index("reputation_events_voided_idx").on(t.voidedReason, t.createdAt, t.id),
 		index("reputation_events_user_idx").on(t.userId),
 		index("reputation_events_source_idx").on(
 			t.cause,
