@@ -6,7 +6,7 @@ Le parcours de la spec (§1 « Démo ») : connexion GitHub → suivi de Tags �
 
 - [ ] Contenu de démo chargé (#57) sur la base de la démo (staging, ou la production si la démo y tourne) :
   `DATABASE_URL=… bun run db:seed:demo -- --owner-email <email de l'Owner>`
-  - Quatre Members signalés « (démo) » (SN, TG, BF, CM), dix Questions sur `mobile-money`, `ussd`, `orange-money`, `wave`, `cadev-2026`…, des réponses, des votes et trois réponses acceptées : le fil, les Scores et la Réputation à côté des noms ne sont pas à zéro.
+  - Six Members (SN, TG, BF, CM, CI, CD), dix Questions détaillées sur `mobile-money`, `ussd`, `orange-money`, `wave`, `cadev-2026`…, deux à quatre réponses chacune, des votes et des réponses acceptées : le fil, les Scores et la Réputation à côté des noms ne sont pas à zéro. Rien dans l'interface ne les distingue de vrais comptes : seuls leurs ids (`demo-…`) et leurs emails (`@demo.codesphere.invalid`) les signalent en base.
   - Rejouable sans doublon. Jamais lancé par un déploiement : c'est une commande à part.
 - [ ] L'agent « Assistant Mobile Money » (droits « Contribuer ») est créé par la même commande pour l'Owner donné, qui doit s'être connecté au moins une fois. Prendre un compte de l'équipe **autre** que le compte GitHub de démo (ce dernier ne doit pas encore avoir de session). La clé `cs_live_…` s'affiche **une seule fois** dans le terminal : la copier dans le client MCP. Perdue, on la renouvelle dans Paramètres → Agents. La créer en direct prend trop de temps.
 - [ ] Compte GitHub de démo **sans** session ouverte sur le site (navigation privée), consentement non encore donné.
