@@ -39,9 +39,13 @@ export const jobPostings = pgTable(
 		// Where to apply, outside CodeSphere: a link, or an email (exactly one is set).
 		applyUrl: text("apply_url"),
 		applyEmail: text("apply_email"),
-		status: text("status", { enum: JOB_STATUSES }).default("published").notNull(),
+		status: text("status", { enum: JOB_STATUSES })
+			.default("published")
+			.notNull(),
 		removedReason: text("removed_reason"),
-		publishedAt: timestamp("published_at", { precision: 3 }).defaultNow().notNull(),
+		publishedAt: timestamp("published_at", { precision: 3 })
+			.defaultNow()
+			.notNull(),
 		// publishedAt + 30 days: after it the posting is no longer listed.
 		expiresAt: timestamp("expires_at", { precision: 3 }).notNull(),
 		version: integer("version").default(1).notNull(),

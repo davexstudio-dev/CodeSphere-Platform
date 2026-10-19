@@ -23,7 +23,10 @@ export const outboxEvents = pgTable(
 		// What the event is about, so a consumer can fetch the current state instead of trusting a payload.
 		aggregateType: text("aggregate_type").notNull(),
 		aggregateId: text("aggregate_id").notNull(),
-		payload: jsonb("payload").$type<Record<string, unknown>>().default({}).notNull(),
+		payload: jsonb("payload")
+			.$type<Record<string, unknown>>()
+			.default({})
+			.notNull(),
 		// Emitting twice with the same key writes once (a retried request does not duplicate the event).
 		dedupeKey: text("dedupe_key").unique(),
 		createdAt: timestamp("created_at", { precision: 6 }).defaultNow().notNull(),
@@ -48,7 +51,9 @@ export const processedEvents = pgTable(
 	{
 		consumer: text("consumer").notNull(),
 		eventId: uuid("event_id").notNull(),
-		processedAt: timestamp("processed_at", { precision: 3 }).defaultNow().notNull(),
+		processedAt: timestamp("processed_at", { precision: 3 })
+			.defaultNow()
+			.notNull(),
 	},
 	(t) => [primaryKey({ columns: [t.consumer, t.eventId] })],
 );
