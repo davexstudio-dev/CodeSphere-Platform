@@ -158,9 +158,11 @@ function Loaded({
 		<QuestionBody question={question} viewer={viewer} />
 	);
 
+	// grid-cols-1 everywhere below: an implicit grid column grows to its widest content (a long line
+	// of code), which would push the whole page sideways on a phone.
 	return (
-		<main className="mx-auto grid max-w-6xl gap-8 px-4 py-6 md:px-6 md:py-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
-			<div className="grid min-w-0 content-start gap-6">
+		<main className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-6 md:px-6 md:py-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
+			<div className="grid min-w-0 grid-cols-1 content-start gap-6">
 				<Breadcrumb
 					aria-label={tNav("breadcrumb")}
 					linkAs={Link}
@@ -196,7 +198,10 @@ function Loaded({
 
 				{accepted ? (
 					<>
-						<section aria-labelledby="solution" className="grid gap-3">
+						<section
+							aria-labelledby="solution"
+							className="grid grid-cols-1 gap-3"
+						>
 							<h2 id="solution" className="scroll-mt-32 font-semibold text-lg">
 								{t("solution")}
 							</h2>
@@ -223,7 +228,7 @@ function Loaded({
 
 				{/* Solved with nothing else to read: no empty « Réponses » heading. */}
 				{showAnswers && (
-					<section aria-labelledby="answers" className="grid gap-3">
+					<section aria-labelledby="answers" className="grid grid-cols-1 gap-3">
 						<h2 id="answers" className="scroll-mt-32 font-semibold text-lg">
 							{t(accepted ? "otherAnswers" : "answers", {
 								count: others.length,
@@ -404,7 +409,7 @@ function AnswerItem({
 	};
 	const isQuestionAuthor = viewer?.id === question.authorId;
 	return (
-		<div className="grid gap-2">
+		<div className="grid grid-cols-1 gap-2">
 			<AnswerCard
 				author={answer.authorName || tMember("unnamed")}
 				reputation={
