@@ -14,7 +14,8 @@ import { withAudit } from "./audit";
  * Votes and the Reputation journal are kept (#243, decision #219): a Score is the sum of the votes
  * on a target and Reputation the sum of the journal, so deleting rows would silently change other
  * Members' numbers (and the next vote's recount). They point at the anonymised row, which holds no
- * name, email or location any more, and no public surface lists a voter.
+ * name, email or location any more, and no public surface lists a voter. The id itself stays as a
+ * pseudonym: decision #219 accepts that, and a retention limit would be a separate decision.
  */
 export async function deleteMember(
 	db: Database,

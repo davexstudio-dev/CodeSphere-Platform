@@ -25,7 +25,7 @@ export async function exportMember(db: Database, memberId: string) {
 			.select()
 			.from(reputationEvents)
 			.where(eq(reputationEvents.userId, memberId))
-			.orderBy(reputationEvents.createdAt),
+			.orderBy(reputationEvents.createdAt, reputationEvents.id),
 		db.select().from(tagFollows).where(eq(tagFollows.userId, memberId)),
 		db
 			.select()

@@ -236,7 +236,13 @@ export const appRouter = impl
 				if (!row) {
 					throw errors.NOT_FOUND();
 				}
-				return publicProfile(row, await reputationOf(context.db, row));
+				// A deleted Member's journal is kept (#243), but its total is not shown.
+				return publicProfile(
+					row,
+					row.suspensionReason === "deleted"
+						? 0
+						: await reputationOf(context.db, row),
+				);
 			}),
 		},
 		hackathons: {

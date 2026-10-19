@@ -23,7 +23,8 @@ describe.skipIf(!url)("members.delete on Postgres", () => {
 	const leaver = `it-del-leaver-${run}`;
 	const staying = `it-del-staying-${run}`;
 	const late = `it-del-late-${run}`;
-	const ids = [author, leaver, staying, late];
+	const famous = `it-del-famous-${run}`;
+	const ids = [author, leaver, staying, late, famous];
 	const service = createVoteService(db);
 	let questionId = "";
 
@@ -123,6 +124,51 @@ describe.skipIf(!url)("members.delete on Postgres", () => {
 		expect(events.length).toBeGreaterThan(0);
 		const [row] = await db.select().from(user).where(eq(user.id, leaver));
 		expect(JSON.stringify(row)).not.toContain("example.com");
+	});
+
+	test("a deleted Member keeps their journal but shows no Reputation, on their profile or content", async () => {
+		const [q] = await db
+			.insert(questions)
+			.values({
+				authorId: famous,
+				idempotencyKey: crypto.randomUUID(),
+				title: "Famous question",
+				body: "b",
+				bodyHtml: "<p>b</p>",
+				language: "en",
+				tags: ["sql"],
+			})
+			.returning();
+		await service.cast(
+			staying,
+			{ targetType: "question", targetId: q?.id ?? "" },
+			"up",
+		);
+		const earned = await db
+			.select()
+			.from(reputationEvents)
+			.where(eq(reputationEvents.userId, famous));
+		expect(earned.length).toBeGreaterThan(0);
+		expect(
+			(await clientAs(staying).members.get({ id: famous })).reputation,
+		).toBeGreaterThan(0);
+
+		await clientAs(famous).members.delete({ deleteContent: false });
+
+		const journal = await db
+			.select()
+			.from(reputationEvents)
+			.where(eq(reputationEvents.userId, famous));
+		expect(journal).toHaveLength(earned.length);
+		expect(
+			(await clientAs(staying).members.get({ id: famous })).reputation,
+		).toBe(0);
+		const listed = await clientAs(staying).questions.list({ limit: 50 });
+		const shown = listed.items.find((item) => item.id === q?.id);
+		expect(shown).toMatchObject({
+			authorName: "Deleted member",
+			authorReputation: 0,
+		});
 	});
 
 	test("the export includes the member's reputation journal", async () => {
