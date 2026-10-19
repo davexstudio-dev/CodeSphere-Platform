@@ -6,6 +6,7 @@ import type {
 import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
 import { answers, questions } from "@codesphere/db/schema/questions";
+// biome-ignore lint/style/noRestrictedImports: tolerated, listing reads the Member's tag follows; move behind a tags contract (#254)
 import { tagFollows } from "@codesphere/db/schema/tags";
 import {
 	and,

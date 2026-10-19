@@ -1,5 +1,6 @@
 import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
+// biome-ignore lint/style/noRestrictedImports: tolerated, the ledger derives events from votes and authorship; move behind a Q&A contract (#254)
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
 import { reputationEvents } from "@codesphere/db/schema/reputation";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
