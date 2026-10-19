@@ -3,8 +3,11 @@ import * as z from "zod";
 
 import { base } from "./base";
 
-/** `read`: reads only. `contribute`: may also ask and answer (never vote, spec §2). */
-export const AgentPreset = z.enum(["read", "contribute"]);
+/**
+ * `read`: reads only. `contribute`: may also ask and answer (never vote, spec §2). `curate`: reads
+ * and proposes links to the watch feed (#255), nothing else.
+ */
+export const AgentPreset = z.enum(["read", "contribute", "curate"]);
 
 export const AGENTS_PER_OWNER = 3;
 

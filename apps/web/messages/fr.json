@@ -1,7 +1,8 @@
 {
 	"footer": {
 		"build": "CodeSphere Platform v{version} · {sha}",
-		"nav": "Liens du pied de page"
+		"nav": "Liens du pied de page",
+		"watch": "Veille"
 	},
 	"language": {
 		"label": "Langue",
@@ -87,11 +88,13 @@
 			"preset": "Droits",
 			"presets": {
 				"read": "Lecture seule",
-				"contribute": "Contribuer"
+				"contribute": "Contribuer",
+				"curate": "Curation"
 			},
 			"presetHints": {
 				"read": "Lit les questions et réponses, sans rien écrire.",
-				"contribute": "Peut aussi poser des questions et répondre."
+				"contribute": "Peut aussi poser des questions et répondre.",
+				"curate": "Lit et propose des liens à la veille, rien d'autre."
 			},
 			"full": "Vous avez atteint 3 agents : supprimez-en un pour en créer un autre.",
 			"keyOnce": "La clé cs_live_ s'affiche une seule fois.",
@@ -495,6 +498,61 @@
 			"error": "Le serveur n'a pas répondu.",
 			"forbidden": "Votre rôle ne donne pas accès aux indicateurs.",
 			"retry": "Réessayer"
+		},
+		"watch": {
+			"title": "Veille",
+			"description": "Sources de confiance, propositions et signalements, domaines bloqués.",
+			"errors": {
+				"forbidden": "Action refusée.",
+				"conflict": "Cet élément existe déjà.",
+				"notFound": "Cet élément n'existe plus.",
+				"generic": "Une erreur est survenue. Réessayez."
+			},
+			"sources": {
+				"title": "Sources",
+				"ingest": "Lire maintenant",
+				"ingested": "{sources} sources lues, {added} nouveaux liens.",
+				"name": "Nom",
+				"feedUrl": "Flux RSS ou Atom",
+				"tags": "Tags (virgules)",
+				"african": "Source africaine",
+				"add": "Ajouter",
+				"none": "Aucune source pour le moment.",
+				"active": "Active",
+				"stopped": "Arrêtée",
+				"items": "{count, plural, one {# lien} other {# liens}}",
+				"fetched": "lue le {date}",
+				"neverFetched": "jamais lue",
+				"stop": "Arrêter",
+				"resume": "Reprendre",
+				"remove": "Retrait",
+				"confirmRemove": "Retirer {name} à sa demande ? Ses liens sont supprimés et son domaine bloqué.",
+				"removed": "{count, plural, one {# lien retiré} other {# liens retirés}}."
+			},
+			"review": {
+				"title": "À modérer",
+				"none": "Rien à modérer.",
+				"origin": {
+					"source": "Source",
+					"member": "Member",
+					"agent": "Agent"
+				},
+				"score": "score {score}",
+				"pending": "en attente",
+				"reports": "{count, plural, one {# signalement} other {# signalements}}",
+				"approve": "Approuver",
+				"remove": "Retirer",
+				"reason": "Motif du retrait",
+				"blockDomain": "Bloquer le domaine"
+			},
+			"domains": {
+				"title": "Domaines bloqués",
+				"domain": "Domaine",
+				"block": "Bloquer",
+				"unblock": "Débloquer",
+				"none": "Aucun domaine bloqué.",
+				"confirmBlock": "Bloquer {domain} ? Ses liens existants sont retirés."
+			}
 		}
 	},
 	"onboarding": {
@@ -913,5 +971,53 @@
 		"propose": "Proposer une idée",
 		"ideasRecent": "Idées récentes",
 		"ideasNone": "Aucune idée proposée pour le moment."
+	},
+	"watch": {
+		"title": "Veille",
+		"intro": "Des liens utiles aux développeurs africains : sources de confiance et propositions de la communauté. Nous gardons le lien, le titre et un court résumé, jamais l'article.",
+		"views": {
+			"recent": "Récents",
+			"pending": "À valider",
+			"saved": "Gardés"
+		},
+		"african": "Source africaine",
+		"origin": {
+			"member": "Proposé par un Member",
+			"agent": "Proposé par un agent"
+		},
+		"pending": "En attente de vote",
+		"pendingHint": "Ces propositions deviennent visibles après un vote positif d'un Member ou l'approbation d'un Admin.",
+		"empty": {
+			"recent": "Rien à lire pour le moment.",
+			"pending": "Aucune proposition en attente.",
+			"saved": "Vous n'avez rien gardé pour plus tard."
+		},
+		"more": "Voir plus",
+		"retry": "Réessayer",
+		"error": "Une erreur est survenue. Réessayez.",
+		"needReputation": "Il vous faut plus de Réputation pour cette action.",
+		"upvote": "Voter pour",
+		"downvote": "Voter contre",
+		"save": "Garder pour plus tard",
+		"saved": "Gardé",
+		"report": "Signaler",
+		"reportReason": "Pourquoi ?",
+		"reportSend": "Envoyer",
+		"reported": "Merci, un Admin va regarder.",
+		"propose": {
+			"title": "Proposer un lien",
+			"hint": "25 de Réputation requis, 5 propositions par jour. Le lien apparaît après un vote positif ou l'approbation d'un Admin.",
+			"url": "Adresse du lien",
+			"titleLabel": "Titre",
+			"summary": "Résumé (300 caractères)",
+			"tags": "Tags, séparés par des virgules",
+			"submit": "Proposer",
+			"done": "Merci ! Votre proposition attend un vote.",
+			"needReputation": "Il vous faut 25 de Réputation pour proposer un lien.",
+			"exists": "Ce lien existe déjà.",
+			"blocked": "Ce site n'est pas accepté.",
+			"tooMany": "Limite de 5 propositions par jour atteinte.",
+			"error": "Le lien n'a pas pu être proposé."
+		}
 	}
 }

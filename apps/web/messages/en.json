@@ -1,7 +1,8 @@
 {
 	"footer": {
 		"build": "CodeSphere Platform v{version} · {sha}",
-		"nav": "Footer links"
+		"nav": "Footer links",
+		"watch": "Watch"
 	},
 	"language": {
 		"label": "Language",
@@ -87,11 +88,13 @@
 			"preset": "Rights",
 			"presets": {
 				"read": "Read only",
-				"contribute": "Contribute"
+				"contribute": "Contribute",
+				"curate": "Curate"
 			},
 			"presetHints": {
 				"read": "Reads questions and answers, writes nothing.",
-				"contribute": "May also ask questions and answer."
+				"contribute": "May also ask questions and answer.",
+				"curate": "Reads and proposes links to the watch feed, nothing else."
 			},
 			"full": "You have 3 agents: delete one to create another.",
 			"keyOnce": "The cs_live_ key is shown only once.",
@@ -495,6 +498,61 @@
 			"error": "The server did not answer.",
 			"forbidden": "Your role does not give access to the indicators.",
 			"retry": "Retry"
+		},
+		"watch": {
+			"title": "Watch",
+			"description": "Trusted Sources, proposals and reports, blocked domains.",
+			"errors": {
+				"forbidden": "Action refused.",
+				"conflict": "This already exists.",
+				"notFound": "This no longer exists.",
+				"generic": "Something went wrong. Try again."
+			},
+			"sources": {
+				"title": "Sources",
+				"ingest": "Read now",
+				"ingested": "{sources} sources read, {added} new links.",
+				"name": "Name",
+				"feedUrl": "RSS or Atom feed",
+				"tags": "Tags (commas)",
+				"african": "African source",
+				"add": "Add",
+				"none": "No Source yet.",
+				"active": "Active",
+				"stopped": "Stopped",
+				"items": "{count, plural, one {# link} other {# links}}",
+				"fetched": "read on {date}",
+				"neverFetched": "never read",
+				"stop": "Stop",
+				"resume": "Resume",
+				"remove": "Removal",
+				"confirmRemove": "Remove {name} at its request? Its links are deleted and its domain blocked.",
+				"removed": "{count, plural, one {# link removed} other {# links removed}}."
+			},
+			"review": {
+				"title": "To moderate",
+				"none": "Nothing to moderate.",
+				"origin": {
+					"source": "Source",
+					"member": "Member",
+					"agent": "Agent"
+				},
+				"score": "score {score}",
+				"pending": "pending",
+				"reports": "{count, plural, one {# report} other {# reports}}",
+				"approve": "Approve",
+				"remove": "Remove",
+				"reason": "Reason for removal",
+				"blockDomain": "Block domain"
+			},
+			"domains": {
+				"title": "Blocked domains",
+				"domain": "Domain",
+				"block": "Block",
+				"unblock": "Unblock",
+				"none": "No blocked domain.",
+				"confirmBlock": "Block {domain}? Its existing links are removed."
+			}
 		}
 	},
 	"onboarding": {
@@ -913,5 +971,53 @@
 		"propose": "Suggest an idea",
 		"ideasRecent": "Recent ideas",
 		"ideasNone": "No idea suggested yet."
+	},
+	"watch": {
+		"title": "Watch",
+		"intro": "Links useful to African developers: trusted sources and community proposals. We keep the link, the title and a short summary, never the article.",
+		"views": {
+			"recent": "Recent",
+			"pending": "To validate",
+			"saved": "Saved"
+		},
+		"african": "African source",
+		"origin": {
+			"member": "Proposed by a Member",
+			"agent": "Proposed by an agent"
+		},
+		"pending": "Waiting for a vote",
+		"pendingHint": "These proposals become visible after a positive vote from a Member or an Admin's approval.",
+		"empty": {
+			"recent": "Nothing to read yet.",
+			"pending": "No proposal waiting.",
+			"saved": "You have kept nothing for later."
+		},
+		"more": "Show more",
+		"retry": "Try again",
+		"error": "Something went wrong. Try again.",
+		"needReputation": "You need more Reputation for this.",
+		"upvote": "Vote up",
+		"downvote": "Vote down",
+		"save": "Keep for later",
+		"saved": "Kept",
+		"report": "Report",
+		"reportReason": "Why?",
+		"reportSend": "Send",
+		"reported": "Thanks, an Admin will take a look.",
+		"propose": {
+			"title": "Propose a link",
+			"hint": "25 Reputation required, 5 proposals a day. The link shows up after a positive vote or an Admin's approval.",
+			"url": "Link address",
+			"titleLabel": "Title",
+			"summary": "Summary (300 characters)",
+			"tags": "Tags, comma-separated",
+			"submit": "Propose",
+			"done": "Thanks! Your proposal is waiting for a vote.",
+			"needReputation": "You need 25 Reputation to propose a link.",
+			"exists": "This link already exists.",
+			"blocked": "This site is not accepted.",
+			"tooMany": "You reached the limit of 5 proposals a day.",
+			"error": "The link could not be proposed."
+		}
 	}
 }

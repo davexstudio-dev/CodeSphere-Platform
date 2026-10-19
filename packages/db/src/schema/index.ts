@@ -9,3 +9,4 @@ export * from "./reputation";
 export * from "./social";
 export * from "./tags";
 export * from "./vitals";
+export * from "./watch";

@@ -6,6 +6,7 @@ import type { AgentRules } from "./agents/moderation";
 import type { FarmingLimits, PrivilegeThresholds } from "./reputation/service";
 import type { SearchIndex } from "./search/service";
 import type { SocialAccounts } from "./social-accounts";
+import type { FetchText } from "./watch/ingest";
 import type { WriteQuota } from "./write-quota";
 
 export type Context = {
@@ -19,6 +20,8 @@ export type Context = {
 	privilegeThresholds?: PrivilegeThresholds;
 	/** Counters of the write limits (#246): shared through Postgres where there is a database. */
 	writeQuota?: WriteQuota;
+	/** Reads a Source's feed (#255); the HTTPS fetch when absent, a fake in tests. */
+	watchFetch?: FetchText;
 	/** The search engine (#247); Postgres full-text search when absent. */
 	searchIndex?: SearchIndex;
 	/** Moderation of Agent Answers (#245); the defaults of decision #220 when absent. */

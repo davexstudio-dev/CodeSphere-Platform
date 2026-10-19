@@ -11,6 +11,7 @@ import { questionsContract } from "./questions";
 import { rankingsContract } from "./rankings";
 import { tagsContract } from "./tags";
 import { votesContract } from "./votes";
+import { watchContract } from "./watch";
 
 export * from "./admin";
 export * from "./agents";
@@ -28,6 +29,7 @@ export * from "./roles";
 export * from "./tags";
 export * from "./vitals";
 export * from "./votes";
+export * from "./watch";
 
 export const contract = {
 	admin: adminContract,
@@ -43,4 +45,5 @@ export const contract = {
 	rankings: rankingsContract,
 	tags: tagsContract,
 	votes: votesContract,
+	watch: watchContract,
 };

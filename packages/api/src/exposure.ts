@@ -5,7 +5,7 @@ import type { AnyProcedureContract } from "@orpc/contract";
 // so an Agent never sees an admin write.
 
 type Meta = {
-	"~openapi"?: { method?: string };
+	"~openapi"?: { method?: string; path?: string };
 	"~mcp"?: { type?: string; annotations?: { readOnlyHint?: boolean } };
 };
 
@@ -15,6 +15,12 @@ const metaOf = (procedure: { "~orpc": unknown }) =>
 /** Reads are explicit GET routes; anything else, a procedure with no route included, writes. */
 export function isRead(procedure: { "~orpc": unknown }): boolean {
 	return metaOf(procedure)["~openapi"]?.method === "GET";
+}
+
+/** The one write a `curate` key may make: proposing a link to the watch feed (#255). */
+export function isWatchSubmission(procedure: { "~orpc": unknown }): boolean {
+	const openapi = metaOf(procedure)["~openapi"];
+	return openapi?.method === "POST" && openapi.path === "/watch/items";
 }
 
 /**

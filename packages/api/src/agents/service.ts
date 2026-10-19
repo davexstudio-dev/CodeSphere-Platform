@@ -58,13 +58,12 @@ async function hashKey(key: string) {
 	return Buffer.from(digest).toString("base64url");
 }
 
-type Preset = "read" | "contribute";
+type Preset = "read" | "contribute" | "curate";
 
 const presetOf = (metadata: string | null): Preset => {
 	try {
-		return JSON.parse(metadata ?? "{}").preset === "contribute"
-			? "contribute"
-			: "read";
+		const preset = JSON.parse(metadata ?? "{}").preset;
+		return preset === "contribute" || preset === "curate" ? preset : "read";
 	} catch {
 		return "read";
 	}

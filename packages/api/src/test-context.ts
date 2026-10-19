@@ -27,6 +27,7 @@ export function testContext(overrides: Partial<Context> = {}): Context {
 			downvote: 0,
 			close_vote: 0,
 			edit_tags: 0,
+			submit_feed_item: 0,
 		},
 		// Anti-farming off, for the same reason: test accounts are brand new.
 		farmingLimits: NO_FARMING_LIMITS,

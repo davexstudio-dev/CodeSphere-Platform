@@ -23,6 +23,7 @@ const NO_PRIVILEGE_THRESHOLDS = {
 	downvote: 0,
 	close_vote: 0,
 	edit_tags: 0,
+	submit_feed_item: 0,
 };
 
 describe.skipIf(!url)("anti-farming on Postgres", () => {

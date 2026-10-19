@@ -22,18 +22,22 @@ export const WRITE_QUOTAS = {
 	human: {
 		question: { maxRequests: QUESTIONS_PER_HOUR, windowMs: HOUR },
 		answer: { maxRequests: ANSWERS_PER_HOUR, windowMs: HOUR },
+		// Proposals to the watch feed: 5 a day for anyone (#255).
+		feed_item: { maxRequests: 5, windowMs: DAY },
 	},
 	agent: {
 		question: { maxRequests: 5, windowMs: DAY },
 		answer: { maxRequests: 20, windowMs: DAY },
+		feed_item: { maxRequests: 5, windowMs: DAY },
 	},
 	owner: {
 		question: { maxRequests: 10, windowMs: DAY },
 		answer: { maxRequests: 40, windowMs: DAY },
+		feed_item: { maxRequests: 10, windowMs: DAY },
 	},
 } as const;
 
-export type WriteAction = "question" | "answer";
+export type WriteAction = "question" | "answer" | "feed_item";
 export type WriteActor = {
 	id: string;
 	kind: "human" | "agent";
@@ -62,7 +66,7 @@ export function createWriteQuota(
 	ownerOf: (agentId: string) => Promise<string | null>,
 ): WriteQuota {
 	const scopes = Object.keys(WRITE_QUOTAS) as (keyof typeof WRITE_QUOTAS)[];
-	const actions: WriteAction[] = ["question", "answer"];
+	const actions: WriteAction[] = ["question", "answer", "feed_item"];
 	const table = Object.fromEntries(
 		scopes.map((scope) => [
 			scope,

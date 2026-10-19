@@ -4,6 +4,7 @@
 // this file).
 import {
 	apiFetch,
+	apiScheduled,
 	isApiPath,
 	type WorkerContext,
 	type WorkerEnv,
@@ -25,5 +26,13 @@ export default {
 			return apiFetch(request, env, ctx);
 		}
 		return openNext.fetch(request, env, ctx);
+	},
+	// Cron Trigger (apps/web/wrangler.jsonc): reads the watch feed's Sources (#255).
+	async scheduled(
+		_event: unknown,
+		env: WorkerEnv,
+		ctx: WorkerContext,
+	): Promise<void> {
+		await apiScheduled(env, ctx);
 	},
 };

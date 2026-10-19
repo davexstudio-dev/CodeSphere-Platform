@@ -6,6 +6,7 @@ import { base, ExpectedVersion, Id, Page, PageInput, Timestamp } from "./base";
 import { Hackathon, JudgingCriterion, Milestone, Prize } from "./hackathons";
 import { MemberSummary } from "./members";
 import { vitalsAdminContract } from "./vitals";
+import { watchAdminContract } from "./watch";
 
 export const AuditEvent = z.object({
 	id: z.string(),
@@ -327,6 +328,7 @@ export const adminContract = {
 			.output(AdminMember),
 	},
 	webVitals: vitalsAdminContract,
+	watch: watchAdminContract,
 	auditLog: {
 		list: base
 			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })

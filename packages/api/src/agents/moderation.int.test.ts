@@ -25,6 +25,7 @@ const NO_PRIVILEGES = {
 	downvote: 0,
 	close_vote: 0,
 	edit_tags: 0,
+	submit_feed_item: 0,
 };
 // Two rejections pause an Agent: enough to exercise the rule with few votes.
 const RULES: AgentRules = { ...DEFAULT_AGENT_RULES, pauseAfter: 2 };

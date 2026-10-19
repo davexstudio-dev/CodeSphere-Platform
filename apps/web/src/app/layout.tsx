@@ -120,6 +120,7 @@ export default async function RootLayout({
 										label: t(`pages.${page}.title`),
 										href: legalHref(page),
 									})),
+									{ label: footer("watch"), href: "/watch" },
 									{ label: roadmap("nav"), href: "/roadmap" },
 								]}
 							/>

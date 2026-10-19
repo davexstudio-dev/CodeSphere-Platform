@@ -14,6 +14,7 @@ describe("parsePrivilegeThresholds", () => {
 			downvote: 75,
 			close_vote: 150,
 			edit_tags: 300,
+			submit_feed_item: 25,
 		});
 		expect(parsePrivilegeThresholds(undefined)).toEqual(
 			DEFAULT_PRIVILEGE_THRESHOLDS,

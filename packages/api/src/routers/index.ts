@@ -23,7 +23,7 @@ import { requireAdmin } from "../authorization";
 import { communitySnapshot } from "../community/service";
 import { decodeCursor, encodeCursor } from "../cursor";
 import { unexpectedErrors } from "../errors";
-import { isRead } from "../exposure";
+import { isRead, isWatchSubmission } from "../exposure";
 import { loadHackathons } from "../hackathons";
 import { impl } from "../index";
 import { sanitizeMarkdown } from "../markdown/sanitizer";
@@ -49,6 +49,10 @@ import {
 	unfollowTag,
 } from "../tags";
 import { webVitalsByCountry } from "../vitals/service";
+import {
+	createWatchAdminHandlers,
+	createWatchHandlers,
+} from "../watch/handlers";
 
 // The authorization guard behind every admin procedure (spec §2). Throws the typed
 // UNAUTHORIZED / FORBIDDEN error declared on the admin contract.
@@ -129,9 +133,17 @@ const enforceAgentPreset = impl.middleware(
 			| { id: string; kind?: string }
 			| undefined;
 		if (user?.kind === "agent" && !isRead(procedure)) {
-			if ((await agentPreset(context.db, user.id)) !== "contribute") {
+			const preset = await agentPreset(context.db, user.id);
+			// `curate` may only propose links to the watch feed (#255).
+			const allowed =
+				preset === "contribute" ||
+				(preset === "curate" && isWatchSubmission(procedure));
+			if (!allowed) {
 				throw new ORPCError("FORBIDDEN", {
-					message: "This key is read-only.",
+					message:
+						preset === "curate"
+							? "This key may only propose watch links."
+							: "This key is read-only.",
 				});
 			}
 		}
@@ -488,6 +500,7 @@ export const appRouter = impl
 						return outcome.publication;
 					}),
 			},
+			watch: createWatchAdminHandlers(),
 			webVitals: {
 				byCountry: impl.admin.webVitals.byCountry
 					.use(isAdmin)
@@ -715,6 +728,7 @@ export const appRouter = impl
 		votes: createVotesHandlers(),
 		feed: createFeedHandlers(),
 		rankings: createRankingsHandlers(),
+		watch: createWatchHandlers(),
 		community: {
 			snapshot: impl.community.snapshot.handler(async ({ context }) => {
 				const { day, computedAt, figures } = await communitySnapshot(

@@ -19,7 +19,7 @@ import { errorCodeOf } from "@/i18n/errors";
 import { useMounted } from "@/lib/use-mounted";
 import { orpc } from "@/utils/orpc";
 
-const PRESETS = ["read", "contribute"] as const;
+const PRESETS = ["read", "contribute", "curate"] as const;
 
 /**
  * « Mes agents » (#50): up to 3 Agents per Owner, each with a `cs_live_` key shown once at

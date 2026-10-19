@@ -1,6 +1,7 @@
 import { parseAgentRules } from "@codesphere/api/agents/moderation";
 import { parseFarmingLimits } from "@codesphere/api/reputation/farming";
 import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
+import { runIngestion } from "@codesphere/api/watch/ingest";
 import { postgresWriteQuota } from "@codesphere/api/write-quota";
 import { createAuth } from "@codesphere/auth";
 import { type Database, DatabaseUnavailableError } from "@codesphere/db";
@@ -130,4 +131,31 @@ export function apiFetch(
 		cached = { key, app: buildApp(env) };
 	}
 	return cached.app.fetch(request, env, ctx);
+}
+
+/**
+ * Cloudflare Cron Trigger (#255): reads the watch feed's Sources. Each run takes the few least
+ * recently read, so a frequent schedule spreads over all of them within a Worker's limits.
+ */
+export async function apiScheduled(
+	env: WorkerEnv,
+	ctx: WorkerContext,
+): Promise<void> {
+	if (!env.DATABASE_URL) {
+		return;
+	}
+	const db = createEdgeDb({ DATABASE_URL: env.DATABASE_URL });
+	ctx.waitUntil(
+		runIngestion(db).then(
+			(result) =>
+				console.log(JSON.stringify({ msg: "watch ingestion", ...result })),
+			(error) =>
+				console.error(
+					JSON.stringify({
+						msg: "watch ingestion failed",
+						error: String(error),
+					}),
+				),
+		),
+	);
 }

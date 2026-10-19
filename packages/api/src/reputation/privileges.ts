@@ -13,6 +13,8 @@ export const DEFAULT_PRIVILEGE_THRESHOLDS: PrivilegeThresholds = {
 	downvote: 75,
 	close_vote: 150,
 	edit_tags: 300,
+	// Proposing a link to the watch feed (#255, decision #223).
+	submit_feed_item: 25,
 };
 
 const Overrides = z

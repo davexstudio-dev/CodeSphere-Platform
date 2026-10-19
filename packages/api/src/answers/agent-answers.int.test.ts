@@ -18,6 +18,7 @@ const NO_PRIVILEGES = {
 	downvote: 0,
 	close_vote: 0,
 	edit_tags: 0,
+	submit_feed_item: 0,
 };
 
 describe.skipIf(!url)("Agent Answers on Postgres", () => {

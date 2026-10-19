@@ -15,6 +15,8 @@
 	// and certificate).
 	// Required by `wrangler preview`, even empty: settings overridden for previews only.
 	"previews": {},
+	// Every 30 minutes: the watch feed reads its Sources (#255).
+	"triggers": { "crons": ["*/30 * * * *"] },
 	"routes": [
 		{
 			"pattern": "preview.codesphereplatform.xyz",

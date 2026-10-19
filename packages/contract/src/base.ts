@@ -59,6 +59,7 @@ export const PRIVILEGES = [
 	"downvote",
 	"close_vote",
 	"edit_tags",
+	"submit_feed_item",
 ] as const;
 export const PrivilegeName = z.enum(PRIVILEGES);
 export type PrivilegeName = z.infer<typeof PrivilegeName>;
