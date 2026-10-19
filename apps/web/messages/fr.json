@@ -373,7 +373,8 @@
 			"blocked": {
 				"owned": "Protégé : possédé par le Hackathon {slug}",
 				"used": "Utilisé par {count, plural, one {# Question} other {# Questions}}",
-				"reserved": "Réservé : levez la réservation pour le modifier ou le supprimer"
+				"reserved": "Réservé : levez la réservation pour le modifier ou le supprimer",
+				"system": "Tag utilisé par la plateforme : il ne peut être ni modifié ni supprimé"
 			},
 			"errors": {
 				"conflict": "Ce nom est déjà pris (formes normalisées identiques), ou le Tag a changé entre-temps.",

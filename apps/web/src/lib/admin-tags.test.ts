@@ -34,6 +34,9 @@ describe("deleteBlock", () => {
 		expect(deleteBlock(tag({ reserved: true, questionCount: 4 }))).toEqual({
 			reason: "reserved",
 		});
+		expect(deleteBlock(tag({ reserved: true, system: true }))).toEqual({
+			reason: "system",
+		});
 		expect(deleteBlock(tag())).toBeNull();
 	});
 });

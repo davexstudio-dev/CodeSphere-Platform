@@ -196,7 +196,7 @@ describe.skipIf(!url)("admin.tags on Postgres (#125)", () => {
 
 	test("an Admin reserves a Tag, which is then kept; lifting it is audited and versioned", async () => {
 		const created = await admin().admin.tags.create({
-			name: name("c"),
+			name: name("r"),
 			reserved: true,
 		});
 		expect(created).toMatchObject({ reserved: true, system: false });
@@ -278,5 +278,67 @@ describe.skipIf(!url)("admin.tags on Postgres (#125)", () => {
 			reserved: true,
 			system: true,
 		});
+	});
+
+	test("reserving is idempotent and refuses a Hackathon's Tag", async () => {
+		const tagRow = await admin().admin.tags.create({
+			name: name("b"),
+			reserved: true,
+		});
+		const same = await admin().admin.tags.setReserved({
+			id: tagRow.id,
+			reserved: true,
+			expectedVersion: tagRow.version,
+		});
+		expect(same.version).toBe(tagRow.version);
+		const events = await db
+			.select({ action: auditLog.action })
+			.from(auditLog)
+			.where(eq(auditLog.targetId, tagRow.id));
+		expect(events.map((e) => e.action)).toEqual(["tag.create"]);
+
+		const slug = name("hackres");
+		await seedHackathon(db, { ...cadev2026, slug });
+		const owned = await admin().admin.tags.create({ name: slug });
+		await expect(
+			admin().admin.tags.setReserved({
+				id: owned.id,
+				reserved: true,
+				expectedVersion: owned.version,
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+		await db.delete(hackathon).where(eq(hackathon.slug, slug));
+		await db.delete(tag).where(inArray(tag.id, [owned.id, tagRow.id]));
+	});
+
+	test("reserving is idempotent and refuses a Hackathon's Tag", async () => {
+		const row = await admin().admin.tags.create({
+			name: name("b2"),
+			reserved: true,
+		});
+		const same = await admin().admin.tags.setReserved({
+			id: row.id,
+			reserved: true,
+			expectedVersion: row.version,
+		});
+		expect(same.version).toBe(row.version);
+		const events = await db
+			.select({ action: auditLog.action })
+			.from(auditLog)
+			.where(eq(auditLog.targetId, row.id));
+		expect(events.map((e) => e.action)).toEqual(["tag.create"]);
+
+		const slug = name("hackres");
+		await seedHackathon(db, { ...cadev2026, slug });
+		const owned = await admin().admin.tags.create({ name: slug });
+		await expect(
+			admin().admin.tags.setReserved({
+				id: owned.id,
+				reserved: true,
+				expectedVersion: owned.version,
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+		await db.delete(hackathon).where(eq(hackathon.slug, slug));
+		await db.delete(tag).where(inArray(tag.id, [owned.id, row.id]));
 	});
 });

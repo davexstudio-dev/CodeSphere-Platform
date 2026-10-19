@@ -4,6 +4,7 @@ type TagLike = {
 	questionCount: number;
 	ownerHackathon: string | null;
 	reserved?: boolean;
+	system?: boolean;
 };
 
 export type TagGroup = "protected" | "used" | "unused";
@@ -19,12 +20,16 @@ export function tagGroup(tag: TagLike): TagGroup {
 export type DeleteBlock =
 	| { reason: "owned"; slug: string }
 	| { reason: "reserved" }
+	| { reason: "system" }
 	| { reason: "used"; count: number };
 
 /** Why a Tag cannot be deleted, or `null` when it can; the page words it before the action. */
 export function deleteBlock(tag: TagLike): DeleteBlock | null {
 	if (tag.ownerHackathon) {
 		return { reason: "owned", slug: tag.ownerHackathon };
+	}
+	if (tag.system) {
+		return { reason: "system" };
 	}
 	if (tag.reserved) {
 		return { reason: "reserved" };

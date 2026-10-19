@@ -50,6 +50,7 @@ export default function AdminTagsPage() {
 	const [name, setName] = useState("");
 	const [reserveNew, setReserveNew] = useState(false);
 	const [error, setError] = useState<ErrorKey | null>(null);
+	const [errorOnReserve, setErrorOnReserve] = useState(false);
 	const selected = items.find((tag) => tag.id === selectedId) ?? null;
 
 	const settled = (nextId: string | null) => {
@@ -61,10 +62,12 @@ export default function AdminTagsPage() {
 			queryKey: orpc.admin.auditLog.key(),
 		});
 	};
-	const failed = (failure: unknown) => {
+	const report = (failure: unknown, onReserve: boolean) => {
 		setError(tagMutationErrorKey(failure));
+		setErrorOnReserve(onReserve);
 		void queryClient.invalidateQueries({ queryKey: orpc.admin.tags.key() });
 	};
+	const failed = (failure: unknown) => report(failure, false);
 
 	const create = useMutation(
 		orpc.admin.tags.create.mutationOptions({
@@ -81,7 +84,7 @@ export default function AdminTagsPage() {
 	const reserve = useMutation(
 		orpc.admin.tags.setReserved.mutationOptions({
 			onSuccess: (tag) => settled(tag.id),
-			onError: failed,
+			onError: (failure) => report(failure, true),
 		}),
 	);
 	const remove = useMutation(
@@ -266,6 +269,14 @@ export default function AdminTagsPage() {
 								<>
 									{!selected.ownerHackathon && (
 										<RecordSection title={t("reservation")}>
+											{error && errorOnReserve && (
+												<Alert variant="destructive">
+													<AlertCircleIcon />
+													<AlertDescription>
+														{t(`errors.${error}`)}
+													</AlertDescription>
+												</Alert>
+											)}
 											<div className="flex items-center gap-2">
 												<Switch
 													id="tag-reserved"
@@ -289,7 +300,7 @@ export default function AdminTagsPage() {
 										</RecordSection>
 									)}
 									<RecordSection title={t("deletion")}>
-										{error && (
+										{error && !errorOnReserve && (
 											<Alert variant="destructive">
 												<AlertCircleIcon />
 												<AlertDescription>
@@ -301,9 +312,11 @@ export default function AdminTagsPage() {
 											<p className="text-muted-foreground text-sm">
 												{block.reason === "owned"
 													? t("blocked.owned", { slug: block.slug })
-													: block.reason === "reserved"
-														? t("blocked.reserved")
-														: t("blocked.used", { count: block.count })}
+													: block.reason === "system"
+														? t("blocked.system")
+														: block.reason === "reserved"
+															? t("blocked.reserved")
+															: t("blocked.used", { count: block.count })}
 											</p>
 										)}
 										<ConfirmTwoStep

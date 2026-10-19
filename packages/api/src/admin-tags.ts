@@ -3,17 +3,10 @@ import { tag } from "@codesphere/db/schema/tags";
 import { sql } from "drizzle-orm";
 
 import { withAudit } from "./audit";
+import { isSystemTag } from "./system-tags";
 
 /** Normalized form shared with the Tags of a Question: trimmed, lowercase. */
 export const normalizeTagName = (name: string) => name.trim().toLowerCase();
-
-/**
- * Tags the product itself relies on (the roadmap's idea box asks its Questions under `roadmap`):
- * always reserved, and an Admin cannot lift the reservation. The migration creates them reserved.
- */
-export const SYSTEM_TAGS = ["roadmap"] as const;
-export const isSystemTag = (name: string) =>
-	(SYSTEM_TAGS as readonly string[]).includes(name);
 
 export type TagRow = {
 	id: string;
@@ -208,8 +201,13 @@ export async function setTagReserved(
 	if (!before) {
 		return { ok: false, code: "NOT_FOUND" };
 	}
-	if (!input.reserved && isSystemTag(before.name)) {
+	// A system Tag stays reserved, and a Hackathon's Tag is already protected by its owner.
+	if ((!input.reserved && isSystemTag(before.name)) || before.ownerHackathon) {
 		return { ok: false, code: "CONFLICT" };
+	}
+	// Already in the requested state: nothing to write, no version bump, no audit noise.
+	if (before.reserved === input.reserved) {
+		return { ok: true, tag: before };
 	}
 	const changed = await withAudit(
 		db,
