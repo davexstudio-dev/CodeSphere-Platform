@@ -328,6 +328,7 @@ jobs:
     needs: deploy
     if: >
       always() &&
+      github.event.action != 'closed' &&
       needs.deploy.result == 'success' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
@@ -339,35 +340,51 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      # Bot Fight Mode challenges GitHub runners (see the reachability check above): the audit
+      # would measure the challenge page, so it is skipped with a notice rather than faked.
       - name: Pick the pages to audit
         id: pages
         working-directory: apps/web
         env:
           PREVIEW_URL: ${{ needs.deploy.outputs.url }}
-        run: echo "urls=$(node lighthouse/run.cjs urls "$PREVIEW_URL")" >> "$GITHUB_OUTPUT"
-      - name: Lighthouse CI
-        id: lhci
+        run: |
+          code=0
+          urls=$(node lighthouse/run.cjs urls "$PREVIEW_URL") || code=$?
+          if [ "$code" = "3" ]; then
+            echo "::notice::Lighthouse budgets not checked: Cloudflare challenged the runner. Add a WAF skip rule for this job to enforce them."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          elif [ "$code" != "0" ]; then
+            exit "$code"
+          else
+            echo "urls=$urls" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Lighthouse CI (timings)
+        if: steps.pages.outputs.skip != 'true'
         working-directory: apps/web
         env:
           LHCI_URLS: ${{ steps.pages.outputs.urls }}
         run: npx --yes @lhci/cli@0.15.1 autorun --config=lighthouserc.cjs
-      - name: Report
-        if: always() && steps.pages.outcome == 'success'
+      # Weights are checked on compressed bytes, which lhci's own assertions do not do.
+      - name: Report and check the weight budgets
+        id: report
+        if: always() && steps.pages.outputs.skip != 'true' && steps.pages.outcome == 'success'
         working-directory: apps/web
         run: |
-          if [ -f .lighthouseci/manifest.json ]; then
-            node lighthouse/run.cjs report > "$RUNNER_TEMP/lighthouse.md"
-            cat "$RUNNER_TEMP/lighthouse.md" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          [ -f .lighthouseci/manifest.json ] || { echo "::error::Lighthouse produced no results"; exit 1; }
+          code=0
+          node lighthouse/run.cjs report > "$RUNNER_TEMP/lighthouse.md" || code=$?
+          cat "$RUNNER_TEMP/lighthouse.md" >> "$GITHUB_STEP_SUMMARY"
+          exit "$code"
       - name: Comment the results
-        if: always() && steps.pages.outcome == 'success'
+        if: always() && steps.pages.outputs.skip != 'true' && steps.report.outcome != 'skipped'
         uses: actions/github-script@v7
         env:
           REPORT: ${{ runner.temp }}/lighthouse.md
         with:
           script: |
             const fs = require('node:fs');
-            if (!fs.existsSync(process.env.REPORT)) return;
+            // A crashed report leaves an empty file: keep the last good comment.
+            if (!fs.existsSync(process.env.REPORT) || fs.statSync(process.env.REPORT).size === 0) return;
             const marker = '<!-- lighthouse -->';
             const body = `${marker}\n**Lighthouse budgets**\n\n${fs.readFileSync(process.env.REPORT, 'utf8')}`;
             const { owner, repo } = context.repo;

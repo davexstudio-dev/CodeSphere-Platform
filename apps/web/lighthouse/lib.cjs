@@ -17,24 +17,47 @@ const MOBILE_SLOW_4G = {
 	},
 };
 
-// The audits that fail a pull request from day one (LCP and initial JS), then the rest once the
-// two-week warning period has passed. INP needs a real interaction, so the lab proxy is Total
-// Blocking Time (the field value comes from #251).
+// LCP and initial JS fail a pull request from day one; the other budgets only warn until this
+// date (two weeks after the gate was introduced), then fail too.
 const WARN_UNTIL = Date.parse("2026-11-02T00:00:00Z");
 
+/** @param {number} now */
+const laterLevel = (now) => (now >= WARN_UNTIL ? "error" : "warn");
+
 /**
- * `budgets` as lhci assertions. `now` is injectable for tests.
+ * Budgets lhci asserts itself (timings). INP needs a real interaction, so the lab proxy is Total
+ * Blocking Time; the field value comes from #251.
  * @param {number} [now]
- * @returns {Record<string, ["error" | "warn", { maxNumericValue: number }]>}
+ * @returns {Record<string, ["error" | "warn", { maxNumericValue: number, aggregationMethod: "median" }]>}
  */
 function assertions(now = Date.now()) {
-	const later = now >= WARN_UNTIL ? "error" : "warn";
+	const later = laterLevel(now);
 	return {
-		"largest-contentful-paint": ["error", { maxNumericValue: 2500 }],
-		"resource-summary:script:size": ["error", { maxNumericValue: 150 * KB }],
-		"total-blocking-time": [later, { maxNumericValue: 200 }],
-		"cumulative-layout-shift": [later, { maxNumericValue: 0.1 }],
-		"resource-summary:total:size": [later, { maxNumericValue: 300 * KB }],
+		"largest-contentful-paint": [
+			"error",
+			{ maxNumericValue: 2500, aggregationMethod: "median" },
+		],
+		"total-blocking-time": [
+			later,
+			{ maxNumericValue: 200, aggregationMethod: "median" },
+		],
+		"cumulative-layout-shift": [
+			later,
+			{ maxNumericValue: 0.1, aggregationMethod: "median" },
+		],
+	};
+}
+
+/**
+ * Weight budgets, in bytes over the wire (compressed). lhci's own `resource-summary:*:size`
+ * assertions count uncompressed bytes, so these are checked here against `transferSize`.
+ * @param {number} [now]
+ * @returns {{ script: { level: "error" | "warn", max: number }, total: { level: "error" | "warn", max: number } }}
+ */
+function sizeBudgets(now = Date.now()) {
+	return {
+		script: { level: "error", max: 150 * KB },
+		total: { level: laterLevel(now), max: 300 * KB },
 	};
 }
 
@@ -61,68 +84,139 @@ function config(env = process.env, now = Date.now()) {
 					chromeFlags: "--no-sandbox --headless=new",
 				},
 			},
-			assert: { assertions: assertions(now), includePassedAssertions: false },
+			assert: { assertions: assertions(now) },
 			upload: { target: "filesystem", outputDir: ".lighthouseci" },
 		},
 	};
 }
 
+/** Thrown by `pickUrls` when Cloudflare serves its bot challenge instead of the site. */
+class ChallengedError extends Error {}
+
 /**
  * The pages to audit: home (feed), ask form, and the first Question and Hackathon the preview
- * serves. `fetchJson` is injectable; a page whose data is missing is left out, not faked.
+ * serves. `fetchJson` is injectable and resolves `{ status, challenged, body }`; a page whose
+ * data is missing is reported through `warn`, never faked.
  * @param {string} origin
- * @param {(url: string) => Promise<any>} fetchJson
+ * @param {(url: string) => Promise<{ status: number, challenged: boolean, body: any }>} fetchJson
+ * @param {(message: string) => void} [warn]
  * @returns {Promise<string[]>}
  */
-async function pickUrls(origin, fetchJson) {
+async function pickUrls(origin, fetchJson, warn = () => {}) {
 	const base = origin.replace(/\/$/, "");
+	const home = await fetchJson(`${base}/`).catch(() => null);
+	if (home?.challenged) {
+		throw new ChallengedError(
+			"Cloudflare challenged the runner: the preview cannot be audited",
+		);
+	}
 	const urls = [`${base}/`, `${base}/ask`];
-	const questions = await fetchJson(`${base}/api/v1/questions?limit=1`).catch(
-		() => null,
-	);
-	const question = questions?.items?.[0]?.id;
-	if (question) {
-		urls.push(`${base}/questions/${encodeURIComponent(question)}`);
-	}
-	const hackathons = await fetchJson(`${base}/api/v1/hackathons?limit=1`).catch(
-		() => null,
-	);
-	const hackathon = hackathons?.items?.[0]?.slug;
-	if (hackathon) {
-		urls.push(`${base}/hackathons/${encodeURIComponent(hackathon)}`);
-	}
+	const lookup = async (path, key, page) => {
+		const response = await fetchJson(`${base}${path}`).catch(() => null);
+		const value = response?.body?.items?.[0]?.[key];
+		if (!value) {
+			warn(`no ${page} found on the preview (${path}): not audited`);
+			return;
+		}
+		urls.push(`${base}/${page}s/${encodeURIComponent(value)}`);
+	};
+	await lookup("/api/v1/questions?limit=1", "id", "question");
+	await lookup("/api/v1/hackathons?limit=1", "slug", "hackathon");
 	return urls;
 }
 
 /**
- * Markdown table of the representative run of each page, for the job summary and the PR.
+ * Weight and timing of each page against the budgets. `level` is the budget's, so a warn-only
+ * metric is told apart from a blocking one.
+ * @param {{ url: string, audits: any }[]} runs
+ * @param {number} [now]
+ */
+function evaluate(runs, now = Date.now()) {
+	const timings = assertions(now);
+	const sizes = sizeBudgets(now);
+	return runs.map(({ url, audits }) => {
+		const items = audits?.["resource-summary"]?.details?.items ?? [];
+		const transfer = (type) =>
+			items.find((item) => item.resourceType === type)?.transferSize;
+		const metric = (value, { level, max }) => ({
+			value,
+			max,
+			level,
+			// A missing value is a failure: a page that could not be measured is not within budget.
+			ok: typeof value === "number" && value <= max,
+		});
+		const timing = (name) => {
+			const [level, { maxNumericValue }] = timings[name];
+			return metric(audits?.[name]?.numericValue, {
+				level,
+				max: maxNumericValue,
+			});
+		};
+		return {
+			path: new URL(url).pathname,
+			lcp: timing("largest-contentful-paint"),
+			tbt: timing("total-blocking-time"),
+			cls: timing("cumulative-layout-shift"),
+			js: metric(transfer("script"), sizes.script),
+			total: metric(transfer("total"), sizes.total),
+		};
+	});
+}
+
+/** The blocking failures of `evaluate`: what must fail the job. */
+function blockingFailures(rows) {
+	return rows.flatMap((row) =>
+		["lcp", "tbt", "cls", "js", "total"]
+			.filter((name) => !row[name].ok && row[name].level === "error")
+			.map((name) => `${row.path}: ${name}`),
+	);
+}
+
+/**
+ * Markdown table for the job summary and the pull request. ✅ within budget, ❌ over a blocking
+ * budget, ⚠️ over a budget that only warns for now.
  * @param {{ url: string, audits: any }[]} runs
  * @param {number} [now]
  */
 function renderReport(runs, now = Date.now()) {
+	const rows = evaluate(runs, now);
 	const budgets = assertions(now);
-	const limit = (name) => budgets[name][1].maxNumericValue;
-	const mark = (ok) => (ok ? "✅" : "❌");
-	const rows = runs.map(({ url, audits }) => {
-		const lcp = audits["largest-contentful-paint"].numericValue;
-		const tbt = audits["total-blocking-time"].numericValue;
-		const cls = audits["cumulative-layout-shift"].numericValue;
-		const js = audits["resource-summary"].details.items.find(
-			(item) => item.resourceType === "script",
-		).transferSize;
-		const total = audits["resource-summary"].details.items.find(
-			(item) => item.resourceType === "total",
-		).transferSize;
-		const path = new URL(url).pathname;
-		return `| \`${path}\` | ${mark(lcp <= limit("largest-contentful-paint"))} ${(lcp / 1000).toFixed(2)} s | ${mark(tbt <= limit("total-blocking-time"))} ${Math.round(tbt)} ms | ${mark(cls <= limit("cumulative-layout-shift"))} ${cls.toFixed(3)} | ${mark(js <= limit("resource-summary:script:size"))} ${(js / KB).toFixed(0)} KB | ${mark(total <= limit("resource-summary:total:size"))} ${(total / KB).toFixed(0)} KB |`;
-	});
+	const sizes = sizeBudgets(now);
+	const cell = (metric, format) => {
+		const mark = metric.ok ? "✅" : metric.level === "error" ? "❌" : "⚠️";
+		const shown =
+			typeof metric.value === "number" ? format(metric.value) : "n/a";
+		return `${mark} ${shown}`;
+	};
+	const seconds = (ms) => `${(ms / 1000).toFixed(2)} s`;
+	const millis = (ms) => `${Math.round(ms)} ms`;
+	const kilobytes = (bytes) => `${(bytes / KB).toFixed(0)} KB`;
+	const head = (label, max, format) => `${label} (≤ ${format(max)})`;
+	const lines = rows.map(
+		(row) =>
+			`| \`${row.path}\` | ${cell(row.lcp, seconds)} | ${cell(row.tbt, millis)} | ${cell(row.cls, (v) => v.toFixed(3))} | ${cell(row.js, kilobytes)} | ${cell(row.total, kilobytes)} |`,
+	);
+	const warned = [
+		...Object.entries(budgets),
+		["total", [sizes.total.level]],
+	].some(([, [level]]) => level === "warn");
 	return [
-		"| Page | LCP (≤ 2.5 s) | TBT (≤ 200 ms) | CLS (≤ 0.1) | JS (≤ 150 KB) | Total (≤ 300 KB) |",
+		`| Page | ${head("LCP", budgets["largest-contentful-paint"][1].maxNumericValue, seconds)} | ${head("TBT", budgets["total-blocking-time"][1].maxNumericValue, millis)} | CLS (≤ ${budgets["cumulative-layout-shift"][1].maxNumericValue}) | ${head("JS", sizes.script.max, kilobytes)} | ${head("Total", sizes.total.max, kilobytes)} |`,
 		"| --- | --- | --- | --- | --- | --- |",
-		...rows,
+		...lines,
 		"",
-		"Mobile profile: slow 4G, CPU 4x slower, median of 3 runs. LCP and initial JS block the pull request; the others warn until 2 Nov 2026, then block.",
+		`Mobile profile: slow 4G, CPU 4x slower; timings are the median of 3 runs, weights are compressed bytes of the representative run. LCP and initial JS block the pull request${warned ? `; the others only warn (⚠️) until ${new Date(WARN_UNTIL).toISOString().slice(0, 10)}, then block` : "; the others block too"}.`,
 	].join("\n");
 }
 
-module.exports = { assertions, config, pickUrls, renderReport, MOBILE_SLOW_4G };
+module.exports = {
+	assertions,
+	sizeBudgets,
+	config,
+	pickUrls,
+	evaluate,
+	blockingFailures,
+	renderReport,
+	ChallengedError,
+	MOBILE_SLOW_4G,
+};
