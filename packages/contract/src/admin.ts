@@ -151,6 +151,10 @@ export const AdminTag = z.object({
 	questionCount: z.number().int().min(0),
 	/** Slug of the Hackathon that owns the Tag, which then cannot be renamed or deleted. */
 	ownerHackathon: z.string().nullable(),
+	/** Reserved by an Admin: it can be neither renamed nor deleted. */
+	reserved: z.boolean(),
+	/** Relied on by the product itself: always reserved, the reservation cannot be lifted. */
+	system: z.boolean(),
 });
 
 /** Name of a Tag: normalized (trimmed, lowercase) like the Tags of a Question. */
@@ -259,7 +263,14 @@ export const adminContract = {
 			.output(z.object({ items: z.array(AdminTag) })),
 		create: base
 			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, CONFLICT: {} })
-			.input(z.object({ name: TagName }))
+			.input(z.object({ name: TagName, reserved: z.boolean().default(false) }))
+			.output(AdminTag),
+		/** Reserves a Tag (kept as is) or lifts the reservation; a system Tag stays reserved. */
+		setReserved: base
+			.errors(tagErrors)
+			.input(
+				z.object({ id: Id, reserved: z.boolean(), expectedVersion: ExpectedVersion }),
+			)
 			.output(AdminTag),
 		rename: base
 			.errors(tagErrors)

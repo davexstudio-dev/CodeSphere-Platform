@@ -372,14 +372,20 @@
 			"pick": "Choisissez un Tag, ou créez-en un avec « + ».",
 			"blocked": {
 				"owned": "Protégé : possédé par le Hackathon {slug}",
-				"used": "Utilisé par {count, plural, one {# Question} other {# Questions}}"
+				"used": "Utilisé par {count, plural, one {# Question} other {# Questions}}",
+				"reserved": "Réservé : levez la réservation pour le modifier ou le supprimer"
 			},
 			"errors": {
 				"conflict": "Ce nom est déjà pris (formes normalisées identiques), ou le Tag a changé entre-temps.",
 				"forbidden": "Action réservée au staff.",
 				"notFound": "Ce Tag n'existe plus.",
 				"generic": "Une erreur est survenue. Réessayez."
-			}
+			},
+			"reserved": "Réservé",
+			"reservation": "Réservation",
+			"reserveNew": "Réserver ce Tag",
+			"reservedHint": "Un Tag réservé est conservé tel quel : il ne peut être ni renommé ni supprimé, même sans Question. Les Members peuvent toujours l'utiliser.",
+			"systemHint": "Tag utilisé par la plateforme : toujours réservé."
 		},
 		"social": {
 			"title": "Comptes sociaux",

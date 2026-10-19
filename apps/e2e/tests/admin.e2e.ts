@@ -236,6 +236,48 @@ test.describe("tags", () => {
 		).toBeDisabled();
 	});
 
+	test("an Admin reserves a Tag, which then cannot be edited, and lifts it", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		const name = `e2e-reserved-${Date.now().toString(36)}`;
+		await page.goto("/admin/tags");
+		await page.getByRole("button", { name: "Créer un Tag" }).click();
+		await page.getByLabel("Nom").fill(name);
+		await page.getByRole("switch", { name: "Réserver ce Tag" }).click();
+		await page.getByRole("button", { name: "Créer", exact: true }).click();
+		await expect(page.getByRole("heading", { name })).toBeVisible();
+		await expect(
+			page.getByText("Réservé", { exact: true }).first(),
+		).toBeVisible();
+		await expect(page.getByRole("button", { name: "Modifier" })).toHaveCount(0);
+		await expect(
+			page.getByRole("button", { name: "Supprimer ce Tag" }),
+		).toBeDisabled();
+
+		const reserved = page.getByRole("switch", { name: "Réservé" });
+		await reserved.click();
+		await expect(page.getByRole("button", { name: "Modifier" })).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: "Supprimer ce Tag" }),
+		).toBeEnabled();
+		await page.getByRole("button", { name: "Supprimer ce Tag" }).click();
+		await confirm(page).click();
+		await expect(page.getByText("Choisissez un Tag")).toBeVisible();
+	});
+
+	test("a system Tag stays reserved", async ({ browser, baseURL }) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		await page.goto("/admin/tags");
+		await page
+			.getByRole("button", { name: /^roadmap/ })
+			.first()
+			.click();
+		await expect(page.getByRole("switch", { name: "Réservé" })).toBeDisabled();
+		await expect(page.getByText("toujours réservé")).toBeVisible();
+	});
+
 	test("a duplicate name is refused", async ({ browser, baseURL }) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
 		await page.goto("/admin/tags");

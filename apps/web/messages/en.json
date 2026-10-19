@@ -372,14 +372,20 @@
 			"pick": "Pick a Tag, or create one with “+”.",
 			"blocked": {
 				"owned": "Protected: owned by the Hackathon {slug}",
-				"used": "Used by {count, plural, one {# Question} other {# Questions}}"
+				"used": "Used by {count, plural, one {# Question} other {# Questions}}",
+				"reserved": "Reserved: lift the reservation to change or delete it"
 			},
 			"errors": {
 				"conflict": "This name is already taken (same normalized form), or the Tag changed in the meantime.",
 				"forbidden": "Staff only.",
 				"notFound": "This Tag no longer exists.",
 				"generic": "Something went wrong. Try again."
-			}
+			},
+			"reserved": "Reserved",
+			"reservation": "Reservation",
+			"reserveNew": "Reserve this Tag",
+			"reservedHint": "A reserved Tag is kept as is: it can be neither renamed nor deleted, even with no Question. Members can still use it.",
+			"systemHint": "Used by the platform itself: always reserved."
 		},
 		"social": {
 			"title": "Social accounts",

@@ -15,6 +15,7 @@ const tag = (over = {}) => ({
 describe("tagGroup", () => {
 	test("protected first, then used, then unused", () => {
 		expect(tagGroup(tag({ ownerHackathon: "cadev-2026" }))).toBe("protected");
+		expect(tagGroup(tag({ reserved: true }))).toBe("protected");
 		expect(tagGroup(tag({ questionCount: 3 }))).toBe("used");
 		expect(tagGroup(tag())).toBe("unused");
 	});
@@ -29,6 +30,9 @@ describe("deleteBlock", () => {
 		expect(deleteBlock(tag({ questionCount: 12 }))).toEqual({
 			reason: "used",
 			count: 12,
+		});
+		expect(deleteBlock(tag({ reserved: true, questionCount: 4 }))).toEqual({
+			reason: "reserved",
 		});
 		expect(deleteBlock(tag())).toBeNull();
 	});

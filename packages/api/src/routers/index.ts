@@ -16,7 +16,13 @@ import {
 	createSocialPostStore,
 	publishShare,
 } from "../admin-social";
-import { createTag, deleteTag, listTags, renameTag } from "../admin-tags";
+import {
+	createTag,
+	deleteTag,
+	listTags,
+	renameTag,
+	setTagReserved,
+} from "../admin-tags";
 import { createAgentsHandlers } from "../agents/handlers";
 import { AgentError, agentPreset, createAgentService } from "../agents/service";
 import { requireAdmin } from "../authorization";
@@ -374,9 +380,23 @@ export const appRouter = impl
 							context.db,
 							actorOf(context.session),
 							input.name,
+							input.reserved,
 						);
 						if (!outcome.ok) {
 							throw errors.CONFLICT();
+						}
+						return outcome.tag;
+					}),
+				setReserved: impl.admin.tags.setReserved
+					.use(isAdmin)
+					.handler(async ({ context, input, errors }) => {
+						const outcome = await setTagReserved(
+							context.db,
+							actorOf(context.session),
+							input,
+						);
+						if (!outcome.ok) {
+							throw tagRefusal(outcome.code, errors);
 						}
 						return outcome.tag;
 					}),
