@@ -53,7 +53,7 @@ Trimestre cible : **à fixer**. Dépend d'une entité légale marchande et d'une
 
 ## Publication sur les comptes sociaux officiels
 
-Un Admin partage une Question ou un Hackathon publics sur les comptes de CodeSphere (ticket #1, ADR [0001-partage-social](adr/0001-partage-social.md)). Les états ci-dessous disent aussi ce qui n'est **pas** fait et la contrainte qui bloque.
+Un Admin partage une Question ou un Hackathon publics sur les comptes de CodeSphere (ticket #1, ADR [0002-partage-social](adr/0002-partage-social.md)). Les états ci-dessous disent aussi ce qui n'est **pas** fait et la contrainte qui bloque.
 
 | Plateforme | État | Contrainte ou reste à faire |
 |---|---|---|

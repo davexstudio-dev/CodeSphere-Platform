@@ -72,4 +72,9 @@ export type Context = {
 	};
 	/** Build identity injected at build time (APP_VERSION, GIT_SHA). */
 	release: { version: string; commit: string };
+	/**
+	 * Verified emails always put back to super_admin at sign-in (SUPER_ADMIN_EMAILS, #285): the
+	 * back-office never demotes them. None when absent.
+	 */
+	superAdminEmails?: ReadonlySet<string>;
 };

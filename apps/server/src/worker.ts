@@ -17,6 +17,7 @@ import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { runIngestion } from "@codesphere/api/watch/ingest";
 import { postgresWriteQuota } from "@codesphere/api/write-quota";
 import { createAuth } from "@codesphere/auth";
+import { parseAdminEmails } from "@codesphere/auth/admin";
 import { type Database, DatabaseUnavailableError } from "@codesphere/db";
 import { createEdgeDb } from "@codesphere/db/edge";
 import { createLogger } from "@codesphere/logger";
@@ -133,6 +134,7 @@ function buildApp(env: WorkerEnv) {
 		agentRules: parseAgentRules(env.AGENT_RULES),
 		farmingLimits: parseFarmingLimits(env.FARMING_LIMITS),
 		feedRanking: parseFeedRanking(env.FEED_RANKING),
+		superAdminEmails: parseAdminEmails(env.SUPER_ADMIN_EMAILS),
 		teamDeps: { requireGithub: env.HACKATHON_REQUIRE_GITHUB === "true" },
 		privilegeThresholds: parsePrivilegeThresholds(env.PRIVILEGE_THRESHOLDS),
 		notifications: createNotifications(env, logger),

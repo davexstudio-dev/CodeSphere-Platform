@@ -48,3 +48,33 @@ export function rolesBelow(actor: unknown): Role[] {
 export function isStaffRole(role: unknown): role is StaffRole {
 	return STAFF_ROLES.includes(role as StaffRole);
 }
+
+/**
+ * The roles `actor` may give (#285): a super_admin gives any role, an admin gives up to admin (an
+ * admin may bring in a peer, never a super_admin), anyone else gives none.
+ */
+export function grantableRoles(actor: unknown): Role[] {
+	if (actor === "super_admin") {
+		return [...ROLES];
+	}
+	if (actor === "admin") {
+		return ["member", "moderator", "admin"];
+	}
+	return [];
+}
+
+/**
+ * Whether `actor` may move a Member from `current` to `next` (#285). Rank still rules: an admin only
+ * reaches roles strictly below theirs. A super_admin is the exception and reaches other
+ * super_admins, so the staff can never be locked out of its top role; the API keeps the last one.
+ */
+export function canChangeRole(
+	actor: unknown,
+	current: unknown,
+	next: Role,
+): boolean {
+	if (!grantableRoles(actor).includes(next) || current === next) {
+		return false;
+	}
+	return actor === "super_admin" || outranks(actor, current);
+}

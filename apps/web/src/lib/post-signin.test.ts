@@ -14,7 +14,7 @@ describe("postSignInPath", () => {
 
 	test("sends every staff role to the back-office", () => {
 		expect(postSignInPath({ role: "super_admin" })).toBe("/dashboard");
-		expect(postSignInPath({ role: "moderator" })).toBe("/dashboard");
+		expect(postSignInPath({ role: "moderator" })).toBe("/admin");
 	});
 
 	test("sends any other Member home", () => {

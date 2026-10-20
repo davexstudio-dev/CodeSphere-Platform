@@ -519,6 +519,10 @@
 			"more": "Show more",
 			"system": "System"
 		},
+		"forbidden": {
+			"title": "Not available to your role",
+			"text": "Your role does not give access to this screen. Ask an admin if you need it."
+		},
 		"signOut": "Sign out",
 		"common": {
 			"confirm": "Confirm ({seconds} s)",

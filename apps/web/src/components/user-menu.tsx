@@ -24,6 +24,7 @@ import { useTranslations } from "next-intl";
 
 import { useSignOut } from "@/components/outbox-provider";
 import SsoLoginDialog from "@/components/sso-login-dialog";
+import { backOfficeHome } from "@/lib/post-signin";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 function initials(name: string) {
@@ -93,7 +94,9 @@ export default function UserMenu() {
 						{t("settings")}
 					</DropdownMenuItem>
 					{isStaffRole(user.role) && (
-						<DropdownMenuItem onClick={() => router.push("/dashboard")}>
+						<DropdownMenuItem
+							onClick={() => router.push(backOfficeHome(user.role))}
+						>
 							<ShieldIcon />
 							{t("admin")}
 						</DropdownMenuItem>

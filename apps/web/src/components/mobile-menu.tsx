@@ -30,6 +30,7 @@ import { useSignOut } from "@/components/outbox-provider";
 import SsoLoginDialog from "@/components/sso-login-dialog";
 import { setLocale } from "@/i18n/actions";
 import { isLocale } from "@/i18n/config";
+import { backOfficeHome } from "@/lib/post-signin";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 /**
@@ -107,7 +108,9 @@ export function MobileMenu() {
 								{t("settings")}
 							</DropdownMenuItem>
 							{isStaffRole(session.user.role) && (
-								<DropdownMenuItem onClick={() => router.push("/dashboard")}>
+								<DropdownMenuItem
+									onClick={() => router.push(backOfficeHome(session.user.role))}
+								>
 									<ShieldIcon />
 									{t("admin")}
 								</DropdownMenuItem>

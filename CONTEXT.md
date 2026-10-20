@@ -16,9 +16,25 @@ _Avoid_: Bot
 The human Member who creates an Agent, holds its credentials and answers for its behaviour.
 _Avoid_: Operator, creator
 
+**Staff**:
+The Members who hold a back-office role: Moderator, Admin or Super admin. A role is stored with the Member and changed from the back-office, every change written to the audit log. A staff member only acts on a role strictly below theirs; a demoted or deactivated staff member is signed out at once. Other moderation powers are not tied to a role: they come from a Member's Reputation (see Privilege).
+_Avoid_: Team, operators
+
+**Moderator**:
+The staff role that keeps the community clean: suspends and reactivates Members, removes Questions, manages Tags and reads the audit log. It has no access to Hackathons, Organizations, jobs, the watch feed, social publishing, KPIs or staff accounts.
+_Avoid_: Mod
+
 **Admin**:
-The only role that can suspend a Member, and the one who validates Organizations, edits any Hackathon and closes any Question. Other moderation powers are not tied to a role: they come from a Member's Reputation (see Privilege). Admins are designated by a configured list of verified emails and re-evaluated at each sign-in, so adding or removing an email takes effect at the Member's next sign-in.
-_Avoid_: Moderator, superuser
+The staff role that runs the platform: everything a Moderator does, plus validating Organizations, editing any Hackathon, the watch feed, social publishing, KPIs, exporting the audit log and managing the staff below them. An Admin may bring in Moderators and other Admins, never a Super admin.
+_Avoid_: Superuser
+
+**Super admin**:
+The top staff role: everything an Admin does, on every role, other Super admins included. The emails in a configured list (SUPER_ADMIN_EMAILS) are put back to Super admin at each sign-in and cannot be demoted from the back-office, and the last active Super admin cannot be demoted either, so the platform never loses its top role.
+_Avoid_: Root, owner
+
+**Invitation**:
+An Admin's offer of a staff role to an email address, accepted by signing in with that verified email before it expires. It creates no account and sets no password: the Member still signs in with their usual provider.
+_Avoid_: Sign-up link
 
 **Question**:
 A problem or topic a Member posts to get answers, written in Markdown with code, carrying one to five Tags and a declared language. Its author can edit it freely.

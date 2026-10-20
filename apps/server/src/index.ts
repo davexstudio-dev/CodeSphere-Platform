@@ -4,6 +4,7 @@ import { startOutboxRelay } from "@codesphere/api/outbox/loop";
 import { parseFarmingLimits } from "@codesphere/api/reputation/farming";
 import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
 import { postgresWriteQuota } from "@codesphere/api/write-quota";
+import { parseAdminEmails } from "@codesphere/auth/admin";
 
 import { createApp } from "./app";
 import { ENV } from "./env.server";
@@ -42,6 +43,7 @@ const app = createApp({
 	feedRanking: parseFeedRanking(ENV.FEED_RANKING),
 	teamDeps: { requireGithub: ENV.HACKATHON_REQUIRE_GITHUB },
 	privilegeThresholds: parsePrivilegeThresholds(ENV.PRIVILEGE_THRESHOLDS),
+	superAdminEmails: parseAdminEmails(ENV.SUPER_ADMIN_EMAILS),
 });
 
 // No Cloudflare Queues on the Bun server: the relay hands the outbox's events to the consumers in
