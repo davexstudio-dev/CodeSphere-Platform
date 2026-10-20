@@ -22,6 +22,7 @@ export type CreateContextOptions = {
 		| "agentRules"
 		| "farmingLimits"
 		| "feedRanking"
+		| "superAdminEmails"
 	>;
 };
 
@@ -67,6 +68,7 @@ export async function createContext({
 		feedRanking: deps.feedRanking,
 		notifications: deps.notifications,
 		social: deps.social,
+		superAdminEmails: deps.superAdminEmails,
 	};
 }
 

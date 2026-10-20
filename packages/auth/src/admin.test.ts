@@ -1,7 +1,7 @@
 /// <reference types="bun" />
 import { describe, expect, test } from "bun:test";
 
-import { isAdminEmail, parseAdminEmails, roleFor } from "./admin";
+import { isAdminEmail, parseAdminEmails, roleAtSignIn, roleFor } from "./admin";
 
 describe("parseAdminEmails", () => {
 	test("is empty when the variable is missing", () => {
@@ -79,5 +79,49 @@ describe("roleFor", () => {
 		expect(
 			roleFor({ email: "dave@example.com", emailVerified: true }, lists),
 		).toBe("super_admin");
+	});
+});
+
+describe("roleAtSignIn", () => {
+	const staff = {
+		superAdmins: parseAdminEmails("boss@example.com"),
+		admins: parseAdminEmails("dave@example.com"),
+		moderators: parseAdminEmails(""),
+	};
+
+	test("keeps the role stored in the database", () => {
+		expect(
+			roleAtSignIn(
+				{ email: "eve@example.com", emailVerified: true, role: "moderator" },
+				staff,
+			),
+		).toBe("moderator");
+	});
+
+	test("no longer re-derives admins and moderators from their lists", () => {
+		expect(
+			roleAtSignIn(
+				{ email: "dave@example.com", emailVerified: true, role: "member" },
+				staff,
+			),
+		).toBe("member");
+	});
+
+	test("always puts a listed super_admin back", () => {
+		expect(
+			roleAtSignIn(
+				{ email: "Boss@example.com", emailVerified: true, role: "member" },
+				staff,
+			),
+		).toBe("super_admin");
+	});
+
+	test("ignores an unverified email in the super_admin list", () => {
+		expect(
+			roleAtSignIn(
+				{ email: "boss@example.com", emailVerified: false, role: "member" },
+				staff,
+			),
+		).toBe("member");
 	});
 });

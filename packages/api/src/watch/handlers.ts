@@ -1,9 +1,9 @@
 import { ORPCError } from "@orpc/server";
-import { requireAdmin } from "../authorization";
 import { createMixedFeedService } from "../feed-mixed/service";
 
 import { impl } from "../index";
 import { PrivilegeError } from "../reputation/service";
+import { staffMay } from "../staff-guard";
 import { defaultWriteQuota } from "../write-quota";
 import { runIngestion } from "./ingest";
 import {
@@ -198,14 +198,6 @@ export function createWatchHandlers() {
 	};
 }
 
-const isStaff = impl.middleware(async ({ context, next }) => {
-	const guard = requireAdmin(context.session);
-	if (!guard.ok) {
-		throw new ORPCError(guard.code);
-	}
-	return next();
-});
-
 export function createWatchAdminHandlers() {
 	const admin = (context: Parameters<typeof service>[0]) =>
 		service(context).admin;
@@ -230,22 +222,22 @@ export function createWatchAdminHandlers() {
 	return {
 		sources: {
 			list: impl.admin.watch.sources.list
-				.use(isStaff)
+				.use(staffMay({ watch: ["manage"] }))
 				.handler(async ({ context }) => ({
 					items: await admin(context).sources(),
 				})),
 			create: impl.admin.watch.sources.create
-				.use(isStaff)
+				.use(staffMay({ watch: ["manage"] }))
 				.handler(({ context, input, errors }) =>
 					run(() => admin(context).createSource(actor(context), input), errors),
 				),
 			update: impl.admin.watch.sources.update
-				.use(isStaff)
+				.use(staffMay({ watch: ["manage"] }))
 				.handler(({ context, input, errors }) =>
 					run(() => admin(context).updateSource(actor(context), input), errors),
 				),
 			remove: impl.admin.watch.sources.remove
-				.use(isStaff)
+				.use(staffMay({ watch: ["manage"] }))
 				.handler(({ context, input, errors }) =>
 					run(
 						() => admin(context).removeSource(actor(context), input.id),
@@ -255,12 +247,12 @@ export function createWatchAdminHandlers() {
 		},
 		items: {
 			review: impl.admin.watch.items.review
-				.use(isStaff)
+				.use(staffMay({ watch: ["manage"] }))
 				.handler(({ context, input, errors }) =>
 					run(() => admin(context).review(input), errors),
 				),
 			approve: impl.admin.watch.items.approve
-				.use(isStaff)
+				.use(staffMay({ watch: ["manage"] }))
 				.handler(({ context, input, errors }) =>
 					run(async () => {
 						await admin(context).approve(actor(context), input.itemId);
@@ -268,7 +260,7 @@ export function createWatchAdminHandlers() {
 					}, errors),
 				),
 			remove: impl.admin.watch.items.remove
-				.use(isStaff)
+				.use(staffMay({ watch: ["manage"] }))
 				.handler(({ context, input, errors }) =>
 					run(async () => {
 						await admin(context).removeItem(
@@ -282,12 +274,12 @@ export function createWatchAdminHandlers() {
 		},
 		domains: {
 			list: impl.admin.watch.domains.list
-				.use(isStaff)
+				.use(staffMay({ watch: ["manage"] }))
 				.handler(async ({ context }) => ({
 					items: await admin(context).domains(),
 				})),
 			block: impl.admin.watch.domains.block
-				.use(isStaff)
+				.use(staffMay({ watch: ["manage"] }))
 				.handler(({ context, input }) =>
 					run(
 						() =>
@@ -300,14 +292,14 @@ export function createWatchAdminHandlers() {
 					),
 				),
 			unblock: impl.admin.watch.domains.unblock
-				.use(isStaff)
+				.use(staffMay({ watch: ["manage"] }))
 				.handler(async ({ context, input }) => {
 					await admin(context).unblockDomain(actor(context), input.domain);
 					return { success: true };
 				}),
 		},
 		ingest: impl.admin.watch.ingest
-			.use(isStaff)
+			.use(staffMay({ watch: ["manage"] }))
 			.handler(({ context }) => runIngestion(context.db, context.watchFetch)),
 	};
 }

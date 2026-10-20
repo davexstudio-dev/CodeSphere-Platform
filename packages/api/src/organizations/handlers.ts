@@ -1,7 +1,7 @@
 import { ORPCError } from "@orpc/server";
 
-import { requireAdmin } from "../authorization";
 import { impl } from "../index";
+import { staffMay } from "../staff-guard";
 import {
 	createOrganizationService,
 	type Decision,
@@ -120,14 +120,6 @@ export function createOrganizationsHandlers() {
 	};
 }
 
-const isStaff = impl.middleware(async ({ context, next }) => {
-	const guard = requireAdmin(context.session);
-	if (!guard.ok) {
-		throw new ORPCError(guard.code);
-	}
-	return next();
-});
-
 export function createOrganizationsAdminHandlers() {
 	const actor = (context: Sessioned) => {
 		if (!context.session) {
@@ -161,7 +153,7 @@ export function createOrganizationsAdminHandlers() {
 
 	return {
 		list: impl.admin.organizations.list
-			.use(isStaff)
+			.use(staffMay({ organization: ["manage"] }))
 			.handler(({ context, input, errors }) =>
 				createOrganizationService(context.db)
 					.admin.list(input)
@@ -170,16 +162,16 @@ export function createOrganizationsAdminHandlers() {
 					}),
 			),
 		validate: impl.admin.organizations.validate
-			.use(isStaff)
+			.use(staffMay({ organization: ["manage"] }))
 			.handler(decide("validate")),
 		reject: impl.admin.organizations.reject
-			.use(isStaff)
+			.use(staffMay({ organization: ["manage"] }))
 			.handler(decide("reject")),
 		suspend: impl.admin.organizations.suspend
-			.use(isStaff)
+			.use(staffMay({ organization: ["manage"] }))
 			.handler(decide("suspend")),
 		reinstate: impl.admin.organizations.reinstate
-			.use(isStaff)
+			.use(staffMay({ organization: ["manage"] }))
 			.handler(decide("reinstate")),
 	};
 }

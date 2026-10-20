@@ -1098,6 +1098,12 @@
 																	"reason": {
 																		"type": "string",
 																		"maxLength": 500
+																	},
+																	"from": {
+																		"type": "string"
+																	},
+																	"to": {
+																		"type": "string"
 																	}
 																},
 																"additionalProperties": false

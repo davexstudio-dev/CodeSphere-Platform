@@ -7,6 +7,7 @@ import { Hackathon, JudgingCriterion, Milestone, Prize } from "./hackathons";
 import { jobsAdminContract } from "./jobs";
 import { MemberSummary } from "./members";
 import { organizationsAdminContract } from "./organizations";
+import { ROLES } from "./roles";
 import { teamsAdminContract } from "./teams";
 import { vitalsAdminContract } from "./vitals";
 import { watchAdminContract } from "./watch";
@@ -22,6 +23,9 @@ export const AuditEvent = z.object({
 		.object({
 			fields: z.array(z.string()).optional(),
 			reason: z.string().max(500).optional(),
+			/** A role change (#285): the role before and after. */
+			from: z.string().optional(),
+			to: z.string().optional(),
 		})
 		.nullable(),
 	createdAt: Timestamp,
@@ -345,6 +349,23 @@ export const adminContract = {
 			.output(AdminMember),
 		reactivate: base
 			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {}, CONFLICT: {} })
+			.input(z.object({ id: z.string() }))
+			.output(AdminMember),
+	},
+	/** Staff accounts (#285): roles and sessions, audited. Back-office only, never REST or MCP. */
+	staff: {
+		setRole: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {}, CONFLICT: {} })
+			.input(
+				z.object({
+					id: z.string(),
+					role: z.enum(ROLES),
+					reason: SuspensionReason,
+				}),
+			)
+			.output(AdminMember),
+		revokeSessions: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {} })
 			.input(z.object({ id: z.string() }))
 			.output(AdminMember),
 	},

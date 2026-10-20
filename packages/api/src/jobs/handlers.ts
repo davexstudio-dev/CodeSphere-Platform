@@ -1,7 +1,7 @@
 import { ORPCError } from "@orpc/server";
 
-import { requireAdmin } from "../authorization";
 import { impl } from "../index";
+import { staffMay } from "../staff-guard";
 import { createJobService, InvalidJobCursorError, JobError } from "./service";
 
 type Errors = {
@@ -192,14 +192,6 @@ export function createTalentHandlers() {
 	};
 }
 
-const isStaff = impl.middleware(async ({ context, next }) => {
-	const guard = requireAdmin(context.session);
-	if (!guard.ok) {
-		throw new ORPCError(guard.code);
-	}
-	return next();
-});
-
 export function createJobsAdminHandlers() {
 	const actor = (context: Sessioned) => {
 		if (!context.session) {
@@ -209,7 +201,7 @@ export function createJobsAdminHandlers() {
 	};
 	return {
 		review: impl.admin.jobs.review
-			.use(isStaff)
+			.use(staffMay({ job: ["manage"] }))
 			.handler(({ context, input, errors }) =>
 				service(context)
 					.admin.review(input)
@@ -218,7 +210,7 @@ export function createJobsAdminHandlers() {
 					}),
 			),
 		uphold: impl.admin.jobs.uphold
-			.use(isStaff)
+			.use(staffMay({ job: ["manage"] }))
 			.handler(({ context, input, errors }) =>
 				service(context)
 					.admin.uphold(actor(context), input.id, input.reason)
@@ -227,7 +219,7 @@ export function createJobsAdminHandlers() {
 					}),
 			),
 		dismiss: impl.admin.jobs.dismiss
-			.use(isStaff)
+			.use(staffMay({ job: ["manage"] }))
 			.handler(({ context, input, errors }) =>
 				service(context)
 					.admin.dismiss(actor(context), input.id)
