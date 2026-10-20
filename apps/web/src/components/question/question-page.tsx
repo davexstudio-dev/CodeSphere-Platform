@@ -32,8 +32,8 @@ import { useRouter } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { CountryFlag } from "@/components/country-flag";
 import Link from "@/components/link";
-
 import { useOutbox } from "@/components/outbox-provider";
 import { RenderedMarkdown } from "@/components/rendered-markdown";
 import { ShareMenu } from "@/components/share-menu";
@@ -303,7 +303,12 @@ function Byline({ question }: { question: QuestionView }) {
 					· {tMember("reputation", { count: question.authorReputation })}
 				</span>
 			)}
-			{question.authorCountry && <span>· {question.authorCountry}</span>}
+			{question.authorCountry && (
+				<>
+					<span>·</span>
+					<CountryFlag code={question.authorCountry} />
+				</>
+			)}
 			<span>
 				·{" "}
 				{mounted ? format.relativeTime(new Date(question.createdAt), now) : "…"}
@@ -432,6 +437,7 @@ function AnswerItem({
 				ago={
 					mounted ? format.relativeTime(new Date(answer.createdAt), now) : "…"
 				}
+				country={<CountryFlag code={answer.authorCountry} />}
 				score={answer.score}
 				vote={answer.myVote}
 				onVoteChange={vote}

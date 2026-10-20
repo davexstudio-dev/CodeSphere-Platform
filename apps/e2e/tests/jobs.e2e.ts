@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { seedValidatedOrganization } from "../support/jobs";
-import { signIn } from "../support/journeys";
+import { pickCountry, signIn } from "../support/journeys";
 
 // Job postings (#258): an Organization's owner publishes, a Member finds it by Tag and applies with
 // their card, the owner sees the application; a posting asking for money is refused.
@@ -26,7 +26,12 @@ test("publish, find, apply with the card, and see the applicant", async ({
 		.getByLabel(/Description/)
 		.fill("Nous cherchons une développeuse pour construire des API robustes.");
 	await owner.getByLabel(/Tags, séparés/).fill(`${TAG}, sql`);
-	await owner.getByLabel("Pays", { exact: true }).fill("SN");
+	await pickCountry(
+		owner,
+		owner.getByLabel("Pays", { exact: true }),
+		"senegal",
+		/Sénégal/,
+	);
 	await owner
 		.getByLabel("Lien de candidature")
 		.fill("https://e2e-jobs.example.org/apply");

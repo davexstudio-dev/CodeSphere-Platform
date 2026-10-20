@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
+import { CountryPicker } from "@/components/country-picker";
 import { JobCard } from "@/components/jobs/job-card";
 import Link from "@/components/link";
 import { errorCodeOf } from "@/i18n/errors";
@@ -140,15 +141,13 @@ export function JobPublish() {
 						placeholder={t("tags")}
 					/>
 					<div className="flex flex-wrap items-center gap-2">
-						<Input
-							required
-							maxLength={5}
-							value={country}
-							onChange={(e) => setCountry(e.target.value)}
-							aria-label={t("country")}
-							placeholder={t("country")}
-							className="w-32"
-						/>
+						<div className="w-56">
+							<CountryPicker
+								value={country}
+								onValueChange={setCountry}
+								ariaLabel={t("country")}
+							/>
+						</div>
 						<Button
 							type="button"
 							variant={remote ? "default" : "outline"}
@@ -174,7 +173,11 @@ export function JobPublish() {
 						placeholder={t("applyEmail")}
 					/>
 					<p className="text-muted-foreground text-xs">{t("rules")}</p>
-					<Button type="submit" disabled={publish.isPending} className="w-fit">
+					<Button
+						type="submit"
+						disabled={publish.isPending || !country}
+						className="w-fit"
+					>
 						{t("submit")}
 					</Button>
 				</form>

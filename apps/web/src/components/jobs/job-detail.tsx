@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
-
+import { CountryFlag, CountryLabel } from "@/components/country-flag";
 import SsoLoginDialog from "@/components/sso-login-dialog";
 import { errorCodeOf } from "@/i18n/errors";
 import { authClient } from "@/lib/auth-client";
@@ -98,7 +98,7 @@ export function JobDetail({ id }: { id: string }) {
 						{data.organization.name}
 					</a>
 					<span aria-hidden="true">·</span>
-					<span>{data.country}</span>
+					<CountryLabel code={data.country} />
 					{data.remote && <Badge variant="secondary">{t("remote")}</Badge>}
 					<span>
 						{t("expires", {
@@ -248,7 +248,12 @@ export function JobDetail({ id }: { id: string }) {
 										<>
 											<span className="text-muted-foreground">
 												{t("reputation", { count: a.card.reputation })}
-												{a.card.country ? ` · ${a.card.country}` : ""}
+												{a.card.country ? (
+													<>
+														{" · "}
+														<CountryFlag code={a.card.country} />
+													</>
+												) : null}
 												{a.card.strongestTags.length > 0
 													? ` · ${a.card.strongestTags.join(", ")}`
 													: ""}

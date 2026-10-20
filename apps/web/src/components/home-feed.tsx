@@ -13,6 +13,7 @@ import {
 import type { Route } from "next";
 import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
+import { CountryFlag } from "@/components/country-flag";
 import Link from "@/components/link";
 import { WatchCard } from "@/components/watch/watch-card";
 
@@ -180,7 +181,11 @@ export function HomeFeed({
 											: tMember("reputation", {
 													count: entry.question.authorReputation,
 												}),
-									region: entry.question.authorCountry ?? "—",
+									region: entry.question.authorCountry ? (
+										<CountryFlag code={entry.question.authorCountry} />
+									) : (
+										"—"
+									),
 									lang: entry.question.language,
 									href: `/questions/${entry.question.id}`,
 									linkAs: CardLink,

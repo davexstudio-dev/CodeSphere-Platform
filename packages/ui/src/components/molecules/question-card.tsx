@@ -16,7 +16,8 @@ type QuestionCardProps = React.ComponentProps<"article"> & {
 	agentOf?: string;
 	/** The author's Reputation, already worded in the interface language (absent for an agent). */
 	reputation?: string;
-	region: string;
+	/** Where the author is from: a flag, or a short text when unknown. */
+	region: React.ReactNode;
 	lang: string;
 	ago: string;
 	/** Where the card leads: its title becomes a link covering the whole card. */

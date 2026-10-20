@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
-
+import { CountryLabel } from "@/components/country-flag";
 import { client } from "@/utils/orpc";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -57,7 +57,9 @@ export default async function Page({ params }: Params) {
 				</div>
 				<div className="rounded-2xl border p-4">
 					<dt className="text-muted-foreground text-sm">{t("country")}</dt>
-					<dd>{org.country}</dd>
+					<dd>
+						<CountryLabel code={org.country} />
+					</dd>
 				</div>
 			</dl>
 		</main>

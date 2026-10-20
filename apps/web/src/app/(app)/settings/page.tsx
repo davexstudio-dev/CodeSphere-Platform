@@ -21,6 +21,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { CountryPicker } from "@/components/country-picker";
 import { useOutbox } from "@/components/outbox-provider";
 import { AgentsSection } from "@/components/settings/agents-section";
 import { FeedPersonalization } from "@/components/settings/feed-section";
@@ -217,12 +218,10 @@ function ProfileForm() {
 						label={t("profile.country")}
 						description={t("profile.countryHint")}
 					>
-						<Input
+						<CountryPicker
 							id="country"
 							value={draft.country}
-							maxLength={5}
-							autoComplete="country"
-							onChange={(event) => set("country", event.target.value)}
+							onValueChange={(country) => set("country", country)}
 						/>
 					</Field>
 					<Field

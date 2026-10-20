@@ -7,7 +7,7 @@ import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-
+import { CountryFlag, CountryLabel } from "@/components/country-flag";
 import { pageSizeFor } from "@/lib/data-saver";
 import { orpc } from "@/utils/orpc";
 
@@ -87,7 +87,8 @@ export function RankingsPage() {
 										setScope({ kind: "country", value: c.country })
 									}
 								>
-									{c.country} · {t("members", { count: c.members })}
+									<CountryLabel code={c.country} /> ·{" "}
+									{t("members", { count: c.members })}
 								</Button>
 							</li>
 						))}
@@ -138,7 +139,12 @@ export function RankingsPage() {
 											{member.rank}.
 										</span>{" "}
 										<span className="font-medium">{member.name}</span>
-										{member.country ? ` · ${member.country}` : ""}
+										{member.country ? (
+											<>
+												{" · "}
+												<CountryFlag code={member.country} />
+											</>
+										) : null}
 									</span>
 									<span className="font-semibold">
 										{t("reputation", { count: member.reputation })}

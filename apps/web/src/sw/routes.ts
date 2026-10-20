@@ -20,6 +20,11 @@ export function isStaticAsset(url: URL, origin: string): boolean {
 	return url.origin === origin && url.pathname.startsWith("/_next/static/");
 }
 
+/** The flags of the country select and of the bylines: small, never changed once served. */
+export function isFlagAsset(url: URL, origin: string): boolean {
+	return url.origin === origin && /^\/flags\/[A-Z]{2}\.svg$/.test(url.pathname);
+}
+
 /** A page navigation on this origin that the worker may answer with the offline page. */
 export function isPageNavigation(
 	request: { mode: string },

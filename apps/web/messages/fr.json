@@ -35,7 +35,7 @@
 			"description": "Ce que les autres membres voient de vous. Votre email n'est jamais affiché.",
 			"name": "Nom",
 			"country": "Pays",
-			"countryHint": "Code ISO à deux lettres (BF, SN, CI…) ou OTHER pour la diaspora.",
+			"countryHint": "Votre pays s'affiche, avec son drapeau, à côté de vos questions et réponses. « Autre pays » pour la diaspora.",
 			"city": "Ville",
 			"cityHint": "Privée par défaut : voir Confidentialité.",
 			"reputation": "Réputation",
@@ -1292,5 +1292,13 @@
 			}
 		},
 		"stopSharing": "Ne plus partager ma fiche"
+	},
+	"countrySelect": {
+		"placeholder": "Rechercher un pays",
+		"empty": "Aucun pays trouvé.",
+		"clear": "Effacer le pays",
+		"open": "Ouvrir la liste des pays",
+		"africa": "Afrique",
+		"others": "Autres pays"
 	}
 }

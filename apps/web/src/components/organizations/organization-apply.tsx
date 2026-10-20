@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { CountryPicker } from "@/components/country-picker";
 import SsoLoginDialog from "@/components/sso-login-dialog";
 import { errorCodeOf } from "@/i18n/errors";
 import { authClient } from "@/lib/auth-client";
@@ -107,13 +108,10 @@ export function OrganizationApply() {
 				<p className="-mt-1 text-muted-foreground text-xs">
 					{t("contactEmailHint")}
 				</p>
-				<Input
-					required
+				<CountryPicker
 					value={country}
-					maxLength={5}
-					onChange={(e) => setCountry(e.target.value)}
-					aria-label={t("country")}
-					placeholder={t("countryHint")}
+					onValueChange={setCountry}
+					ariaLabel={t("country")}
 				/>
 				<Textarea
 					value={description}
@@ -122,7 +120,11 @@ export function OrganizationApply() {
 					aria-label={t("description")}
 					placeholder={t("description")}
 				/>
-				<Button type="submit" disabled={apply.isPending} className="w-fit">
+				<Button
+					type="submit"
+					disabled={apply.isPending || !country}
+					className="w-fit"
+				>
 					{t("submit")}
 				</Button>
 			</form>

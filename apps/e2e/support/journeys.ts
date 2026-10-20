@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 import { readSignInCode } from "./otp";
 
@@ -53,4 +53,15 @@ export async function publishQuestion(page: Page, title: string) {
 	await page.getByRole("button", { name: "Publier la question" }).click();
 	await expect(page).toHaveURL(/\/questions\/[0-9a-f-]{36}/);
 	await expect(page.getByRole("heading", { name: title })).toBeVisible();
+}
+
+/** Picks a country in a country select by typing part of its name, then choosing the option. */
+export async function pickCountry(
+	page: Page,
+	field: Locator,
+	query: string,
+	name: RegExp,
+) {
+	await field.fill(query);
+	await page.getByRole("option", { name }).click();
 }
