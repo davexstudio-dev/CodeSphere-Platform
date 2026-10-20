@@ -38,7 +38,9 @@ export type WorkerEnv = {
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;
 	CORS_ORIGIN: string;
+	SUPER_ADMIN_EMAILS?: string;
 	ADMIN_EMAILS?: string;
+	MODERATOR_EMAILS?: string;
 	RESEND_API_KEY?: string;
 	EMAIL_FROM?: string;
 	RESEND_WEBHOOK_SECRET?: string;

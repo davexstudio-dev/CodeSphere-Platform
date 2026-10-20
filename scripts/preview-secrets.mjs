@@ -30,6 +30,11 @@ const KEYS = [
 	"LINKEDIN_AUTHOR",
 	"BLUESKY_IDENTIFIER",
 	"BLUESKY_APP_PASSWORD",
+	// Staff email lists (#120): comma-separated, re-read at every sign-in. Only the staging
+	// workflow exports them; unset leaves every account a plain Member.
+	"SUPER_ADMIN_EMAILS",
+	"ADMIN_EMAILS",
+	"MODERATOR_EMAILS",
 ];
 
 // DATABASE_URL is optional: a preview without the `preview-db` label has no database (#150).
