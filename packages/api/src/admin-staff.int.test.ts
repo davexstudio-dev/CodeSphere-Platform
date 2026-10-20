@@ -3,6 +3,7 @@
 // through the router.
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import type { Session } from "@codesphere/auth";
+import { parseAdminEmails } from "@codesphere/auth/admin";
 import type { Role } from "@codesphere/contract/roles";
 import { createDb } from "@codesphere/db";
 import { auditLog } from "@codesphere/db/schema/audit";
@@ -30,12 +31,14 @@ describe.skipIf(!url)("staff roles on Postgres (#285)", () => {
 	};
 	const ids = Object.keys(accounts).map(id);
 	const email = (name: string) => `${id(name)}@example.com`;
+	// Parsed like SUPER_ADMIN_EMAILS in production: lowercased, as the guard compares.
+	const superAdminEmails = parseAdminEmails(email("envBoss"));
 
 	const as = (name: string) =>
 		createRouterClient(appRouter, {
 			context: testContext({
 				db,
-				superAdminEmails: new Set([email("envBoss")]),
+				superAdminEmails,
 				session: {
 					user: {
 						id: id(name),
