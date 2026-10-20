@@ -52,6 +52,7 @@
 		"@types/node": "^26.4.1",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
+		"country-flag-icons": "^1.6.20",
 		"drizzle-orm": "catalog:",
 		"tailwindcss": "catalog:",
 		"typescript": "catalog:",

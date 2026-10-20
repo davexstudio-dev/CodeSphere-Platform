@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 
 import {
 	isApiPath,
+	isFlagAsset,
 	isPageNavigation,
 	isStaticAsset,
 	OFFLINE_URL,
@@ -59,5 +60,16 @@ describe("isPageNavigation", () => {
 		).toBe(false);
 		expect(isPageNavigation({ mode: "cors" }, url("/"), ORIGIN)).toBe(false);
 		expect(isPageNavigation(nav, url(OFFLINE_URL), ORIGIN)).toBe(false);
+	});
+});
+
+describe("isFlagAsset", () => {
+	test("only a flag file of this origin", () => {
+		expect(isFlagAsset(url("/flags/CI.svg"), ORIGIN)).toBe(true);
+		expect(isFlagAsset(url("/flags/ci.svg"), ORIGIN)).toBe(false);
+		expect(isFlagAsset(url("/flags/CI.svg.map"), ORIGIN)).toBe(false);
+		expect(
+			isFlagAsset(url("/flags/CI.svg", "https://cdn.example"), ORIGIN),
+		).toBe(false);
 	});
 });

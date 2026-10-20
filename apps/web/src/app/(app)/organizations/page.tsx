@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-
+import { CountryLabel } from "@/components/country-flag";
 import Link from "@/components/link";
 import { client } from "@/utils/orpc";
 
@@ -40,7 +40,8 @@ export default async function Page() {
 								{org.name}
 							</a>
 							<p className="text-muted-foreground text-sm">
-								{org.country} · {new URL(org.website).hostname}
+								<CountryLabel code={org.country} /> ·{" "}
+								{new URL(org.website).hostname}
 							</p>
 						</li>
 					))}

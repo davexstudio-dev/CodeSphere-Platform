@@ -204,3 +204,12 @@
 	--font-outfit: ui-sans-serif;
 	--font-jetbrains-mono: ui-monospace;
 }
+
+/* Data saver mode (#250): no flag images, the country's code instead (see the Flag atom). */
+:root[data-data-saver="true"] [data-slot="flag-image"] {
+	display: none;
+}
+
+:root[data-data-saver="true"] [data-slot="flag-code"] {
+	display: inline;
+}

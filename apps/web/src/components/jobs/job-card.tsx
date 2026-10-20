@@ -3,6 +3,7 @@ import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Tag } from "@codesphere/ui/components/atoms/tag";
 
 import { useTranslations } from "next-intl";
+import { CountryLabel } from "@/components/country-flag";
 
 /** A job posting in a list (#258): title, Organization, country, Tags. */
 export function JobCard({ job }: { job: JobPosting }) {
@@ -22,7 +23,7 @@ export function JobCard({ job }: { job: JobPosting }) {
 					{job.organization.name}
 				</a>
 				<span aria-hidden="true">·</span>
-				<span>{job.country}</span>
+				<CountryLabel code={job.country} />
 				{job.remote && <Badge variant="secondary">{t("remote")}</Badge>}
 				{job.myApplication && <Badge variant="success">{t("applied")}</Badge>}
 			</p>

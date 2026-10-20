@@ -3665,6 +3665,9 @@
 															}
 														]
 													},
+													"authorCountry": {
+														"type": ["string", "null"]
+													},
 													"myVote": {
 														"anyOf": [
 															{
@@ -3693,6 +3696,7 @@
 													"authorKind",
 													"ownerName",
 													"authorReputation",
+													"authorCountry",
 													"myVote"
 												],
 												"additionalProperties": false

@@ -18,6 +18,8 @@ type AnswerCardProps = Omit<React.ComponentProps<"article">, "children"> & {
 	agentOf?: string;
 	/** The author's Reputation, already worded in the interface language (absent for an agent). */
 	reputation?: string;
+	/** The author's country as a flag (see the Flag atom); absent when not set. */
+	country?: React.ReactNode;
 	ago: string;
 	score: number;
 	vote: Vote | null;
@@ -63,6 +65,7 @@ function AnswerCard({
 	author,
 	agentOf,
 	reputation,
+	country,
 	ago,
 	score,
 	vote,
@@ -110,6 +113,7 @@ function AnswerCard({
 					<b className="text-foreground">{author}</b>
 				)}
 				{reputation && <span>· {reputation}</span>}
+				{country}
 				<span>· {ago}</span>
 				{accepted && (
 					<StatusBadge status="accepted" className="ml-auto">

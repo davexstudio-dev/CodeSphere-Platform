@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { signIn } from "../support/journeys";
+import { pickCountry, signIn } from "../support/journeys";
 
 // Organizations (#257): a Member applies, an Admin validates, the public profile appears, and a
 // refused address or a rejection is explained to the applicant.
@@ -21,7 +21,12 @@ test("a Member applies, an Admin validates, the public profile appears", async (
 	await member
 		.getByLabel("E-mail sur le domaine de l'Organisation")
 		.fill("someone@gmail.com");
-	await member.getByLabel("Pays", { exact: true }).fill("SN");
+	await pickCountry(
+		member,
+		member.getByLabel("Pays", { exact: true }),
+		"senegal",
+		/Sénégal/,
+	);
 	await member.getByRole("button", { name: "Envoyer la demande" }).click();
 	await expect(
 		member.getByText(/doit être sur le domaine du site web/),

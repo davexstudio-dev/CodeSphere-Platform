@@ -35,7 +35,7 @@
 			"description": "What other members see of you. Your email is never shown.",
 			"name": "Name",
 			"country": "Country",
-			"countryHint": "Two-letter ISO code (BF, SN, CI…) or OTHER for the diaspora.",
+			"countryHint": "Your country is shown, with its flag, next to your questions and answers. “Other country” for the diaspora.",
 			"city": "City",
 			"cityHint": "Private by default: see Privacy.",
 			"reputation": "Reputation",
@@ -1292,5 +1292,13 @@
 			}
 		},
 		"stopSharing": "Stop sharing my card"
+	},
+	"countrySelect": {
+		"placeholder": "Search a country",
+		"empty": "No country found.",
+		"clear": "Clear the country",
+		"open": "Open the country list",
+		"africa": "Africa",
+		"others": "Other countries"
 	}
 }

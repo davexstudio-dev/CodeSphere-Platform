@@ -4,7 +4,12 @@
 // cannot do (see docs/research/249-pwa-opennext-trial.md).
 import { CacheFirst, ExpirationPlugin, NetworkOnly, Serwist } from "serwist";
 
-import { isPageNavigation, isStaticAsset, OFFLINE_URL } from "./routes";
+import {
+	isFlagAsset,
+	isPageNavigation,
+	isStaticAsset,
+	OFFLINE_URL,
+} from "./routes";
 
 declare const self: ServiceWorkerGlobalScope;
 // Replaced at build time: the offline page is fetched again after each deployment.
@@ -23,6 +28,19 @@ const serwist = new Serwist({
 					new ExpirationPlugin({
 						maxEntries: 200,
 						maxAgeSeconds: 30 * 24 * 60 * 60,
+					}),
+				],
+			}),
+		},
+		{
+			// Flags seen once stay available offline (the country code shows meanwhile).
+			matcher: ({ url }) => isFlagAsset(url, self.location.origin),
+			handler: new CacheFirst({
+				cacheName: "flags",
+				plugins: [
+					new ExpirationPlugin({
+						maxEntries: 300,
+						maxAgeSeconds: 90 * 24 * 60 * 60,
 					}),
 				],
 			}),

@@ -44,7 +44,7 @@ describe.skipIf(!url)("Question page reads on Postgres", () => {
 	beforeAll(async () => {
 		await db.insert(user).values([
 			{ id: asker, name: "Awa", email: `${asker}@example.com`, country: "SN" },
-			{ id: voter, name: "Kofi", email: `${voter}@example.com` },
+			{ id: voter, name: "Kofi", email: `${voter}@example.com`, country: "BF" },
 			{ id: owner, name: "Ama", email: `${owner}@example.com` },
 		]);
 		// A contribute key: the Agent may answer.
@@ -127,6 +127,25 @@ describe.skipIf(!url)("Question page reads on Postgres", () => {
 		]);
 		const visitor = await clientAs(null).answers.list({ questionId });
 		expect(visitor.items[0]?.myVote).toBeNull();
+	});
+
+	test("answers.list carries the author's country, null for an Agent", async () => {
+		const q = await clientAs(asker).questions.create({
+			idempotencyKey: crypto.randomUUID(),
+			title: "Which country shows?",
+			body: "Body",
+			language: "en",
+			tags: ["postgres"],
+		});
+		await clientAs(voter).answers.create({
+			idempotencyKey: crypto.randomUUID(),
+			questionId: q.id,
+			body: "An answer from Burkina Faso.",
+		});
+		const { items } = await clientAs(null).answers.list({ questionId: q.id });
+		expect(items.map((a) => a.authorCountry)).toEqual(["BF"]);
+		const agent = await clientAs(null).answers.list({ questionId });
+		expect(agent.items[0]?.authorCountry).toBeNull();
 	});
 
 	test("an unknown Question is NOT_FOUND on both reads", async () => {

@@ -31,6 +31,8 @@ export const AnswerListItem = AnswerDetail.extend({
 	ownerName: z.string().nullable(),
 	/** The author's Reputation (#239); null for an Agent, which earns none. */
 	authorReputation: z.number().int().nullable(),
+	/** The author's country (ISO 3166-1 alpha-2 or OTHER), shown as a flag; null when not set. */
+	authorCountry: z.string().nullable(),
 	myVote: z.enum(["up", "down"]).nullable(),
 });
 
