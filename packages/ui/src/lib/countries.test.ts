@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { join } from "node:path";
 
 import {
 	AFRICAN_COUNTRY_CODES,
@@ -25,7 +26,9 @@ describe("the country list", () => {
 		const files = new Set(
 			(
 				await Array.fromAsync(
-					new Bun.Glob("*.svg").scan("../../apps/web/public/flags"),
+					new Bun.Glob("*.svg").scan(
+						join(import.meta.dir, "../../../../apps/web/public/flags"),
+					),
 				)
 			).map((f) => f.replace(".svg", "")),
 		);
