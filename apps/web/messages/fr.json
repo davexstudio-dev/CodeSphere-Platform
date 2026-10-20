@@ -519,6 +519,10 @@
 			"more": "Voir plus",
 			"system": "Système"
 		},
+		"forbidden": {
+			"title": "Écran non accessible à votre rôle",
+			"text": "Votre rôle ne donne pas accès à cet écran. Demandez à un admin si vous en avez besoin."
+		},
 		"signOut": "Se déconnecter",
 		"common": {
 			"confirm": "Confirmer ({seconds} s)",

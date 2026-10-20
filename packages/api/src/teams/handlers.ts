@@ -2,8 +2,8 @@ import type { TeamConflict } from "@codesphere/contract/teams";
 import { ORPCError } from "@orpc/server";
 import type { z } from "zod";
 
-import { requireAdmin } from "../authorization";
 import { impl } from "../index";
+import { staffMay } from "../staff-guard";
 import { githubFirstCommit } from "./repo-check";
 import {
 	createTeamService,
@@ -229,14 +229,6 @@ export function createTeamsHandlers() {
 	};
 }
 
-const isStaff = impl.middleware(async ({ context, next }) => {
-	const guard = requireAdmin(context.session);
-	if (!guard.ok) {
-		throw new ORPCError(guard.code);
-	}
-	return next();
-});
-
 export function createTeamsAdminHandlers() {
 	const actor = (context: Sessioned) => {
 		if (!context.session) {
@@ -246,7 +238,7 @@ export function createTeamsAdminHandlers() {
 	};
 	return {
 		checkRepositories: impl.admin.teams.checkRepositories
-			.use(isStaff)
+			.use(staffMay({ team: ["manage"] }))
 			.handler(({ context, input, errors }) =>
 				service(context)
 					.admin.checkRepositories(
@@ -259,7 +251,7 @@ export function createTeamsAdminHandlers() {
 					}),
 			),
 		flagged: impl.admin.teams.flagged
-			.use(isStaff)
+			.use(staffMay({ team: ["manage"] }))
 			.handler(async ({ context, input, errors }) => {
 				try {
 					return { items: await service(context).admin.flagged(input.slug) };

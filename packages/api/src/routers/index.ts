@@ -16,6 +16,7 @@ import {
 	createSocialPostStore,
 	publishShare,
 } from "../admin-social";
+import { revokeStaffSessions, setRole } from "../admin-staff";
 import {
 	createTag,
 	deleteTag,
@@ -25,7 +26,6 @@ import {
 } from "../admin-tags";
 import { createAgentsHandlers } from "../agents/handlers";
 import { AgentError, agentPreset, createAgentService } from "../agents/service";
-import { requireAdmin } from "../authorization";
 import { communitySnapshot } from "../community/service";
 import { decodeCursor, encodeCursor } from "../cursor";
 import { unexpectedErrors } from "../errors";
@@ -56,6 +56,7 @@ import { createQuestionService, QuestionError } from "../questions/service";
 import { consume, socialLimiter } from "../rate-limit";
 import { createRankingsHandlers } from "../reputation/handlers";
 import { reputationOf } from "../reputation/service";
+import { staffMay } from "../staff-guard";
 import { isSuspended } from "../suspension";
 import {
 	followedTags,
@@ -74,16 +75,6 @@ import {
 	createWatchHandlers,
 } from "../watch/handlers";
 
-// The authorization guard behind every admin procedure (spec §2). Throws the typed
-// UNAUTHORIZED / FORBIDDEN error declared on the admin contract.
-const isAdmin = impl.middleware(async ({ context, next }) => {
-	const result = requireAdmin(context.session);
-	if (!result.ok) {
-		throw new ORPCError(result.code);
-	}
-	return next();
-});
-
 // The typed refusal of a moderation outcome (#123).
 const refusal = (
 	code: "NOT_FOUND" | "CONFLICT" | "FORBIDDEN",
@@ -101,13 +92,26 @@ const refusal = (
 				})
 			: errors.CONFLICT();
 
-// The signed-in staff member behind an admin write; `isAdmin` has already refused anonymous calls.
+// The signed-in staff member behind an admin write; `staffMay` has already refused anonymous calls.
 const actorOf = (session: { user: { id: string } } | null) => {
 	if (!session) {
 		throw new ORPCError("UNAUTHORIZED");
 	}
 	return session.user.id;
 };
+
+// The typed refusal of a staff account outcome (#285), with the reason safe to show the actor.
+const staffRefusal = (
+	outcome: { code: "NOT_FOUND" | "FORBIDDEN" | "CONFLICT"; message?: string },
+	errors: {
+		NOT_FOUND: () => Error;
+		FORBIDDEN: (options?: { message?: string }) => Error;
+		CONFLICT: (options?: { message?: string }) => Error;
+	},
+) =>
+	outcome.code === "NOT_FOUND"
+		? errors.NOT_FOUND()
+		: errors[outcome.code]({ message: outcome.message });
 
 // The typed refusal of a Tag outcome (#125).
 const tagRefusal = (
@@ -301,13 +305,13 @@ export const appRouter = impl
 		},
 		admin: {
 			kpi: impl.admin.kpi
-				.use(isAdmin)
+				.use(staffMay({ kpi: ["read"] }))
 				.handler(async ({ context, input }) =>
 					kpiReport(context.db, input.period),
 				),
 			hackathons: {
 				update: impl.admin.hackathons.update
-					.use(isAdmin)
+					.use(staffMay({ hackathon: ["update"] }))
 					.handler(async ({ context, input, errors }) => {
 						const outcome = await updateHackathon(
 							context.db,
@@ -332,7 +336,7 @@ export const appRouter = impl
 			},
 			members: {
 				list: impl.admin.members.list
-					.use(isAdmin)
+					.use(staffMay({ moderation: ["list"] }))
 					.handler(async ({ context, input, errors }) => {
 						const page = await listMembers(context.db, input);
 						if (!page) {
@@ -345,7 +349,7 @@ export const appRouter = impl
 						return page;
 					}),
 				suspend: impl.admin.members.suspend
-					.use(isAdmin)
+					.use(staffMay({ moderation: ["suspend"] }))
 					.handler(async ({ context, input, errors }) => {
 						const actorId = actorOf(context.session);
 						if (input.id === actorId) {
@@ -366,7 +370,7 @@ export const appRouter = impl
 						return outcome.member;
 					}),
 				reactivate: impl.admin.members.reactivate
-					.use(isAdmin)
+					.use(staffMay({ moderation: ["reactivate"] }))
 					.handler(async ({ context, input, errors }) => {
 						const outcome = await setSuspension(
 							context.db,
@@ -381,14 +385,55 @@ export const appRouter = impl
 						return outcome.member;
 					}),
 			},
+			staff: {
+				setRole: impl.admin.staff.setRole
+					.use(staffMay({ staff: ["set-role"] }))
+					.handler(async ({ context, input, errors }) => {
+						const outcome = await setRole(
+							context.db,
+							{
+								id: actorOf(context.session),
+								role: String(context.session?.user.role),
+							},
+							input.id,
+							input.role,
+							input.reason,
+							context.superAdminEmails,
+						);
+						if (!outcome.ok) {
+							throw staffRefusal(outcome, errors);
+						}
+						return outcome.member;
+					}),
+				revokeSessions: impl.admin.staff.revokeSessions
+					.use(staffMay({ staff: ["revoke-sessions"] }))
+					.handler(async ({ context, input, errors }) => {
+						const outcome = await revokeStaffSessions(
+							context.db,
+							{
+								id: actorOf(context.session),
+								role: String(context.session?.user.role),
+							},
+							input.id,
+						);
+						if (!outcome.ok) {
+							// Never a CONFLICT: revoking sessions has no state to clash with.
+							throw staffRefusal(outcome, {
+								...errors,
+								CONFLICT: errors.FORBIDDEN,
+							});
+						}
+						return outcome.member;
+					}),
+			},
 			tags: {
 				list: impl.admin.tags.list
-					.use(isAdmin)
+					.use(staffMay({ tag: ["list"] }))
 					.handler(async ({ context }) => ({
 						items: await listTags(context.db),
 					})),
 				create: impl.admin.tags.create
-					.use(isAdmin)
+					.use(staffMay({ tag: ["create"] }))
 					.handler(async ({ context, input, errors }) => {
 						const outcome = await createTag(
 							context.db,
@@ -402,7 +447,7 @@ export const appRouter = impl
 						return outcome.tag;
 					}),
 				setReserved: impl.admin.tags.setReserved
-					.use(isAdmin)
+					.use(staffMay({ tag: ["reserve"] }))
 					.handler(async ({ context, input, errors }) => {
 						const outcome = await setTagReserved(
 							context.db,
@@ -415,7 +460,7 @@ export const appRouter = impl
 						return outcome.tag;
 					}),
 				rename: impl.admin.tags.rename
-					.use(isAdmin)
+					.use(staffMay({ tag: ["rename"] }))
 					.handler(async ({ context, input, errors }) => {
 						const outcome = await renameTag(
 							context.db,
@@ -428,7 +473,7 @@ export const appRouter = impl
 						return outcome.tag;
 					}),
 				delete: impl.admin.tags.delete
-					.use(isAdmin)
+					.use(staffMay({ tag: ["delete"] }))
 					.handler(async ({ context, input, errors }) => {
 						const outcome = await deleteTag(
 							context.db,
@@ -443,7 +488,7 @@ export const appRouter = impl
 			},
 			social: {
 				status: impl.admin.social.status
-					.use(isAdmin)
+					.use(staffMay({ social: ["manage"] }))
 					.handler(async ({ context }) => ({
 						platforms: context.social?.siteUrl
 							? [...(context.social.publisher?.platforms ?? [])]
@@ -457,7 +502,7 @@ export const appRouter = impl
 							: [],
 					})),
 				connect: impl.admin.social.connect
-					.use(isAdmin)
+					.use(staffMay({ social: ["manage"] }))
 					.handler(async ({ context, input, errors }) => {
 						const actorId = actorOf(context.session);
 						await consume(socialLimiter, actorId);
@@ -476,7 +521,7 @@ export const appRouter = impl
 						}
 					}),
 				completeConnect: impl.admin.social.completeConnect
-					.use(isAdmin)
+					.use(staffMay({ social: ["manage"] }))
 					.handler(async ({ context, input, errors }) => {
 						const actorId = actorOf(context.session);
 						await consume(socialLimiter, actorId);
@@ -493,7 +538,7 @@ export const appRouter = impl
 						}
 					}),
 				disconnect: impl.admin.social.disconnect
-					.use(isAdmin)
+					.use(staffMay({ social: ["manage"] }))
 					.handler(async ({ context, input, errors }) => {
 						if (!context.social?.accounts) {
 							throw errors.SERVICE_UNAVAILABLE();
@@ -508,7 +553,7 @@ export const appRouter = impl
 						return { success: true };
 					}),
 				publish: impl.admin.social.publish
-					.use(isAdmin)
+					.use(staffMay({ social: ["manage"] }))
 					.handler(async ({ context, input, errors }) => {
 						const actorId = actorOf(context.session);
 						await consume(socialLimiter, actorId);
@@ -540,14 +585,14 @@ export const appRouter = impl
 			teams: createTeamsAdminHandlers(),
 			webVitals: {
 				byCountry: impl.admin.webVitals.byCountry
-					.use(isAdmin)
+					.use(staffMay({ kpi: ["read"] }))
 					.handler(({ context, input }) =>
 						webVitalsByCountry(context.db, input.days),
 					),
 			},
 			reputationFlags: {
 				list: impl.admin.reputationFlags.list
-					.use(isAdmin)
+					.use(staffMay({ moderation: ["list"] }))
 					.handler(async ({ context, input, errors }) => {
 						const position = input.cursor ? decodeCursor(input.cursor) : null;
 						if (input.cursor && !position) {
@@ -615,7 +660,7 @@ export const appRouter = impl
 			},
 			auditLog: {
 				list: impl.admin.auditLog.list
-					.use(isAdmin)
+					.use(staffMay({ audit: ["read"] }))
 					.handler(async ({ context, input, errors }) => {
 						const position = input.cursor ? decodeCursor(input.cursor) : null;
 						if (input.cursor && !position) {
@@ -671,7 +716,7 @@ export const appRouter = impl
 			},
 			agents: {
 				reactivate: impl.admin.agents.reactivate
-					.use(isAdmin)
+					.use(staffMay({ moderation: ["reactivate"] }))
 					.handler(async ({ context, input, errors }) => {
 						const actorId = context.session?.user.id;
 						if (!actorId) {
@@ -693,14 +738,14 @@ export const appRouter = impl
 			},
 			questions: {
 				remove: impl.admin.questions.remove
-					.use(isAdmin)
+					.use(staffMay({ moderation: ["remove"] }))
 					.handler(async ({ context, input, errors }) => {
 						const actorId = context.session?.user.id;
 						if (!actorId) {
 							throw errors.UNAUTHORIZED();
 						}
 						try {
-							// The isAdmin middleware admits staff only, so the actor is staff here.
+							// The staffMay guard admits staff only, so the actor is staff here.
 							return await createQuestionService(context.db).removeQuestion(
 								{ id: actorId, isStaff: true },
 								input.id,

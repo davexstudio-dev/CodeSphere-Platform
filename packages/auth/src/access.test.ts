@@ -1,34 +1,55 @@
 import { describe, expect, test } from "bun:test";
-import { ROLES, STAFF_ROLES } from "@codesphere/contract/roles";
+import { ROLES } from "@codesphere/contract/roles";
 
-import { roles } from "./access";
+import { roleCan, roles } from "./access";
 
-const can = (role: keyof typeof roles, permissions: Record<string, string[]>) =>
-	roles[role].authorize(permissions as never).success;
+const can = (role: string, permissions: Record<string, string[]>) =>
+	roleCan(role, permissions as never);
+
+// The matrix of #285: one row per resource, the roles that hold it.
+const matrix: [Record<string, string[]>, string[]][] = [
+	[
+		{ moderation: ["list", "suspend", "reactivate", "remove"] },
+		["moderator", "admin", "super_admin"],
+	],
+	[
+		{ tag: ["list", "create", "rename", "reserve", "delete"] },
+		["moderator", "admin", "super_admin"],
+	],
+	[{ audit: ["read"] }, ["moderator", "admin", "super_admin"]],
+	[{ audit: ["export"] }, ["admin", "super_admin"]],
+	[{ hackathon: ["update"] }, ["admin", "super_admin"]],
+	[{ organization: ["manage"] }, ["admin", "super_admin"]],
+	[{ job: ["manage"] }, ["admin", "super_admin"]],
+	[{ team: ["manage"] }, ["admin", "super_admin"]],
+	[{ watch: ["manage"] }, ["admin", "super_admin"]],
+	[{ social: ["manage"] }, ["admin", "super_admin"]],
+	[{ kpi: ["read"] }, ["admin", "super_admin"]],
+	[
+		{ staff: ["list", "invite", "set-role", "deactivate", "revoke-sessions"] },
+		["admin", "super_admin"],
+	],
+];
 
 describe("access control", () => {
 	test("defines exactly the roles of the database enum", () => {
 		expect(Object.keys(roles).sort()).toEqual([...ROLES].sort());
 	});
 
-	test("a plain Member reaches nothing of the back-office", () => {
-		expect(can("member", { moderation: ["list"] })).toBe(false);
-		expect(can("member", { audit: ["read"] })).toBe(false);
-		expect(can("member", { user: ["list"] })).toBe(false);
-	});
-
-	test("every staff role reaches the back-office resources", () => {
-		for (const role of STAFF_ROLES) {
-			expect(can(role, { moderation: ["list", "suspend", "reactivate"] })).toBe(
-				true,
-			);
-			expect(can(role, { tag: ["create", "rename", "delete"] })).toBe(true);
-			expect(can(role, { hackathon: ["update"] })).toBe(true);
-			expect(can(role, { audit: ["read"], kpi: ["read"] })).toBe(true);
+	for (const [permissions, holders] of matrix) {
+		for (const role of ROLES) {
+			const expected = holders.includes(role);
+			test(`${role} ${expected ? "holds" : "lacks"} ${JSON.stringify(permissions)}`, () => {
+				expect(can(role, permissions)).toBe(expected);
+			});
 		}
+	}
+
+	test("an unknown role holds nothing", () => {
+		expect(can("agent", { moderation: ["list"] })).toBe(false);
 	});
 
-	test("no role may bypass the email lists or the audited suspension", () => {
+	test("no role reaches the plugin's own role, ban or session endpoints", () => {
 		for (const role of ROLES) {
 			for (const action of [
 				"set-role",

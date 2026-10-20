@@ -60,6 +60,8 @@ export type AppDeps = {
 	reporter?: ErrorReporter;
 	/** Signing secret of the Resend webhook (#200); without it, /webhooks/resend is not mounted. */
 	resendWebhookSecret?: string;
+	/** Verified emails always put back to super_admin (SUPER_ADMIN_EMAILS, #285): never demoted from the back-office. */
+	superAdminEmails?: ReadonlySet<string>;
 };
 
 // Stateless handlers: built once per isolate or process, shared by every request.

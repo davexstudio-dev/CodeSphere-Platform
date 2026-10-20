@@ -10,7 +10,7 @@ import { admin, emailOTP, oAuthProxy } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 
 import { ac, roles } from "./access";
-import { parseAdminEmails, roleFor } from "./admin";
+import { parseAdminEmails, roleAtSignIn, roleFor } from "./admin";
 import { readConsent } from "./consent";
 import { displayNameFor } from "./display-name";
 import { type OAuthProxyEnv, oauthProxyFrom } from "./oauth-proxy";
@@ -128,8 +128,8 @@ export function createAuth(
 			},
 			session: {
 				create: {
-					// Every sign-in re-derives the role from ADMIN_EMAILS (#120), for humans only:
-					// an Agent is never an Admin.
+					// The role lives in the database (#285); a sign-in only puts a SUPER_ADMIN_EMAILS
+					// member back to super_admin. Humans only: an Agent is never staff.
 					before: async (session) => {
 						const [row] = await database
 							.select({
@@ -141,7 +141,7 @@ export function createAuth(
 							.from(schema.user)
 							.where(eq(schema.user.id, session.userId));
 						if (row && row.kind === "human") {
-							const role = roleFor(row, staff);
+							const role = roleAtSignIn(row, staff);
 							if (role !== row.role) {
 								await database
 									.update(schema.user)
@@ -221,8 +221,8 @@ export function createAuth(
 				// Set by an Admin suspension (#123): read by the API context, never by the client.
 				suspendedAt: { type: "date", required: false, input: false },
 				// Also declared by the admin plugin below; restated here with the enum's values so the
-				// Session type carries the exact roles. Derived from the staff email lists at sign-in,
-				// never by the client.
+				// Session type carries the exact roles. Seeded from the staff email lists, then managed
+				// through the audited staff procedures of the API (#285), never by the client.
 				role: {
 					type: [...ROLES],
 					required: false,
@@ -233,9 +233,9 @@ export function createAuth(
 		},
 		plugins: [
 			...(proxy ? [oAuthProxy(proxy)] : []),
-			// Role management and access control (#120). The roles and what each may do live in
-			// ./access; the permissions that would let a role bypass the email lists or the audited
-			// suspension (set-role, ban, impersonate…) are granted to none.
+			// Role management and access control (#120, #285). The roles and what each may do live in
+			// ./access; the plugin's own set-role, ban and impersonate endpoints are granted to none: role
+			// changes go through the audited staff procedures of the API.
 			admin({
 				ac,
 				roles,
