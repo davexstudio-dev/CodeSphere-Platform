@@ -173,6 +173,8 @@ jobs:
           NEXT_PUBLIC_SERVER_URL: https://${{ env.PREVIEW_NAME }}.${{ env.PREVIEW_DOMAIN }}
           # Every preview has its own Neon database (the database job): the app uses it.
           NEXT_PUBLIC_HAS_DATABASE: "true"
+          # Inlined at build time; must match EMAIL_OTP_SIGNIN on the Worker (set at deploy below).
+          NEXT_PUBLIC_EMAIL_OTP_SIGNIN: "true"
         # cf:build compiles the service worker (public/sw.js, #249) before OpenNext bundles the assets.
         run: bun run cf:build
 
@@ -261,6 +263,10 @@ jobs:
           GITLAB_CLIENT_SECRET: ${{ secrets.PREVIEW_GITLAB_CLIENT_SECRET }}
           GOOGLE_CLIENT_ID: ${{ secrets.PREVIEW_GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.PREVIEW_GOOGLE_CLIENT_SECRET }}
+          # The email sign-in code goes out through Resend, as on staging. Unset = the code request
+          # fails with "The sign-in code could not be sent."
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}
         run: |
           # Secrets go through a file, never the command line; removed right after.
           umask 077
@@ -274,6 +280,7 @@ jobs:
             --var "BETTER_AUTH_URL:$ORIGIN" \
             --var "CORS_ORIGIN:$ORIGIN" \
             --var "OAUTH_PROXY_PRODUCTION_URL:https://staging.codesphereplatform.xyz" \
+            --var "EMAIL_OTP_SIGNIN:true" \
             --secrets-file preview-secrets.json
           rm -f preview-secrets.json
           echo "url=$ORIGIN" >> "$GITHUB_OUTPUT"
