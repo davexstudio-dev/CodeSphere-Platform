@@ -112,8 +112,8 @@ export function createAuth(
 					}),
 				}
 			: undefined,
-		// SSO in production: no email/password sign-in (#59, spec §3). The email code below is
-		// opt-in (EMAIL_OTP_SIGNIN), for local development and previews only.
+		// SSO, and no email/password sign-in (#59, spec §3). The email code below is opt-in
+		// (EMAIL_OTP_SIGNIN), on in previews, staging and production.
 		socialProviders: socialProvidersFrom(env),
 		account: {
 			// Link provider accounts on a verified email only: no trusted providers, so an

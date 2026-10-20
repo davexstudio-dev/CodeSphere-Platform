@@ -41,7 +41,7 @@ ou Actions › Staging › Run workflow, branche `develop`. Le bouton n'apparaî
 | `PREVIEW_GITHUB_CLIENT_ID`, `PREVIEW_GITHUB_CLIENT_SECRET` | App OAuth GitHub, callback sur l'URL de staging | pour « Se connecter avec GitHub » |
 | `PREVIEW_GITLAB_CLIENT_ID`, `PREVIEW_GITLAB_CLIENT_SECRET` | Idem GitLab | optionnel |
 | `PREVIEW_GOOGLE_CLIENT_ID`, `PREVIEW_GOOGLE_CLIENT_SECRET` | Idem Google | optionnel |
-| `RESEND_API_KEY` | Envoi d'e-mails (staging seulement) | optionnel |
+| `RESEND_API_KEY` | Envoi d'e-mails (staging et previews : code de connexion) | optionnel |
 | `SOCIAL_CREDENTIALS_SECRET` | Secret (32 caractères ou plus, distinct du secret d'auth) dont dérive la clé de chiffrement des jetons des comptes sociaux. Le changer rend les comptes illisibles : on les reconnecte | pour les comptes sociaux |
 | `X_CLIENT_SECRET`, `LINKEDIN_CLIENT_SECRET` | Secret des applications OAuth (X : client confidentiel seulement) | pour les comptes sociaux |
 | `BLUESKY_APP_PASSWORD` | Mot de passe d'application Bluesky (jamais le mot de passe du compte) | pour Bluesky |
@@ -51,7 +51,7 @@ Les secrets passent au Worker par un fichier (`scripts/preview-secrets.mjs`), ja
 
 **Comptes sociaux.** Ils ne s'activent que si `SOCIAL_CREDENTIALS_SECRET`, `X_CLIENT_ID` ou `LINKEDIN_CLIENT_ID` sont définis ; une valeur absente est ignorée, rien n'est envoyé vide. L'application OAuth déclare `https://staging.codesphereplatform.xyz/admin/social/callback` comme URI de redirection, puis un Admin connecte le compte depuis `/admin/social`.
 
-**Connexion par code e-mail.** Elle est active en staging : `EMAIL_OTP_SIGNIN=true` sur le Worker (`--var`) et `NEXT_PUBLIC_EMAIL_OTP_SIGNIN=true` au build, les deux doivent concorder (le second est inlined dans le bundle). Le code part par Resend : sans `RESEND_API_KEY` et `EMAIL_FROM`, la demande échoue avec « The sign-in code could not be sent. » (le code n'est journalisé qu'en développement). La production garde `EMAIL_OTP_SIGNIN=false`.
+**Connexion par code e-mail.** Elle est active en staging et dans les previews : `EMAIL_OTP_SIGNIN=true` sur le Worker (`--var`) et `NEXT_PUBLIC_EMAIL_OTP_SIGNIN=true` au build, les deux doivent concorder (le second est inlined dans le bundle). Le code part par Resend : sans `RESEND_API_KEY` et `EMAIL_FROM`, la demande échoue avec « The sign-in code could not be sent. » (le code n'est journalisé qu'en développement). Les previews le règlent de la même façon dans `preview.yml`, la production dans `docker-compose.prod.yml` et le build de `production.yml`.
 
 ## Vérification `/api/v1/health`
 

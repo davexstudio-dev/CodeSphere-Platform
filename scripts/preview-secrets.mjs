@@ -12,7 +12,7 @@ const KEYS = [
 	"GITLAB_CLIENT_SECRET",
 	"GOOGLE_CLIENT_ID",
 	"GOOGLE_CLIENT_SECRET",
-	// Only the staging workflow exports them: previews send no email.
+	// Staging and previews export the key (the email sign-in code); the webhook secret is staging only.
 	"RESEND_API_KEY",
 	"RESEND_WEBHOOK_SECRET",
 	// Not a secret, but "Name <address>" cannot go on the command line: opennextjs-cloudflare
