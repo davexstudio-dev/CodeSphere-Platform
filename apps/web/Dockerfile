@@ -12,6 +12,10 @@ ENV NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
 # and only in this stage.
 ARG SERVER_URL=http://server:3000
 ENV SERVER_URL=${SERVER_URL}
+# Shows the email sign-in code field; inlined at build time, must match EMAIL_OTP_SIGNIN on the
+# server (docker-compose.prod.yml).
+ARG NEXT_PUBLIC_EMAIL_OTP_SIGNIN=false
+ENV NEXT_PUBLIC_EMAIL_OTP_SIGNIN=${NEXT_PUBLIC_EMAIL_OTP_SIGNIN}
 # Footer build identity (#42): .git is excluded from the context, so the build args carry the values.
 # No defaults here: an unset arg lets next.config.ts fall back to package.json and git.
 ARG APP_VERSION

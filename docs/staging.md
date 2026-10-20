@@ -51,7 +51,7 @@ Les secrets passent au Worker par un fichier (`scripts/preview-secrets.mjs`), ja
 
 **Comptes sociaux.** Ils ne s'activent que si `SOCIAL_CREDENTIALS_SECRET`, `X_CLIENT_ID` ou `LINKEDIN_CLIENT_ID` sont définis ; une valeur absente est ignorée, rien n'est envoyé vide. L'application OAuth déclare `https://staging.codesphereplatform.xyz/admin/social/callback` comme URI de redirection, puis un Admin connecte le compte depuis `/admin/social`.
 
-**Connexion par code e-mail.** Elle est active en staging et dans les previews : `EMAIL_OTP_SIGNIN=true` sur le Worker (`--var`) et `NEXT_PUBLIC_EMAIL_OTP_SIGNIN=true` au build, les deux doivent concorder (le second est inlined dans le bundle). Le code part par Resend : sans `RESEND_API_KEY` et `EMAIL_FROM`, la demande échoue avec « The sign-in code could not be sent. » (le code n'est journalisé qu'en développement). Les previews le règlent de la même façon dans `preview.yml`. La production garde `EMAIL_OTP_SIGNIN=false`.
+**Connexion par code e-mail.** Elle est active en staging et dans les previews : `EMAIL_OTP_SIGNIN=true` sur le Worker (`--var`) et `NEXT_PUBLIC_EMAIL_OTP_SIGNIN=true` au build, les deux doivent concorder (le second est inlined dans le bundle). Le code part par Resend : sans `RESEND_API_KEY` et `EMAIL_FROM`, la demande échoue avec « The sign-in code could not be sent. » (le code n'est journalisé qu'en développement). Les previews le règlent de la même façon dans `preview.yml`, la production dans `docker-compose.prod.yml` et le build de `production.yml`.
 
 ## Vérification `/api/v1/health`
 

@@ -74,6 +74,8 @@ services:
       args:
         # Empty on purpose: the browser calls the API on the host it was loaded from.
         NEXT_PUBLIC_SERVER_URL: ""
+        # Must match EMAIL_OTP_SIGNIN on the server below.
+        NEXT_PUBLIC_EMAIL_OTP_SIGNIN: "true"
         APP_VERSION: ${APP_VERSION:-dev}
         GIT_SHA: ${GIT_SHA:-dev}
     env_file:
@@ -129,8 +131,9 @@ services:
       # The apex host: a cookie with Domain=<apex> is also sent to admin.<apex>.
       COOKIE_DOMAIN: ${PUBLIC_HOST}
       NODE_ENV: production
-      # Passwordless email code is for local development and previews only.
-      EMAIL_OTP_SIGNIN: "false"
+      # Sign in with a one-time code sent by email (Resend), next to SSO. Must match
+      # NEXT_PUBLIC_EMAIL_OTP_SIGNIN in the web build args above.
+      EMAIL_OTP_SIGNIN: "true"
     expose:
       - "3000"
     healthcheck:
