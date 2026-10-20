@@ -233,6 +233,11 @@ jobs:
           LINKEDIN_AUTHOR: ${{ vars.LINKEDIN_AUTHOR }}
           BLUESKY_IDENTIFIER: ${{ vars.BLUESKY_IDENTIFIER }}
           BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          # Staff roles (#120): comma-separated verified emails, re-read at every sign-in. Without
+          # them every account is demoted to Member at its next sign-in.
+          SUPER_ADMIN_EMAILS: ${{ secrets.SUPER_ADMIN_EMAILS }}
+          ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
+          MODERATOR_EMAILS: ${{ secrets.MODERATOR_EMAILS }}
         run: |
           # Secrets go through a file, never the command line; removed right after.
           umask 077

@@ -62,7 +62,7 @@ describe("roleFor", () => {
 
 	test("gives each staff list its role", () => {
 		const lists = staff({
-			superAdmins: "boss@example.com",
+			superAdmins: "other@example.com, boss@example.com",
 			moderators: "mod@example.com",
 		});
 		const verified = (email: string) => ({ email, emailVerified: true });
