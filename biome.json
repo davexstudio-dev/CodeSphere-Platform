@@ -17,6 +17,7 @@
 			"!**/.zed",
 			"!**/.vscode",
 			"!**/routeTree.gen.ts",
+			"!apps/web/public/flags",
 			"!packages/db/src/migrations",
 			"!prototype",
 			"!**/src-tauri",
