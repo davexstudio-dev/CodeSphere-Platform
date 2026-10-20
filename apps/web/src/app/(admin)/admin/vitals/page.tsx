@@ -7,6 +7,7 @@ import {
 	AlertDescription,
 	AlertTitle,
 } from "@codesphere/ui/components/molecules/alert";
+import { cn } from "@codesphere/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
@@ -100,13 +101,14 @@ export default function VitalsPage() {
 												{cell ? (
 													<>
 														<span
-															className={
+															className={cn(
+																"whitespace-nowrap",
 																cell.goodShare >= 0.75
 																	? "text-success"
 																	: cell.goodShare < 0.5
 																		? "text-destructive"
-																		: undefined
-															}
+																		: undefined,
+															)}
 														>
 															{value(metric, cell.p75, cell.p75Above)}
 														</span>

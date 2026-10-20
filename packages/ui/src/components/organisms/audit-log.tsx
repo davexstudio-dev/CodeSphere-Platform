@@ -22,50 +22,87 @@ type AuditEntry = {
 
 type AuditLogProps = { entries: readonly AuditEntry[] };
 
-/** Read-only audit journal: keys, suspensions and account deletions (spec §4, Logs). */
+const ActionBadge = ({ entry }: { entry: AuditEntry }) => (
+	<Badge
+		variant={
+			entry.tone === "destructive"
+				? "destructive"
+				: entry.tone === "warning"
+					? "warning"
+					: "outline"
+		}
+	>
+		{entry.action}
+	</Badge>
+);
+
+// Ids and pasted URLs have no break point: let them wrap instead of widening the layout.
+const Target = ({ entry }: { entry: AuditEntry }) => (
+	<>
+		{entry.target}
+		{entry.reason && (
+			<span className="mt-0.5 block text-xs">Raison : {entry.reason}</span>
+		)}
+	</>
+);
+
+/**
+ * Read-only audit journal: keys, suspensions and account deletions (spec §4, Logs). A table when
+ * the content area has room for its four columns, a stack of cards below 40 rem (a container
+ * query, as for AdminMasterDetail: the sidebar takes 16 rem of a tablet's width). The table comes
+ * first in the DOM so `first()` text lookups land on the visible copy on desktop.
+ */
 function AuditLog({ entries }: AuditLogProps) {
 	return (
-		<Table>
-			<TableHeader>
-				<TableRow>
-					<TableHead>Date</TableHead>
-					<TableHead>Acteur</TableHead>
-					<TableHead>Action</TableHead>
-					<TableHead>Cible</TableHead>
-				</TableRow>
-			</TableHeader>
-			<TableBody>
+		<div data-slot="audit-log" className="@container min-w-0">
+			<div className="@max-[40rem]:hidden">
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>Date</TableHead>
+							<TableHead>Acteur</TableHead>
+							<TableHead>Action</TableHead>
+							<TableHead>Cible</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{entries.map((entry) => (
+							<TableRow key={entry.id}>
+								<TableCell className="whitespace-nowrap font-mono text-muted-foreground text-xs">
+									{entry.at}
+								</TableCell>
+								<TableCell>{entry.actor}</TableCell>
+								<TableCell>
+									<ActionBadge entry={entry} />
+								</TableCell>
+								<TableCell className="text-muted-foreground [overflow-wrap:anywhere]">
+									<Target entry={entry} />
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</div>
+			<ul className="@min-[40rem]:hidden divide-y divide-border rounded-lg border border-border">
 				{entries.map((entry) => (
-					<TableRow key={entry.id}>
-						<TableCell className="whitespace-nowrap font-mono text-muted-foreground text-xs">
-							{entry.at}
-						</TableCell>
-						<TableCell>{entry.actor}</TableCell>
-						<TableCell>
-							<Badge
-								variant={
-									entry.tone === "destructive"
-										? "destructive"
-										: entry.tone === "warning"
-											? "warning"
-											: "outline"
-								}
-							>
-								{entry.action}
-							</Badge>
-						</TableCell>
-						<TableCell className="text-muted-foreground">
-							{entry.target}
-							{entry.reason && (
-								<span className="mt-0.5 block text-xs">
-									Raison : {entry.reason}
-								</span>
-							)}
-						</TableCell>
-					</TableRow>
+					<li
+						key={entry.id}
+						className="flex flex-col gap-1.5 px-3 py-2.5 text-sm"
+					>
+						<div className="flex flex-wrap items-center justify-between gap-2">
+							<ActionBadge entry={entry} />
+							<span className="font-mono text-muted-foreground text-xs">
+								{entry.at}
+							</span>
+						</div>
+						<span className="font-medium">{entry.actor}</span>
+						<span className="text-muted-foreground [overflow-wrap:anywhere]">
+							<Target entry={entry} />
+						</span>
+					</li>
 				))}
-			</TableBody>
-		</Table>
+			</ul>
+		</div>
 	);
 }
 
