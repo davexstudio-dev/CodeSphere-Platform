@@ -25,23 +25,7 @@ import {
 } from "@codesphere/ui/components/molecules/texts-reveal";
 import { useState } from "react";
 import { toast } from "sonner";
-
-function Specimen({
-	label,
-	children,
-}: {
-	label: string;
-	children: React.ReactNode;
-}) {
-	return (
-		<div data-toc-item className="flex flex-col gap-2">
-			<span className="font-mono text-muted-foreground text-xs">{label}</span>
-			<div className="flex flex-wrap items-center gap-3 rounded-md border p-4">
-				{children}
-			</div>
-		</div>
-	);
-}
+import { Specimen } from "./specimen";
 
 const VIEWS = ["Liste", "Grille", "Carte"] as const;
 
@@ -63,7 +47,7 @@ export function MotionSpecimens() {
 						<TabsTrigger value="c">Tags</TabsTrigger>
 					</TabsList>
 					<TabsContent value="a" className="text-muted-foreground text-sm">
-						Le pastille glisse d'un onglet à l'autre.
+						La pastille glisse d'un onglet à l'autre.
 					</TabsContent>
 					<TabsContent value="b" className="text-muted-foreground text-sm">
 						Réponses.

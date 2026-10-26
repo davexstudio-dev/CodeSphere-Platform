@@ -6,6 +6,7 @@
 		"build": "bun run roadmap:build && bun run build:sw && tsc -b ../../packages/contract && next build",
 		"build:sw": "bun scripts/build-sw.mjs",
 		"roadmap:build": "bun scripts/build-roadmap.mjs",
+		"ds:sources": "bun scripts/build-ds-sources.mjs",
 		"check-types": "tsc -b ../../packages/contract && next typegen && tsc --noEmit && tsc --noEmit -p src/sw",
 		"start": "next start",
 		"env:generate": "varlock codegen",
