@@ -40,7 +40,7 @@ function AdminMasterDetail({
 	...props
 }: AdminMasterDetailProps) {
 	return (
-		<div data-slot="admin-master-detail" className="@container min-w-0">
+		<div data-slot="admin-master-detail" className="@container w-full min-w-0">
 			<div
 				className={cn(
 					"flex @min-[46rem]:grid @min-[46rem]:grid-cols-[minmax(14rem,20rem)_minmax(0,1fr)] flex-col @min-[46rem]:items-start gap-6",
