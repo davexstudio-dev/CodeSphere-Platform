@@ -107,7 +107,15 @@ jobs:
       # GHSA-5j98-mcp5-4vw2 (glob 10.3.3): command injection through the glob CLI's -c/--cmd
       # flag. It reaches us only through @opennextjs/cloudflare, a build tool that calls the
       # library, never the CLI, on our own code. Revisit when OpenNext updates its glob range.
+      # GHSA-mrhx-c7xc-m3w5 (zod 3.25.76): memory use on oversized constrained collections. The
+      # 3.x copy is the shadcn CLI's own (a development tool that only reads our registry files);
+      # every package of ours is on zod 4.6.7. Revisit when the shadcn CLI moves to zod 4.
+      # GHSA-xjj6-f33q-929c (undici 7.29.1): DoS on a response with excessive content-encodings.
+      # miniflare pins it exactly, and only the local Workers emulator (dev and preview builds)
+      # uses it, against our own origin. Revisit on a miniflare release that bumps it.
       - run: >
           bun audit --audit-level=high
           --ignore=GHSA-vfj7-8cjw-p6xm
           --ignore=GHSA-5j98-mcp5-4vw2
+          --ignore=GHSA-mrhx-c7xc-m3w5
+          --ignore=GHSA-xjj6-f33q-929c
