@@ -1,5 +1,9 @@
 import { Badge } from "@codesphere/ui/components/atoms/badge";
 import {
+	type RowAction,
+	RowActions,
+} from "@codesphere/ui/components/molecules/row-actions";
+import {
 	Table,
 	TableBody,
 	TableCell,
@@ -20,7 +24,17 @@ type AuditEntry = {
 	reason?: string;
 };
 
-type AuditLogProps = { entries: readonly AuditEntry[] };
+type AuditLogProps = {
+	entries: readonly AuditEntry[];
+	/**
+	 * What a row's `⋯` menu offers. Without it the journal stays read-only and shows no Actions
+	 * column, as on the pages that cannot act on an entry.
+	 */
+	actionsOf?: (entry: AuditEntry) => readonly RowAction[];
+};
+
+const rowLabel = (entry: AuditEntry) =>
+	`Actions pour ${entry.action} · ${entry.target}`;
 
 const ActionBadge = ({ entry }: { entry: AuditEntry }) => (
 	<Badge
@@ -52,7 +66,7 @@ const Target = ({ entry }: { entry: AuditEntry }) => (
  * query, as for AdminMasterDetail: the sidebar takes 16 rem of a tablet's width). The table comes
  * first in the DOM so `first()` text lookups land on the visible copy on desktop.
  */
-function AuditLog({ entries }: AuditLogProps) {
+function AuditLog({ entries, actionsOf }: AuditLogProps) {
 	return (
 		<div data-slot="audit-log" className="@container min-w-0">
 			<div className="@max-[40rem]:hidden">
@@ -63,6 +77,11 @@ function AuditLog({ entries }: AuditLogProps) {
 							<TableHead>Acteur</TableHead>
 							<TableHead>Action</TableHead>
 							<TableHead>Cible</TableHead>
+							{actionsOf && (
+								<TableHead className="w-10 text-right">
+									<span className="sr-only">Actions</span>
+								</TableHead>
+							)}
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -78,6 +97,14 @@ function AuditLog({ entries }: AuditLogProps) {
 								<TableCell className="text-muted-foreground [overflow-wrap:anywhere]">
 									<Target entry={entry} />
 								</TableCell>
+								{actionsOf && (
+									<TableCell className="text-right">
+										<RowActions
+											label={rowLabel(entry)}
+											actions={actionsOf(entry)}
+										/>
+									</TableCell>
+								)}
 							</TableRow>
 						))}
 					</TableBody>
@@ -91,8 +118,16 @@ function AuditLog({ entries }: AuditLogProps) {
 					>
 						<div className="flex flex-wrap items-center justify-between gap-2">
 							<ActionBadge entry={entry} />
-							<span className="font-mono text-muted-foreground text-xs">
-								{entry.at}
+							<span className="flex items-center gap-1">
+								<span className="font-mono text-muted-foreground text-xs">
+									{entry.at}
+								</span>
+								{actionsOf && (
+									<RowActions
+										label={rowLabel(entry)}
+										actions={actionsOf(entry)}
+									/>
+								)}
 							</span>
 						</div>
 						<span className="font-medium">{entry.actor}</span>

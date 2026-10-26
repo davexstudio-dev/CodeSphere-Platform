@@ -213,7 +213,11 @@ import {
 import { TagPicker } from "@codesphere/ui/components/organisms/tag-picker";
 import {
 	BookOpenIcon,
+	DownloadIcon,
+	ExternalLinkIcon,
+	EyeIcon,
 	FileTextIcon,
+	FunnelIcon,
 	InfoIcon,
 	SearchIcon,
 	TriangleAlertIcon,
@@ -359,6 +363,7 @@ export default function DesignSystemPage() {
 	const [tablePage, setTablePage] = useState(1);
 	const [tableChecked, setTableChecked] = useState<Selection>(NO_SELECTION);
 	const [tableReasonOpen, setTableReasonOpen] = useState(false);
+	const [auditNote, setAuditNote] = useState<string | null>(null);
 	const [checked, setChecked] = useState(false);
 	const [vote, setVote] = useState<Vote | null>("up");
 	const [step, setStep] = useState(1);
@@ -1240,8 +1245,57 @@ export default function DesignSystemPage() {
 						</div>
 					</Specimen>
 					<Specimen label="AuditLog (données d'exemple)">
-						<div className="w-full">
-							<AuditLog entries={auditEntries.slice(0, 4)} />
+						<div className="flex w-full flex-col gap-2">
+							<AuditLog
+								entries={auditEntries.slice(0, 4)}
+								actionsOf={(entry) => [
+									{
+										id: "detail",
+										label: "Voir le détail",
+										icon: <EyeIcon />,
+										onSelect: () =>
+											setAuditNote(`Détail de « ${entry.action} » ouvert`),
+									},
+									{
+										id: "by-actor",
+										label: "Filtrer par acteur",
+										icon: <FunnelIcon />,
+										onSelect: () =>
+											setAuditNote(
+												`Journal filtré sur l'acteur ${entry.actor}`,
+											),
+									},
+									{
+										id: "by-target",
+										label: "Filtrer par cible",
+										icon: <FunnelIcon />,
+										onSelect: () =>
+											setAuditNote(
+												`Journal filtré sur la cible ${entry.target}`,
+											),
+									},
+									{
+										id: "open-target",
+										label: "Ouvrir la cible",
+										icon: <ExternalLinkIcon />,
+										onSelect: () =>
+											setAuditNote(`Cible ${entry.target} ouverte`),
+									},
+									{
+										id: "export",
+										label: "Exporter en CSV",
+										icon: <DownloadIcon />,
+										// Réservé à `audit:export` : grisé pour un Moderator.
+										disabled: entry.actor !== "admin@codesphere",
+										onSelect: () =>
+											setAuditNote("Export CSV de la sélection filtrée lancé"),
+									},
+								]}
+							/>
+							<p aria-live="polite" className="text-muted-foreground text-xs">
+								{auditNote ??
+									"Ouvrez le menu ⋯ d'une ligne. L'export est grisé pour les acteurs sans le droit audit:export."}
+							</p>
 						</div>
 					</Specimen>
 					<Specimen label="KpiGrid">
