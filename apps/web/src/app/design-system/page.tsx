@@ -124,6 +124,7 @@ import { ReasonField } from "@codesphere/ui/components/molecules/reason-field";
 import { RelatedQuestions } from "@codesphere/ui/components/molecules/related-questions";
 import { RowActions } from "@codesphere/ui/components/molecules/row-actions";
 import { SaveBar } from "@codesphere/ui/components/molecules/save-bar";
+import { CountrySelect } from "@codesphere/ui/components/molecules/country-select";
 import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { SegmentedControl } from "@codesphere/ui/components/molecules/segmented-control";
 import {
@@ -359,6 +360,7 @@ export default function DesignSystemPage() {
 	const [scrollOrientation, setScrollOrientation] =
 		useState<(typeof SCROLL_ORIENTATIONS)[number]>("vertical");
 	const [scrollRows, setScrollRows] = useState(20);
+	const [country, setCountry] = useState("");
 	const [scrollHeight, setScrollHeight] = useState(176);
 	const [checked, setChecked] = useState(false);
 	const [vote, setVote] = useState<Vote | null>("up");
@@ -1453,6 +1455,13 @@ export default function DesignSystemPage() {
 							onValueChange={setPickedTags}
 							onSubmit={() => {}}
 							onSkip={() => {}}
+						/>
+					</Specimen>
+					<Specimen label="CountrySelect — recherche par nom, liste défilante">
+						<CountrySelect
+							value={country}
+							onValueChange={setCountry}
+							ariaLabel="Pays"
 						/>
 					</Specimen>
 					<Specimen label="FeedFilters — langue et pays">

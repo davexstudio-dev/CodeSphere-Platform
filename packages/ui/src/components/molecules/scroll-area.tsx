@@ -2,7 +2,8 @@
 
 // From the shadcn registry (`shadcn add scroll-area`, base-lyra), with two changes: `orientation`
 // on ScrollArea picks which bars it shows (the registry version only has the vertical one, and a
-// ScrollBar given as a child would land inside the viewport), and the thumb is rounded.
+// ScrollBar given as a child would land inside the viewport), the thumb is rounded, and the root
+// is a flex column so that a `max-h-*`, a fixed height or a flex-1 slot bounds the viewport.
 import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area";
 import { cn } from "@codesphere/ui/lib/utils";
 
@@ -20,12 +21,12 @@ function ScrollArea({
 	return (
 		<ScrollAreaPrimitive.Root
 			data-slot="scroll-area"
-			className={cn("relative", className)}
+			className={cn("relative flex min-h-0 min-w-0 flex-col", className)}
 			{...props}
 		>
 			<ScrollAreaPrimitive.Viewport
 				data-slot="scroll-area-viewport"
-				className="size-full rounded-[inherit] outline-none transition-[color,box-shadow] focus-visible:outline-1 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+				className="min-h-0 min-w-0 flex-1 rounded-[inherit] outline-none transition-[color,box-shadow] focus-visible:outline-1 focus-visible:ring-[3px] focus-visible:ring-ring/50"
 			>
 				{children}
 			</ScrollAreaPrimitive.Viewport>

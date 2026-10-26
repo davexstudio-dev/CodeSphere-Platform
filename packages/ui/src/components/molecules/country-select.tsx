@@ -2,6 +2,7 @@
 
 import { Combobox } from "@base-ui/react/combobox";
 import { Flag } from "@codesphere/ui/components/atoms/flag";
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import {
 	type CountryOption,
 	countryOptions,
@@ -128,40 +129,42 @@ function CountrySelect({
 								{l.empty}
 							</p>
 						</Combobox.Empty>
-						<Combobox.List className="max-h-72 overflow-y-auto overscroll-contain py-1 outline-0">
-							{[
-								{ title: l.africa, items: africa },
-								{ title: l.others, items: others },
-							].map(
-								(group) =>
-									group.items.length > 0 && (
-										<Combobox.Group key={group.title} items={group.items}>
-											<Combobox.GroupLabel className="px-3 pt-2 pb-1 font-medium text-muted-foreground text-xs">
-												{group.title}
-											</Combobox.GroupLabel>
-											<Combobox.Collection>
-												{(option: CountryOption) => (
-													<Combobox.Item
-														key={option.value}
-														value={option}
-														className="grid cursor-default select-none grid-cols-[1.25rem_auto_1fr] items-center gap-2 px-3 py-1.5 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-													>
-														<Combobox.ItemIndicator>
-															<CheckIcon className="size-3.5" />
-														</Combobox.ItemIndicator>
-														<span className="col-start-2 flex">
-															<Flag code={option.value} name={option.label} />
-														</span>
-														<span className="col-start-3 truncate">
-															{option.label}
-														</span>
-													</Combobox.Item>
-												)}
-											</Combobox.Collection>
-										</Combobox.Group>
-									),
-							)}
-						</Combobox.List>
+						<ScrollArea className="max-h-72">
+							<Combobox.List className="py-1 outline-0">
+								{[
+									{ title: l.africa, items: africa },
+									{ title: l.others, items: others },
+								].map(
+									(group) =>
+										group.items.length > 0 && (
+											<Combobox.Group key={group.title} items={group.items}>
+												<Combobox.GroupLabel className="px-3 pt-2 pb-1 font-medium text-muted-foreground text-xs">
+													{group.title}
+												</Combobox.GroupLabel>
+												<Combobox.Collection>
+													{(option: CountryOption) => (
+														<Combobox.Item
+															key={option.value}
+															value={option}
+															className="grid cursor-default select-none grid-cols-[1.25rem_auto_1fr] items-center gap-2 px-3 py-1.5 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+														>
+															<Combobox.ItemIndicator>
+																<CheckIcon className="size-3.5" />
+															</Combobox.ItemIndicator>
+															<span className="col-start-2 flex">
+																<Flag code={option.value} name={option.label} />
+															</span>
+															<span className="col-start-3 truncate">
+																{option.label}
+															</span>
+														</Combobox.Item>
+													)}
+												</Combobox.Collection>
+											</Combobox.Group>
+										),
+								)}
+							</Combobox.List>
+						</ScrollArea>
 					</Combobox.Popup>
 				</Combobox.Positioner>
 			</Combobox.Portal>

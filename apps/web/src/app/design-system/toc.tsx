@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@codesphere/ui/components/atoms/input";
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { cn } from "@codesphere/ui/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 
@@ -117,42 +118,44 @@ export function DesignSystemToc() {
 				value={query}
 				onChange={(event) => setQuery(event.target.value)}
 			/>
-			<nav className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1 text-sm">
-				{visible.map((section) => (
-					<div key={section.id} className="flex flex-col gap-0.5">
-						<a
-							href={`#${section.id}`}
-							data-toc-link={section.id}
-							className={cn(
-								"rounded-md px-2 py-1 font-semibold hover:bg-accent",
-								active === section.id && "text-primary",
-							)}
-						>
-							{section.label}
-						</a>
-						{section.items.map((item) => (
+			<ScrollArea className="min-h-0 flex-1">
+				<nav className="flex flex-col gap-4 pr-3 text-sm">
+					{visible.map((section) => (
+						<div key={section.id} className="flex flex-col gap-0.5">
 							<a
-								key={item.id}
-								href={`#${item.id}`}
-								data-toc-link={item.id}
-								aria-current={active === item.id ? "location" : undefined}
+								href={`#${section.id}`}
+								data-toc-link={section.id}
 								className={cn(
-									"truncate rounded-md border-transparent border-l-2 px-2 py-1 pl-4 text-muted-foreground hover:bg-accent hover:text-foreground",
-									active === item.id &&
-										"border-primary bg-accent text-foreground",
+									"rounded-md px-2 py-1 font-semibold hover:bg-accent",
+									active === section.id && "text-primary",
 								)}
 							>
-								{item.label}
+								{section.label}
 							</a>
-						))}
-					</div>
-				))}
-				{visible.length === 0 && (
-					<p className="px-2 text-muted-foreground text-xs">
-						Aucun composant ne correspond.
-					</p>
-				)}
-			</nav>
+							{section.items.map((item) => (
+								<a
+									key={item.id}
+									href={`#${item.id}`}
+									data-toc-link={item.id}
+									aria-current={active === item.id ? "location" : undefined}
+									className={cn(
+										"truncate rounded-md border-transparent border-l-2 px-2 py-1 pl-4 text-muted-foreground hover:bg-accent hover:text-foreground",
+										active === item.id &&
+											"border-primary bg-accent text-foreground",
+									)}
+								>
+									{item.label}
+								</a>
+							))}
+						</div>
+					))}
+					{visible.length === 0 && (
+						<p className="px-2 text-muted-foreground text-xs">
+							Aucun composant ne correspond.
+						</p>
+					)}
+				</nav>
+			</ScrollArea>
 		</aside>
 	);
 }

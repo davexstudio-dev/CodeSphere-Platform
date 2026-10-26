@@ -394,6 +394,13 @@
 			"packages/ui/src/components/organisms/tag-picker.tsx"
 		]
 	},
+	"CountrySelect — recherche par nom, liste défilante": {
+		"imports": "import { CountrySelect } from \"@codesphere/ui/components/molecules/country-select\";",
+		"jsx": "<CountrySelect\n\tvalue={country}\n\tonValueChange={setCountry}\n\tariaLabel=\"Pays\"\n/>",
+		"files": [
+			"packages/ui/src/components/molecules/country-select.tsx"
+		]
+	},
 	"FeedFilters — langue et pays": {
 		"imports": "import { FeedFilters } from \"@codesphere/ui/components/organisms/feed-filters\";",
 		"jsx": "<FeedFilters\n\tlanguage={feedLanguage}\n\tonLanguageChange={setFeedLanguage}\n\tcountry={feedCountry}\n\tonCountryChange={setFeedCountry}\n\tcountries={[\n\t\t{ value: \"all\", label: \"Tous les pays\" },\n\t\t{ value: \"SN\", label: \"Sénégal\" },\n\t\t{ value: \"CI\", label: \"Côte d'Ivoire\" },\n\t\t{ value: \"NG\", label: \"Nigéria\" },\n\t]}\n/>",

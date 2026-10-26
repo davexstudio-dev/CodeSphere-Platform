@@ -7,6 +7,7 @@ import {
 	AlertDescription,
 	AlertTitle,
 } from "@codesphere/ui/components/molecules/alert";
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { cn } from "@codesphere/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
@@ -76,7 +77,7 @@ export default function VitalsPage() {
 			) : report.data.countries.length === 0 ? (
 				<p className="text-muted-foreground text-sm">{t("empty")}</p>
 			) : (
-				<div className="overflow-x-auto">
+				<ScrollArea orientation="horizontal">
 					<table className="w-full text-left text-sm">
 						<thead className="text-muted-foreground">
 							<tr>
@@ -130,7 +131,7 @@ export default function VitalsPage() {
 							))}
 						</tbody>
 					</table>
-				</div>
+				</ScrollArea>
 			)}
 			<p className="text-muted-foreground text-xs">{t("note")}</p>
 		</AdminFrame>

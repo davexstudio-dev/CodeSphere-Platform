@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@codesphere/ui/components/atoms/input";
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { cn } from "@codesphere/ui/lib/utils";
 import { SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -129,31 +130,30 @@ function GroupedList<T extends GroupedListItem>({
 				</div>
 				{actions}
 			</div>
-			<nav
-				aria-label={label}
-				className="min-h-0 flex-1 overflow-y-auto rounded-md border border-border"
-			>
-				{sections.length === 0 && (
-					<p className="p-3 text-muted-foreground text-sm">{emptyText}</p>
-				)}
-				{sections.map((section) => (
-					<section key={section.key} aria-label={section.label}>
-						<h3 className="sticky top-0 z-[1] flex justify-between bg-background px-3 pt-2 pb-1 font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
-							{section.label}
-							<span className="tabular-nums">{section.items.length}</span>
-						</h3>
-						{section.items.map((item) => (
-							<ListRow
-								key={item.id}
-								name={item.name}
-								meta={item.meta}
-								selected={item.id === selectedId}
-								onClick={() => onSelect(item)}
-							/>
-						))}
-					</section>
-				))}
-			</nav>
+			<ScrollArea className="min-h-0 flex-1 rounded-md border border-border">
+				<nav aria-label={label}>
+					{sections.length === 0 && (
+						<p className="p-3 text-muted-foreground text-sm">{emptyText}</p>
+					)}
+					{sections.map((section) => (
+						<section key={section.key} aria-label={section.label}>
+							<h3 className="sticky top-0 z-[1] flex justify-between bg-background px-3 pt-2 pb-1 font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+								{section.label}
+								<span className="tabular-nums">{section.items.length}</span>
+							</h3>
+							{section.items.map((item) => (
+								<ListRow
+									key={item.id}
+									name={item.name}
+									meta={item.meta}
+									selected={item.id === selectedId}
+									onClick={() => onSelect(item)}
+								/>
+							))}
+						</section>
+					))}
+				</nav>
+			</ScrollArea>
 		</div>
 	);
 }
