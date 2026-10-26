@@ -24,7 +24,7 @@
 		"@orpc/zod": "catalog:",
 		"drizzle-orm": "catalog:",
 		"highlight.js": "11.12.0",
-		"markdown-it": "15.0.2",
+		"markdown-it": "15.0.3",
 		"sanitize-html": "2.18.0",
 		"zod": "catalog:"
 	},
