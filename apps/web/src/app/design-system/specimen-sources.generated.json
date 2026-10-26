@@ -212,6 +212,16 @@
 			"packages/ui/src/components/molecules/tabs.tsx"
 		]
 	},
+	"ScrollArea — modifiable (registre shadcn)": {
+		"imports": "import { Input } from \"@codesphere/ui/components/atoms/input\";\nimport { Label } from \"@codesphere/ui/components/atoms/label\";\nimport { ScrollArea } from \"@codesphere/ui/components/molecules/scroll-area\";\nimport { SegmentedControl } from \"@codesphere/ui/components/molecules/segmented-control\";",
+		"jsx": "<div className=\"flex w-full flex-col gap-4\">\n\t<div className=\"flex flex-wrap items-end gap-4\">\n\t\t<div className=\"flex flex-col gap-1.5\">\n\t\t\t<Label>Défilement</Label>\n\t\t\t<SegmentedControl\n\t\t\t\toptions={SCROLL_ORIENTATIONS}\n\t\t\t\tvalue={scrollOrientation}\n\t\t\t\tonValueChange={setScrollOrientation}\n\t\t\t\tlabels={SCROLL_LABELS}\n\t\t\t/>\n\t\t</div>\n\t\t<div className=\"flex flex-col gap-1.5\">\n\t\t\t<Label htmlFor=\"ds-scroll-rows\">Lignes</Label>\n\t\t\t<Input\n\t\t\t\tid=\"ds-scroll-rows\"\n\t\t\t\ttype=\"number\"\n\t\t\t\tmin={1}\n\t\t\t\tmax={200}\n\t\t\t\tvalue={scrollRows}\n\t\t\t\tonChange={(event) =>\n\t\t\t\t\tsetScrollRows(Number(event.target.value) || 1)\n\t\t\t\t}\n\t\t\t\tclassName=\"w-24\"\n\t\t\t/>\n\t\t</div>\n\t\t<div className=\"flex flex-col gap-1.5\">\n\t\t\t<Label htmlFor=\"ds-scroll-height\">Hauteur (px)</Label>\n\t\t\t<Input\n\t\t\t\tid=\"ds-scroll-height\"\n\t\t\t\ttype=\"number\"\n\t\t\t\tmin={80}\n\t\t\t\tmax={480}\n\t\t\t\tstep={16}\n\t\t\t\tvalue={scrollHeight}\n\t\t\t\tonChange={(event) =>\n\t\t\t\t\tsetScrollHeight(Number(event.target.value) || 80)\n\t\t\t\t}\n\t\t\t\tclassName=\"w-28\"\n\t\t\t/>\n\t\t</div>\n\t</div>\n\t<ScrollArea\n\t\t// Remounted when the content changes: the bars are measured on mount and on scroll.\n\t\tkey={`${scrollOrientation}-${scrollRows}-${scrollHeight}`}\n\t\torientation={scrollOrientation}\n\t\tstyle={{ height: scrollHeight }}\n\t\tclassName=\"w-full rounded-md border\"\n\t>\n\t\t<ul className=\"divide-y\">\n\t\t\t{Array.from({ length: scrollRows }, (_, row) => (\n\t\t\t\t<li\n\t\t\t\t\tkey={row}\n\t\t\t\t\tclassName=\"whitespace-nowrap px-3 py-2 text-sm\"\n\t\t\t\t>\n\t\t\t\t\tLigne {row + 1}\n\t\t\t\t\t{scrollOrientation !== \"vertical\" &&\n\t\t\t\t\t\t\" — un contenu volontairement long pour déborder sur la largeur et montrer la barre horizontale du composant, quelle que soit la largeur de la colonne dans laquelle il s'affiche : encore quelques mots pour être sûr\"}\n\t\t\t\t</li>\n\t\t\t))}\n\t\t</ul>\n\t</ScrollArea>\n</div>",
+		"files": [
+			"packages/ui/src/components/atoms/input.tsx",
+			"packages/ui/src/components/atoms/label.tsx",
+			"packages/ui/src/components/molecules/scroll-area.tsx",
+			"packages/ui/src/components/molecules/segmented-control.tsx"
+		]
+	},
 	"Collapsible — question repliable": {
 		"imports": "import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from \"@codesphere/ui/components/molecules/collapsible\";",
 		"jsx": "<Collapsible className=\"w-full max-w-md\" defaultOpen>\n\t<CollapsibleTrigger>\n\t\tComment intégrer Orange Money en Node.js ?\n\t</CollapsibleTrigger>\n\t<CollapsiblePanel>\n\t\t<p className=\"pt-2 text-muted-foreground text-sm\">\n\t\t\tJ'appelle l'endpoint de paiement depuis mon backend mais le\n\t\t\tcallback n'arrive jamais en local.\n\t\t</p>\n\t</CollapsiblePanel>\n</Collapsible>",

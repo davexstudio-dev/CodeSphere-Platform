@@ -124,6 +124,7 @@ import { ReasonField } from "@codesphere/ui/components/molecules/reason-field";
 import { RelatedQuestions } from "@codesphere/ui/components/molecules/related-questions";
 import { RowActions } from "@codesphere/ui/components/molecules/row-actions";
 import { SaveBar } from "@codesphere/ui/components/molecules/save-bar";
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { SegmentedControl } from "@codesphere/ui/components/molecules/segmented-control";
 import {
 	Select,
@@ -329,6 +330,13 @@ const COLOR_TOKENS = [
 	{ name: "border", className: "bg-border" },
 ] as const;
 
+const SCROLL_ORIENTATIONS = ["vertical", "horizontal", "both"] as const;
+const SCROLL_LABELS = {
+	vertical: "Vertical",
+	horizontal: "Horizontal",
+	both: "Les deux",
+};
+
 const ADMIN_GROUPS = [
 	{ key: "active", label: "Actifs" },
 	{ key: "suspended", label: "Suspendus" },
@@ -348,6 +356,10 @@ export default function DesignSystemPage() {
 	const [tableChecked, setTableChecked] = useState<Selection>(NO_SELECTION);
 	const [tableReasonOpen, setTableReasonOpen] = useState(false);
 	const [auditNote, setAuditNote] = useState<string | null>(null);
+	const [scrollOrientation, setScrollOrientation] =
+		useState<(typeof SCROLL_ORIENTATIONS)[number]>("vertical");
+	const [scrollRows, setScrollRows] = useState(20);
+	const [scrollHeight, setScrollHeight] = useState(176);
 	const [checked, setChecked] = useState(false);
 	const [vote, setVote] = useState<Vote | null>("up");
 	const [step, setStep] = useState(1);
@@ -941,6 +953,70 @@ export default function DesignSystemPage() {
 							</TabsContent>
 							<TabsContent value="prix">Contenu de l'onglet Prix.</TabsContent>
 						</Tabs>
+					</Specimen>
+					<Specimen label="ScrollArea — modifiable (registre shadcn)">
+						<div className="flex w-full flex-col gap-4">
+							<div className="flex flex-wrap items-end gap-4">
+								<div className="flex flex-col gap-1.5">
+									<Label>Défilement</Label>
+									<SegmentedControl
+										options={SCROLL_ORIENTATIONS}
+										value={scrollOrientation}
+										onValueChange={setScrollOrientation}
+										labels={SCROLL_LABELS}
+									/>
+								</div>
+								<div className="flex flex-col gap-1.5">
+									<Label htmlFor="ds-scroll-rows">Lignes</Label>
+									<Input
+										id="ds-scroll-rows"
+										type="number"
+										min={1}
+										max={200}
+										value={scrollRows}
+										onChange={(event) =>
+											setScrollRows(Number(event.target.value) || 1)
+										}
+										className="w-24"
+									/>
+								</div>
+								<div className="flex flex-col gap-1.5">
+									<Label htmlFor="ds-scroll-height">Hauteur (px)</Label>
+									<Input
+										id="ds-scroll-height"
+										type="number"
+										min={80}
+										max={480}
+										step={16}
+										value={scrollHeight}
+										onChange={(event) =>
+											setScrollHeight(Number(event.target.value) || 80)
+										}
+										className="w-28"
+									/>
+								</div>
+							</div>
+							<ScrollArea
+								// Remounted when the content changes: the bars are measured on mount and on scroll.
+								key={`${scrollOrientation}-${scrollRows}-${scrollHeight}`}
+								orientation={scrollOrientation}
+								style={{ height: scrollHeight }}
+								className="w-full rounded-md border"
+							>
+								<ul className="divide-y">
+									{Array.from({ length: scrollRows }, (_, row) => (
+										<li
+											key={row}
+											className="whitespace-nowrap px-3 py-2 text-sm"
+										>
+											Ligne {row + 1}
+											{scrollOrientation !== "vertical" &&
+												" — un contenu volontairement long pour déborder sur la largeur et montrer la barre horizontale du composant, quelle que soit la largeur de la colonne dans laquelle il s'affiche : encore quelques mots pour être sûr"}
+										</li>
+									))}
+								</ul>
+							</ScrollArea>
+						</div>
 					</Specimen>
 					<Specimen label="Collapsible — question repliable">
 						<Collapsible className="w-full max-w-md" defaultOpen>
