@@ -11,16 +11,19 @@ function Tabs({ className, ...props }: TabsPrimitive.Root.Props) {
 	);
 }
 
-function TabsList({ className, ...props }: TabsPrimitive.List.Props) {
+function TabsList({ className, children, ...props }: TabsPrimitive.List.Props) {
 	return (
 		<TabsPrimitive.List
 			data-slot="tabs-list"
 			className={cn(
-				"inline-flex w-fit items-center gap-1 rounded-full border border-border bg-card p-1 text-sm",
+				"relative inline-flex w-fit items-center gap-1 rounded-full border border-border bg-card p-1 text-sm",
 				className,
 			)}
 			{...props}
-		/>
+		>
+			{children}
+			<TabsPrimitive.Indicator className="t-tabs-pill bg-primary" />
+		</TabsPrimitive.List>
 	);
 }
 
@@ -29,7 +32,7 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
 		<TabsPrimitive.Tab
 			data-slot="tabs-trigger"
 			className={cn(
-				"rounded-full px-4 py-1 text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 data-[active]:bg-primary data-[active]:text-primary-foreground",
+				"relative z-10 rounded-full px-4 py-1 text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 data-[active]:text-primary-foreground",
 				className,
 			)}
 			{...props}

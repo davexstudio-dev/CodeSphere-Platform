@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./transitions/tokens.css";
+@import "./transitions/menu-dropdown.css";
+@import "./transitions/tabs-sliding.css";
+@import "./transitions/texts-reveal.css";
+@import "./transitions/panel-reveal.css";
+@import "./transitions/skeleton-reveal.css";
+@import "./transitions/toast.css";
+@import "./transitions/success-check.css";
+@import "./transitions/error-shake.css";
+@import "./transitions/toggle.css";
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
 
@@ -173,8 +183,8 @@
 }
 
 @utility motion-rise {
-	animation: motion-rise 320ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-	animation-delay: calc(min(var(--i, 0), 8) * 55ms);
+	animation: motion-rise 320ms var(--ease-smooth-out) both;
+	animation-delay: calc(min(var(--i, 0), 8) * var(--duration-stagger));
 	@media (prefers-reduced-motion: reduce) {
 		animation: none;
 	}

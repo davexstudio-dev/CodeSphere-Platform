@@ -6,6 +6,7 @@ import {
 	AlertDescription,
 	AlertTitle,
 } from "@codesphere/ui/components/molecules/alert";
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -51,7 +52,7 @@ export default function ReputationFlagsPage() {
 			) : items.length === 0 ? (
 				<p className="text-muted-foreground text-sm">{t("empty")}</p>
 			) : (
-				<div className="overflow-x-auto">
+				<ScrollArea orientation="horizontal">
 					<table className="w-full text-left text-sm">
 						<thead className="text-muted-foreground">
 							<tr>
@@ -74,7 +75,7 @@ export default function ReputationFlagsPage() {
 							))}
 						</tbody>
 					</table>
-				</div>
+				</ScrollArea>
 			)}
 			{flags.hasNextPage && (
 				<Button

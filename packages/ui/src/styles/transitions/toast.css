@@ -1,0 +1,28 @@
+/* Toast open / close (transitions.dev 22), applied to Sonner. Sonner owns the position and the
+   stacking (its transform), so only the blur and the timing come from the tokens: slower in than
+   out. The doubled attribute selector outranks the stylesheet Sonner injects at runtime. */
+[data-sonner-toaster] [data-sonner-toast] {
+	filter: blur(var(--toast-blur));
+	transition:
+		transform var(--toast-open) var(--toast-ease),
+		opacity var(--toast-open) var(--toast-ease),
+		filter var(--toast-open) var(--toast-ease),
+		height var(--toast-open) var(--toast-ease),
+		box-shadow 200ms;
+}
+[data-sonner-toaster] [data-sonner-toast][data-mounted="true"] {
+	filter: none;
+}
+[data-sonner-toaster] [data-sonner-toast][data-removed="true"] {
+	filter: blur(var(--toast-blur));
+	transition-duration:
+		var(--toast-close), var(--toast-close), var(--toast-close),
+		var(--toast-close), 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-sonner-toaster] [data-sonner-toast] {
+		transition: none !important;
+		filter: none;
+	}
+}

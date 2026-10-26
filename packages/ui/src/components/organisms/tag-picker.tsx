@@ -1,6 +1,10 @@
 "use client";
 
 import { Button } from "@codesphere/ui/components/atoms/button";
+import {
+	RevealLine,
+	TextsReveal,
+} from "@codesphere/ui/components/molecules/texts-reveal";
 import { cn } from "@codesphere/ui/lib/utils";
 
 type TagPickerProps = Omit<
@@ -70,10 +74,18 @@ function TagPicker({
 			)}
 			{...props}
 		>
-			<header className="flex flex-col gap-1">
-				<h2 className="font-semibold text-xl tracking-tight">{l.title}</h2>
-				<p className="text-muted-foreground text-sm">{l.lead(min)}</p>
-			</header>
+			<TextsReveal className="flex flex-col gap-1">
+				<RevealLine
+					as="h2"
+					line={1}
+					className="font-semibold text-xl tracking-tight"
+				>
+					{l.title}
+				</RevealLine>
+				<RevealLine as="p" line={2} className="text-muted-foreground text-sm">
+					{l.lead(min)}
+				</RevealLine>
+			</TextsReveal>
 			<ul className="flex flex-wrap gap-2">
 				{tags.map((tag, index) => {
 					const selected = value.includes(tag);

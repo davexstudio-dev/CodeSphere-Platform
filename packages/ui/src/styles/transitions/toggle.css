@@ -1,0 +1,13 @@
+/* Toggle (transitions.dev 27). Upstream plays a two-step overshoot keyframe; the Switch already
+   moves its thumb with the `translate` property, so a single transition with an overshooting
+   cubic-bezier gives the same settle without a keyframe that would also run on first paint. */
+.t-toggle-thumb {
+	transition: translate var(--toggle-dur) var(--toggle-ease);
+	will-change: translate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-toggle-thumb {
+		transition: none !important;
+	}
+}

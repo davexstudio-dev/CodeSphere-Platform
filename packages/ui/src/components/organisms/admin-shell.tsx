@@ -46,7 +46,7 @@ function AdminShell({
 			data-slot="admin-shell"
 			data-collapsed={collapsed}
 			className={cn(
-				"min-h-svh bg-background transition-[grid-template-columns] duration-200 md:grid",
+				"min-h-svh bg-background transition-[grid-template-columns] duration-250 ease-(--ease-smooth-out) md:grid",
 				collapsed ? "md:grid-cols-[4.5rem_1fr]" : "md:grid-cols-[16rem_1fr]",
 				className,
 			)}

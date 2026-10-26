@@ -9,6 +9,7 @@ import {
 	getTextContent,
 	splitLines,
 } from "@codesphere/ui/components/molecules/code-block/utils";
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { cn } from "@codesphere/ui/lib/utils";
 import { Check, Copy } from "lucide-react";
 import type React from "react";
@@ -130,6 +131,7 @@ export const CodeBlock = memo(function CodeBlock({
 					</span>
 					{showCopyButton && (
 						<button
+							type="button"
 							onClick={handleCopy}
 							className="flex cursor-pointer items-center gap-1.5 rounded text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground"
 							aria-label="Copy code"
@@ -151,38 +153,40 @@ export const CodeBlock = memo(function CodeBlock({
 			)}
 
 			{/* Code content */}
-			<pre className="min-h-0 flex-1 overflow-auto p-4">
-				<code className={cn("grid font-mono", textSize || "text-xs")}>
-					{lines.map((line, i) => (
-						<span
-							key={i}
-							className={cn(
-								"grid gap-6",
-								showLineNumbers ? "grid-cols-[auto_1fr]" : "grid-cols-1",
-							)}
-						>
-							{showLineNumbers && (
-								<span className="min-w-[2ch] select-none text-right text-xs text-zinc-600 leading-6">
-									{i + 1}
-								</span>
-							)}
-							<span className="whitespace-pre leading-6">
-								{tokenizedLines ? (
-									<HighlightedLine
-										tokens={
-											tokenizedLines[i]?.tokens ?? [
-												{ type: null, content: line || " " },
-											]
-										}
-									/>
-								) : (
-									line || " "
+			<ScrollArea orientation="both" className="min-h-0 flex-1">
+				<pre className="p-4">
+					<code className={cn("grid font-mono", textSize || "text-xs")}>
+						{lines.map((line, i) => (
+							<span
+								key={i}
+								className={cn(
+									"grid gap-6",
+									showLineNumbers ? "grid-cols-[auto_1fr]" : "grid-cols-1",
 								)}
+							>
+								{showLineNumbers && (
+									<span className="min-w-[2ch] select-none text-right text-xs text-zinc-600 leading-6">
+										{i + 1}
+									</span>
+								)}
+								<span className="whitespace-pre leading-6">
+									{tokenizedLines ? (
+										<HighlightedLine
+											tokens={
+												tokenizedLines[i]?.tokens ?? [
+													{ type: null, content: line || " " },
+												]
+											}
+										/>
+									) : (
+										line || " "
+									)}
+								</span>
 							</span>
-						</span>
-					))}
-				</code>
-			</pre>
+						))}
+					</code>
+				</pre>
+			</ScrollArea>
 		</div>
 	);
 });
@@ -233,6 +237,7 @@ export const CompactCodeBlock = memo(function CompactCodeBlock({
 			)}
 		>
 			<button
+				type="button"
 				onClick={handleCopy}
 				className="absolute top-1 right-1 z-10 cursor-pointer rounded border border-border bg-background/80 p-1.5 opacity-0 transition-opacity hover:bg-background group-hover/codeblock:opacity-100"
 				aria-label="Copy code"
