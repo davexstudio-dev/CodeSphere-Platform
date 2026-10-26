@@ -131,6 +131,7 @@ export const CodeBlock = memo(function CodeBlock({
 					</span>
 					{showCopyButton && (
 						<button
+							type="button"
 							onClick={handleCopy}
 							className="flex cursor-pointer items-center gap-1.5 rounded text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground"
 							aria-label="Copy code"
@@ -236,6 +237,7 @@ export const CompactCodeBlock = memo(function CompactCodeBlock({
 			)}
 		>
 			<button
+				type="button"
 				onClick={handleCopy}
 				className="absolute top-1 right-1 z-10 cursor-pointer rounded border border-border bg-background/80 p-1.5 opacity-0 transition-opacity hover:bg-background group-hover/codeblock:opacity-100"
 				aria-label="Copy code"
