@@ -34,7 +34,7 @@ function Specimen({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="flex flex-col gap-2">
+		<div data-toc-item className="flex flex-col gap-2">
 			<span className="font-mono text-muted-foreground text-xs">{label}</span>
 			<div className="flex flex-wrap items-center gap-3 rounded-md border p-4">
 				{children}

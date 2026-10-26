@@ -222,6 +222,7 @@ import {
 import { useState } from "react";
 import Link from "@/components/link";
 import { MotionSpecimens } from "./motion-specimens";
+import { DesignSystemToc } from "./toc";
 import { auditEntries, moderationRows } from "./sample-data";
 
 const TABS = ["Pour toi", "Récents", "Sans réponse"] as const;
@@ -298,7 +299,7 @@ function Section({
 	children: React.ReactNode;
 }) {
 	return (
-		<section className="flex flex-col gap-4 border-t pt-8">
+		<section data-toc-section className="flex flex-col gap-4 border-t pt-8">
 			<header>
 				<h2 className="font-semibold text-xl">{title}</h2>
 				{description && (
@@ -318,7 +319,7 @@ function Specimen({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="flex flex-col gap-2">
+		<div data-toc-item className="flex flex-col gap-2">
 			<span className="font-mono text-muted-foreground text-xs">{label}</span>
 			<div className="flex flex-wrap items-center gap-3 rounded-md border p-4">
 				{children}
@@ -377,8 +378,9 @@ export default function DesignSystemPage() {
 	);
 
 	return (
-		<div className="min-h-svh">
-			<main className="mx-auto flex max-w-5xl flex-col gap-10 px-5 py-8">
+		<div className="min-h-svh lg:flex">
+			<DesignSystemToc />
+			<main className="mx-auto flex w-full min-w-0 max-w-5xl flex-col gap-10 px-5 py-8">
 				<header className="flex flex-col gap-2">
 					<Logo />
 					<h1 className="font-bold text-3xl tracking-tight">
