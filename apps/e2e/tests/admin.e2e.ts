@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import {
 	type Browser,
 	type BrowserContext,
@@ -435,6 +436,96 @@ test.describe("audit log", () => {
 		await expect(
 			page.getByText("Aucun événement pour ces filtres."),
 		).toHaveCount(0);
+	});
+
+	// #287: the ⋯ menu of a row. The Tag events come from the Tag CRUD test above.
+	const rowMenus = (page: Page) =>
+		page.getByRole("button", { name: /^Options de la ligne/ });
+
+	test("the row menu shows the detail, filters and opens the target, by keyboard too", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		await page.goto("/admin/audit");
+		await page.getByLabel("Type de cible").fill("tag");
+		await expect(rowMenus(page).first()).toBeVisible();
+
+		// Keyboard: Enter opens the menu on its first item, Enter again opens the detail.
+		await rowMenus(page).first().focus();
+		await page.keyboard.press("Enter");
+		await expect(
+			page.getByRole("menuitem", { name: "Voir le détail" }),
+		).toBeFocused();
+		await page.keyboard.press("Enter");
+		const detail = page.getByRole("dialog", { name: "Événement du journal" });
+		await expect(detail).toBeVisible();
+		await expect(detail.getByText("Identifiant de la cible")).toBeVisible();
+		await page.keyboard.press("Escape");
+		await expect(detail).toBeHidden();
+
+		// Filter by this actor, then by this target; « Réinitialiser » clears both.
+		await rowMenus(page).first().click();
+		await page
+			.getByRole("menuitem", { name: "Filtrer par cet acteur" })
+			.click();
+		await expect(page.getByLabel("Acteur (identifiant)")).not.toHaveValue("");
+		await rowMenus(page).first().click();
+		await page
+			.getByRole("menuitem", { name: "Filtrer par cette cible" })
+			.click();
+		await expect(page.getByLabel("Identifiant de cible")).not.toHaveValue("");
+		await page
+			.getByRole("button", { name: "Réinitialiser les filtres" })
+			.click();
+		await expect(page.getByLabel("Acteur (identifiant)")).toHaveValue("");
+		await expect(page.getByLabel("Identifiant de cible")).toHaveValue("");
+
+		// A Tag event leads to the Tags screen.
+		await page.getByLabel("Type de cible").fill("tag");
+		await rowMenus(page).first().click();
+		await page.getByRole("menuitem", { name: "Ouvrir la cible" }).click();
+		await expect(page).toHaveURL(/\/admin\/tags$/);
+	});
+
+	test("an Admin exports the filtered journal as CSV", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		await page.goto("/admin/audit");
+		await page.getByLabel("Type de cible").fill("tag");
+		await expect(rowMenus(page).first()).toBeVisible();
+		await rowMenus(page).first().click();
+		const downloading = page.waitForEvent("download");
+		await page.getByRole("menuitem", { name: "Exporter en CSV" }).click();
+		const download = await downloading;
+		expect(download.suggestedFilename()).toMatch(
+			/^audit-log-\d{4}-\d{2}-\d{2}\.csv$/,
+		);
+		const text = readFileSync(await download.path(), "utf8");
+		// A BOM for Excel, then the header and at least one Tag event.
+		expect(text.replace(/^﻿/, "")).toMatch(
+			/^id,date,actor_id,action,target_type,target_id,reason,fields,from,to\r\n/,
+		);
+		expect(text).toContain(",tag,");
+	});
+
+	test("a Moderator reads the journal but the export is greyed, with the reason", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, MODERATOR_EMAIL);
+		await page.goto("/admin/audit");
+		await expect(rowMenus(page).first()).toBeVisible();
+		await rowMenus(page).first().click();
+		const exportItem = page.getByRole("menuitem", { name: /Exporter en CSV/ });
+		await expect(exportItem).toHaveAttribute("aria-disabled", "true");
+		await expect(exportItem).toContainText("Réservé aux Admins");
+		// The rest of the menu still works.
+		await expect(
+			page.getByRole("menuitem", { name: "Voir le détail" }),
+		).toBeEnabled();
 	});
 });
 

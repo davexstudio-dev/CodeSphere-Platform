@@ -93,4 +93,100 @@ describe.skipIf(!url)("admin.auditLog.list on Postgres", () => {
 			clientAs("admin").admin.auditLog.list({ limit: 5, cursor: "nope" }),
 		).rejects.toMatchObject({ code: "BAD_REQUEST" });
 	});
+
+	test("filters by one target (#287)", async () => {
+		const targetId = `it-target-${crypto.randomUUID()}`;
+		await db.insert(auditLog).values([
+			{ actorId: adminId, action: "it.target", targetType: "test", targetId },
+			{
+				actorId: adminId,
+				action: "it.target",
+				targetType: "test",
+				targetId: `${targetId}-other`,
+			},
+		]);
+		const page = await clientAs("admin").admin.auditLog.list({
+			limit: 5,
+			targetType: "test",
+			targetId,
+		});
+		expect(page.items.map((event) => event.targetId)).toEqual([targetId]);
+	});
+});
+
+describe.skipIf(!url)("admin.auditLog.export on Postgres (#287)", () => {
+	const db = createDb({ DATABASE_URL: url ?? "" });
+	const adminId = `it-export-${crypto.randomUUID()}`;
+	const action = `it.export.${crypto.randomUUID()}`;
+
+	const clientAs = (role: string, kind = "human") =>
+		createRouterClient(appRouter, {
+			context: testContext({
+				db,
+				session: {
+					user: { id: adminId, role, kind },
+					session: { id: "s1" },
+				} as unknown as Session,
+			}),
+		});
+
+	beforeAll(async () => {
+		await db.insert(user).values({
+			id: adminId,
+			name: "Export admin",
+			email: `${adminId}@example.com`,
+			role: "admin",
+		});
+		await db.insert(auditLog).values([
+			{
+				actorId: adminId,
+				action,
+				targetType: "test",
+				targetId: "t-1",
+				details: { reason: "=1+1, risky" },
+			},
+			{ actorId: adminId, action, targetType: "test", targetId: "t-2" },
+		]);
+	});
+
+	afterAll(async () => {
+		await db.delete(auditLog).where(eq(auditLog.actorId, adminId));
+		await db.delete(user).where(eq(user.id, adminId));
+	});
+
+	test("an admin gets the filtered journal as CSV", async () => {
+		const out = await clientAs("admin").admin.auditLog.export({ action });
+		expect(out.rows).toBe(2);
+		expect(out.truncated).toBe(false);
+		const lines = out.csv.split("\r\n");
+		expect(lines[0]).toStartWith("id,date,actor_id,action");
+		expect(out.csv).toContain(`,${action},test,t-1,"'=1+1, risky",`);
+		expect(lines).toHaveLength(4);
+	});
+
+	test("a super admin may export too", async () => {
+		const out = await clientAs("super_admin").admin.auditLog.export({ action });
+		expect(out.rows).toBe(2);
+	});
+
+	test("a moderator reads the journal but gets FORBIDDEN on the export", async () => {
+		await expect(
+			clientAs("moderator").admin.auditLog.list({ limit: 5 }),
+		).resolves.toBeDefined();
+		await expect(
+			clientAs("moderator").admin.auditLog.export({ action }),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	test("a member gets FORBIDDEN", async () => {
+		await expect(
+			clientAs("member").admin.auditLog.export({ action }),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	test("an Agent with the admin role forced in the database gets FORBIDDEN", async () => {
+		await expect(
+			clientAs("admin", "agent").admin.auditLog.export({ action }),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+	});
 });

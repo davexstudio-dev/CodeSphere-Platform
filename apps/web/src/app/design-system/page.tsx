@@ -1350,6 +1350,10 @@ export default function DesignSystemPage() {
 										icon: <DownloadIcon />,
 										// Réservé à `audit:export` : grisé pour un Moderator.
 										disabled: entry.actor !== "admin@codesphere",
+										description:
+											entry.actor !== "admin@codesphere"
+												? "Réservé aux Admins"
+												: undefined,
 										onSelect: () =>
 											setAuditNote("Export CSV de la sélection filtrée lancé"),
 									},

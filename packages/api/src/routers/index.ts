@@ -1,4 +1,8 @@
-import { type contract, MEMBER_SUSPENDED_MESSAGE } from "@codesphere/contract";
+import {
+	AUDIT_EXPORT_LIMIT,
+	type contract,
+	MEMBER_SUSPENDED_MESSAGE,
+} from "@codesphere/contract";
 import { auditLog } from "@codesphere/db/schema/audit";
 import { user } from "@codesphere/db/schema/auth";
 import { questions } from "@codesphere/db/schema/questions";
@@ -26,6 +30,8 @@ import {
 } from "../admin-tags";
 import { createAgentsHandlers } from "../agents/handlers";
 import { AgentError, agentPreset, createAgentService } from "../agents/service";
+import { auditCsv } from "../audit-csv";
+import { auditEventOf, auditFilterOf } from "../audit-log";
 import { communitySnapshot } from "../community/service";
 import { decodeCursor, encodeCursor } from "../cursor";
 import { unexpectedErrors } from "../errors";
@@ -675,13 +681,7 @@ export const appRouter = impl
 							.from(auditLog)
 							.where(
 								and(
-									input.action ? eq(auditLog.action, input.action) : undefined,
-									input.actorId
-										? eq(auditLog.actorId, input.actorId)
-										: undefined,
-									input.targetType
-										? eq(auditLog.targetType, input.targetType)
-										: undefined,
+									auditFilterOf(input),
 									position
 										? or(
 												lt(auditLog.createdAt, position.createdAt),
@@ -698,19 +698,28 @@ export const appRouter = impl
 						const page = rows.slice(0, input.limit);
 						const last = page.at(-1);
 						return {
-							items: page.map((row) => ({
-								id: row.id,
-								actorId: row.actorId,
-								action: row.action,
-								targetType: row.targetType,
-								targetId: row.targetId,
-								details: row.details ?? null,
-								createdAt: row.createdAt.toISOString(),
-							})),
+							items: page.map(auditEventOf),
 							nextCursor:
 								rows.length > input.limit && last
 									? encodeCursor(last.createdAt, last.id)
 									: null,
+						};
+					}),
+				// The filtered journal as CSV (#287): `audit:export`, which a Moderator does not hold.
+				export: impl.admin.auditLog.export
+					.use(staffMay({ audit: ["export"] }))
+					.handler(async ({ context, input }) => {
+						const rows = await context.db
+							.select()
+							.from(auditLog)
+							.where(auditFilterOf(input))
+							.orderBy(desc(auditLog.createdAt), desc(auditLog.id))
+							.limit(AUDIT_EXPORT_LIMIT + 1);
+						const kept = rows.slice(0, AUDIT_EXPORT_LIMIT);
+						return {
+							csv: auditCsv(kept.map(auditEventOf)),
+							rows: kept.length,
+							truncated: rows.length > AUDIT_EXPORT_LIMIT,
 						};
 					}),
 			},

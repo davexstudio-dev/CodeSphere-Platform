@@ -20,6 +20,11 @@ type RowAction = {
 	 */
 	destructive?: boolean;
 	disabled?: boolean;
+	/**
+	 * A line under the label, read by assistive technology with it. Use it to say why an action is
+	 * greyed out (« Réservé aux Admins »): a disabled menu item cannot show a tooltip.
+	 */
+	description?: string;
 	onSelect: () => void;
 };
 
@@ -29,6 +34,18 @@ type RowActionsProps = {
 	actions: readonly RowAction[];
 	className?: string;
 };
+
+const ActionText = ({ action }: { action: RowAction }) =>
+	action.description ? (
+		<span className="flex flex-col">
+			{action.label}
+			<span className="font-normal text-muted-foreground text-xs">
+				{action.description}
+			</span>
+		</span>
+	) : (
+		action.label
+	);
 
 /** The `⋯` menu at the end of a row; destructive entries come last, after a separator. */
 function RowActions({ label, actions, className }: RowActionsProps) {
@@ -56,7 +73,7 @@ function RowActions({ label, actions, className }: RowActionsProps) {
 						onClick={action.onSelect}
 					>
 						{action.icon}
-						{action.label}
+						<ActionText action={action} />
 					</DropdownMenuItem>
 				))}
 				{safe.length > 0 && destructive.length > 0 && <DropdownMenuSeparator />}
@@ -68,7 +85,7 @@ function RowActions({ label, actions, className }: RowActionsProps) {
 						onClick={action.onSelect}
 					>
 						{action.icon}
-						{action.label}
+						<ActionText action={action} />
 					</DropdownMenuItem>
 				))}
 			</DropdownMenuContent>
