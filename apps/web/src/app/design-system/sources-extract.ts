@@ -5,8 +5,10 @@
 import { readFileSync } from "node:fs";
 
 type SpecimenSource = {
-	/** The imports and the JSX, ready to display. */
-	code: string;
+	/** The import lines of the components the JSX uses. */
+	imports: string;
+	/** The JSX as written in the page. */
+	jsx: string;
 	/** Where the components it uses live, from the repository root. */
 	files: string[];
 };
@@ -114,7 +116,8 @@ export function buildSpecimenSources(dir: URL): Record<string, SpecimenSource> {
 				});
 
 			result[label] = {
-				code: `${lines.join("\n")}${lines.length ? "\n\n" : ""}${body}\n`,
+				imports: lines.join("\n"),
+				jsx: body,
 				files: [...byModule.keys()]
 					.map(sourceFile)
 					.filter((file): file is string => file !== null)
