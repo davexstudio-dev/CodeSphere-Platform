@@ -2,16 +2,12 @@
 	"Button — variantes": {
 		"imports": "import { Button } from \"@codesphere/ui/components/atoms/button\";",
 		"jsx": "<Button>Default</Button>\n<Button variant=\"secondary\">Secondary</Button>\n<Button variant=\"outline\">Outline</Button>\n<Button variant=\"ghost\">Ghost</Button>\n<Button variant=\"destructive\">Destructive</Button>\n<Button variant=\"link\">Link</Button>\n<Button disabled>Désactivé</Button>",
-		"files": [
-			"packages/ui/src/components/atoms/button.tsx"
-		]
+		"files": ["packages/ui/src/components/atoms/button.tsx"]
 	},
 	"Button — tailles": {
 		"imports": "import { Button } from \"@codesphere/ui/components/atoms/button\";\nimport { SearchIcon } from \"lucide-react\";",
 		"jsx": "<Button size=\"xs\">xs</Button>\n<Button size=\"sm\">sm</Button>\n<Button size=\"default\">default</Button>\n<Button size=\"lg\">lg</Button>\n<Button size=\"icon\" aria-label=\"Rechercher\">\n\t<SearchIcon />\n</Button>",
-		"files": [
-			"packages/ui/src/components/atoms/button.tsx"
-		]
+		"files": ["packages/ui/src/components/atoms/button.tsx"]
 	},
 	"Input, Textarea, Label": {
 		"imports": "import { Input } from \"@codesphere/ui/components/atoms/input\";\nimport { Label } from \"@codesphere/ui/components/atoms/label\";\nimport { Textarea } from \"@codesphere/ui/components/atoms/textarea\";",
@@ -33,23 +29,17 @@
 	"Avatar — tailles et repli": {
 		"imports": "import { Avatar, AvatarBadge, AvatarFallback, AvatarGroup, AvatarGroupCount } from \"@codesphere/ui/components/atoms/avatar\";",
 		"jsx": "<Avatar size=\"sm\">\n\t<AvatarFallback>SM</AvatarFallback>\n</Avatar>\n<Avatar>\n\t<AvatarFallback>AW</AvatarFallback>\n</Avatar>\n<Avatar size=\"lg\">\n\t<AvatarFallback>LG</AvatarFallback>\n\t<AvatarBadge />\n</Avatar>\n<AvatarGroup>\n\t<Avatar>\n\t\t<AvatarFallback>AD</AvatarFallback>\n\t</Avatar>\n\t<Avatar>\n\t\t<AvatarFallback>KO</AvatarFallback>\n\t</Avatar>\n\t<AvatarGroupCount>+3</AvatarGroupCount>\n</AvatarGroup>",
-		"files": [
-			"packages/ui/src/components/atoms/avatar.tsx"
-		]
+		"files": ["packages/ui/src/components/atoms/avatar.tsx"]
 	},
 	"Blobatar — avatar de repli généré": {
 		"imports": "import { Blobatar } from \"@codesphere/ui/components/atoms/blobatar\";",
 		"jsx": "<Blobatar name=\"awa_dev\" blobatar={{ title: \"awa_dev\" }} />\n<Blobatar name=\"koffi\" blobatar={{ title: \"koffi\" }} />\n<Blobatar\n\tname=\"Claude-bot\"\n\tblobatar={{ title: \"Claude-bot\" }}\n\tsize=\"lg\"\n/>",
-		"files": [
-			"packages/ui/src/components/atoms/blobatar.tsx"
-		]
+		"files": ["packages/ui/src/components/atoms/blobatar.tsx"]
 	},
 	"Badge — variantes": {
 		"imports": "import { Badge } from \"@codesphere/ui/components/atoms/badge\";",
 		"jsx": "<Badge>Default</Badge>\n<Badge variant=\"secondary\">Secondary</Badge>\n<Badge variant=\"outline\">Outline</Badge>\n<Badge variant=\"success\">Success</Badge>\n<Badge variant=\"warning\">Warning</Badge>\n<Badge variant=\"destructive\">Destructive</Badge>",
-		"files": [
-			"packages/ui/src/components/atoms/badge.tsx"
-		]
+		"files": ["packages/ui/src/components/atoms/badge.tsx"]
 	},
 	"Switch, Separator": {
 		"imports": "import { Label } from \"@codesphere/ui/components/atoms/label\";\nimport { Separator } from \"@codesphere/ui/components/atoms/separator\";\nimport { Switch } from \"@codesphere/ui/components/atoms/switch\";",
@@ -63,30 +53,22 @@
 	"Sparkline": {
 		"imports": "import { Sparkline } from \"@codesphere/ui/components/atoms/sparkline\";",
 		"jsx": "<div className=\"w-40\">\n\t<Sparkline data={[3, 5, 4, 8, 7, 12, 11, 15]} />\n</div>\n<div className=\"w-40 text-destructive\">\n\t<Sparkline\n\t\tdata={[15, 12, 13, 9, 10, 6, 5, 3]}\n\t\tclassName=\"text-destructive\"\n\t/>\n</div>",
-		"files": [
-			"packages/ui/src/components/atoms/sparkline.tsx"
-		]
+		"files": ["packages/ui/src/components/atoms/sparkline.tsx"]
 	},
 	"StatusBadge — états": {
 		"imports": "import { StatusBadge } from \"@codesphere/ui/components/atoms/status-badge\";",
 		"jsx": "<StatusBadge status=\"accepted\" />\n<StatusBadge status=\"pending\" />\n<StatusBadge status=\"rejected\" />\n<StatusBadge status=\"draft\" />",
-		"files": [
-			"packages/ui/src/components/atoms/status-badge.tsx"
-		]
+		"files": ["packages/ui/src/components/atoms/status-badge.tsx"]
 	},
 	"Skeleton": {
 		"imports": "import { Skeleton } from \"@codesphere/ui/components/atoms/skeleton\";",
 		"jsx": "<div className=\"flex w-72 flex-col gap-2\">\n\t<Skeleton className=\"h-4 w-full\" />\n\t<Skeleton className=\"h-4 w-2/3\" />\n</div>",
-		"files": [
-			"packages/ui/src/components/atoms/skeleton.tsx"
-		]
+		"files": ["packages/ui/src/components/atoms/skeleton.tsx"]
 	},
 	"Marker — variantes": {
 		"imports": "import { Marker, MarkerContent, MarkerIcon } from \"@codesphere/ui/components/atoms/marker\";\nimport { BookOpenIcon } from \"lucide-react\";",
 		"jsx": "<div className=\"flex w-full max-w-md flex-col gap-2\">\n\t<Marker>\n\t\t<MarkerIcon>\n\t\t\t<BookOpenIcon />\n\t\t</MarkerIcon>\n\t\t<MarkerContent>Par défaut</MarkerContent>\n\t</Marker>\n\t<Marker variant=\"separator\">\n\t\t<MarkerContent>Séparateur</MarkerContent>\n\t</Marker>\n\t<Marker variant=\"border\">\n\t\t<MarkerContent>Bordure basse</MarkerContent>\n\t</Marker>\n</div>",
-		"files": [
-			"packages/ui/src/components/atoms/marker.tsx"
-		]
+		"files": ["packages/ui/src/components/atoms/marker.tsx"]
 	},
 	"Tag, AgentBadge, Logo": {
 		"imports": "import { AgentBadge } from \"@codesphere/ui/components/atoms/agent-badge\";\nimport { Logo } from \"@codesphere/ui/components/atoms/logo\";\nimport { Tag } from \"@codesphere/ui/components/atoms/tag\";",
@@ -116,37 +98,27 @@
 	"Bubble (BubbleGroup)": {
 		"imports": "import { Bubble, BubbleContent, BubbleGroup } from \"@codesphere/ui/components/molecules/bubble\";",
 		"jsx": "<BubbleGroup className=\"w-full max-w-md\">\n\t<Bubble variant=\"muted\">\n\t\t<BubbleContent>Bulle muted</BubbleContent>\n\t</Bubble>\n\t<Bubble align=\"end\">\n\t\t<BubbleContent>Bulle primaire, alignée à droite</BubbleContent>\n\t</Bubble>\n</BubbleGroup>",
-		"files": [
-			"packages/ui/src/components/molecules/bubble.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/bubble.tsx"]
 	},
 	"Attachment": {
 		"imports": "import { Attachment, AttachmentAction, AttachmentActions, AttachmentContent, AttachmentDescription, AttachmentMedia, AttachmentTitle } from \"@codesphere/ui/components/molecules/attachment\";\nimport { FileTextIcon } from \"lucide-react\";",
 		"jsx": "<Attachment className=\"w-72\">\n\t<AttachmentMedia variant=\"icon\">\n\t\t<FileTextIcon />\n\t</AttachmentMedia>\n\t<AttachmentContent>\n\t\t<AttachmentTitle>schema.sql</AttachmentTitle>\n\t\t<AttachmentDescription>12 Ko</AttachmentDescription>\n\t</AttachmentContent>\n\t<AttachmentActions>\n\t\t<AttachmentAction aria-label=\"Retirer\">×</AttachmentAction>\n\t</AttachmentActions>\n</Attachment>",
-		"files": [
-			"packages/ui/src/components/molecules/attachment.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/attachment.tsx"]
 	},
 	"CodeBlock — coloration et copie": {
 		"imports": "import { CodeBlock } from \"@codesphere/ui/components/molecules/code-block\";",
 		"jsx": "\t\t\t\t\t\t<CodeBlock language=\"tsx\" className=\"w-full\">\n\t\t\t\t\t\t\t{`export function Tag({ name }: { name: string }) {\n  return <span className=\"rounded-md\">{name}</span>;\n}`}\n\t\t\t\t\t\t</CodeBlock>",
-		"files": [
-			"packages/ui/src/components/molecules/code-block.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/code-block.tsx"]
 	},
 	"Alert — info, hors ligne, erreur": {
 		"imports": "import { Alert, AlertDescription, AlertTitle } from \"@codesphere/ui/components/molecules/alert\";\nimport { InfoIcon, TriangleAlertIcon, WifiOffIcon } from \"lucide-react\";",
 		"jsx": "<div className=\"flex w-full flex-col gap-3\">\n\t<Alert variant=\"info\">\n\t\t<InfoIcon />\n\t\t<AlertTitle>Information</AlertTitle>\n\t\t<AlertDescription>\n\t\t\tLa carte CADEV est épinglée pendant le concours.\n\t\t</AlertDescription>\n\t</Alert>\n\t<Alert variant=\"warning\">\n\t\t<WifiOffIcon />\n\t\t<AlertTitle>Vous êtes hors ligne</AlertTitle>\n\t\t<AlertDescription>\n\t\t\tVos réponses sont gardées et seront envoyées au retour du\n\t\t\tréseau.\n\t\t</AlertDescription>\n\t</Alert>\n\t<Alert variant=\"destructive\">\n\t\t<TriangleAlertIcon />\n\t\t<AlertTitle>Envoi rejeté</AlertTitle>\n\t\t<AlertDescription>\n\t\t\tVous avez déjà répondu à cette question.\n\t\t</AlertDescription>\n\t</Alert>\n</div>",
-		"files": [
-			"packages/ui/src/components/molecules/alert.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/alert.tsx"]
 	},
 	"Select — filtre de langue": {
 		"imports": "import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from \"@codesphere/ui/components/molecules/select\";",
 		"jsx": "<div className=\"w-56\">\n\t<Select\n\t\tvalue={language}\n\t\tonValueChange={setLanguage}\n\t\titems={[\n\t\t\t{ value: \"fr\", label: \"Français\" },\n\t\t\t{ value: \"en\", label: \"English\" },\n\t\t\t{ value: \"all\", label: \"Toutes les langues\" },\n\t\t]}\n\t>\n\t\t<SelectTrigger aria-label=\"Langue\">\n\t\t\t<SelectValue placeholder=\"Toutes les langues\" />\n\t\t</SelectTrigger>\n\t\t<SelectContent>\n\t\t\t<SelectItem value=\"fr\">Français</SelectItem>\n\t\t\t<SelectItem value=\"en\">English</SelectItem>\n\t\t\t<SelectItem value=\"all\">Toutes les langues</SelectItem>\n\t\t</SelectContent>\n\t</Select>\n</div>",
-		"files": [
-			"packages/ui/src/components/molecules/select.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/select.tsx"]
 	},
 	"Stepper — formulaire de question": {
 		"imports": "import { Button } from \"@codesphere/ui/components/atoms/button\";\nimport { Stepper } from \"@codesphere/ui/components/molecules/stepper\";",
@@ -159,9 +131,7 @@
 	"Timeline — frise du hackathon": {
 		"imports": "import { Timeline } from \"@codesphere/ui/components/molecules/timeline\";",
 		"jsx": "<Timeline\n\tclassName=\"w-full max-w-md\"\n\titems={[\n\t\t{\n\t\t\tdate: \"13 oct.\",\n\t\t\ttitle: \"Point de contrôle 1\",\n\t\t\tdescription: \"Staging à jour\",\n\t\t\tstate: \"done\",\n\t\t},\n\t\t{\n\t\t\tdate: \"17 oct.\",\n\t\t\ttitle: \"Point de contrôle 2\",\n\t\t\tdescription: \"Parcours de démo rejoué\",\n\t\t\tstate: \"current\",\n\t\t},\n\t\t{\n\t\t\tdate: \"24 oct.\",\n\t\t\ttitle: \"Gel des fonctionnalités\",\n\t\t\tstate: \"upcoming\",\n\t\t},\n\t\t{ date: \"25 oct.\", title: \"Soumission\", state: \"upcoming\" },\n\t]}\n/>",
-		"files": [
-			"packages/ui/src/components/molecules/timeline.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/timeline.tsx"]
 	},
 	"Dialog — confirmation": {
 		"imports": "import { Button } from \"@codesphere/ui/components/atoms/button\";\nimport { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from \"@codesphere/ui/components/molecules/dialog\";",
@@ -193,9 +163,7 @@
 	"KpiCard — hausse, baisse, métrique à minimiser": {
 		"imports": "import { KpiCard } from \"@codesphere/ui/components/molecules/kpi-card\";",
 		"jsx": "<div className=\"grid w-full gap-4 md:grid-cols-3\">\n\t<KpiCard\n\t\tlabel=\"Membres actifs\"\n\t\tvalue=\"428\"\n\t\tdelta={12.4}\n\t\thint=\"vs 7 jours\"\n\t\ttrend={[310, 322, 340, 365, 380, 402, 428]}\n\t/>\n\t<KpiCard\n\t\tlabel=\"Questions avec réponse\"\n\t\tvalue=\"74 %\"\n\t\tdelta={-3.2}\n\t\thint=\"vs 7 jours\"\n\t\ttrend={[78, 77, 76, 75, 75, 74, 74]}\n\t/>\n\t<KpiCard\n\t\tlabel=\"Questions sans réponse\"\n\t\tvalue=\"51\"\n\t\tdelta={-6.3}\n\t\tlowerIsBetter\n\t\thint=\"vs 7 jours\"\n\t\ttrend={[58, 56, 55, 54, 53, 52, 51]}\n\t/>\n</div>",
-		"files": [
-			"packages/ui/src/components/molecules/kpi-card.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/kpi-card.tsx"]
 	},
 	"ProviderButton, ThemeToggle": {
 		"imports": "import { ProviderButton } from \"@codesphere/ui/components/molecules/provider-button\";\nimport { ThemeToggle } from \"@codesphere/ui/components/molecules/theme-toggle\";",
@@ -208,9 +176,7 @@
 	"Tabs": {
 		"imports": "import { Tabs, TabsContent, TabsList, TabsTrigger } from \"@codesphere/ui/components/molecules/tabs\";",
 		"jsx": "<Tabs defaultValue=\"apercu\" className=\"w-full max-w-md\">\n\t<TabsList>\n\t\t<TabsTrigger value=\"apercu\">Aperçu</TabsTrigger>\n\t\t<TabsTrigger value=\"regles\">Règles</TabsTrigger>\n\t\t<TabsTrigger value=\"prix\">Prix</TabsTrigger>\n\t</TabsList>\n\t<TabsContent value=\"apercu\">\n\t\tContenu de l'onglet Aperçu.\n\t</TabsContent>\n\t<TabsContent value=\"regles\">\n\t\tContenu de l'onglet Règles.\n\t</TabsContent>\n\t<TabsContent value=\"prix\">Contenu de l'onglet Prix.</TabsContent>\n</Tabs>",
-		"files": [
-			"packages/ui/src/components/molecules/tabs.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/tabs.tsx"]
 	},
 	"ScrollArea — modifiable (registre shadcn)": {
 		"imports": "import { Input } from \"@codesphere/ui/components/atoms/input\";\nimport { Label } from \"@codesphere/ui/components/atoms/label\";\nimport { ScrollArea } from \"@codesphere/ui/components/molecules/scroll-area\";\nimport { SegmentedControl } from \"@codesphere/ui/components/molecules/segmented-control\";",
@@ -225,30 +191,22 @@
 	"Collapsible — question repliable": {
 		"imports": "import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from \"@codesphere/ui/components/molecules/collapsible\";",
 		"jsx": "<Collapsible className=\"w-full max-w-md\" defaultOpen>\n\t<CollapsibleTrigger>\n\t\tComment intégrer Orange Money en Node.js ?\n\t</CollapsibleTrigger>\n\t<CollapsiblePanel>\n\t\t<p className=\"pt-2 text-muted-foreground text-sm\">\n\t\t\tJ'appelle l'endpoint de paiement depuis mon backend mais le\n\t\t\tcallback n'arrive jamais en local.\n\t\t</p>\n\t</CollapsiblePanel>\n</Collapsible>",
-		"files": [
-			"packages/ui/src/components/molecules/collapsible.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/collapsible.tsx"]
 	},
 	"VoteControl": {
 		"imports": "import { VoteControl } from \"@codesphere/ui/components/molecules/vote-control\";",
 		"jsx": "<VoteControl\n\tscore={12 + (vote === \"up\" ? 1 : vote === \"down\" ? -1 : 0)}\n\tvalue={vote}\n\tonValueChange={setVote}\n/>\n<VoteControl\n\tscore={3}\n\tvalue={null}\n\tonValueChange={() => {}}\n\torientation=\"vertical\"\n\tdisabled\n/>",
-		"files": [
-			"packages/ui/src/components/molecules/vote-control.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/vote-control.tsx"]
 	},
 	"AnswerCard — acceptée, agent, longue": {
 		"imports": "import { AnswerCard } from \"@codesphere/ui/components/molecules/answer-card\";",
 		"jsx": "<div className=\"grid w-full gap-4 md:grid-cols-2\">\n\t<AnswerCard\n\t\tauthor=\"awa_dev\"\n\t\tago=\"il y a 1 h\"\n\t\tscore={12 + (vote === \"up\" ? 1 : vote === \"down\" ? -1 : 0)}\n\t\tvote={vote}\n\t\tonVoteChange={setVote}\n\t\taccepted\n\t\tonCopyCode={() => {}}\n\t\tonShare={() => {}}\n\t>\n\t\t<p>\n\t\t\tExpose un `callback_url` public avec un tunnel, puis vérifie\n\t\t\tla signature.\n\t\t</p>\n\t</AnswerCard>\n\t<AnswerCard\n\t\tauthor=\"Claude-bot\"\n\t\tagentOf=\"koffi\"\n\t\tago=\"hier\"\n\t\tscore={4}\n\t\tvote={null}\n\t\tonVoteChange={() => {}}\n\t\tvoteDisabled\n\t\tonAccept={() => {}}\n\t\tonShare={() => {}}\n\t>\n\t\t<p>\n\t\t\tRéponse d'un agent : badgée, jamais promue au-dessus d'un\n\t\t\thumain.\n\t\t</p>\n\t</AnswerCard>\n\t<AnswerCard\n\t\tauthor=\"yaya\"\n\t\tago=\"il y a 3 j\"\n\t\tscore={1}\n\t\tvote={null}\n\t\tonVoteChange={() => {}}\n\t\tlong\n\t\tclassName=\"md:col-span-2\"\n\t>\n\t\t{Array.from({ length: 6 }, (_, i) => (\n\t\t\t<p key={i} className=\"mb-2\">\n\t\t\t\tParagraphe {i + 1} d'une longue réponse, replié tant que le\n\t\t\t\tmembre ne demande pas la suite.\n\t\t\t</p>\n\t\t))}\n\t</AnswerCard>\n</div>",
-		"files": [
-			"packages/ui/src/components/molecules/answer-card.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/answer-card.tsx"]
 	},
 	"InputGroup": {
 		"imports": "import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText } from \"@codesphere/ui/components/molecules/input-group\";\nimport { SearchIcon } from \"lucide-react\";",
 		"jsx": "<InputGroup className=\"w-full max-w-md\">\n\t<InputGroupAddon>\n\t\t<InputGroupText>\n\t\t\t<SearchIcon />\n\t\t</InputGroupText>\n\t</InputGroupAddon>\n\t<InputGroupInput placeholder=\"Rechercher une question\" />\n\t<InputGroupAddon align=\"inline-end\">\n\t\t<InputGroupButton>Chercher</InputGroupButton>\n\t</InputGroupAddon>\n</InputGroup>",
-		"files": [
-			"packages/ui/src/components/molecules/input-group.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/input-group.tsx"]
 	},
 	"DropdownMenu": {
 		"imports": "import { Button } from \"@codesphere/ui/components/atoms/button\";\nimport { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from \"@codesphere/ui/components/molecules/dropdown-menu\";",
@@ -269,51 +227,37 @@
 	"SegmentedControl": {
 		"imports": "import { SegmentedControl } from \"@codesphere/ui/components/molecules/segmented-control\";",
 		"jsx": "<SegmentedControl\n\toptions={TABS}\n\tvalue={tab}\n\tonValueChange={setTab}\n/>",
-		"files": [
-			"packages/ui/src/components/molecules/segmented-control.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/segmented-control.tsx"]
 	},
 	"FollowedTags": {
 		"imports": "import { FollowedTags } from \"@codesphere/ui/components/molecules/followed-tags\";",
 		"jsx": "<FollowedTags\n\tclassName=\"w-full\"\n\ttags={[\"mobile-money\", \"nodejs\", \"ussd\", \"docker\"]}\n\thighlighted={[\"mobile-money\", \"nodejs\"]}\n\taddAction={\n\t\t<span className=\"shrink-0 rounded-full border border-dashed px-3 py-1 text-muted-foreground text-sm\">\n\t\t\t+ suivre\n\t\t</span>\n\t}\n/>",
-		"files": [
-			"packages/ui/src/components/molecules/followed-tags.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/followed-tags.tsx"]
 	},
 	"QuestionCard": {
 		"imports": "import { QuestionCard } from \"@codesphere/ui/components/molecules/question-card\";",
 		"jsx": "<div className=\"grid w-full gap-4 md:grid-cols-2\">\n\t{SAMPLE_QUESTIONS.slice(0, 2).map((question) => (\n\t\t<QuestionCard key={question.id} {...question} />\n\t))}\n</div>",
-		"files": [
-			"packages/ui/src/components/molecules/question-card.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/question-card.tsx"]
 	},
 	"CadevBanner": {
 		"imports": "import { CadevBanner } from \"@codesphere/ui/components/molecules/cadev-banner\";",
 		"jsx": "<CadevBanner\n\tclassName=\"w-full\"\n\tname=\"Hackathon CADEV 2026\"\n\tsummary=\"Concours de développement ouvert aux équipes africaines.\"\n\tclosesAt=\"2026-10-25T17:00:00Z\"\n\tnow={new Date(\"2026-10-11T22:00:00Z\")}\n\tmilestones={[\n\t\t{\n\t\t\tkey: \"submission_close\",\n\t\t\tlabel: \"Soumissions\",\n\t\t\tstartsAt: \"2026-10-25T17:00:00Z\",\n\t\t},\n\t\t{\n\t\t\tkey: \"peer_vote\",\n\t\t\tlabel: \"Votes entre pairs\",\n\t\t\tstartsAt: \"2026-10-25T18:00:00Z\",\n\t\t},\n\t\t{\n\t\t\tkey: \"public_vote\",\n\t\t\tlabel: \"Vote du public\",\n\t\t\tstartsAt: \"2026-10-27T00:00:00Z\",\n\t\t},\n\t\t{\n\t\t\tkey: \"jury\",\n\t\t\tlabel: \"Jury\",\n\t\t\tstartsAt: \"2026-11-01T00:00:00Z\",\n\t\t},\n\t]}\n\taction={\n\t\t<span className=\"rounded-full bg-background px-4 py-2 font-semibold text-primary text-sm\">\n\t\t\tVoir les règles →\n\t\t</span>\n\t}\n/>",
-		"files": [
-			"packages/ui/src/components/molecules/cadev-banner.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/cadev-banner.tsx"]
 	},
 	"CadevBanner — ruban (mobile, Member)": {
 		"imports": "import { CadevBanner } from \"@codesphere/ui/components/molecules/cadev-banner\";",
 		"jsx": "<CadevBanner\n\tclassName=\"w-full\"\n\tvariant=\"ribbon\"\n\tname=\"CADEV 2026\"\n\tsummary=\"\"\n\tclosesAt=\"2026-10-25T17:00:00Z\"\n\tnow={new Date(\"2026-10-11T22:00:00Z\")}\n/>",
-		"files": [
-			"packages/ui/src/components/molecules/cadev-banner.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/cadev-banner.tsx"]
 	},
 	"CadevBanner — rail (bureau, Member)": {
 		"imports": "import { CadevBanner } from \"@codesphere/ui/components/molecules/cadev-banner\";",
 		"jsx": "<CadevBanner\n\tclassName=\"w-72\"\n\tvariant=\"rail\"\n\tname=\"CADEV 2026\"\n\tsummary=\"\"\n\tclosesAt=\"2026-10-25T17:00:00Z\"\n\tnow={new Date(\"2026-10-11T22:00:00Z\")}\n/>",
-		"files": [
-			"packages/ui/src/components/molecules/cadev-banner.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/cadev-banner.tsx"]
 	},
 	"QuestionFeed": {
 		"imports": "import { QuestionFeed } from \"@codesphere/ui/components/organisms/question-feed\";",
 		"jsx": "<QuestionFeed className=\"w-full\" questions={SAMPLE_QUESTIONS} />",
-		"files": [
-			"packages/ui/src/components/organisms/question-feed.tsx"
-		]
+		"files": ["packages/ui/src/components/organisms/question-feed.tsx"]
 	},
 	"Message (MessageGroup)": {
 		"imports": "import { Bubble, BubbleContent } from \"@codesphere/ui/components/molecules/bubble\";\nimport { Message, MessageAvatar, MessageContent, MessageFooter, MessageGroup, MessageHeader } from \"@codesphere/ui/components/organisms/message\";",
@@ -326,51 +270,37 @@
 	"AnswerForm — écrire, aperçu, états": {
 		"imports": "import { AnswerForm } from \"@codesphere/ui/components/organisms/answer-form\";",
 		"jsx": "<div className=\"grid w-full gap-4 md:grid-cols-2\">\n\t<AnswerForm\n\t\tvalue={answerText}\n\t\tonValueChange={setAnswerText}\n\t\tpreview={<p>{answerText}</p>}\n\t\tonSubmit={() => {}}\n\t\tstatus=\"draft\"\n\t/>\n\t<AnswerForm\n\t\tvalue=\"Ma réponse hors ligne\"\n\t\tonValueChange={() => {}}\n\t\tpreview={<p>Ma réponse hors ligne</p>}\n\t\tonSubmit={() => {}}\n\t\tstatus=\"pending\"\n\t/>\n\t<AnswerForm\n\t\tvalue=\"Texte conservé après rejet\"\n\t\tonValueChange={() => {}}\n\t\tpreview={<p>Texte conservé après rejet</p>}\n\t\tonSubmit={() => {}}\n\t\tstatus=\"rejected\"\n\t\trejectionReason=\"Vous avez déjà répondu à cette question\"\n\t\tclassName=\"md:col-span-2\"\n\t/>\n</div>",
-		"files": [
-			"packages/ui/src/components/organisms/answer-form.tsx"
-		]
+		"files": ["packages/ui/src/components/organisms/answer-form.tsx"]
 	},
 	"LoginCard — SSO et consentement": {
 		"imports": "import { LoginCard } from \"@codesphere/ui/components/organisms/login-card\";",
 		"jsx": "<div className=\"w-full max-w-sm\">\n\t<LoginCard consentVersion=\"2026-10\" onProviderSelect={() => {}} />\n</div>",
-		"files": [
-			"packages/ui/src/components/organisms/login-card.tsx"
-		]
+		"files": ["packages/ui/src/components/organisms/login-card.tsx"]
 	},
 	"LoginDialog — bouton qui ouvre la connexion": {
 		"imports": "import { LoginDialog } from \"@codesphere/ui/components/organisms/login-dialog\";",
 		"jsx": "<div className=\"flex w-full justify-center py-2\">\n\t<LoginDialog\n\t\tconsentVersion=\"2026-10\"\n\t\tonProviderSelect={() => {}}\n\t/>\n</div>",
-		"files": [
-			"packages/ui/src/components/organisms/login-dialog.tsx"
-		]
+		"files": ["packages/ui/src/components/organisms/login-dialog.tsx"]
 	},
 	"ModerationTable (données d'exemple)": {
 		"imports": "import { ModerationTable } from \"@codesphere/ui/components/organisms/moderation-table\";",
 		"jsx": "<div className=\"w-full\">\n\t<ModerationTable\n\t\trows={sortModerationRows(moderationRows, moderationSort)}\n\t\tonConfirm={() => {}}\n\t\tsort={moderationSort}\n\t\tonSortChange={setModerationSort}\n\t\tmaxHeight={320}\n\t/>\n</div>",
-		"files": [
-			"packages/ui/src/components/organisms/moderation-table.tsx"
-		]
+		"files": ["packages/ui/src/components/organisms/moderation-table.tsx"]
 	},
 	"AuditLog (données d'exemple)": {
 		"imports": "import { AuditLog } from \"@codesphere/ui/components/organisms/audit-log\";\nimport { DownloadIcon, ExternalLinkIcon, EyeIcon, FunnelIcon } from \"lucide-react\";",
 		"jsx": "<div className=\"flex w-full flex-col gap-2\">\n\t<AuditLog\n\t\tentries={auditEntries.slice(0, 4)}\n\t\tactionsOf={(entry) => [\n\t\t\t{\n\t\t\t\tid: \"detail\",\n\t\t\t\tlabel: \"Voir le détail\",\n\t\t\t\ticon: <EyeIcon />,\n\t\t\t\tonSelect: () =>\n\t\t\t\t\tsetAuditNote(`Détail de « ${entry.action} » ouvert`),\n\t\t\t},\n\t\t\t{\n\t\t\t\tid: \"by-actor\",\n\t\t\t\tlabel: \"Filtrer par acteur\",\n\t\t\t\ticon: <FunnelIcon />,\n\t\t\t\tonSelect: () =>\n\t\t\t\t\tsetAuditNote(\n\t\t\t\t\t\t`Journal filtré sur l'acteur ${entry.actor}`,\n\t\t\t\t\t),\n\t\t\t},\n\t\t\t{\n\t\t\t\tid: \"by-target\",\n\t\t\t\tlabel: \"Filtrer par cible\",\n\t\t\t\ticon: <FunnelIcon />,\n\t\t\t\tonSelect: () =>\n\t\t\t\t\tsetAuditNote(\n\t\t\t\t\t\t`Journal filtré sur la cible ${entry.target}`,\n\t\t\t\t\t),\n\t\t\t},\n\t\t\t{\n\t\t\t\tid: \"open-target\",\n\t\t\t\tlabel: \"Ouvrir la cible\",\n\t\t\t\ticon: <ExternalLinkIcon />,\n\t\t\t\tonSelect: () =>\n\t\t\t\t\tsetAuditNote(`Cible ${entry.target} ouverte`),\n\t\t\t},\n\t\t\t{\n\t\t\t\tid: \"export\",\n\t\t\t\tlabel: \"Exporter en CSV\",\n\t\t\t\ticon: <DownloadIcon />,\n\t\t\t\t// Réservé à `audit:export` : grisé pour un Moderator.\n\t\t\t\tdisabled: entry.actor !== \"admin@codesphere\",\n\t\t\t\tonSelect: () =>\n\t\t\t\t\tsetAuditNote(\"Export CSV de la sélection filtrée lancé\"),\n\t\t\t},\n\t\t]}\n\t/>\n\t<p aria-live=\"polite\" className=\"text-muted-foreground text-xs\">\n\t\t{auditNote ??\n\t\t\t\"Ouvrez le menu ⋯ d'une ligne. L'export est grisé pour les acteurs sans le droit audit:export.\"}\n\t</p>\n</div>",
-		"files": [
-			"packages/ui/src/components/organisms/audit-log.tsx"
-		]
+		"files": ["packages/ui/src/components/organisms/audit-log.tsx"]
 	},
 	"KpiGrid": {
 		"imports": "import { KpiGrid } from \"@codesphere/ui/components/organisms/kpi-grid\";",
 		"jsx": "<KpiGrid\n\tclassName=\"w-full\"\n\titems={[\n\t\t{\n\t\t\tid: \"a\",\n\t\t\tlabel: \"Membres actifs\",\n\t\t\tvalue: \"428\",\n\t\t\tdelta: 12.4,\n\t\t\ttrend: [3, 5, 6, 8, 9, 12],\n\t\t},\n\t\t{\n\t\t\tid: \"b\",\n\t\t\tlabel: \"Questions posées\",\n\t\t\tvalue: \"193\",\n\t\t\tdelta: 8.1,\n\t\t\ttrend: [3, 4, 4, 6, 5, 7],\n\t\t},\n\t]}\n/>",
-		"files": [
-			"packages/ui/src/components/organisms/kpi-grid.tsx"
-		]
+		"files": ["packages/ui/src/components/organisms/kpi-grid.tsx"]
 	},
 	"AppFooter": {
 		"imports": "import { AppFooter } from \"@codesphere/ui/components/organisms/app-footer\";",
 		"jsx": "<AppFooter\n\tclassName=\"w-full rounded-md border-t-0\"\n\tversion=\"1.0.0\"\n\tsha=\"6a2db9dd7e5e2bd5b4a4c60c247cc8bb13ff90bf\"\n\tlinks={[\n\t\t{ label: \"Confidentialité\", href: \"/legal/privacy\" },\n\t\t{ label: \"Conditions\", href: \"/legal/terms\" },\n\t]}\n/>",
-		"files": [
-			"packages/ui/src/components/organisms/app-footer.tsx"
-		]
+		"files": ["packages/ui/src/components/organisms/app-footer.tsx"]
 	},
 	"Field — libellé, aide et erreur par champ": {
 		"imports": "import { Input } from \"@codesphere/ui/components/atoms/input\";\nimport { Field } from \"@codesphere/ui/components/molecules/field\";",
@@ -383,30 +313,22 @@
 	"TagInput — saisie libre et suggestions": {
 		"imports": "import { TagInput } from \"@codesphere/ui/components/molecules/tag-input\";",
 		"jsx": "<div className=\"w-full max-w-md\">\n\t<TagInput\n\t\tvalue={questionTags}\n\t\tonValueChange={setQuestionTags}\n\t\tsuggestions={[\n\t\t\t\"nodejs\",\n\t\t\t\"mobile-money\",\n\t\t\t\"ussd\",\n\t\t\t\"postgresql\",\n\t\t\t\"docker\",\n\t\t\t\"pwa\",\n\t\t]}\n\t/>\n</div>",
-		"files": [
-			"packages/ui/src/components/molecules/tag-input.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/tag-input.tsx"]
 	},
 	"TagPicker — onboarding (3 tags minimum, passable)": {
 		"imports": "import { TagPicker } from \"@codesphere/ui/components/organisms/tag-picker\";",
 		"jsx": "<TagPicker\n\tclassName=\"w-full\"\n\ttags={[\n\t\t\"mobile-money\",\n\t\t\"nodejs\",\n\t\t\"ussd\",\n\t\t\"postgresql\",\n\t\t\"docker\",\n\t\t\"pwa\",\n\t\t\"react-native\",\n\t\t\"ia\",\n\t\t\"securite\",\n\t]}\n\tvalue={pickedTags}\n\tonValueChange={setPickedTags}\n\tonSubmit={() => {}}\n\tonSkip={() => {}}\n/>",
-		"files": [
-			"packages/ui/src/components/organisms/tag-picker.tsx"
-		]
+		"files": ["packages/ui/src/components/organisms/tag-picker.tsx"]
 	},
 	"CountrySelect — recherche par nom, liste défilante": {
 		"imports": "import { CountrySelect } from \"@codesphere/ui/components/molecules/country-select\";",
 		"jsx": "<CountrySelect\n\tvalue={country}\n\tonValueChange={setCountry}\n\tariaLabel=\"Pays\"\n/>",
-		"files": [
-			"packages/ui/src/components/molecules/country-select.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/country-select.tsx"]
 	},
 	"FeedFilters — langue et pays": {
 		"imports": "import { FeedFilters } from \"@codesphere/ui/components/organisms/feed-filters\";",
 		"jsx": "<FeedFilters\n\tlanguage={feedLanguage}\n\tonLanguageChange={setFeedLanguage}\n\tcountry={feedCountry}\n\tonCountryChange={setFeedCountry}\n\tcountries={[\n\t\t{ value: \"all\", label: \"Tous les pays\" },\n\t\t{ value: \"SN\", label: \"Sénégal\" },\n\t\t{ value: \"CI\", label: \"Côte d'Ivoire\" },\n\t\t{ value: \"NG\", label: \"Nigéria\" },\n\t]}\n/>",
-		"files": [
-			"packages/ui/src/components/organisms/feed-filters.tsx"
-		]
+		"files": ["packages/ui/src/components/organisms/feed-filters.tsx"]
 	},
 	"OfflineBanner — hors ligne / synchronisation": {
 		"imports": "import { Button } from \"@codesphere/ui/components/atoms/button\";\nimport { OfflineBanner } from \"@codesphere/ui/components/molecules/offline-banner\";",
@@ -419,16 +341,12 @@
 	"RelatedQuestions — pendant la saisie du titre": {
 		"imports": "import { RelatedQuestions } from \"@codesphere/ui/components/molecules/related-questions\";",
 		"jsx": "<RelatedQuestions\n\tclassName=\"w-full max-w-lg\"\n\tquestions={[\n\t\t{\n\t\t\tid: \"r1\",\n\t\t\ttitle: \"Intégrer l'API Orange Money en Node.js\",\n\t\t\tanswers: 3,\n\t\t\tanswered: true,\n\t\t\thref: \"#\",\n\t\t},\n\t\t{\n\t\t\tid: \"r2\",\n\t\t\ttitle: \"Callback de paiement jamais reçu en local\",\n\t\t\tanswers: 1,\n\t\t\tanswered: false,\n\t\t\thref: \"#\",\n\t\t},\n\t]}\n/>",
-		"files": [
-			"packages/ui/src/components/molecules/related-questions.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/related-questions.tsx"]
 	},
 	"Countdown — clôture du hackathon": {
 		"imports": "import { Countdown } from \"@codesphere/ui/components/molecules/countdown\";",
 		"jsx": "<Countdown target=\"2026-10-25T23:59:00Z\" />\n<Countdown target=\"2026-10-01T00:00:00Z\" />",
-		"files": [
-			"packages/ui/src/components/molecules/countdown.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/countdown.tsx"]
 	},
 	"SettingsSection, SettingRow, LanguageSwitcher": {
 		"imports": "import { Switch } from \"@codesphere/ui/components/atoms/switch\";\nimport { LanguageSwitcher } from \"@codesphere/ui/components/molecules/language-switcher\";\nimport { SettingRow, SettingsSection } from \"@codesphere/ui/components/molecules/setting-row\";",
@@ -455,9 +373,7 @@
 	"MessageScroller": {
 		"imports": "import { MessageScroller, MessageScrollerContent, MessageScrollerItem, MessageScrollerProvider, MessageScrollerViewport } from \"@codesphere/ui/components/organisms/message-scroller\";",
 		"jsx": "<div className=\"h-48 w-full max-w-md\">\n\t<MessageScrollerProvider>\n\t\t<MessageScroller>\n\t\t\t<MessageScrollerViewport>\n\t\t\t\t<MessageScrollerContent>\n\t\t\t\t\t{Array.from({ length: 8 }, (_, i) => (\n\t\t\t\t\t\t<MessageScrollerItem key={i} className=\"p-2 text-sm\">\n\t\t\t\t\t\t\tMessage {i + 1}\n\t\t\t\t\t\t</MessageScrollerItem>\n\t\t\t\t\t))}\n\t\t\t\t</MessageScrollerContent>\n\t\t\t</MessageScrollerViewport>\n\t\t</MessageScroller>\n\t</MessageScrollerProvider>\n</div>",
-		"files": [
-			"packages/ui/src/components/organisms/message-scroller.tsx"
-		]
+		"files": ["packages/ui/src/components/organisms/message-scroller.tsx"]
 	},
 	"AppHeader": {
 		"imports": "import { Button } from \"@codesphere/ui/components/atoms/button\";\nimport { AppHeader } from \"@codesphere/ui/components/organisms/app-header\";",
@@ -470,9 +386,7 @@
 	"Empty — état hors-ligne": {
 		"imports": "import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from \"@codesphere/ui/components/molecules/empty\";",
 		"jsx": "<Empty className=\"w-full max-w-md\">\n\t<EmptyHeader>\n\t\t<EmptyTitle>Hors-ligne</EmptyTitle>\n\t\t<EmptyDescription>\n\t\t\tVos brouillons sont conservés localement.\n\t\t</EmptyDescription>\n\t</EmptyHeader>\n</Empty>",
-		"files": [
-			"packages/ui/src/components/molecules/empty.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/empty.tsx"]
 	},
 	"AdminMasterDetail — GroupedList + RecordSheet": {
 		"imports": "import { GroupedList } from \"@codesphere/ui/components/molecules/grouped-list\";\nimport { AdminMasterDetail } from \"@codesphere/ui/components/organisms/admin-master-detail\";\nimport { RecordFields, RecordSection, RecordSheet } from \"@codesphere/ui/components/organisms/record-sheet\";",
@@ -486,9 +400,7 @@
 	"SaveBar — modifié / inchangé": {
 		"imports": "import { SaveBar } from \"@codesphere/ui/components/molecules/save-bar\";",
 		"jsx": "<div className=\"flex w-full flex-col gap-3\">\n\t<SaveBar\n\t\tdirty\n\t\tonSave={() => setAdminEditing(false)}\n\t\tonDiscard={() => setAdminEditing(false)}\n\t/>\n\t<SaveBar dirty={false} onSave={() => {}} onDiscard={() => {}} />\n</div>",
-		"files": [
-			"packages/ui/src/components/molecules/save-bar.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/save-bar.tsx"]
 	},
 	"ConfirmTwoStep + ReasonField": {
 		"imports": "import { ConfirmTwoStep } from \"@codesphere/ui/components/molecules/confirm-two-step\";\nimport { ReasonField } from \"@codesphere/ui/components/molecules/reason-field\";",
@@ -501,9 +413,7 @@
 	"StateGate — chargement, erreur, vide": {
 		"imports": "import { StateGate } from \"@codesphere/ui/components/molecules/state-gate\";",
 		"jsx": "<div className=\"grid w-full gap-4 md:grid-cols-3\">\n\t<StateGate status=\"loading\">\n\t\t<p>Contenu</p>\n\t</StateGate>\n\t<StateGate status=\"error\" onRetry={() => {}}>\n\t\t<p>Contenu</p>\n\t</StateGate>\n\t<StateGate status=\"empty\">\n\t\t<p>Contenu</p>\n\t</StateGate>\n</div>",
-		"files": [
-			"packages/ui/src/components/molecules/state-gate.tsx"
-		]
+		"files": ["packages/ui/src/components/molecules/state-gate.tsx"]
 	},
 	"Tabs sliding — TabsList (Base UI) et SegmentedControl": {
 		"imports": "import { SegmentedControl } from \"@codesphere/ui/components/molecules/segmented-control\";\nimport { Tabs, TabsContent, TabsList, TabsTrigger } from \"@codesphere/ui/components/molecules/tabs\";",
@@ -541,9 +451,7 @@
 	"Toast — flou et durées d'ouverture/fermeture": {
 		"imports": "import { Button } from \"@codesphere/ui/components/atoms/button\";",
 		"jsx": "<Button\n\tvariant=\"outline\"\n\tsize=\"sm\"\n\tonClick={() => toast.success(\"Modifications enregistrées\")}\n>\n\tAfficher un toast\n</Button>",
-		"files": [
-			"packages/ui/src/components/atoms/button.tsx"
-		]
+		"files": ["packages/ui/src/components/atoms/button.tsx"]
 	},
 	"Success check — la coche se dessine": {
 		"imports": "import { Button } from \"@codesphere/ui/components/atoms/button\";\nimport { SuccessCheck } from \"@codesphere/ui/components/atoms/success-check\";",
@@ -564,8 +472,6 @@
 	"Toggle — le curseur se pose avec un léger dépassement": {
 		"imports": "import { Switch } from \"@codesphere/ui/components/atoms/switch\";",
 		"jsx": "<Switch aria-label=\"Exemple\" />\n<Switch aria-label=\"Exemple activé\" defaultChecked />",
-		"files": [
-			"packages/ui/src/components/atoms/switch.tsx"
-		]
+		"files": ["packages/ui/src/components/atoms/switch.tsx"]
 	}
 }
