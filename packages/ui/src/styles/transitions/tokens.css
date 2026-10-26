@@ -38,10 +38,11 @@
 	--dropdown-pre-scale: 0.97;
 	--dropdown-closing-scale: 0.99;
 	--dropdown-ease: cubic-bezier(0.22, 1, 0.36, 1);
-	/* Panel reveal: a record swaps in place, so it rises by --distance-medium, not by 100px. */
-	--panel-open-dur: 400ms;
+	/* Panel reveal: a record swaps in place at every click on the list, so it rises by
+	   --distance-base over --duration-fast, not by 100px over 400ms. */
+	--panel-open-dur: 250ms;
 	--panel-close-dur: 350ms;
-	--panel-translate-y: 12px;
+	--panel-translate-y: 8px;
 	--panel-blur: 2px;
 	--panel-ease: cubic-bezier(0.22, 1, 0.36, 1);
 	/* Success check */

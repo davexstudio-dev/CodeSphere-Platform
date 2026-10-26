@@ -122,7 +122,7 @@ function CountrySelect({
 			</Combobox.InputGroup>
 			<Combobox.Portal>
 				<Combobox.Positioner sideOffset={4} className="z-50 outline-none">
-					<Combobox.Popup className="w-[var(--anchor-width)] max-w-[var(--available-width)] origin-[var(--transform-origin)] rounded-md border border-border bg-popover text-popover-foreground shadow-md transition-[scale,opacity] duration-100 data-[ending-style]:scale-95 data-[starting-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0">
+					<Combobox.Popup className="t-dropdown w-[var(--anchor-width)] max-w-[var(--available-width)] rounded-md border border-border bg-popover text-popover-foreground shadow-md">
 						<Combobox.Empty>
 							<p className="px-3 py-4 text-muted-foreground text-sm">
 								{l.empty}

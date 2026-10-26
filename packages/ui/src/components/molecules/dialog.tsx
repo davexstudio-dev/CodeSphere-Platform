@@ -26,12 +26,12 @@ function DialogContent({
 		<DialogPrimitive.Portal>
 			<DialogPrimitive.Backdrop
 				data-slot="dialog-backdrop"
-				className="fixed inset-0 z-50 bg-black/40 transition-opacity duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0"
+				className="fixed inset-0 z-50 bg-black/40 transition-opacity duration-250 ease-(--ease-smooth-out) data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 data-[ending-style]:duration-150"
 			/>
 			<DialogPrimitive.Popup
 				data-slot="dialog-content"
 				className={cn(
-					"fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col gap-4 overflow-y-auto rounded-xl border border-border bg-card p-6 text-card-foreground shadow-lg outline-none transition duration-150 data-[ending-style]:scale-95 data-[starting-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0",
+					"fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col gap-4 overflow-y-auto rounded-xl border border-border bg-card p-6 text-card-foreground shadow-lg outline-none transition duration-250 ease-(--ease-smooth-out) data-[ending-style]:scale-[0.96] data-[starting-style]:scale-[0.96] data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 data-[ending-style]:duration-150",
 					className,
 				)}
 				{...props}
