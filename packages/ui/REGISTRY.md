@@ -8,7 +8,7 @@ Les transitions de [transitions.dev](https://transitions.dev) que l'interface ut
 modifier dans un produit, mais interdit de republier la collection.
 
 ```sh
-bun run registry:build                              # écrit registry/r/*.json (ignoré par git)
+bunx shadcn build -o registry/r                           # écrit registry/r/*.json (ignoré par git)
 bunx shadcn add ./registry/r/tabs-sliding.json      # installe l'entrée et les jetons qu'elle demande
 ```
 
