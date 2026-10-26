@@ -221,6 +221,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import Link from "@/components/link";
+import { MotionSpecimens } from "./motion-specimens";
 import { auditEntries, moderationRows } from "./sample-data";
 
 const TABS = ["Pour toi", "Récents", "Sans réponse"] as const;
@@ -1551,6 +1552,13 @@ export default function DesignSystemPage() {
 							</StateGate>
 						</div>
 					</Specimen>
+				</Section>
+
+				<Section
+					title="Mouvement"
+					description="Transitions du registre @transitions (packages/ui/REGISTRY.md) : respectent prefers-reduced-motion et le mode économie de données."
+				>
+					<MotionSpecimens />
 				</Section>
 			</main>
 		</div>

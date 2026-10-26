@@ -1,11 +1,30 @@
+"use client";
+
 import { cn } from "@codesphere/ui/lib/utils";
+import { useEffect, useState } from "react";
 
 type AdminMasterDetailProps = Omit<React.ComponentProps<"div">, "children"> & {
 	/** The list, usually a `GroupedList`: fixed on the left, it scrolls on its own. */
 	list: React.ReactNode;
 	/** The selected record, usually a `RecordSheet`. */
 	detail: React.ReactNode;
+	/** Identifies the record in `detail`: when it changes, the new record slides in (panel reveal). */
+	detailKey?: React.Key | null;
 };
+
+/** Panel reveal (transitions.dev 07): remounted per record, it rises into place once painted. */
+function RevealedDetail({ children }: { children: React.ReactNode }) {
+	const [open, setOpen] = useState(false);
+	useEffect(() => {
+		const frame = requestAnimationFrame(() => setOpen(true));
+		return () => cancelAnimationFrame(frame);
+	}, []);
+	return (
+		<div className="t-panel-slide" data-open={open}>
+			{children}
+		</div>
+	);
+}
 
 /**
  * The admin list/detail layout (#117): the list stays put on the left (sticky, under the fixed
@@ -16,6 +35,7 @@ type AdminMasterDetailProps = Omit<React.ComponentProps<"div">, "children"> & {
 function AdminMasterDetail({
 	list,
 	detail,
+	detailKey,
 	className,
 	...props
 }: AdminMasterDetailProps) {
@@ -31,7 +51,13 @@ function AdminMasterDetail({
 				<div className="@min-[46rem]:sticky @min-[46rem]:top-28 flex @min-[46rem]:max-h-[calc(100svh-8rem)] flex-col">
 					{list}
 				</div>
-				<div className="min-w-0">{detail}</div>
+				<div className="min-w-0">
+					{detailKey == null ? (
+						detail
+					) : (
+						<RevealedDetail key={detailKey}>{detail}</RevealedDetail>
+					)}
+				</div>
 			</div>
 		</div>
 	);

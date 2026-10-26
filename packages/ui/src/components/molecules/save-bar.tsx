@@ -1,5 +1,12 @@
+"use client";
+
 import { Button } from "@codesphere/ui/components/atoms/button";
+import { SuccessCheck } from "@codesphere/ui/components/atoms/success-check";
 import { cn } from "@codesphere/ui/lib/utils";
+import { useEffect, useRef, useState } from "react";
+
+/** How long the success check stays after a save went through. */
+const SAVED_MS = 2500;
 
 type SaveBarProps = {
 	/** Something differs from what was loaded: the only state in which saving is possible. */
@@ -26,6 +33,19 @@ function SaveBar({
 	discardLabel = "Annuler",
 	className,
 }: SaveBarProps) {
+	// A save went through when `saving` ends with nothing left to save: the check marks it.
+	const [saved, setSaved] = useState(false);
+	const wasSaving = useRef(false);
+	useEffect(() => {
+		if (wasSaving.current && !saving && !dirty) {
+			setSaved(true);
+			const timer = setTimeout(() => setSaved(false), SAVED_MS);
+			wasSaving.current = !!saving;
+			return () => clearTimeout(timer);
+		}
+		wasSaving.current = !!saving;
+	}, [saving, dirty]);
+
 	return (
 		<div
 			data-slot="save-bar"
@@ -44,6 +64,10 @@ function SaveBar({
 				)}
 			>
 				{dirty ? dirtyText : cleanText}
+				<SuccessCheck
+					show={saved && !dirty}
+					className="ml-1.5 size-4 align-middle text-success"
+				/>
 			</span>
 			<span className="flex gap-2">
 				<Button

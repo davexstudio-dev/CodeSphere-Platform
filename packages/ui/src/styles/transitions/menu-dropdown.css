@@ -1,0 +1,25 @@
+/* Menu dropdown (transitions.dev 05), driven by Base UI's data-starting-style / data-ending-style
+   instead of the upstream .is-open / .is-closing classes: the popup keeps its own open state. The
+   origin comes from the positioner (--transform-origin), so the menu grows from its trigger. */
+.t-dropdown {
+	transform-origin: var(--transform-origin, top left);
+	transition:
+		transform var(--dropdown-open-dur) var(--dropdown-ease),
+		opacity var(--dropdown-open-dur) var(--dropdown-ease);
+	will-change: transform, opacity;
+}
+.t-dropdown[data-starting-style] {
+	transform: scale(var(--dropdown-pre-scale));
+	opacity: 0;
+}
+.t-dropdown[data-ending-style] {
+	transform: scale(var(--dropdown-closing-scale));
+	opacity: 0;
+	transition-duration: var(--dropdown-close-dur);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-dropdown {
+		transition: none !important;
+	}
+}

@@ -109,6 +109,7 @@ export default function ModerationPage() {
 				</Alert>
 			)}
 			<AdminMasterDetail
+				detailKey={selected?.id}
 				list={
 					<>
 						<fieldset className="mb-2 flex gap-1 border-0 p-0">

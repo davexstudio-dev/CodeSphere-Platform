@@ -1,5 +1,6 @@
 "use client";
 
+import { SkeletonReveal } from "@codesphere/ui/components/molecules/skeleton-reveal";
 import { TagPicker } from "@codesphere/ui/components/organisms/tag-picker";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -63,10 +64,6 @@ export default function TagsOnboardingPage() {
 		}),
 	);
 
-	if (popular.isPending) {
-		return <p className="p-6 text-muted-foreground text-sm">{t("loading")}</p>;
-	}
-
 	const names = [
 		...new Set([
 			...(popular.data?.items.map((tag) => tag.name) ?? []),
@@ -76,24 +73,50 @@ export default function TagsOnboardingPage() {
 
 	return (
 		<div className="mx-auto w-full max-w-2xl p-4 sm:p-6">
-			<TagPicker
-				tags={names}
-				value={value}
-				onValueChange={setValue}
-				min={MIN_FOLLOWED_TAGS}
-				onSubmit={() => save.mutate(value)}
-				onSkip={() => skip.mutate()}
-				pending={save.isPending || skip.isPending}
-				labels={{
-					title: t("title"),
-					lead: (min) => t("lead", { min }),
-					missing: (count) => t("missing", { count }),
-					ready: (count) => t("ready", { count }),
-					skip: t("skip"),
-					submit: t("submit"),
-					saving: t("saving"),
-				}}
-			/>
+			<SkeletonReveal
+				ready={!popular.isPending}
+				aria-busy={popular.isPending}
+				skeleton={
+					<div
+						role="status"
+						aria-label={t("loading")}
+						className="flex flex-col gap-5 rounded-xl border border-border bg-card p-6"
+					>
+						<div className="flex flex-col gap-2">
+							<div className="h-6 w-2/3 rounded-md bg-muted" />
+							<div className="h-4 w-full rounded-md bg-muted" />
+						</div>
+						<div className="flex flex-wrap gap-2">
+							{Array.from({ length: 12 }, (_, i) => (
+								<div
+									// biome-ignore lint/suspicious/noArrayIndexKey: a fixed, static placeholder list.
+									key={i}
+									className="h-7 w-20 rounded-full bg-muted"
+								/>
+							))}
+						</div>
+					</div>
+				}
+			>
+				<TagPicker
+					tags={names}
+					value={value}
+					onValueChange={setValue}
+					min={MIN_FOLLOWED_TAGS}
+					onSubmit={() => save.mutate(value)}
+					onSkip={() => skip.mutate()}
+					pending={save.isPending || skip.isPending}
+					labels={{
+						title: t("title"),
+						lead: (min) => t("lead", { min }),
+						missing: (count) => t("missing", { count }),
+						ready: (count) => t("ready", { count }),
+						skip: t("skip"),
+						submit: t("submit"),
+						saving: t("saving"),
+					}}
+				/>
+			</SkeletonReveal>
 		</div>
 	);
 }

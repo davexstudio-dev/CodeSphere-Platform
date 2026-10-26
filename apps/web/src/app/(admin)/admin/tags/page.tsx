@@ -116,6 +116,7 @@ export default function AdminTagsPage() {
 				</Alert>
 			)}
 			<AdminMasterDetail
+				detailKey={mode === "create" ? "create" : selected?.id}
 				list={
 					<GroupedList
 						label={t("list")}

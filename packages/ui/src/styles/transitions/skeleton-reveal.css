@@ -1,0 +1,60 @@
+/* Skeleton loader and reveal (transitions.dev 14). Upstream stacks the two layers with
+   position:absolute; here they share one grid cell instead, so the wrapper keeps the height of the
+   taller layer and nothing jumps when the content lands. */
+.t-skel {
+	display: grid;
+}
+.t-skel-skeleton,
+.t-skel-content {
+	grid-area: 1 / 1;
+	min-width: 0;
+}
+
+.t-skel-skeleton {
+	z-index: 1;
+	opacity: 1;
+	filter: blur(0);
+	transition:
+		opacity var(--reveal-dur) var(--reveal-ease),
+		filter var(--reveal-dur) var(--reveal-ease);
+}
+.t-skel-content {
+	z-index: 2;
+	opacity: 0;
+	filter: blur(var(--reveal-blur));
+	transition:
+		opacity var(--reveal-dur) var(--reveal-ease),
+		filter var(--reveal-dur) var(--reveal-ease);
+}
+.t-skel.is-revealed .t-skel-skeleton {
+	opacity: 0;
+	filter: blur(var(--reveal-blur));
+	pointer-events: none;
+}
+.t-skel.is-revealed .t-skel-content {
+	opacity: 1;
+	filter: none;
+}
+
+.t-skel-skeleton.is-pulsing > * {
+	animation: t-skel-pulse var(--pulse-dur) ease-in-out var(--pulse-count);
+}
+@keyframes t-skel-pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: var(--pulse-min);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-skel-skeleton,
+	.t-skel-content {
+		transition: none !important;
+	}
+	.t-skel-skeleton.is-pulsing > * {
+		animation: none !important;
+	}
+}

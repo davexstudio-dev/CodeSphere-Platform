@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./transitions/tokens.css";
+@import "./transitions/menu-dropdown.css";
+@import "./transitions/tabs-sliding.css";
+@import "./transitions/texts-reveal.css";
+@import "./transitions/panel-reveal.css";
+@import "./transitions/skeleton-reveal.css";
+@import "./transitions/toast.css";
+@import "./transitions/success-check.css";
+@import "./transitions/error-shake.css";
+@import "./transitions/toggle.css";
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
 

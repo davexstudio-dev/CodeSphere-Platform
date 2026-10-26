@@ -1,0 +1,29 @@
+/* Panel reveal (transitions.dev 07). At rest the panel carries no transform or filter, so it does
+   not become the containing block of its sticky and fixed descendants. */
+.t-panel-slide {
+	transform: translateY(var(--panel-translate-y));
+	opacity: 0;
+	filter: blur(var(--panel-blur));
+	transition:
+		transform var(--panel-close-dur) var(--panel-ease),
+		opacity var(--panel-close-dur) var(--panel-ease),
+		filter var(--panel-close-dur) var(--panel-ease);
+}
+.t-panel-slide[data-open="true"] {
+	transform: none;
+	opacity: 1;
+	filter: none;
+	transition:
+		transform var(--panel-open-dur) var(--panel-ease),
+		opacity var(--panel-open-dur) var(--panel-ease),
+		filter var(--panel-open-dur) var(--panel-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-panel-slide {
+		transition: none !important;
+		transform: none;
+		opacity: 1;
+		filter: none;
+	}
+}

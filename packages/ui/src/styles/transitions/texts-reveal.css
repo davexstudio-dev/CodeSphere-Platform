@@ -1,0 +1,30 @@
+/* Texts reveal (transitions.dev 18): lines rise in with a staggered blur once .is-shown is set. */
+.t-stagger-line {
+	display: block;
+	opacity: 0;
+	transform: translateY(var(--stagger-distance));
+	filter: blur(var(--stagger-blur));
+	transition:
+		opacity var(--stagger-dur) var(--stagger-ease),
+		transform var(--stagger-dur) var(--stagger-ease),
+		filter var(--stagger-dur) var(--stagger-ease);
+	will-change: transform, opacity, filter;
+}
+.t-stagger-line--2 {
+	transition-delay: var(--stagger-stagger);
+}
+
+.t-stagger.is-shown .t-stagger-line {
+	opacity: 1;
+	transform: translateY(0);
+	filter: blur(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-stagger-line {
+		transition: none !important;
+		opacity: 1;
+		transform: none;
+		filter: none;
+	}
+}
