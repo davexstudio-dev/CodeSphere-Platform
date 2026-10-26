@@ -24,7 +24,7 @@ describe("AuditLog", () => {
 
 	test("has no Actions column unless the page can act on an entry", () => {
 		const html = renderToStaticMarkup(<AuditLog entries={[base]} />);
-		expect(html).not.toContain("Actions pour");
+		expect(html).not.toContain("Options de la ligne");
 	});
 
 	test("offers a menu per entry when actionsOf is given", () => {
@@ -36,7 +36,9 @@ describe("AuditLog", () => {
 				]}
 			/>,
 		);
-		expect(html).toContain("Actions pour Membre suspendu · troll_account");
+		expect(html).toContain(
+			"Options de la ligne : Membre suspendu · troll_account",
+		);
 	});
 
 	test("shows nothing extra for an entry without a reason", () => {

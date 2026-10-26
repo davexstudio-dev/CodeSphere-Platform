@@ -57,7 +57,18 @@ export const AuditLogFilter = PageInput.extend({
 	action: z.string().min(1).max(64).optional(),
 	actorId: z.string().min(1).optional(),
 	targetType: z.string().min(1).max(64).optional(),
+	/** One target of that type: « filter by this target » of the row menu (#287). */
+	targetId: z.string().min(1).max(128).optional(),
 });
+
+/** The filters of the journal, without paging: the CSV export takes the whole filtered set. */
+export const AuditLogExportFilter = AuditLogFilter.omit({
+	cursor: true,
+	limit: true,
+});
+
+/** The most rows one export holds; past it `truncated` is set and the file ends there. */
+export const AUDIT_EXPORT_LIMIT = 5000;
 
 /**
  * An Admin edit of a Hackathon (#124): every field is optional, a list given replaces the
@@ -396,6 +407,21 @@ export const adminContract = {
 			)
 			.input(AuditLogFilter)
 			.output(Page(AuditEvent)),
+		/**
+		 * CSV of the filtered journal (#287), newest first. Admin and Super admin only (`audit:export`):
+		 * a Moderator reads the journal but gets FORBIDDEN here. Not exposed over OpenAPI or MCP: the
+		 * back-office downloads it.
+		 */
+		export: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
+			.input(AuditLogExportFilter)
+			.output(
+				z.object({
+					csv: z.string(),
+					rows: z.number().int(),
+					truncated: z.boolean(),
+				}),
+			),
 	},
 	reputationFlags: {
 		list: base

@@ -22,6 +22,17 @@ type AuditEntry = {
 	tone?: "default" | "warning" | "destructive";
 	/** The reason typed by the admin for a decision; shown under the target. */
 	reason?: string;
+	/** What the menu of a row needs (#287): the raw action and the ids behind the names above. */
+	actionKey?: string;
+	actorId?: string | null;
+	targetType?: string;
+	targetId?: string | null;
+	details?: {
+		fields?: string[];
+		reason?: string;
+		from?: string;
+		to?: string;
+	} | null;
 };
 
 type AuditLogProps = {
@@ -31,10 +42,16 @@ type AuditLogProps = {
 	 * column, as on the pages that cannot act on an entry.
 	 */
 	actionsOf?: (entry: AuditEntry) => readonly RowAction[];
+	/** Names a row's menu for assistive technology; French by default. */
+	rowLabelOf?: (entry: AuditEntry) => string;
+	/** The (visually hidden) header of the menu column; French by default. */
+	actionsHeader?: string;
 };
 
-const rowLabel = (entry: AuditEntry) =>
-	`Actions pour ${entry.action} · ${entry.target}`;
+// « Options », not « Actions »: the page also has an « Action » filter, and a label that contains
+// it would make that field ambiguous for a screen reader or a test looking it up by name.
+const defaultRowLabel = (entry: AuditEntry) =>
+	`Options de la ligne : ${entry.action} · ${entry.target}`;
 
 const ActionBadge = ({ entry }: { entry: AuditEntry }) => (
 	<Badge
@@ -66,7 +83,12 @@ const Target = ({ entry }: { entry: AuditEntry }) => (
  * query, as for AdminMasterDetail: the sidebar takes 16 rem of a tablet's width). The table comes
  * first in the DOM so `first()` text lookups land on the visible copy on desktop.
  */
-function AuditLog({ entries, actionsOf }: AuditLogProps) {
+function AuditLog({
+	entries,
+	actionsOf,
+	rowLabelOf = defaultRowLabel,
+	actionsHeader = "Options",
+}: AuditLogProps) {
 	return (
 		<div data-slot="audit-log" className="@container min-w-0">
 			<div className="@max-[40rem]:hidden">
@@ -79,7 +101,7 @@ function AuditLog({ entries, actionsOf }: AuditLogProps) {
 							<TableHead>Cible</TableHead>
 							{actionsOf && (
 								<TableHead className="w-10 text-right">
-									<span className="sr-only">Actions</span>
+									<span className="sr-only">{actionsHeader}</span>
 								</TableHead>
 							)}
 						</TableRow>
@@ -100,7 +122,7 @@ function AuditLog({ entries, actionsOf }: AuditLogProps) {
 								{actionsOf && (
 									<TableCell className="text-right">
 										<RowActions
-											label={rowLabel(entry)}
+											label={rowLabelOf(entry)}
 											actions={actionsOf(entry)}
 										/>
 									</TableCell>
@@ -124,7 +146,7 @@ function AuditLog({ entries, actionsOf }: AuditLogProps) {
 								</span>
 								{actionsOf && (
 									<RowActions
-										label={rowLabel(entry)}
+										label={rowLabelOf(entry)}
 										actions={actionsOf(entry)}
 									/>
 								)}
