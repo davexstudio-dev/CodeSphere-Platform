@@ -90,6 +90,7 @@
 		"@next/env": "npm:@varlock/nextjs-integration@1.2.4",
 		"sharp": "npm:empty-npm-package@1.0.0",
 		"seroval": "1.6.9",
-		"seroval-plugins": "1.6.9"
+		"seroval-plugins": "1.6.9",
+		"undici": "7.30.1"
 	}
 }
