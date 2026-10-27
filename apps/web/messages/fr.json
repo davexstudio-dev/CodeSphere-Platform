@@ -1349,7 +1349,13 @@
 		"ideasHint": "Posez une Question avec le Tag « roadmap » : la communauté peut voter.",
 		"propose": "Proposer une idée",
 		"ideasRecent": "Idées récentes",
-		"ideasNone": "Aucune idée proposée pour le moment."
+		"ideasNone": "Aucune idée proposée pour le moment.",
+		"overview": "{done} lignes livrées sur {total}",
+		"overviewLabel": "Avancement de la feuille de route",
+		"sectionProgress": "{done} sur {total} livrées",
+		"legendDelivered": "{count} livrées",
+		"legendInProgress": "{count} en cours",
+		"legendPlanned": "{count} prévues"
 	},
 	"watch": {
 		"title": "Veille",

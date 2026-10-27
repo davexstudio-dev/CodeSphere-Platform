@@ -1,9 +1,8 @@
-import { AppFooter } from "@codesphere/ui/components/organisms/app-footer";
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Outfit } from "next/font/google";
 import { cookies, headers } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { getLocale, getMessages } from "next-intl/server";
 
 import "../index.css";
 import { DataSaver, DataSaverToggle } from "@/components/data-saver";
@@ -14,7 +13,6 @@ import {
 	parsePreference,
 	resolveDataSaver,
 } from "@/lib/data-saver";
-import { LEGAL_PAGES, legalHref } from "@/lib/legal";
 import { publicPageUrl } from "@/lib/page-url";
 import {
 	OG_IMAGE_PATH,
@@ -86,9 +84,6 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
 	const locale = await getLocale();
 	const messages = await getMessages();
-	const t = await getTranslations("legal");
-	const roadmap = await getTranslations("roadmap");
-	const footer = await getTranslations("footer");
 	// Drawn by src/proxy.ts for the CSP (#54).
 	const requestHeaders = await headers();
 	const nonce = requestHeaders.get("x-nonce") ?? undefined;
@@ -116,21 +111,6 @@ export default async function RootLayout({
 					<DataSaver active={dataSaver} preference={preference}>
 						<Providers nonce={nonce}>
 							{children}
-							<AppFooter
-								version={process.env.APP_VERSION ?? "0.0.0"}
-								sha={process.env.GIT_SHA ?? "dev"}
-								navLabel={footer("nav")}
-								links={[
-									...LEGAL_PAGES.map((page) => ({
-										label: t(`pages.${page}.title`),
-										href: legalHref(page),
-									})),
-									{ label: footer("watch"), href: "/watch" },
-									{ label: footer("jobs"), href: "/jobs" },
-									{ label: footer("organizations"), href: "/organizations" },
-									{ label: roadmap("nav"), href: "/roadmap" },
-								]}
-							/>
 							<DataSaverToggle />
 						</Providers>
 					</DataSaver>

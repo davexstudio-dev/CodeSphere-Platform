@@ -418,6 +418,16 @@
 			"packages/ui/src/components/organisms/admin-user-menu.tsx"
 		]
 	},
+	"StatStrip — chiffres clés (bloc blocks.so stats-02)": {
+		"imports": "import { StatStrip } from \"@codesphere/ui/components/organisms/stat-strip\";",
+		"jsx": "<StatStrip\n\tclassName=\"w-full\"\n\titems={[\n\t\t{ label: \"Membres actifs (30 jours)\", value: \"428\" },\n\t\t{ label: \"Questions\", value: \"1 930\" },\n\t\t{ label: \"Questions avec une réponse\", value: \"74 %\" },\n\t\t{\n\t\t\tlabel: \"Délai médian avant la première réponse\",\n\t\t\tvalue: \"2 heures\",\n\t\t},\n\t\t{ label: \"Réponses acceptées\", value: \"41 %\" },\n\t\t{ label: \"Pays représentés\", value: \"17\" },\n\t]}\n/>",
+		"files": ["packages/ui/src/components/organisms/stat-strip.tsx"]
+	},
+	"RoadmapTimeline — frise de la feuille de route (bloc blocks.so onboarding-06)": {
+		"imports": "import { RoadmapTimeline } from \"@codesphere/ui/components/organisms/roadmap-timeline\";",
+		"jsx": "<RoadmapTimeline\n\tclassName=\"w-full max-w-xl\"\n\titems={[\n\t\t{\n\t\t\tid: \"a\",\n\t\t\ttext: \"Questions, Réponses, Réponse acceptée, Votes\",\n\t\t\tstatus: \"delivered\",\n\t\t\tstatusLabel: \"Livré\",\n\t\t\treference: \"#219\",\n\t\t},\n\t\t{\n\t\t\tid: \"b\",\n\t\t\ttext: \"Notifications\",\n\t\t\tstatus: \"in_progress\",\n\t\t\tstatusLabel: \"En cours\",\n\t\t},\n\t\t{\n\t\t\tid: \"c\",\n\t\t\ttext: \"Applications mobiles natives\",\n\t\t\tstatus: \"planned\",\n\t\t\tstatusLabel: \"Prévu\",\n\t\t},\n\t]}\n/>",
+		"files": ["packages/ui/src/components/organisms/roadmap-timeline.tsx"]
+	},
 	"StateGate — chargement, erreur, vide": {
 		"imports": "import { StateGate } from \"@codesphere/ui/components/molecules/state-gate\";",
 		"jsx": "<div className=\"grid w-full gap-4 md:grid-cols-3\">\n\t<StateGate status=\"loading\">\n\t\t<p>Contenu</p>\n\t</StateGate>\n\t<StateGate status=\"error\" onRetry={() => {}}>\n\t\t<p>Contenu</p>\n\t</StateGate>\n\t<StateGate status=\"empty\">\n\t\t<p>Contenu</p>\n\t</StateGate>\n</div>",
