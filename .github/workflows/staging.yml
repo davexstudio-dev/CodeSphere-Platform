@@ -274,3 +274,24 @@ jobs:
           done
           echo "::error::$ORIGIN/api/v1/health did not answer 200 within 5 minutes (last status: ${status:-none})"
           exit 1
+
+      # The health check above only reaches the API. A page of the web app can fail on its own: a
+      # Next.js bump the OpenNext adapter did not support made every page answer 500 (Worker error
+      # 1101) while /api/v1/health stayed green. A public page must answer 200 too.
+      - name: Check a page of the web app
+        run: |
+          for attempt in $(seq 1 12); do
+            headers=$(curl -sS -m 15 -o /dev/null -D - "$ORIGIN/roadmap" || true)
+            status=$(printf '%s' "$headers" | awk 'toupper($1) ~ /^HTTP/ {code=$2} END {print code}')
+            if [ "$status" = "200" ]; then
+              echo "the web app answers after $attempt attempt(s)"
+              exit 0
+            fi
+            if [ "$status" = "403" ] && printf '%s' "$headers" | grep -qi '^cf-mitigated: *challenge'; then
+              echo "::warning::web app not checked: Cloudflare challenged the runner (see docs/staging.md)"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::$ORIGIN/roadmap did not answer 200 within 2 minutes (last status: ${status:-none})"
+          exit 1
