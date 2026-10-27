@@ -43,3 +43,27 @@ export function roadmapIn(locale: Locale) {
 		notDoing: data.not_doing.map((item) => pick(item, locale)),
 	};
 }
+
+export type RoadmapProgress = {
+	delivered: number;
+	inProgress: number;
+	planned: number;
+	total: number;
+	/** Share of the lines already delivered, 0 to 100, rounded; 0 for an empty list. */
+	percent: number;
+};
+
+/** How far a list of roadmap lines has come (#252): the counts per status and the delivered share. */
+export function progressOf(items: readonly { status: RoadmapStatus }[]) {
+	const count = (status: RoadmapStatus) =>
+		items.filter((item) => item.status === status).length;
+	const delivered = count("delivered");
+	return {
+		delivered,
+		inProgress: count("in_progress"),
+		planned: count("planned"),
+		total: items.length,
+		percent:
+			items.length === 0 ? 0 : Math.round((delivered / items.length) * 100),
+	} satisfies RoadmapProgress;
+}

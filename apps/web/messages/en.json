@@ -1349,7 +1349,13 @@
 		"ideasHint": "Ask a Question with the \"roadmap\" Tag: the community can vote.",
 		"propose": "Suggest an idea",
 		"ideasRecent": "Recent ideas",
-		"ideasNone": "No idea suggested yet."
+		"ideasNone": "No idea suggested yet.",
+		"overview": "{done} of {total} lines delivered",
+		"overviewLabel": "Roadmap progress",
+		"sectionProgress": "{done} of {total} delivered",
+		"legendDelivered": "{count} delivered",
+		"legendInProgress": "{count} in progress",
+		"legendPlanned": "{count} planned"
 	},
 	"watch": {
 		"title": "Watch",

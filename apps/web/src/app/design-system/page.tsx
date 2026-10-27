@@ -213,6 +213,8 @@ import {
 	RecordSection,
 	RecordSheet,
 } from "@codesphere/ui/components/organisms/record-sheet";
+import { RoadmapTimeline } from "@codesphere/ui/components/organisms/roadmap-timeline";
+import { StatStrip } from "@codesphere/ui/components/organisms/stat-strip";
 import { TagPicker } from "@codesphere/ui/components/organisms/tag-picker";
 import {
 	BookOpenIcon,
@@ -1704,6 +1706,48 @@ export default function DesignSystemPage() {
 								</DropdownMenuItem>
 							</AdminUserMenu>
 						</div>
+					</Specimen>
+					<Specimen label="StatStrip — chiffres clés (bloc blocks.so stats-02)">
+						<StatStrip
+							className="w-full"
+							items={[
+								{ label: "Membres actifs (30 jours)", value: "428" },
+								{ label: "Questions", value: "1 930" },
+								{ label: "Questions avec une réponse", value: "74 %" },
+								{
+									label: "Délai médian avant la première réponse",
+									value: "2 heures",
+								},
+								{ label: "Réponses acceptées", value: "41 %" },
+								{ label: "Pays représentés", value: "17" },
+							]}
+						/>
+					</Specimen>
+					<Specimen label="RoadmapTimeline — frise de la feuille de route (bloc blocks.so onboarding-06)">
+						<RoadmapTimeline
+							className="w-full max-w-xl"
+							items={[
+								{
+									id: "a",
+									text: "Questions, Réponses, Réponse acceptée, Votes",
+									status: "delivered",
+									statusLabel: "Livré",
+									reference: "#219",
+								},
+								{
+									id: "b",
+									text: "Notifications",
+									status: "in_progress",
+									statusLabel: "En cours",
+								},
+								{
+									id: "c",
+									text: "Applications mobiles natives",
+									status: "planned",
+									statusLabel: "Prévu",
+								},
+							]}
+						/>
 					</Specimen>
 					<Specimen label="StateGate — chargement, erreur, vide">
 						<div className="grid w-full gap-4 md:grid-cols-3">
