@@ -140,13 +140,14 @@ export function Specimen({
 				<span className="font-mono text-muted-foreground text-xs">{label}</span>
 				{source && (
 					<Button
-						variant="ghost"
+						variant="outline"
 						size="xs"
 						aria-haspopup="dialog"
+						className="shrink-0 rounded-full bg-card px-2.5 text-muted-foreground shadow-xs hover:border-primary/40 hover:bg-primary/5 hover:text-foreground"
 						onClick={() => setOpen(true)}
 					>
 						<CodeIcon />
-						Code
+						Voir le code
 					</Button>
 				)}
 			</div>
