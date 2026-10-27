@@ -2,12 +2,13 @@
 	"$schema": "./node_modules/oxlint/configuration_schema.json",
 	"jsPlugins": ["@shadcn/lint"],
 	"categories": { "correctness": "off" },
-	"rules": {},
-	"ignorePatterns": [
-		"**/node_modules/**",
-		"**/.next/**",
-		"**/.open-next/**",
-		"**/dist/**",
-		"**/*.generated.*"
-	]
+	"rules": {
+		"shadcn/no-restyle": "warn",
+		"shadcn/no-raw-colors": "warn",
+		"shadcn/no-arbitrary-values": "warn",
+		"shadcn/no-inline-styles": "warn",
+		"shadcn/no-unknown-classes": "warn",
+		"shadcn/require-static-classes": "warn"
+	},
+	"ignorePatterns": ["**/node_modules/**","**/.next/**","**/.open-next/**","**/dist/**","**/*.generated.*"]
 }
