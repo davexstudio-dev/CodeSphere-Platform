@@ -163,6 +163,9 @@ test.describe("menus", () => {
 		const shell = page.locator("[data-slot=admin-shell]");
 		await page.getByRole("button", { name: "Réduire le menu" }).click();
 		await expect(shell).toHaveAttribute("data-collapsed", "true");
+		// Icon only, the staff badge stays a circle around its round avatar (not a squeezed pill).
+		const badge = await accountMenu(page).boundingBox();
+		expect(badge?.width).toBeCloseTo(badge?.height ?? 0, 0);
 		await page.getByRole("button", { name: "Déployer le menu" }).click();
 		await expect(shell).toHaveAttribute("data-collapsed", "false");
 	});

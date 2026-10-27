@@ -55,7 +55,14 @@ function AdminShell({
 			)}
 			{...props}
 		>
-			<aside className="flex flex-col gap-3 border-border border-b bg-sidebar p-3 text-sidebar-foreground md:sticky md:top-0 md:h-svh md:gap-6 md:border-r md:border-b-0 md:p-4">
+			<aside
+				className={cn(
+					"flex flex-col gap-3 border-border border-b bg-sidebar p-3 text-sidebar-foreground md:sticky md:top-0 md:h-svh md:gap-6 md:border-r md:border-b-0 md:p-4",
+					// Collapsed (4.5 rem), the icon-only account badge is 46 px wide: 16 px of padding left only
+					// 40, so it would be squeezed into a pill. 12 px leaves 48.
+					collapsed && "md:px-3",
+				)}
+			>
 				<div
 					className={cn(
 						"flex items-start justify-between gap-2",

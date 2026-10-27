@@ -58,8 +58,10 @@ function AdminUserMenu({
 						data-slot="admin-user-menu"
 						className={cn(
 							"flex w-full min-w-0 items-center gap-2.5 rounded-lg border border-sidebar-border bg-sidebar-accent/40 p-1.5 text-left outline-none transition-colors hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-ring/50 data-popup-open:bg-sidebar-accent",
+							// Icon only: a circle that hugs the round avatar (36 px, plus its 3 px ring), so the hover,
+							// the open state and the focus ring all follow the avatar and not a square around it.
 							compact &&
-								"w-auto justify-center border-transparent bg-transparent",
+								"w-auto shrink-0 justify-center self-center rounded-full border-transparent bg-transparent p-1",
 							className,
 						)}
 					/>
