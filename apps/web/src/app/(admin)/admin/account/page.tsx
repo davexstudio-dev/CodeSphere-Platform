@@ -1,63 +1,294 @@
 "use client";
 
+import { roleCan } from "@codesphere/auth/access";
 import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
+import { Input } from "@codesphere/ui/components/atoms/input";
+import { SegmentedControl } from "@codesphere/ui/components/molecules/segmented-control";
 import {
 	RecordFields,
 	RecordSection,
 } from "@codesphere/ui/components/organisms/record-sheet";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { BadgeCheckIcon, CalendarIcon, MailIcon } from "lucide-react";
+import type { Route } from "next";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "sonner";
-
-import AdminFrame from "@/components/admin-frame";
+import AdminFrame, { ADMIN_NAV } from "@/components/admin-frame";
 import { useAdminIdentity } from "@/components/admin-identity";
 import Link from "@/components/link";
 import LocaleSwitcher from "@/components/locale-switcher";
+import { useSignOut } from "@/components/outbox-provider";
 import { auditActionMessageKey } from "@/lib/audit-target";
 import { authClient } from "@/lib/auth-client";
 import { describeUserAgent } from "@/lib/user-agent";
 import { orpc } from "@/utils/orpc";
 
-/** « Mon compte » (#286): the signed-in staff member's profile, sessions and recent activity. */
+const NAME_MAX = 80;
+
+const initialsOf = (name: string) =>
+	name
+		.split(/\s+/)
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((part) => part.charAt(0).toUpperCase())
+		.join("") || "?";
+
+/** « Mon compte » (#286): the signed-in staff member's profile, preferences, sessions and recent activity. */
 export default function AccountPage() {
 	const t = useTranslations("admin.account");
 	const tRole = useTranslations("admin.staff.roles");
+	const locale = useLocale();
 	const identity = useAdminIdentity();
+	const current = authClient.useSession();
 	const role =
 		identity?.role === "super_admin" ||
 		identity?.role === "admin" ||
 		identity?.role === "moderator"
 			? identity.role
 			: "member";
+	const day = new Intl.DateTimeFormat(locale, { dateStyle: "long" });
+	const moment = new Intl.DateTimeFormat(locale, {
+		dateStyle: "medium",
+		timeStyle: "short",
+	});
 
 	return (
 		<AdminFrame title={t("title")} description={t("description")}>
-			<div className="grid gap-6 xl:grid-cols-2">
-				<RecordSection title={t("profile.title")}>
-					<RecordFields
-						fields={[
-							{ label: t("profile.name"), value: identity?.name ?? "—" },
-							{ label: t("profile.email"), value: identity?.email ?? "—" },
-							{
-								label: t("profile.role"),
-								value: <Badge variant="outline">{tRole(role)}</Badge>,
-							},
-						]}
-					/>
-					<p className="text-muted-foreground text-xs">{t("profile.note")}</p>
-				</RecordSection>
-				<RecordSection title={t("language.title")}>
-					<p className="text-muted-foreground text-sm">
-						{t("language.description")}
-					</p>
-					<LocaleSwitcher />
-				</RecordSection>
-				<Sessions />
-				<Activity selfId={identity?.id} />
+			<div className="flex flex-col gap-6">
+				<section className="flex flex-wrap items-center gap-5 rounded-xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-5 md:p-6">
+					<span
+						aria-hidden="true"
+						className="grid size-16 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-amber-600 font-bold text-primary-foreground text-xl ring-2 ring-background ring-offset-2 ring-offset-primary"
+					>
+						{initialsOf(identity?.name ?? "")}
+					</span>
+					<div className="flex min-w-0 flex-1 flex-col gap-2">
+						<div className="flex flex-wrap items-center gap-2">
+							<h2 className="truncate font-semibold text-2xl tracking-tight">
+								{identity?.name ?? "—"}
+							</h2>
+							<Badge variant="outline">{tRole(role)}</Badge>
+						</div>
+						<ul className="flex flex-wrap gap-x-5 gap-y-1 text-muted-foreground text-sm">
+							<li className="flex items-center gap-1.5">
+								<MailIcon className="size-3.5" aria-hidden="true" />
+								{identity?.email ?? "—"}
+							</li>
+							{identity && (
+								<li className="flex items-center gap-1.5">
+									<BadgeCheckIcon className="size-3.5" aria-hidden="true" />
+									{identity.emailVerified
+										? t("hero.verified")
+										: t("hero.unverified")}
+								</li>
+							)}
+							{identity && (
+								<li className="flex items-center gap-1.5">
+									<CalendarIcon className="size-3.5" aria-hidden="true" />
+									{t("hero.memberSince", {
+										date: day.format(new Date(identity.createdAt)),
+									})}
+								</li>
+							)}
+						</ul>
+						{current.data && (
+							<p className="text-muted-foreground text-xs">
+								{t("hero.lastSignIn", {
+									date: moment.format(new Date(current.data.session.createdAt)),
+								})}
+							</p>
+						)}
+					</div>
+				</section>
+				<div className="grid items-start gap-6 xl:grid-cols-3">
+					<div className="flex flex-col gap-6 xl:col-span-2">
+						<ProfileForm />
+						<Sessions />
+						<Activity selfId={identity?.id} />
+					</div>
+					<div className="flex flex-col gap-6">
+						<Access role={identity?.role} />
+						<Preferences />
+					</div>
+				</div>
 			</div>
 		</AdminFrame>
+	);
+}
+
+/** The name is the one field that is the member's own: the email and the role come from elsewhere. */
+function ProfileForm() {
+	const t = useTranslations("admin.account.profile");
+	const tRole = useTranslations("admin.staff.roles");
+	const locale = useLocale();
+	const router = useRouter();
+	const identity = useAdminIdentity();
+	const accounts = useQuery({
+		queryKey: ["account", "providers"],
+		queryFn: async () => {
+			const out = await authClient.listAccounts();
+			return out.data ?? [];
+		},
+	});
+	const [name, setName] = useState(identity?.name ?? "");
+	const [busy, setBusy] = useState(false);
+	if (!identity) {
+		return null;
+	}
+	const trimmed = name.trim();
+	const valid = trimmed.length >= 1 && trimmed.length <= NAME_MAX;
+	const changed = trimmed !== identity.name;
+	const role =
+		identity.role === "super_admin" ||
+		identity.role === "admin" ||
+		identity.role === "moderator"
+			? identity.role
+			: "member";
+	const methods = [
+		...new Set((accounts.data ?? []).map((account) => account.providerId)),
+	].map((id) => (t.has(`providers.${id}`) ? t(`providers.${id}`) : id));
+
+	const save = async (event: React.FormEvent) => {
+		event.preventDefault();
+		if (!valid || !changed) {
+			return;
+		}
+		setBusy(true);
+		try {
+			const out = await authClient.updateUser({ name: trimmed });
+			if (out.error) {
+				toast.error(t("failed"));
+				return;
+			}
+			toast.success(t("saved"));
+			// The identity is read on the server by the layout: read it again.
+			router.refresh();
+		} catch {
+			toast.error(t("failed"));
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	return (
+		<RecordSection title={t("title")}>
+			<form onSubmit={save} className="flex flex-col gap-1.5">
+				<label htmlFor="account-name" className="font-medium text-sm">
+					{t("name")}
+				</label>
+				<div className="flex flex-wrap items-start gap-2">
+					<Input
+						id="account-name"
+						value={name}
+						maxLength={NAME_MAX}
+						autoComplete="name"
+						aria-invalid={!valid}
+						aria-describedby="account-name-hint"
+						onChange={(event) => setName(event.target.value)}
+						className="h-9 max-w-sm flex-1 text-sm md:text-sm"
+					/>
+					<Button type="submit" disabled={busy || !valid || !changed}>
+						{busy ? t("saving") : t("save")}
+					</Button>
+				</div>
+				<p
+					id="account-name-hint"
+					className={
+						valid ? "text-muted-foreground text-xs" : "text-destructive text-xs"
+					}
+				>
+					{valid ? t("nameHint") : t("invalid")}
+				</p>
+			</form>
+			<RecordFields
+				className="mt-2 border-border border-t pt-3"
+				fields={[
+					{ label: t("email"), value: identity.email },
+					{
+						label: t("role"),
+						value: <Badge variant="outline">{tRole(role)}</Badge>,
+					},
+					{
+						label: t("memberSince"),
+						value: new Intl.DateTimeFormat(locale, {
+							dateStyle: "long",
+						}).format(new Date(identity.createdAt)),
+					},
+					{
+						label: t("signIn"),
+						value: accounts.isSuccess
+							? methods.length > 0
+								? methods.join(", ")
+								: t("emailCode")
+							: "…",
+					},
+				]}
+			/>
+			<p className="text-muted-foreground text-xs">{t("emailHint")}</p>
+		</RecordSection>
+	);
+}
+
+/** What the role opens, from the same table the sidebar is drawn with. */
+function Access({ role }: { role?: string }) {
+	const t = useTranslations("admin.account.access");
+	const tAdmin = useTranslations("admin");
+	const screens = ADMIN_NAV.filter((item) => roleCan(role, item.can));
+	return (
+		<RecordSection title={t("title")}>
+			<p className="text-muted-foreground text-sm">{t("description")}</p>
+			<ul className="flex flex-wrap gap-1.5">
+				{screens.map((screen) => (
+					<li key={screen.href}>
+						<Link
+							href={screen.href as Route}
+							className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1 text-xs transition-colors hover:border-primary/40 hover:bg-primary/5"
+						>
+							<screen.icon className="size-3.5 text-muted-foreground" />
+							{tAdmin(screen.key)}
+						</Link>
+					</li>
+				))}
+			</ul>
+			<p className="text-muted-foreground text-xs">
+				{t("count", { count: screens.length })}
+			</p>
+		</RecordSection>
+	);
+}
+
+const THEMES = ["light", "dark", "system"] as const;
+
+function Preferences() {
+	const t = useTranslations("admin.account.preferences");
+	const tMenu = useTranslations("admin.userMenu.themes");
+	const { theme, setTheme } = useTheme();
+	const value = THEMES.find((item) => item === theme) ?? "system";
+	return (
+		<RecordSection title={t("title")}>
+			<div className="flex flex-col items-start gap-1.5">
+				<span className="font-medium text-sm">{t("language")}</span>
+				<LocaleSwitcher />
+			</div>
+			<div className="flex flex-col items-start gap-1.5">
+				<span className="font-medium text-sm">{t("theme")}</span>
+				<SegmentedControl
+					options={THEMES}
+					value={value}
+					onValueChange={setTheme}
+					labels={{
+						light: tMenu("light"),
+						dark: tMenu("dark"),
+						system: tMenu("system"),
+					}}
+					aria-label={t("theme")}
+				/>
+			</div>
+		</RecordSection>
 	);
 }
 
@@ -67,12 +298,15 @@ function Sessions() {
 	const queryClient = useQueryClient();
 	const [busy, setBusy] = useState(false);
 	const current = authClient.useSession();
+	const signOut = useSignOut();
 	const sessions = useQuery({
+		retry: false,
 		queryKey: ["account", "sessions"],
 		queryFn: async () => {
 			const out = await authClient.listSessions();
 			if (out.error) {
-				throw new Error(out.error.message);
+				// Better Auth only lists the sessions of a fresh one (signed in under a day ago).
+				throw new Error(out.error.code ?? out.error.message);
 			}
 			return out.data ?? [];
 		},
@@ -109,11 +343,27 @@ function Sessions() {
 	);
 
 	return (
-		<RecordSection title={t("title")} className="xl:col-span-2">
+		<RecordSection title={t("title")}>
 			{sessions.isPending ? (
 				<p className="text-muted-foreground text-sm">{t("loading")}</p>
 			) : sessions.isError ? (
-				<p className="text-destructive text-sm">{t("error")}</p>
+				sessions.error.message === "SESSION_NOT_FRESH" ? (
+					<div className="flex flex-col items-start gap-3">
+						<p className="text-muted-foreground text-sm">{t("stale")}</p>
+						<Button
+							variant="outline"
+							onClick={() =>
+								void signOut(() => {
+									window.location.assign("/signin");
+								})
+							}
+						>
+							{t("reauth")}
+						</Button>
+					</div>
+				) : (
+					<p className="text-destructive text-sm">{t("error")}</p>
+				)
 			) : (
 				<ul className="flex flex-col divide-y divide-border">
 					{sessions.data.map((session) => {
@@ -195,7 +445,7 @@ function Activity({ selfId }: { selfId?: string }) {
 	});
 
 	return (
-		<RecordSection title={t("title")} className="xl:col-span-2">
+		<RecordSection title={t("title")}>
 			<p className="text-muted-foreground text-sm">{t("description")}</p>
 			{log.isPending ? (
 				<p className="text-muted-foreground text-sm">{t("loading")}</p>

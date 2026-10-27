@@ -814,13 +814,27 @@
 		},
 		"account": {
 			"title": "My account",
-			"description": "Your back-office profile, sessions and activity.",
+			"description": "Your profile, preferences, sessions and activity in the back-office.",
 			"profile": {
 				"title": "Profile",
-				"name": "Name",
+				"name": "Display name",
 				"email": "Email",
 				"role": "Role",
-				"note": "These details come from your sign-in provider: they cannot be edited here."
+				"nameHint": "This name shows in your badge and in the audit log.",
+				"emailHint": "The address comes from your sign-in provider: it cannot be changed here.",
+				"memberSince": "Member since",
+				"signIn": "Sign-in",
+				"save": "Save",
+				"saving": "Saving…",
+				"saved": "Name updated.",
+				"failed": "The name could not be changed. Try again.",
+				"invalid": "Enter a name of 1 to 80 characters.",
+				"emailCode": "Code sent by email",
+				"providers": {
+					"google": "Google",
+					"github": "GitHub",
+					"credential": "Email and password"
+				}
 			},
 			"sessions": {
 				"title": "Active sessions",
@@ -834,7 +848,9 @@
 				"revoked": "Session signed out.",
 				"othersRevoked": "Other sessions signed out.",
 				"failed": "Signing out failed. Try again.",
-				"onlyThis": "No other open session."
+				"onlyThis": "No other open session.",
+				"stale": "For your security, the session list is only available after a recent sign-in (under 24 h). Sign in again to show it.",
+				"reauth": "Sign in again"
 			},
 			"activity": {
 				"title": "My activity",
@@ -844,9 +860,21 @@
 				"unavailable": "Log unavailable.",
 				"full": "Open the audit log"
 			},
-			"language": {
-				"title": "Language",
-				"description": "Language of the back-office interface."
+			"hero": {
+				"memberSince": "Member since {date}",
+				"lastSignIn": "Session opened on {date}",
+				"verified": "Email verified",
+				"unverified": "Email not verified"
+			},
+			"access": {
+				"title": "Your access",
+				"description": "The back-office screens your role opens.",
+				"count": "{count, plural, one {# screen} other {# screens}}"
+			},
+			"preferences": {
+				"title": "Preferences",
+				"language": "Interface language",
+				"theme": "Theme"
 			}
 		},
 		"userMenu": {
@@ -1355,7 +1383,9 @@
 		"sectionProgress": "{done} of {total} delivered",
 		"legendDelivered": "{count} delivered",
 		"legendInProgress": "{count} in progress",
-		"legendPlanned": "{count} planned"
+		"legendPlanned": "{count} planned",
+		"summary": "Summary",
+		"remaining": "{count, plural, =0 {Nothing left to do} one {# line left to do} other {# lines left to do}}"
 	},
 	"watch": {
 		"title": "Watch",

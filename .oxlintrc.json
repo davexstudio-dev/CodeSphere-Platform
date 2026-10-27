@@ -1,0 +1,13 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"jsPlugins": ["@shadcn/lint"],
+	"categories": { "correctness": "off" },
+	"rules": {},
+	"ignorePatterns": [
+		"**/node_modules/**",
+		"**/.next/**",
+		"**/.open-next/**",
+		"**/dist/**",
+		"**/*.generated.*"
+	]
+}

@@ -35,7 +35,7 @@ const initials = (name: string) =>
 		.join("") || "?";
 
 /**
- * The signed-in staff member at the top left of the back-office sidebar (#286): an avatar with the
+ * The signed-in staff member at the bottom of the back-office sidebar (#286): an avatar with the
  * name and the role, opening the account menu. Same look as the visitor's badge in the site header.
  */
 function AdminUserMenu({
@@ -82,7 +82,11 @@ function AdminUserMenu({
 					</>
 				)}
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="start" className="min-w-64 bg-card">
+			<DropdownMenuContent
+				side="top"
+				align="start"
+				className="min-w-64 bg-card"
+			>
 				<DropdownMenuGroup>
 					<DropdownMenuLabel className="flex flex-col gap-1">
 						<span className="font-medium text-foreground text-sm">{name}</span>

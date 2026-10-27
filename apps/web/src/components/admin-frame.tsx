@@ -110,6 +110,8 @@ const NAV: {
 	},
 ];
 
+export { NAV as ADMIN_NAV };
+
 /** The screen `pathname` belongs to: the longest matching entry, so /admin/tags is not /admin. */
 const screenOf = (pathname: string) =>
 	// « Mon compte » belongs to every staff member: no permission to ask for.
