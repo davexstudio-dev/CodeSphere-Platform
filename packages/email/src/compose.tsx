@@ -33,6 +33,11 @@ import {
 	type SignInCodeProps,
 } from "./templates/sign-in-code";
 import {
+	STAFF_INVITATION_SUBJECTS,
+	StaffInvitation,
+	type StaffInvitationProps,
+} from "./templates/staff-invitation";
+import {
 	WELCOME_SUBJECTS,
 	Welcome,
 	type WelcomeProps,
@@ -46,7 +51,8 @@ export type EmailMessage =
 	| { kind: "member-reactivated"; props: MemberReactivatedProps }
 	| { kind: "api-key-created"; props: ApiKeyCreatedProps }
 	| { kind: "agent-paused"; props: AgentPausedProps }
-	| { kind: "sign-in-code"; props: SignInCodeProps };
+	| { kind: "sign-in-code"; props: SignInCodeProps }
+	| { kind: "staff-invitation"; props: StaffInvitationProps };
 
 /** The subject and the body of a message, in the language of its props. */
 export function composeEmail(message: EmailMessage): {
@@ -89,6 +95,11 @@ export function composeEmail(message: EmailMessage): {
 			return {
 				subject: SIGN_IN_CODE_SUBJECTS[locale],
 				template: <SignInCode {...message.props} />,
+			};
+		case "staff-invitation":
+			return {
+				subject: STAFF_INVITATION_SUBJECTS[locale],
+				template: <StaffInvitation {...message.props} />,
 			};
 	}
 }

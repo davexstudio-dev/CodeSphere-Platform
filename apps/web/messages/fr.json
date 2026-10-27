@@ -716,6 +716,152 @@
 				"notFound": "Cette offre n'a plus de signalement en attente.",
 				"generic": "Une erreur est survenue. Réessayez."
 			}
+		},
+		"staff": {
+			"title": "Équipe",
+			"description": "Comptes du back-office : rôles, invitations, sessions. Chaque action est journalisée.",
+			"list": "Équipe",
+			"search": "Rechercher un compte",
+			"searchPlaceholder": "Nom ou e-mail",
+			"loading": "Chargement…",
+			"empty": "Aucun compte du staff.",
+			"pick": "Choisissez un compte ou une invitation.",
+			"unavailable": "Équipe indisponible",
+			"retry": "Réessayer",
+			"groups": {
+				"super_admin": "Super admins",
+				"admin": "Admins",
+				"moderator": "Modérateurs",
+				"pending": "Invitations en attente"
+			},
+			"roles": {
+				"member": "Membre",
+				"moderator": "Modérateur",
+				"admin": "Admin",
+				"super_admin": "Super admin"
+			},
+			"pendingMeta": "{days, plural, one {# jour} other {# jours}}",
+			"expiredMeta": "Expirée",
+			"deactivated": "Désactivé",
+			"invite": {
+				"button": "Inviter",
+				"title": "Inviter dans l'équipe",
+				"description": "Chaque adresse reçoit une offre valable 7 jours. Aucun compte ni mot de passe n'est créé : le rôle s'applique à la première connexion avec cette adresse vérifiée.",
+				"emails": "Adresses e-mail",
+				"emailsHelp": "Séparées par des virgules ou des retours à la ligne, 20 au maximum.",
+				"role": "Rôle",
+				"submit": "Envoyer les invitations",
+				"sending": "Envoi…",
+				"count": "{count, plural, one {# adresse} other {# adresses}}",
+				"invalid": "Adresse illisible : {emails}",
+				"overflow": "{count, plural, one {# adresse en trop sera ignorée} other {# adresses en trop seront ignorées}}",
+				"resultsTitle": "Résultat",
+				"status": {
+					"invited": "Invitation créée",
+					"promoted": "Rôle donné tout de suite",
+					"already_staff": "A déjà ce rôle ou plus",
+					"refused": "Refusé"
+				},
+				"emailNotSent": "e-mail non parti : prévenez la personne vous-même",
+				"done": "Fermer"
+			},
+			"invitation": {
+				"section": "Invitation",
+				"email": "E-mail",
+				"role": "Rôle offert",
+				"invitedBy": "Invitée par",
+				"sent": "Envoyée le",
+				"expires": "Expire le",
+				"expired": "expirée : renvoyez-la pour la rouvrir",
+				"leftDays": "{days, plural, one {# jour restant} other {# jours restants}}",
+				"resend": "Renvoyer",
+				"resent": "Invitation renvoyée pour 7 jours.",
+				"resentNoMail": "Prolongée de 7 jours, mais l'e-mail n'a pas pu partir.",
+				"revoke": "Révoquer l'invitation",
+				"revoked": "Invitation révoquée.",
+				"unknownInviter": "compte supprimé"
+			},
+			"account": {
+				"section": "Compte",
+				"email": "E-mail",
+				"role": "Rôle",
+				"joined": "Inscrit le",
+				"status": "Statut",
+				"active": "Actif",
+				"suspended": "Désactivé"
+			},
+			"manage": {
+				"roleSection": "Changer le rôle",
+				"newRole": "Nouveau rôle",
+				"reasonLabel": "Raison (obligatoire)",
+				"reasonTooShort": "3 caractères minimum.",
+				"applyRole": "Appliquer le rôle",
+				"roleChanged": "Rôle modifié.",
+				"accessSection": "Accès",
+				"deactivate": "Désactiver ce compte",
+				"reactivate": "Réactiver",
+				"revokeSessions": "Déconnecter partout",
+				"sessionsRevoked": "Sessions révoquées.",
+				"refusalSelf": "C'est votre compte : utilisez « Mon compte » pour vos sessions.",
+				"refusalRank": "Rang égal ou supérieur au vôtre : vous ne pouvez pas gérer ce compte."
+			},
+			"errors": {
+				"forbidden": "Action refusée : rang insuffisant.",
+				"conflict": "Ce compte a déjà changé d'état, ou une règle l'interdit (dernier super admin, rôle fixé par l'environnement). La liste a été rechargée.",
+				"notFound": "Ce compte ou cette invitation n'existe plus.",
+				"generic": "Une erreur est survenue. Réessayez."
+			}
+		},
+		"account": {
+			"title": "Mon compte",
+			"description": "Votre profil du back-office, vos sessions et votre activité.",
+			"profile": {
+				"title": "Profil",
+				"name": "Nom",
+				"email": "E-mail",
+				"role": "Rôle",
+				"note": "Ces informations viennent de votre fournisseur de connexion : elles ne se modifient pas ici."
+			},
+			"sessions": {
+				"title": "Sessions actives",
+				"loading": "Chargement…",
+				"error": "Sessions indisponibles.",
+				"current": "Cette session",
+				"unknownDevice": "Appareil inconnu",
+				"started": "Ouverte le {date}",
+				"revoke": "Déconnecter",
+				"revokeOthers": "Déconnecter toutes les autres sessions",
+				"revoked": "Session déconnectée.",
+				"othersRevoked": "Autres sessions déconnectées.",
+				"failed": "La déconnexion a échoué. Réessayez.",
+				"onlyThis": "Aucune autre session ouverte."
+			},
+			"activity": {
+				"title": "Mon activité",
+				"description": "Vos dernières actions dans le journal d'audit.",
+				"loading": "Chargement…",
+				"empty": "Aucune action de votre part dans le journal.",
+				"unavailable": "Journal indisponible.",
+				"full": "Ouvrir le journal d'audit"
+			},
+			"language": {
+				"title": "Langue",
+				"description": "Langue de l'interface du back-office."
+			}
+		},
+		"userMenu": {
+			"label": "Menu du compte",
+			"account": "Mon compte",
+			"settings": "Réglages",
+			"language": "Langue",
+			"theme": "Thème",
+			"backToSite": "Retour au site",
+			"signOut": "Se déconnecter",
+			"themes": {
+				"light": "Clair",
+				"dark": "Sombre",
+				"system": "Système"
+			}
 		}
 	},
 	"onboarding": {

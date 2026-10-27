@@ -716,6 +716,152 @@
 				"notFound": "This posting has no pending report.",
 				"generic": "Something went wrong. Try again."
 			}
+		},
+		"staff": {
+			"title": "Team",
+			"description": "Back-office accounts: roles, invitations, sessions. Every action is logged.",
+			"list": "Team",
+			"search": "Search an account",
+			"searchPlaceholder": "Name or email",
+			"loading": "Loading…",
+			"empty": "No staff account.",
+			"pick": "Pick an account or an invitation.",
+			"unavailable": "Team unavailable",
+			"retry": "Retry",
+			"groups": {
+				"super_admin": "Super admins",
+				"admin": "Admins",
+				"moderator": "Moderators",
+				"pending": "Pending invitations"
+			},
+			"roles": {
+				"member": "Member",
+				"moderator": "Moderator",
+				"admin": "Admin",
+				"super_admin": "Super admin"
+			},
+			"pendingMeta": "{days, plural, one {# day} other {# days}}",
+			"expiredMeta": "Expired",
+			"deactivated": "Deactivated",
+			"invite": {
+				"button": "Invite",
+				"title": "Invite to the team",
+				"description": "Each address gets an offer valid for 7 days. No account and no password is created: the role applies at the first sign-in with that verified address.",
+				"emails": "Email addresses",
+				"emailsHelp": "Separated by commas or line breaks, 20 at most.",
+				"role": "Role",
+				"submit": "Send the invitations",
+				"sending": "Sending…",
+				"count": "{count, plural, one {# address} other {# addresses}}",
+				"invalid": "Unreadable address: {emails}",
+				"overflow": "{count, plural, one {# address over the limit will be ignored} other {# addresses over the limit will be ignored}}",
+				"resultsTitle": "Result",
+				"status": {
+					"invited": "Invitation created",
+					"promoted": "Role given at once",
+					"already_staff": "Already has this role or higher",
+					"refused": "Refused"
+				},
+				"emailNotSent": "email not sent: tell them yourself",
+				"done": "Close"
+			},
+			"invitation": {
+				"section": "Invitation",
+				"email": "Email",
+				"role": "Role offered",
+				"invitedBy": "Invited by",
+				"sent": "Sent on",
+				"expires": "Expires on",
+				"expired": "expired: resend it to reopen it",
+				"leftDays": "{days, plural, one {# day left} other {# days left}}",
+				"resend": "Resend",
+				"resent": "Invitation resent for 7 days.",
+				"resentNoMail": "Extended by 7 days, but the email could not be sent.",
+				"revoke": "Revoke the invitation",
+				"revoked": "Invitation revoked.",
+				"unknownInviter": "deleted account"
+			},
+			"account": {
+				"section": "Account",
+				"email": "Email",
+				"role": "Role",
+				"joined": "Joined",
+				"status": "Status",
+				"active": "Active",
+				"suspended": "Deactivated"
+			},
+			"manage": {
+				"roleSection": "Change the role",
+				"newRole": "New role",
+				"reasonLabel": "Reason (required)",
+				"reasonTooShort": "3 characters minimum.",
+				"applyRole": "Apply the role",
+				"roleChanged": "Role changed.",
+				"accessSection": "Access",
+				"deactivate": "Deactivate this account",
+				"reactivate": "Reactivate",
+				"revokeSessions": "Sign out everywhere",
+				"sessionsRevoked": "Sessions revoked.",
+				"refusalSelf": "This is your account: use “My account” for your sessions.",
+				"refusalRank": "Same or higher rank than yours: you cannot manage this account."
+			},
+			"errors": {
+				"forbidden": "Refused: rank too low.",
+				"conflict": "This account already changed, or a rule forbids it (last super admin, role set by the environment). The list was reloaded.",
+				"notFound": "This account or invitation no longer exists.",
+				"generic": "Something went wrong. Try again."
+			}
+		},
+		"account": {
+			"title": "My account",
+			"description": "Your back-office profile, sessions and activity.",
+			"profile": {
+				"title": "Profile",
+				"name": "Name",
+				"email": "Email",
+				"role": "Role",
+				"note": "These details come from your sign-in provider: they cannot be edited here."
+			},
+			"sessions": {
+				"title": "Active sessions",
+				"loading": "Loading…",
+				"error": "Sessions unavailable.",
+				"current": "This session",
+				"unknownDevice": "Unknown device",
+				"started": "Opened {date}",
+				"revoke": "Sign out",
+				"revokeOthers": "Sign out of all other sessions",
+				"revoked": "Session signed out.",
+				"othersRevoked": "Other sessions signed out.",
+				"failed": "Signing out failed. Try again.",
+				"onlyThis": "No other open session."
+			},
+			"activity": {
+				"title": "My activity",
+				"description": "Your latest actions in the audit log.",
+				"loading": "Loading…",
+				"empty": "None of your actions is in the log yet.",
+				"unavailable": "Log unavailable.",
+				"full": "Open the audit log"
+			},
+			"language": {
+				"title": "Language",
+				"description": "Language of the back-office interface."
+			}
+		},
+		"userMenu": {
+			"label": "Account menu",
+			"account": "My account",
+			"settings": "Settings",
+			"language": "Language",
+			"theme": "Theme",
+			"backToSite": "Back to the site",
+			"signOut": "Sign out",
+			"themes": {
+				"light": "Light",
+				"dark": "Dark",
+				"system": "System"
+			}
 		}
 	},
 	"onboarding": {

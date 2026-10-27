@@ -154,6 +154,45 @@ export const AdminMember = MemberSummary.extend({
 	suspensionReason: z.string().nullable(),
 });
 
+/**
+ * The roles an invitation can offer (#286). Super admin is not one of them: it stays reserved to the
+ * SUPER_ADMIN_EMAILS list (ADR 0003), so the back-office never mints the top role.
+ */
+export const INVITABLE_ROLES = ["moderator", "admin"] as const;
+
+/** Most emails one invitation form takes. */
+export const STAFF_INVITE_MAX_EMAILS = 20;
+
+/** An open offer of a staff role to an email address (#286). */
+export const StaffInvitation = z.object({
+	id: Id,
+	email: z.string(),
+	role: z.enum(INVITABLE_ROLES),
+	/** Name of the Admin who invited; null once that account is gone. */
+	invitedBy: z.string().nullable(),
+	createdAt: Timestamp,
+	expiresAt: Timestamp,
+});
+
+/** What happened to one email of an invitation form. */
+export const StaffInviteResult = z.object({
+	email: z.string(),
+	status: z.enum([
+		/** An open offer now waits for the first verified sign-in with this email. */
+		"invited",
+		/** The email already belonged to a Member, who got the role at once. */
+		"promoted",
+		/** That Member already holds this role or a higher one. */
+		"already_staff",
+		/** The rules refuse it: an Agent, a rank above the Admin's. */
+		"refused",
+	]),
+	/** The invitation id when an offer was created. */
+	invitationId: Id.nullable(),
+	/** Whether the invitation email left: false when no mail service is configured. */
+	emailSent: z.boolean(),
+});
+
 export const AdminMemberFilter = PageInput.extend({
 	status: z.enum(["active", "suspended"]).optional(),
 	/** Matches the name or the email, case-insensitively. */
@@ -379,6 +418,41 @@ export const adminContract = {
 			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {} })
 			.input(z.object({ id: z.string() }))
 			.output(AdminMember),
+		/** The staff accounts and the open invitations (#286). */
+		list: base.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} }).output(
+			z.object({
+				members: z.array(AdminMember),
+				invitations: z.array(StaffInvitation),
+			}),
+		),
+		/**
+		 * Offers a staff role to up to 20 emails at once (#286). An email that already belongs to a
+		 * Member promotes them at once; any other gets an open offer for seven days, applied at the
+		 * first verified sign-in. One result per email: a refusal for one does not stop the others.
+		 */
+		invite: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
+			.input(
+				z.object({
+					emails: z
+						.array(z.string().trim().toLowerCase().pipe(z.email()))
+						.min(1)
+						.max(STAFF_INVITE_MAX_EMAILS),
+					role: z.enum(INVITABLE_ROLES),
+				}),
+			)
+			.output(z.object({ results: z.array(StaffInviteResult) })),
+		revokeInvitation: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {} })
+			.input(z.object({ id: Id }))
+			.output(z.object({ id: Id })),
+		/** Opens the offer for seven more days, from now, and sends the email again. */
+		resendInvitation: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {} })
+			.input(z.object({ id: Id }))
+			.output(
+				z.object({ invitation: StaffInvitation, emailSent: z.boolean() }),
+			),
 	},
 	jobs: jobsAdminContract,
 	organizations: organizationsAdminContract,

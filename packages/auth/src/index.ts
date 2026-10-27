@@ -16,6 +16,7 @@ import { displayNameFor } from "./display-name";
 import { type OAuthProxyEnv, oauthProxyFrom } from "./oauth-proxy";
 import { type SocialProviderEnv, socialProvidersFrom } from "./providers";
 import { isRefusedProxyCallback } from "./proxy-target";
+import { acceptStaffInvitation } from "./staff-invitation";
 import { withoutOAuthTokens } from "./tokens";
 
 export type AuthConfig = SocialProviderEnv &
@@ -147,6 +148,14 @@ export function createAuth(
 									.update(schema.user)
 									.set({ role })
 									.where(eq(schema.user.id, session.userId));
+							}
+							// An invitation (#286) raises the role of a verified email, once.
+							if (row.emailVerified) {
+								await acceptStaffInvitation(database, {
+									id: session.userId,
+									email: row.email,
+									role,
+								});
 							}
 						}
 						return { data: session };

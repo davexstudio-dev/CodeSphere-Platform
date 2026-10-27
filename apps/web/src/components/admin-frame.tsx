@@ -1,7 +1,6 @@
 "use client";
 
 import { type Permissions, roleCan } from "@codesphere/auth/access";
-import { Button } from "@codesphere/ui/components/atoms/button";
 import {
 	Empty,
 	EmptyDescription,
@@ -14,7 +13,6 @@ import {
 	BriefcaseIcon,
 	BuildingIcon,
 	GaugeIcon,
-	LogOutIcon,
 	RssIcon,
 	ScaleIcon,
 	ScrollTextIcon,
@@ -22,13 +20,13 @@ import {
 	ShieldIcon,
 	TagIcon,
 	TrophyIcon,
+	UsersIcon,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import AdminAccountMenu from "@/components/admin-account-menu";
 import { useAdminIdentity } from "@/components/admin-identity";
 import Link from "@/components/link";
-import LocaleSwitcher from "@/components/locale-switcher";
-import { authClient } from "@/lib/auth-client";
 
 // Each screen with the permission its procedures require (#285): the same access control the API
 // enforces, so a moderator sees only what they can use.
@@ -104,13 +102,22 @@ const NAV: {
 		icon: ScrollTextIcon,
 		can: { audit: ["read"] },
 	},
+	{
+		key: "staff.title",
+		href: "/admin/staff",
+		icon: UsersIcon,
+		can: { staff: ["list"] },
+	},
 ];
 
 /** The screen `pathname` belongs to: the longest matching entry, so /admin/tags is not /admin. */
 const screenOf = (pathname: string) =>
-	NAV.filter(
-		(item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
-	).sort((a, b) => b.href.length - a.href.length)[0];
+	// « Mon compte » belongs to every staff member: no permission to ask for.
+	(pathname.startsWith("/admin/account") ? [] : NAV)
+		.filter(
+			(item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
+		)
+		.sort((a, b) => b.href.length - a.href.length)[0];
 
 /** The back-office layout with the navigation wired to the router and the signed-in Admin. */
 export default function AdminFrame({
@@ -125,32 +132,18 @@ export default function AdminFrame({
 	children: React.ReactNode;
 }) {
 	const pathname = usePathname();
-	const router = useRouter();
 	const identity = useAdminIdentity();
 	const t = useTranslations("admin");
 	// A screen the role cannot use shows why instead of a page of FORBIDDEN errors.
 	const screen = screenOf(pathname);
 	const allowed = !screen || roleCan(identity?.role, screen.can);
 
-	const signOut = () =>
-		authClient.signOut({
-			fetchOptions: { onSuccess: () => router.push("/") },
-		});
-
 	return (
 		<AdminShell
 			title={title}
 			description={description}
 			LinkComponent={Link}
-			user={
-				identity
-					? {
-							name: identity.name,
-							email: identity.email,
-							role: identity.role,
-						}
-					: undefined
-			}
+			userMenu={({ collapsed }) => <AdminAccountMenu compact={collapsed} />}
 			nav={NAV.filter((item) => roleCan(identity?.role, item.can)).map(
 				({ key, can: _can, ...item }) => ({
 					...item,
@@ -158,16 +151,7 @@ export default function AdminFrame({
 					active: pathname === item.href,
 				}),
 			)}
-			actions={
-				<>
-					<LocaleSwitcher />
-					{actions}
-					<Button variant="ghost" size="sm" onClick={signOut}>
-						<LogOutIcon />
-						{t("signOut")}
-					</Button>
-				</>
-			}
+			actions={actions}
 		>
 			{allowed ? (
 				children

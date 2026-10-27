@@ -178,6 +178,7 @@ import {
 	VoteControl,
 } from "@codesphere/ui/components/molecules/vote-control";
 import { AdminMasterDetail } from "@codesphere/ui/components/organisms/admin-master-detail";
+import { AdminUserMenu } from "@codesphere/ui/components/organisms/admin-user-menu";
 import { AnswerForm } from "@codesphere/ui/components/organisms/answer-form";
 import { ApiKeyReveal } from "@codesphere/ui/components/organisms/api-key-reveal";
 import { AppFooter } from "@codesphere/ui/components/organisms/app-footer";
@@ -221,8 +222,10 @@ import {
 	FileTextIcon,
 	FunnelIcon,
 	InfoIcon,
+	LogOutIcon,
 	SearchIcon,
 	TriangleAlertIcon,
+	UserCogIcon,
 	WifiOffIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -1667,6 +1670,39 @@ export default function DesignSystemPage() {
 								disabled={reason.trim().length < 3}
 								onConfirm={() => setReason("")}
 							/>
+						</div>
+					</Specimen>
+					<Specimen label="AdminUserMenu — le badge du staff, en haut à gauche">
+						<div className="w-64 rounded-lg bg-sidebar p-3">
+							<AdminUserMenu
+								name="Awa Diallo"
+								email="awa@example.com"
+								roleLabel="Admin"
+								label="Menu du compte"
+							>
+								<DropdownMenuItem>
+									<UserCogIcon />
+									Mon compte
+								</DropdownMenuItem>
+								<DropdownMenuSeparator />
+								<DropdownMenuItem variant="destructive">
+									<LogOutIcon />
+									Se déconnecter
+								</DropdownMenuItem>
+							</AdminUserMenu>
+						</div>
+						<div className="w-16 rounded-lg bg-sidebar p-3">
+							<AdminUserMenu
+								compact
+								name="Awa Diallo"
+								roleLabel="Admin"
+								label="Menu du compte (réduit)"
+							>
+								<DropdownMenuItem>
+									<UserCogIcon />
+									Mon compte
+								</DropdownMenuItem>
+							</AdminUserMenu>
 						</div>
 					</Specimen>
 					<Specimen label="StateGate — chargement, erreur, vide">

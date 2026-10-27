@@ -39,6 +39,11 @@ export {
 	type SignInCodeProps,
 } from "./templates/sign-in-code";
 export {
+	STAFF_INVITATION_SUBJECTS,
+	StaffInvitation,
+	type StaffInvitationProps,
+} from "./templates/staff-invitation";
+export {
 	WELCOME_SUBJECT,
 	WELCOME_SUBJECTS,
 	Welcome,

@@ -58,6 +58,16 @@ export type Context = {
 			member: { email: string; name: string },
 			agentName: string,
 		): Promise<void>;
+		/**
+		 * A staff invitation (#286): `true` when the email left, false when there is no mail service
+		 * or the send failed. Optional: a deployment with no mail provider leaves it out.
+		 */
+		staffInvited?(invitation: {
+			email: string;
+			role: "moderator" | "admin";
+			invitedBy: string;
+			days: number;
+		}): Promise<boolean>;
 	};
 	/**
 	 * Publishing to CodeSphere's own social accounts (#265). Optional: a deployment without
