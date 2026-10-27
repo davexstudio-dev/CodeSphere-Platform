@@ -22,6 +22,12 @@ import {
 } from "../admin-social";
 import { revokeStaffSessions, setRole } from "../admin-staff";
 import {
+	inviteStaff,
+	listStaff,
+	resendInvitation,
+	revokeInvitation,
+} from "../admin-staff-invitations";
+import {
 	createTag,
 	deleteTag,
 	listTags,
@@ -430,6 +436,72 @@ export const appRouter = impl
 							});
 						}
 						return outcome.member;
+					}),
+				// Staff invitations (#286).
+				list: impl.admin.staff.list
+					.use(staffMay({ staff: ["list"] }))
+					.handler(({ context }) => listStaff(context.db)),
+				invite: impl.admin.staff.invite
+					.use(staffMay({ staff: ["invite"] }))
+					.handler(async ({ context, input, errors }) => {
+						const results = await inviteStaff(
+							context.db,
+							{
+								id: actorOf(context.session),
+								role: String(context.session?.user.role),
+							},
+							String(context.session?.user.name ?? ""),
+							input.emails,
+							input.role,
+							{
+								superAdminEmails: context.superAdminEmails,
+								send: context.notifications?.staffInvited,
+							},
+						);
+						if ("forbidden" in results) {
+							throw errors.FORBIDDEN({
+								message: "You cannot offer this role.",
+							});
+						}
+						return { results };
+					}),
+				revokeInvitation: impl.admin.staff.revokeInvitation
+					.use(staffMay({ staff: ["invite"] }))
+					.handler(async ({ context, input, errors }) => {
+						const outcome = await revokeInvitation(
+							context.db,
+							{
+								id: actorOf(context.session),
+								role: String(context.session?.user.role),
+							},
+							input.id,
+						);
+						if (!outcome.ok) {
+							throw outcome.code === "NOT_FOUND"
+								? errors.NOT_FOUND()
+								: errors.FORBIDDEN();
+						}
+						return outcome.value;
+					}),
+				resendInvitation: impl.admin.staff.resendInvitation
+					.use(staffMay({ staff: ["invite"] }))
+					.handler(async ({ context, input, errors }) => {
+						const outcome = await resendInvitation(
+							context.db,
+							{
+								id: actorOf(context.session),
+								role: String(context.session?.user.role),
+							},
+							String(context.session?.user.name ?? ""),
+							input.id,
+							{ send: context.notifications?.staffInvited },
+						);
+						if (!outcome.ok) {
+							throw outcome.code === "NOT_FOUND"
+								? errors.NOT_FOUND()
+								: errors.FORBIDDEN();
+						}
+						return outcome.value;
 					}),
 			},
 			tags: {

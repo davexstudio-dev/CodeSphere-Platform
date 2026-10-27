@@ -2,6 +2,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { isAdminEmail, parseAdminEmails, roleAtSignIn, roleFor } from "./admin";
+import { roleFromInvitation } from "./staff-invitation";
 
 describe("parseAdminEmails", () => {
 	test("is empty when the variable is missing", () => {
@@ -123,5 +124,19 @@ describe("roleAtSignIn", () => {
 				staff,
 			),
 		).toBe("member");
+	});
+});
+
+describe("roleFromInvitation (#286)", () => {
+	test("raises a member to the offered staff role", () => {
+		expect(roleFromInvitation("member", "moderator")).toBe("moderator");
+		expect(roleFromInvitation(null, "admin")).toBe("admin");
+		expect(roleFromInvitation("moderator", "admin")).toBe("admin");
+	});
+
+	test("never lowers or repeats a role", () => {
+		expect(roleFromInvitation("admin", "moderator")).toBeNull();
+		expect(roleFromInvitation("admin", "admin")).toBeNull();
+		expect(roleFromInvitation("super_admin", "admin")).toBeNull();
 	});
 });

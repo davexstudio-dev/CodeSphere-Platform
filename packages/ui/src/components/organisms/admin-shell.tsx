@@ -20,8 +20,11 @@ type AdminShellProps = Omit<React.ComponentProps<"div">, "title"> & {
 	nav: readonly AdminNavItem[];
 	/** The router's link component (next/link). Defaults to a plain `a`. */
 	LinkComponent?: React.ElementType;
-	/** Shown at the bottom of the sidebar. */
-	user?: { name: string; role: string; email?: string };
+	/**
+	 * The signed-in member at the top left of the sidebar: an `AdminUserMenu`. A render prop, because
+	 * the menu narrows to the avatar when the sidebar collapses.
+	 */
+	userMenu?: (state: { collapsed: boolean }) => React.ReactNode;
 	/** Page-level actions, rendered next to the title. */
 	actions?: React.ReactNode;
 };
@@ -32,7 +35,7 @@ function AdminShell({
 	description,
 	nav,
 	LinkComponent = "a",
-	user,
+	userMenu,
 	actions,
 	children,
 	className,
@@ -52,7 +55,14 @@ function AdminShell({
 			)}
 			{...props}
 		>
-			<aside className="flex flex-col gap-3 border-border border-b bg-sidebar p-3 text-sidebar-foreground md:sticky md:top-0 md:h-svh md:gap-6 md:border-r md:border-b-0 md:p-4">
+			<aside
+				className={cn(
+					"flex flex-col gap-3 border-border border-b bg-sidebar p-3 text-sidebar-foreground md:sticky md:top-0 md:h-svh md:gap-6 md:border-r md:border-b-0 md:p-4",
+					// Collapsed (4.5 rem), the icon-only account badge is 46 px wide: 16 px of padding left only
+					// 40, so it would be squeezed into a pill. 12 px leaves 48.
+					collapsed && "md:px-3",
+				)}
+			>
 				<div
 					className={cn(
 						"flex items-start justify-between gap-2",
@@ -80,6 +90,7 @@ function AdminShell({
 						<ToggleIcon className="size-4" />
 					</button>
 				</div>
+				{userMenu?.({ collapsed })}
 				<nav
 					aria-label="Administration"
 					className="-mx-1 overflow-x-auto md:mx-0"
@@ -105,22 +116,6 @@ function AdminShell({
 						))}
 					</ul>
 				</nav>
-				{user && (
-					<div
-						className={cn(
-							"mt-auto hidden flex-col text-xs md:flex",
-							collapsed && "md:hidden",
-						)}
-					>
-						<span className="font-medium">{user.name}</span>
-						{user.email && (
-							<span className="truncate text-muted-foreground">
-								{user.email}
-							</span>
-						)}
-						<span className="text-muted-foreground">{user.role}</span>
-					</div>
-				)}
 			</aside>
 
 			<div className="flex min-w-0 flex-col">

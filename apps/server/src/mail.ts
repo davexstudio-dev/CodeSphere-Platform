@@ -83,6 +83,26 @@ export function createNotifications(
 				logger.warn({ message: result.message }, "agent paused email not sent");
 			}
 		},
+		async staffInvited(invitation) {
+			const result = await mail.send({
+				to: invitation.email,
+				...composeEmail({
+					kind: "staff-invitation",
+					props: {
+						invitedBy: invitation.invitedBy,
+						role: invitation.role,
+						days: invitation.days,
+					},
+				}),
+			});
+			if (result.status === "failed") {
+				logger.warn(
+					{ message: result.message },
+					"staff invitation email not sent",
+				);
+			}
+			return result.status === "sent";
+		},
 		async apiKeyCreated(member, keyName) {
 			const result = await mail.send({
 				to: member.email,

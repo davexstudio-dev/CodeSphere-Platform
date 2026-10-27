@@ -410,6 +410,14 @@
 			"packages/ui/src/components/molecules/reason-field.tsx"
 		]
 	},
+	"AdminUserMenu — le badge du staff, en haut à gauche": {
+		"imports": "import { DropdownMenuItem, DropdownMenuSeparator } from \"@codesphere/ui/components/molecules/dropdown-menu\";\nimport { AdminUserMenu } from \"@codesphere/ui/components/organisms/admin-user-menu\";\nimport { LogOutIcon, UserCogIcon } from \"lucide-react\";",
+		"jsx": "<div className=\"w-64 rounded-lg bg-sidebar p-3\">\n\t<AdminUserMenu\n\t\tname=\"Awa Diallo\"\n\t\temail=\"awa@example.com\"\n\t\troleLabel=\"Admin\"\n\t\tlabel=\"Menu du compte\"\n\t>\n\t\t<DropdownMenuItem>\n\t\t\t<UserCogIcon />\n\t\t\tMon compte\n\t\t</DropdownMenuItem>\n\t\t<DropdownMenuSeparator />\n\t\t<DropdownMenuItem variant=\"destructive\">\n\t\t\t<LogOutIcon />\n\t\t\tSe déconnecter\n\t\t</DropdownMenuItem>\n\t</AdminUserMenu>\n</div>\n<div className=\"w-16 rounded-lg bg-sidebar p-3\">\n\t<AdminUserMenu\n\t\tcompact\n\t\tname=\"Awa Diallo\"\n\t\troleLabel=\"Admin\"\n\t\tlabel=\"Menu du compte (réduit)\"\n\t>\n\t\t<DropdownMenuItem>\n\t\t\t<UserCogIcon />\n\t\t\tMon compte\n\t\t</DropdownMenuItem>\n\t</AdminUserMenu>\n</div>",
+		"files": [
+			"packages/ui/src/components/molecules/dropdown-menu.tsx",
+			"packages/ui/src/components/organisms/admin-user-menu.tsx"
+		]
+	},
 	"StateGate — chargement, erreur, vide": {
 		"imports": "import { StateGate } from \"@codesphere/ui/components/molecules/state-gate\";",
 		"jsx": "<div className=\"grid w-full gap-4 md:grid-cols-3\">\n\t<StateGate status=\"loading\">\n\t\t<p>Contenu</p>\n\t</StateGate>\n\t<StateGate status=\"error\" onRetry={() => {}}>\n\t\t<p>Contenu</p>\n\t</StateGate>\n\t<StateGate status=\"empty\">\n\t\t<p>Contenu</p>\n\t</StateGate>\n</div>",

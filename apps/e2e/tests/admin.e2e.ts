@@ -23,6 +23,7 @@ const MENUS = [
 	{ name: "Tags", path: "/admin/tags" },
 	{ name: "Web Vitals", path: "/admin/vitals" },
 	{ name: "Journal d'audit", path: "/admin/audit" },
+	{ name: "Équipe", path: "/admin/staff" },
 ] as const;
 
 // One sign-in per staff account: the sign-in endpoint is rate-limited, and a session is all the
@@ -70,6 +71,9 @@ test.beforeEach(({ browser: _browser }, info) => info.setTimeout(120_000));
 
 const sidebar = (page: Page) =>
 	page.getByRole("navigation", { name: "Administration" });
+// The staff badge at the top left of the sidebar (#286) and its menu.
+const accountMenu = (page: Page) =>
+	page.getByRole("button", { name: "Menu du compte" });
 const confirm = (page: Page) =>
 	page.getByRole("button", { name: /^Confirmer/ });
 
@@ -94,15 +98,16 @@ test.describe("access", () => {
 		baseURL,
 	}) => {
 		for (const [email, role] of [
-			[MODERATOR_EMAIL, "moderator"],
-			[ADMIN_EMAIL, "admin"],
+			[MODERATOR_EMAIL, "Modérateur"],
+			[ADMIN_EMAIL, "Admin"],
 		] as const) {
 			const page = await sessionAs(browser, baseURL, email);
 			await page.goto("/dashboard");
 			await expect(
 				page.getByRole("heading", { name: "Tableau de bord" }),
 			).toBeVisible();
-			await expect(page.getByText(role, { exact: true })).toBeVisible();
+			// The staff badge at the top left of the sidebar (#286) names the role.
+			await expect(accountMenu(page)).toContainText(role);
 		}
 	});
 });
@@ -158,6 +163,9 @@ test.describe("menus", () => {
 		const shell = page.locator("[data-slot=admin-shell]");
 		await page.getByRole("button", { name: "Réduire le menu" }).click();
 		await expect(shell).toHaveAttribute("data-collapsed", "true");
+		// Icon only, the staff badge stays a circle around its round avatar (not a squeezed pill).
+		const badge = await accountMenu(page).boundingBox();
+		expect(badge?.width).toBeCloseTo(badge?.height ?? 0, 0);
 		await page.getByRole("button", { name: "Déployer le menu" }).click();
 		await expect(shell).toHaveAttribute("data-collapsed", "false");
 	});
@@ -168,11 +176,13 @@ test.describe("menus", () => {
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
 		await page.goto("/dashboard");
-		await page.getByRole("button", { name: "English" }).click();
+		await accountMenu(page).click();
+		await page.getByRole("menuitemradio", { name: "English" }).click();
 		await expect(
 			page.getByRole("heading", { level: 1, name: "Dashboard" }),
 		).toBeVisible();
-		await page.getByRole("button", { name: "Français" }).click();
+		await page.getByRole("button", { name: "Account menu" }).click();
+		await page.getByRole("menuitemradio", { name: "Français" }).click();
 		await expect(
 			page.getByRole("heading", { level: 1, name: "Tableau de bord" }),
 		).toBeVisible();
@@ -183,10 +193,109 @@ test.describe("menus", () => {
 			fresh: true,
 		});
 		await page.goto("/dashboard");
-		await page.getByRole("button", { name: "Se déconnecter" }).click();
+		await accountMenu(page).click();
+		await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
 		await expect(page).toHaveURL(baseURL ? `${baseURL}/` : "/");
 		await page.goto("/admin");
 		await expect(page).toHaveURL(/\/signin/);
+	});
+});
+
+test.describe("staff badge and account (#286)", () => {
+	test("the badge menu leads to « Mon compte » and back to the site", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		await page.goto("/dashboard");
+		await accountMenu(page).click();
+		await expect(page.getByText(ADMIN_EMAIL)).toBeVisible();
+		await page.getByRole("menuitem", { name: "Mon compte" }).click();
+		await expect(page).toHaveURL(/\/admin\/account$/);
+		await expect(
+			page.getByRole("heading", { level: 1, name: "Mon compte" }),
+		).toBeVisible();
+		await accountMenu(page).click();
+		await page.getByRole("menuitem", { name: "Retour au site" }).click();
+		await expect(page).toHaveURL(baseURL ? `${baseURL}/` : "/");
+	});
+
+	test("« Mon compte » shows the profile, this session and the activity", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, MODERATOR_EMAIL);
+		await page.goto("/admin/account");
+		const profile = page.locator("section", { hasText: "Profil" }).first();
+		await expect(profile.getByText(MODERATOR_EMAIL)).toBeVisible();
+		await expect(page.getByText("Cette session")).toBeVisible();
+		await expect(
+			page.getByRole("heading", { name: "Mon activité" }),
+		).toBeVisible();
+	});
+
+	test("an Admin invites two emails and the pending offers appear", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		const stamp = Date.now().toString(36);
+		const first = `e2e.invited1.${stamp}@example.com`;
+		const second = `e2e.invited2.${stamp}@example.com`;
+		await page.goto("/admin/staff");
+		await page.getByRole("button", { name: "Inviter" }).click();
+		const dialog = page.getByRole("dialog", { name: "Inviter dans l'équipe" });
+		await dialog.getByLabel("Adresses e-mail").fill(`${first}, ${second}`);
+		await expect(dialog.getByText("2 adresses")).toBeVisible();
+		await dialog
+			.getByRole("button", { name: "Envoyer les invitations" })
+			.click();
+		await expect(dialog.getByText("Invitation créée")).toHaveCount(2);
+		await dialog.getByRole("button", { name: "Fermer" }).first().click();
+		await expect(page.getByText("Invitations en attente")).toBeVisible();
+		await page.getByRole("button", { name: first }).click();
+		await expect(page.getByRole("heading", { name: first })).toBeVisible();
+		// Revoke it: the offer leaves the list.
+		await page.getByRole("button", { name: "Révoquer l'invitation" }).click();
+		await confirm(page).click();
+		await expect(page.getByRole("button", { name: first })).toHaveCount(0);
+		await expect(page.getByRole("button", { name: second })).toBeVisible();
+	});
+
+	test("a Moderator does not get the team screen", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, MODERATOR_EMAIL);
+		await page.goto("/dashboard");
+		await expect(
+			sidebar(page).getByRole("link", { name: "Équipe" }),
+		).toHaveCount(0);
+		await page.goto("/admin/staff");
+		await expect(
+			page.getByText("Écran non accessible à votre rôle"),
+		).toBeVisible();
+	});
+
+	test("an invited email gets the role at its first sign-in", async ({
+		browser,
+		baseURL,
+	}) => {
+		const admin = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		const guest = `e2e.guest.${Date.now().toString(36)}@example.com`;
+		await admin.goto("/admin/staff");
+		await admin.getByRole("button", { name: "Inviter" }).click();
+		const dialog = admin.getByRole("dialog", { name: "Inviter dans l'équipe" });
+		await dialog.getByLabel("Adresses e-mail").fill(guest);
+		await dialog
+			.getByRole("button", { name: "Envoyer les invitations" })
+			.click();
+		await expect(dialog.getByText("Invitation créée")).toBeVisible();
+
+		// The guest signs in for the first time: the account is created and the offer applied.
+		const page = await sessionAs(browser, baseURL, guest, { fresh: true });
+		await page.goto("/dashboard");
+		await expect(accountMenu(page)).toContainText("Modérateur");
 	});
 });
 
