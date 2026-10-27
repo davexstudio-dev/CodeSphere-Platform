@@ -64,10 +64,20 @@ export default function AdminAccountMenu({ compact }: { compact: boolean }) {
 						}
 					}}
 				>
-					<DropdownMenuRadioItem value="fr" disabled={pending} lang="fr">
+					<DropdownMenuRadioItem
+						closeOnClick
+						value="fr"
+						disabled={pending}
+						lang="fr"
+					>
 						Français
 					</DropdownMenuRadioItem>
-					<DropdownMenuRadioItem value="en" disabled={pending} lang="en">
+					<DropdownMenuRadioItem
+						closeOnClick
+						value="en"
+						disabled={pending}
+						lang="en"
+					>
 						English
 					</DropdownMenuRadioItem>
 				</DropdownMenuRadioGroup>
@@ -83,13 +93,13 @@ export default function AdminAccountMenu({ compact }: { compact: boolean }) {
 						}
 					}}
 				>
-					<DropdownMenuRadioItem value="light">
+					<DropdownMenuRadioItem closeOnClick value="light">
 						{t("themes.light")}
 					</DropdownMenuRadioItem>
-					<DropdownMenuRadioItem value="dark">
+					<DropdownMenuRadioItem closeOnClick value="dark">
 						{t("themes.dark")}
 					</DropdownMenuRadioItem>
-					<DropdownMenuRadioItem value="system">
+					<DropdownMenuRadioItem closeOnClick value="system">
 						{t("themes.system")}
 					</DropdownMenuRadioItem>
 				</DropdownMenuRadioGroup>
