@@ -10,8 +10,8 @@
 		"check-types": "tsc -b"
 	},
 	"dependencies": {
-		"@better-auth/api-key": "1.7.5",
-		"@better-auth/drizzle-adapter": "1.7.5",
+		"@better-auth/api-key": "1.7.14",
+		"@better-auth/drizzle-adapter": "1.7.14",
 		"@codesphere/contract": "workspace:*",
 		"@codesphere/db": "workspace:*",
 		"better-auth": "catalog:",
