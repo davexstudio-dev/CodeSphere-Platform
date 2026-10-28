@@ -9,10 +9,11 @@ import { SegmentedControl } from "@codesphere/ui/components/molecules/segmented-
 import { SettingsSection } from "@codesphere/ui/components/molecules/setting-row";
 import { ApiKeyReveal } from "@codesphere/ui/components/organisms/api-key-reveal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BotIcon, KeyRoundIcon, PowerOffIcon } from "lucide-react";
+import { BotIcon, HistoryIcon, KeyRoundIcon, PowerOffIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
+import { AgentActivity } from "@/components/agent-activity";
 import Link from "@/components/link";
 
 import { errorCodeOf } from "@/i18n/errors";
@@ -165,6 +166,7 @@ function AgentRow({
 	onDelete: () => void;
 }) {
 	const t = useTranslations("settings.agents");
+	const [showHistory, setShowHistory] = useState(false);
 	const format = useFormatter();
 	const mounted = useMounted();
 	return (
@@ -229,12 +231,26 @@ function AgentRow({
 						{t("disable")}
 					</Button>
 				)}
+				<Button
+					variant="ghost"
+					size="sm"
+					aria-expanded={showHistory}
+					onClick={() => setShowHistory((open) => !open)}
+				>
+					<HistoryIcon />
+					{showHistory ? t("hideHistory") : t("history")}
+				</Button>
 				<ConfirmTwoStep
 					label={t("delete")}
 					disabled={busy}
 					onConfirm={onDelete}
 				/>
 			</div>
+			{showHistory && (
+				<div className="border-border border-t pt-3">
+					<AgentActivity agentId={agent.id} />
+				</div>
+			)}
 		</li>
 	);
 }
