@@ -116,9 +116,10 @@
 		},
 		"tabs": {
 			"profile": "Profil",
-			"tags": "Tags",
+			"reputation": "Réputation et badges",
+			"tags": "Centres d'intérêt",
 			"agents": "Agents",
-			"data": "Vos données"
+			"data": "Confidentialité et données"
 		},
 		"feed": {
 			"title": "Fil « Pour toi »",
@@ -151,6 +152,18 @@
 			"preview": "Ce qu'un recruteur voit",
 			"previewLine": "Réputation {reputation} · Tags forts : {tags} · Pays : {country}",
 			"error": "L'enregistrement a échoué."
+		},
+		"unsaved": "Modifications non enregistrées.",
+		"applied": "Préférence enregistrée.",
+		"header": {
+			"reputation": "{value} de réputation"
+		},
+		"reputation": {
+			"rankings": "Voir les classements",
+			"strongest": "Vos Tags les plus forts",
+			"strongestNone": "Pas encore de Tag où vous vous démarquez : répondez sur vos Tags pour en faire apparaître.",
+			"badges": "Badges",
+			"badgesNone": "Aucun badge pour l'instant."
 		}
 	},
 	"agentProfile": {
