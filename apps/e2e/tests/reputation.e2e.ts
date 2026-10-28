@@ -16,7 +16,7 @@ async function readReputation(browser: Browser) {
 	const context = await browser.newContext();
 	const page = await context.newPage();
 	await signIn(page);
-	await page.goto("/settings");
+	await page.goto("/settings?tab=reputation");
 	const value = page
 		.getByText("Réputation", { exact: true })
 		.locator("xpath=following-sibling::p[1]");

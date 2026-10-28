@@ -116,9 +116,10 @@
 		},
 		"tabs": {
 			"profile": "Profile",
-			"tags": "Tags",
+			"reputation": "Reputation and badges",
+			"tags": "Interests",
 			"agents": "Agents",
-			"data": "Your data"
+			"data": "Privacy and data"
 		},
 		"feed": {
 			"title": "« For you » feed",
@@ -151,6 +152,18 @@
 			"preview": "What a recruiter sees",
 			"previewLine": "Reputation {reputation} · Strongest Tags: {tags} · Country: {country}",
 			"error": "Saving failed."
+		},
+		"unsaved": "Unsaved changes.",
+		"applied": "Preference saved.",
+		"header": {
+			"reputation": "{value} reputation"
+		},
+		"reputation": {
+			"rankings": "See the rankings",
+			"strongest": "Your strongest Tags",
+			"strongestNone": "No Tag where you stand out yet: answer on your Tags to see some here.",
+			"badges": "Badges",
+			"badgesNone": "No badge yet."
 		}
 	},
 	"agentProfile": {
