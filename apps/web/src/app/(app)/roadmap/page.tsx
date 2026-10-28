@@ -1,6 +1,7 @@
 import { MIN_MEMBERS_PER_COUNTRY } from "@codesphere/contract";
 import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Card } from "@codesphere/ui/components/molecules/card";
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { RoadmapTimeline } from "@codesphere/ui/components/organisms/roadmap-timeline";
 import { SectionNav } from "@codesphere/ui/components/organisms/section-nav";
 import { StatStrip } from "@codesphere/ui/components/organisms/stat-strip";
@@ -78,11 +79,15 @@ export default async function Page() {
 
 	return (
 		<div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 md:px-8 md:py-14 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-12">
-			<aside className="lg:sticky lg:top-6 lg:self-start">
-				<SectionNav title={t("summary")} items={summary} />
-				<p className="mt-3 hidden text-muted-foreground text-xs lg:block">
-					{t("remaining", { count: overall.inProgress + overall.planned })}
-				</p>
+			{/* Sticky under the site bar (h-16, itself sticky), never under it: top = 4 rem + 1.5 rem.
+			    Its height is the viewport's minus that offset; a longer summary scrolls inside. */}
+			<aside className="lg:sticky lg:top-22 lg:flex lg:max-h-[calc(100svh-7rem)] lg:flex-col lg:self-start">
+				<ScrollArea className="lg:min-h-0 lg:flex-1">
+					<SectionNav title={t("summary")} items={summary} />
+					<p className="mt-3 hidden text-muted-foreground text-xs lg:block">
+						{t("remaining", { count: overall.inProgress + overall.planned })}
+					</p>
+				</ScrollArea>
 			</aside>
 			<main className="flex min-w-0 flex-col gap-12">
 				<header className="flex flex-col gap-4">
@@ -147,7 +152,7 @@ export default async function Page() {
 				</header>
 
 				<section aria-labelledby="community" className="flex flex-col gap-4">
-					<h2 id="community" className="scroll-mt-24 font-semibold text-xl">
+					<h2 id="community" className="scroll-mt-28 font-semibold text-xl">
 						{t("community")}
 					</h2>
 					{figures && snapshot ? (
@@ -179,7 +184,7 @@ export default async function Page() {
 							<div className="flex flex-wrap items-center gap-x-3 gap-y-1">
 								<h2
 									id={section.id}
-									className="scroll-mt-24 font-semibold text-xl"
+									className="scroll-mt-28 font-semibold text-xl"
 								>
 									{section.title}
 								</h2>
@@ -211,7 +216,7 @@ export default async function Page() {
 				})}
 
 				<section aria-labelledby="not-doing" className="flex flex-col gap-4">
-					<h2 id="not-doing" className="scroll-mt-24 font-semibold text-xl">
+					<h2 id="not-doing" className="scroll-mt-28 font-semibold text-xl">
 						{t("notDoing")}
 					</h2>
 					<Card className="p-5 md:p-6">
@@ -237,7 +242,7 @@ export default async function Page() {
 								className="mt-1 size-5 shrink-0 text-primary"
 							/>
 							<div className="flex flex-col gap-1">
-								<h2 id="ideas" className="scroll-mt-24 font-semibold text-xl">
+								<h2 id="ideas" className="scroll-mt-28 font-semibold text-xl">
 									{t("ideas")}
 								</h2>
 								<p className="text-muted-foreground text-sm">
