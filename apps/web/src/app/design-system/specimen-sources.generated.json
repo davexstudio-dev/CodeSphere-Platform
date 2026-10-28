@@ -428,6 +428,11 @@
 		"jsx": "<RoadmapTimeline\n\tclassName=\"w-full max-w-xl\"\n\titems={[\n\t\t{\n\t\t\tid: \"a\",\n\t\t\ttext: \"Questions, Réponses, Réponse acceptée, Votes\",\n\t\t\tstatus: \"delivered\",\n\t\t\tstatusLabel: \"Livré\",\n\t\t\treference: \"#219\",\n\t\t},\n\t\t{\n\t\t\tid: \"b\",\n\t\t\ttext: \"Notifications\",\n\t\t\tstatus: \"in_progress\",\n\t\t\tstatusLabel: \"En cours\",\n\t\t},\n\t\t{\n\t\t\tid: \"c\",\n\t\t\ttext: \"Applications mobiles natives\",\n\t\t\tstatus: \"planned\",\n\t\t\tstatusLabel: \"Prévu\",\n\t\t},\n\t]}\n/>",
 		"files": ["packages/ui/src/components/organisms/roadmap-timeline.tsx"]
 	},
+	"SectionNav — sommaire d'une longue page": {
+		"imports": "import { SectionNav } from \"@codesphere/ui/components/organisms/section-nav\";",
+		"jsx": "<SectionNav\n\tclassName=\"w-full max-w-xs\"\n\ttitle=\"Sommaire\"\n\titems={[\n\t\t{ id: \"ds-statstrip\", label: \"Chiffres clés\" },\n\t\t{\n\t\t\tid: \"ds-roadmaptimeline\",\n\t\t\tlabel: \"Phase 1\",\n\t\t\tprogress: { done: 4, total: 5 },\n\t\t},\n\t\t{\n\t\t\tid: \"ds-sectionnav\",\n\t\t\tlabel: \"Phase 2\",\n\t\t\tprogress: { done: 1, total: 6 },\n\t\t},\n\t]}\n/>",
+		"files": ["packages/ui/src/components/organisms/section-nav.tsx"]
+	},
 	"StateGate — chargement, erreur, vide": {
 		"imports": "import { StateGate } from \"@codesphere/ui/components/molecules/state-gate\";",
 		"jsx": "<div className=\"grid w-full gap-4 md:grid-cols-3\">\n\t<StateGate status=\"loading\">\n\t\t<p>Contenu</p>\n\t</StateGate>\n\t<StateGate status=\"error\" onRetry={() => {}}>\n\t\t<p>Contenu</p>\n\t</StateGate>\n\t<StateGate status=\"empty\">\n\t\t<p>Contenu</p>\n\t</StateGate>\n</div>",

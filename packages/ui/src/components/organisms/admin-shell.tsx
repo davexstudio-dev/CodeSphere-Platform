@@ -21,7 +21,7 @@ type AdminShellProps = Omit<React.ComponentProps<"div">, "title"> & {
 	/** The router's link component (next/link). Defaults to a plain `a`. */
 	LinkComponent?: React.ElementType;
 	/**
-	 * The signed-in member at the top left of the sidebar: an `AdminUserMenu`. A render prop, because
+	 * The signed-in member at the bottom of the sidebar: an `AdminUserMenu`. A render prop, because
 	 * the menu narrows to the avatar when the sidebar collapses.
 	 */
 	userMenu?: (state: { collapsed: boolean }) => React.ReactNode;
@@ -90,10 +90,10 @@ function AdminShell({
 						<ToggleIcon className="size-4" />
 					</button>
 				</div>
-				{userMenu?.({ collapsed })}
+				{/* The nav takes the height left and scrolls inside it, so the account stays in view below. */}
 				<nav
 					aria-label="Administration"
-					className="-mx-1 overflow-x-auto md:mx-0"
+					className="-mx-1 overflow-x-auto md:mx-0 md:min-h-0 md:flex-1 md:overflow-y-auto md:overflow-x-hidden"
 				>
 					<ul className="flex gap-1 px-1 md:flex-col md:px-0">
 						{nav.map(({ label, href, icon: Icon, active }) => (
@@ -116,6 +116,11 @@ function AdminShell({
 						))}
 					</ul>
 				</nav>
+				{userMenu && (
+					<div className="md:border-sidebar-border md:border-t md:pt-3">
+						{userMenu({ collapsed })}
+					</div>
+				)}
 			</aside>
 
 			<div className="flex min-w-0 flex-col">

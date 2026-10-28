@@ -234,6 +234,24 @@ test.describe("staff badge and account (#286)", () => {
 		).toBeVisible();
 	});
 
+	test("a staff member renames their account and the badge follows", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, MODERATOR_EMAIL);
+		await page.goto("/admin/account");
+		const field = page.getByLabel("Nom affiché");
+		const original = await field.inputValue();
+		const renamed = `${original} Test`;
+		await field.fill(renamed);
+		await page.getByRole("button", { name: "Enregistrer" }).click();
+		await expect(accountMenu(page)).toContainText(renamed);
+		// Put the name back: the other tests read it.
+		await field.fill(original);
+		await page.getByRole("button", { name: "Enregistrer" }).click();
+		await expect(accountMenu(page)).toContainText(original);
+	});
+
 	test("an Admin invites two emails and the pending offers appear", async ({
 		browser,
 		baseURL,

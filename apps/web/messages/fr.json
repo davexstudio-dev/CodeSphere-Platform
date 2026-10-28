@@ -814,13 +814,27 @@
 		},
 		"account": {
 			"title": "Mon compte",
-			"description": "Votre profil du back-office, vos sessions et votre activité.",
+			"description": "Votre profil, vos préférences, vos sessions et votre activité dans le back-office.",
 			"profile": {
 				"title": "Profil",
-				"name": "Nom",
+				"name": "Nom affiché",
 				"email": "E-mail",
 				"role": "Rôle",
-				"note": "Ces informations viennent de votre fournisseur de connexion : elles ne se modifient pas ici."
+				"nameHint": "Ce nom apparaît dans votre badge et dans le journal d'audit.",
+				"emailHint": "L'adresse vient de votre fournisseur de connexion : elle ne se modifie pas ici.",
+				"memberSince": "Membre depuis",
+				"signIn": "Connexion",
+				"save": "Enregistrer",
+				"saving": "Enregistrement…",
+				"saved": "Nom mis à jour.",
+				"failed": "Le nom n'a pas pu être modifié. Réessayez.",
+				"invalid": "Entrez un nom de 1 à 80 caractères.",
+				"emailCode": "Code envoyé par e-mail",
+				"providers": {
+					"google": "Google",
+					"github": "GitHub",
+					"credential": "E-mail et mot de passe"
+				}
 			},
 			"sessions": {
 				"title": "Sessions actives",
@@ -834,7 +848,9 @@
 				"revoked": "Session déconnectée.",
 				"othersRevoked": "Autres sessions déconnectées.",
 				"failed": "La déconnexion a échoué. Réessayez.",
-				"onlyThis": "Aucune autre session ouverte."
+				"onlyThis": "Aucune autre session ouverte.",
+				"stale": "Pour votre sécurité, la liste des sessions n'est disponible qu'après une connexion récente (moins de 24 h). Reconnectez-vous pour l'afficher.",
+				"reauth": "Se reconnecter"
 			},
 			"activity": {
 				"title": "Mon activité",
@@ -844,9 +860,21 @@
 				"unavailable": "Journal indisponible.",
 				"full": "Ouvrir le journal d'audit"
 			},
-			"language": {
-				"title": "Langue",
-				"description": "Langue de l'interface du back-office."
+			"hero": {
+				"memberSince": "Membre depuis le {date}",
+				"lastSignIn": "Session ouverte le {date}",
+				"verified": "E-mail vérifié",
+				"unverified": "E-mail non vérifié"
+			},
+			"access": {
+				"title": "Votre accès",
+				"description": "Les écrans du back-office que votre rôle ouvre.",
+				"count": "{count, plural, one {# écran} other {# écrans}}"
+			},
+			"preferences": {
+				"title": "Préférences",
+				"language": "Langue de l'interface",
+				"theme": "Thème"
 			}
 		},
 		"userMenu": {
@@ -1355,7 +1383,9 @@
 		"sectionProgress": "{done} sur {total} livrées",
 		"legendDelivered": "{count} livrées",
 		"legendInProgress": "{count} en cours",
-		"legendPlanned": "{count} prévues"
+		"legendPlanned": "{count} prévues",
+		"summary": "Sommaire",
+		"remaining": "{count, plural, =0 {Plus rien à faire} one {# ligne reste à faire} other {# lignes restent à faire}}"
 	},
 	"watch": {
 		"title": "Veille",

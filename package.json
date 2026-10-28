@@ -69,7 +69,8 @@
 		"postinstall": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./packages/db/",
 		"auth:generate": "cd apps/server && bun run auth:generate",
 		"licenses": "bun scripts/licenses.mjs",
-		"check": "biome check --write ."
+		"check": "biome check --write .",
+		"lint:ds": "oxlint apps packages"
 	},
 	"dependencies": {
 		"zod": "catalog:"
@@ -77,7 +78,9 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.12",
 		"@codesphere/config": "workspace:*",
+		"@shadcn/lint": "^0.2.3",
 		"@types/bun": "catalog:",
+		"oxlint": "^1.90.0",
 		"turbo": "^2.10.12",
 		"typescript": "catalog:",
 		"varlock": "catalog:"

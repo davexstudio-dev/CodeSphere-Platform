@@ -21,7 +21,7 @@ import { setLocale } from "@/i18n/actions";
 import { isLocale } from "@/i18n/config";
 
 /**
- * The staff badge at the top left of the back-office (#286): who is signed in, their role, and the
+ * The staff badge at the bottom of the back-office sidebar (#286): who is signed in, their role, and the
  * menu of their account: « Mon compte », language and theme, back to the site, sign out.
  */
 export default function AdminAccountMenu({ compact }: { compact: boolean }) {

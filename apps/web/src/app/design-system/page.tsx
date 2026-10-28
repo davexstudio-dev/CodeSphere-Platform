@@ -214,6 +214,7 @@ import {
 	RecordSheet,
 } from "@codesphere/ui/components/organisms/record-sheet";
 import { RoadmapTimeline } from "@codesphere/ui/components/organisms/roadmap-timeline";
+import { SectionNav } from "@codesphere/ui/components/organisms/section-nav";
 import { StatStrip } from "@codesphere/ui/components/organisms/stat-strip";
 import { TagPicker } from "@codesphere/ui/components/organisms/tag-picker";
 import {
@@ -1745,6 +1746,25 @@ export default function DesignSystemPage() {
 									text: "Applications mobiles natives",
 									status: "planned",
 									statusLabel: "Prévu",
+								},
+							]}
+						/>
+					</Specimen>
+					<Specimen label="SectionNav — sommaire d'une longue page">
+						<SectionNav
+							className="w-full max-w-xs"
+							title="Sommaire"
+							items={[
+								{ id: "ds-statstrip", label: "Chiffres clés" },
+								{
+									id: "ds-roadmaptimeline",
+									label: "Phase 1",
+									progress: { done: 4, total: 5 },
+								},
+								{
+									id: "ds-sectionnav",
+									label: "Phase 2",
+									progress: { done: 1, total: 6 },
 								},
 							]}
 						/>

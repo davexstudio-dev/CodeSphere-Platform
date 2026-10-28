@@ -23,6 +23,8 @@ export default async function AdminLayout({
 				name: session.user.name,
 				email: session.user.email,
 				role: session.user.role ?? "member",
+				createdAt: new Date(session.user.createdAt).toISOString(),
+				emailVerified: session.user.emailVerified,
 			}}
 		>
 			{children}

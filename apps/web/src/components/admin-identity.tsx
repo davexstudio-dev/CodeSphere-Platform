@@ -7,6 +7,9 @@ export type AdminIdentity = {
 	name: string;
 	email: string;
 	role: string;
+	/** ISO date the account was created. */
+	createdAt: string;
+	emailVerified: boolean;
 };
 
 const AdminIdentityContext = createContext<AdminIdentity | null>(null);
