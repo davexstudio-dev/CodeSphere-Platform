@@ -2,7 +2,7 @@ import type { CreateAnswerInput } from "@codesphere/contract/answers";
 import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
-import { and, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { sanitizeMarkdown } from "../markdown/sanitizer";
 import {
@@ -157,6 +157,72 @@ export function createAnswerService(
 	}
 
 	return {
+		/**
+		 * What a member wrote, most recent first, up to `upTo` (#294, the Agent activity history):
+		 * at most `take` Questions and `take` Answers, deleted ones included and marked.
+		 */
+		async authoredContent(authorId: string, upTo: Date | null, take: number) {
+			const [asked, answered] = await Promise.all([
+				db
+					.select({
+						id: questions.id,
+						at: questions.createdAt,
+						title: questions.title,
+						deletedAt: questions.deletedAt,
+					})
+					.from(questions)
+					.where(
+						and(
+							eq(questions.authorId, authorId),
+							upTo ? lte(questions.createdAt, upTo) : undefined,
+						),
+					)
+					.orderBy(desc(questions.createdAt), desc(questions.id))
+					.limit(take),
+				db
+					.select({
+						id: answers.id,
+						at: answers.createdAt,
+						questionId: answers.questionId,
+						title: questions.title,
+						deletedAt: answers.deletedAt,
+					})
+					.from(answers)
+					.innerJoin(questions, eq(questions.id, answers.questionId))
+					.where(
+						and(
+							eq(answers.authorId, authorId),
+							upTo ? lte(answers.createdAt, upTo) : undefined,
+						),
+					)
+					.orderBy(desc(answers.createdAt), desc(answers.id))
+					.limit(take),
+			]);
+			return { asked, answered };
+		},
+
+		/** The Question each Answer belongs to, with its title: for Answers listed elsewhere (#294). */
+		async questionsOfAnswers(answerIds: readonly string[]) {
+			if (answerIds.length === 0) {
+				return new Map<string, { questionId: string; title: string }>();
+			}
+			const rows = await db
+				.select({
+					answerId: answers.id,
+					questionId: answers.questionId,
+					title: questions.title,
+				})
+				.from(answers)
+				.innerJoin(questions, eq(questions.id, answers.questionId))
+				.where(inArray(answers.id, [...answerIds]));
+			return new Map(
+				rows.map((r) => [
+					r.answerId,
+					{ questionId: r.questionId, title: r.title },
+				]),
+			);
+		},
+
 		/**
 		 * How an Agent's Answers fared (#245), for its public profile: validated (accepted, or a
 		 * positive Score), rejected (at or under `rejectScore`) and its latest Answers. Only Answers

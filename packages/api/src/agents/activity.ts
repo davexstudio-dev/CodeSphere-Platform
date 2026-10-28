@@ -5,8 +5,9 @@ import type {
 import type { Database } from "@codesphere/db";
 import { agentPauses, agentRejections } from "@codesphere/db/schema/agents";
 import { auditLog } from "@codesphere/db/schema/audit";
-import { answers, questions } from "@codesphere/db/schema/questions";
 import { and, desc, eq, isNotNull, like, lte, ne } from "drizzle-orm";
+
+import { createAnswerService } from "../answers/service";
 
 /**
  * The Agent activity history (#294), rebuilt from what the platform keeps: no table of API calls.
@@ -80,186 +81,159 @@ export async function agentActivity(
 	const iso = (date: Date) => date.toISOString();
 	const none: Promise<AgentActivityItem[]> = Promise.resolve([]);
 
-	const [asked, answered, rejected, paused, resumed, managed] =
-		await Promise.all([
-			wanted("question")
-				? db
-						.select({
-							id: questions.id,
-							at: questions.createdAt,
-							title: questions.title,
-							deletedAt: questions.deletedAt,
-						})
-						.from(questions)
-						.where(
-							and(eq(questions.authorId, agentId), upTo(questions.createdAt)),
-						)
-						.orderBy(desc(questions.createdAt), desc(questions.id))
-						.limit(take)
-						.then((rows) =>
-							rows.map(
-								(r): AgentActivityItem => ({
-									id: `q:${r.id}`,
-									kind: "question",
-									at: iso(r.at),
-									questionId: r.id,
-									questionTitle: r.title,
-									action: null,
-									deleted: r.deletedAt !== null,
-								}),
-							),
-						)
-				: none,
-			wanted("answer")
-				? db
-						.select({
-							id: answers.id,
-							at: answers.createdAt,
-							questionId: answers.questionId,
-							title: questions.title,
-							deletedAt: answers.deletedAt,
-						})
-						.from(answers)
-						.innerJoin(questions, eq(questions.id, answers.questionId))
-						.where(and(eq(answers.authorId, agentId), upTo(answers.createdAt)))
-						.orderBy(desc(answers.createdAt), desc(answers.id))
-						.limit(take)
-						.then((rows) =>
-							rows.map(
-								(r): AgentActivityItem => ({
-									id: `a:${r.id}`,
-									kind: "answer",
-									at: iso(r.at),
-									questionId: r.questionId,
-									questionTitle: r.title,
-									action: null,
-									deleted: r.deletedAt !== null,
-								}),
-							),
-						)
-				: none,
-			wanted("rejection")
-				? db
-						.select({
-							id: agentRejections.answerId,
-							at: agentRejections.rejectedAt,
-							questionId: answers.questionId,
-							title: questions.title,
-						})
-						.from(agentRejections)
-						.innerJoin(answers, eq(answers.id, agentRejections.answerId))
-						.innerJoin(questions, eq(questions.id, answers.questionId))
-						.where(
-							and(
-								eq(agentRejections.agentId, agentId),
-								upTo(agentRejections.rejectedAt),
-							),
-						)
-						.orderBy(desc(agentRejections.rejectedAt))
-						.limit(take)
-						.then((rows) =>
-							rows.map(
-								(r): AgentActivityItem => ({
-									id: `r:${r.id}`,
-									kind: "rejection",
-									at: iso(r.at),
-									questionId: r.questionId,
-									questionTitle: r.title,
-									action: null,
-									deleted: false,
-								}),
-							),
-						)
-				: none,
-			wanted("pause")
-				? db
-						.select({ id: agentPauses.id, at: agentPauses.pausedAt })
-						.from(agentPauses)
-						.where(
-							and(eq(agentPauses.agentId, agentId), upTo(agentPauses.pausedAt)),
-						)
-						.orderBy(desc(agentPauses.pausedAt))
-						.limit(take)
-						.then((rows) =>
-							rows.map(
-								(r): AgentActivityItem => ({
-									id: `p:${r.id}`,
-									kind: "pause",
-									at: iso(r.at),
-									questionId: null,
-									questionTitle: null,
-									action: null,
-									deleted: false,
-								}),
-							),
-						)
-				: none,
-			wanted("resume")
-				? db
-						.select({ id: agentPauses.id, at: agentPauses.endedAt })
-						.from(agentPauses)
-						.where(
-							and(
-								eq(agentPauses.agentId, agentId),
-								isNotNull(agentPauses.endedAt),
-								upTo(agentPauses.endedAt),
-							),
-						)
-						.orderBy(desc(agentPauses.endedAt))
-						.limit(take)
-						.then((rows) =>
-							rows.flatMap((r): AgentActivityItem[] =>
-								r.at
-									? [
-											{
-												id: `e:${r.id}`,
-												kind: "resume",
-												at: iso(r.at),
-												questionId: null,
-												questionTitle: null,
-												action: null,
-												deleted: false,
-											},
-										]
-									: [],
-							),
-						)
-				: none,
-			// The pause has its own row above: its audit event would show it twice.
-			wanted("management")
-				? db
-						.select({
-							id: auditLog.id,
-							at: auditLog.createdAt,
-							action: auditLog.action,
-						})
-						.from(auditLog)
-						.where(
-							and(
-								eq(auditLog.targetType, "agent"),
-								eq(auditLog.targetId, agentId),
-								like(auditLog.action, "agent.%"),
-								ne(auditLog.action, "agent.pause"),
-								upTo(auditLog.createdAt),
-							),
-						)
-						.orderBy(desc(auditLog.createdAt))
-						.limit(take)
-						.then((rows) =>
-							rows.map(
-								(r): AgentActivityItem => ({
-									id: `m:${r.id}`,
-									kind: "management",
-									at: iso(r.at),
-									questionId: null,
-									questionTitle: null,
-									action: r.action,
-									deleted: false,
-								}),
-							),
-						)
-				: none,
-		]);
+	// Questions and Answers belong to the Q&A module: read through its service (ADR 0001).
+	const qa = createAnswerService(db);
+	const content =
+		wanted("question") || wanted("answer")
+			? qa.authoredContent(agentId, cursor?.at ?? null, take)
+			: Promise.resolve({ asked: [], answered: [] });
+
+	const [written, rejectedRows, paused, resumed, managed] = await Promise.all([
+		content,
+		wanted("rejection")
+			? db
+					.select({
+						id: agentRejections.answerId,
+						at: agentRejections.rejectedAt,
+					})
+					.from(agentRejections)
+					.where(
+						and(
+							eq(agentRejections.agentId, agentId),
+							upTo(agentRejections.rejectedAt),
+						),
+					)
+					.orderBy(desc(agentRejections.rejectedAt))
+					.limit(take)
+			: Promise.resolve([] as { id: string; at: Date }[]),
+		wanted("pause")
+			? db
+					.select({ id: agentPauses.id, at: agentPauses.pausedAt })
+					.from(agentPauses)
+					.where(
+						and(eq(agentPauses.agentId, agentId), upTo(agentPauses.pausedAt)),
+					)
+					.orderBy(desc(agentPauses.pausedAt))
+					.limit(take)
+					.then((rows) =>
+						rows.map(
+							(r): AgentActivityItem => ({
+								id: `p:${r.id}`,
+								kind: "pause",
+								at: iso(r.at),
+								questionId: null,
+								questionTitle: null,
+								action: null,
+								deleted: false,
+							}),
+						),
+					)
+			: none,
+		wanted("resume")
+			? db
+					.select({ id: agentPauses.id, at: agentPauses.endedAt })
+					.from(agentPauses)
+					.where(
+						and(
+							eq(agentPauses.agentId, agentId),
+							isNotNull(agentPauses.endedAt),
+							upTo(agentPauses.endedAt),
+						),
+					)
+					.orderBy(desc(agentPauses.endedAt))
+					.limit(take)
+					.then((rows) =>
+						rows.flatMap((r): AgentActivityItem[] =>
+							r.at
+								? [
+										{
+											id: `e:${r.id}`,
+											kind: "resume",
+											at: iso(r.at),
+											questionId: null,
+											questionTitle: null,
+											action: null,
+											deleted: false,
+										},
+									]
+								: [],
+						),
+					)
+			: none,
+		// The pause has its own row above: its audit event would show it twice.
+		wanted("management")
+			? db
+					.select({
+						id: auditLog.id,
+						at: auditLog.createdAt,
+						action: auditLog.action,
+					})
+					.from(auditLog)
+					.where(
+						and(
+							eq(auditLog.targetType, "agent"),
+							eq(auditLog.targetId, agentId),
+							like(auditLog.action, "agent.%"),
+							ne(auditLog.action, "agent.pause"),
+							upTo(auditLog.createdAt),
+						),
+					)
+					.orderBy(desc(auditLog.createdAt))
+					.limit(take)
+					.then((rows) =>
+						rows.map(
+							(r): AgentActivityItem => ({
+								id: `m:${r.id}`,
+								kind: "management",
+								at: iso(r.at),
+								questionId: null,
+								questionTitle: null,
+								action: r.action,
+								deleted: false,
+							}),
+						),
+					)
+			: none,
+	]);
+
+	const asked = wanted("question")
+		? written.asked.map(
+				(r): AgentActivityItem => ({
+					id: `q:${r.id}`,
+					kind: "question",
+					at: iso(r.at),
+					questionId: r.id,
+					questionTitle: r.title,
+					action: null,
+					deleted: r.deletedAt !== null,
+				}),
+			)
+		: [];
+	const answered = wanted("answer")
+		? written.answered.map(
+				(r): AgentActivityItem => ({
+					id: `a:${r.id}`,
+					kind: "answer",
+					at: iso(r.at),
+					questionId: r.questionId,
+					questionTitle: r.title,
+					action: null,
+					deleted: r.deletedAt !== null,
+				}),
+			)
+		: [];
+	const onQuestion = await qa.questionsOfAnswers(rejectedRows.map((r) => r.id));
+	const rejected = rejectedRows.map(
+		(r): AgentActivityItem => ({
+			id: `r:${r.id}`,
+			kind: "rejection",
+			at: iso(r.at),
+			questionId: onQuestion.get(r.id)?.questionId ?? null,
+			questionTitle: onQuestion.get(r.id)?.title ?? null,
+			action: null,
+			deleted: !onQuestion.has(r.id),
+		}),
+	);
 
 	return pageOf(
 		[asked, answered, rejected, paused, resumed, managed],
