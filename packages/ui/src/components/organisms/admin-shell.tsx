@@ -98,7 +98,10 @@ function AdminShell({
 				>
 					{/* The project's ScrollArea: a thin themed bar instead of the browser's, horizontal on a
 					    phone (a row of tabs) and vertical in the sidebar. */}
-					<ScrollArea orientation="both" className="w-full flex-1">
+					<ScrollArea
+						orientation="both"
+						className="w-full flex-1 md:h-full md:min-h-0"
+					>
 						<ul className="flex gap-1 px-1 pb-2 md:flex-col md:px-0 md:pr-2.5 md:pb-0">
 							{nav.map(({ label, href, icon: Icon, active }) => (
 								<li key={href} className="shrink-0">

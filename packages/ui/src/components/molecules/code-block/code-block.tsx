@@ -248,43 +248,45 @@ export const CompactCodeBlock = memo(function CompactCodeBlock({
 					<Copy className="h-3.5 w-3.5 text-muted-foreground" />
 				)}
 			</button>
-			<div className="max-h-[inherit] overflow-y-auto p-2">
-				<pre className="overflow-x-auto">
-					<code className="grid">
-						{lines.map((line, i) => (
-							<span key={i} className="grid grid-cols-[auto_1fr] gap-4">
-								<span
-									className={cn(
-										textSize,
-										"min-w-[2ch] select-none text-right text-muted-foreground/30",
-									)}
-								>
-									{i + 1}
+			<ScrollArea orientation="both" className="max-h-[inherit]">
+				<div className="p-2">
+					<pre>
+						<code className="grid">
+							{lines.map((line, i) => (
+								<span key={i} className="grid grid-cols-[auto_1fr] gap-4">
+									<span
+										className={cn(
+											textSize,
+											"min-w-[2ch] select-none text-right text-muted-foreground/30",
+										)}
+									>
+										{i + 1}
+									</span>
+									<span
+										className={cn(
+											textSize,
+											"whitespace-pre-wrap break-all",
+											!tokenizedLines && "text-muted-foreground",
+										)}
+									>
+										{tokenizedLines ? (
+											<HighlightedLine
+												tokens={
+													tokenizedLines[i]?.tokens ?? [
+														{ type: null, content: line || " " },
+													]
+												}
+											/>
+										) : (
+											line || " "
+										)}
+									</span>
 								</span>
-								<span
-									className={cn(
-										textSize,
-										"whitespace-pre-wrap break-all",
-										!tokenizedLines && "text-muted-foreground",
-									)}
-								>
-									{tokenizedLines ? (
-										<HighlightedLine
-											tokens={
-												tokenizedLines[i]?.tokens ?? [
-													{ type: null, content: line || " " },
-												]
-											}
-										/>
-									) : (
-										line || " "
-									)}
-								</span>
-							</span>
-						))}
-					</code>
-				</pre>
-			</div>
+							))}
+						</code>
+					</pre>
+				</div>
+			</ScrollArea>
 		</div>
 	);
 });
