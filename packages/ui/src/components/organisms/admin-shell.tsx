@@ -73,7 +73,8 @@ function AdminShell({
 					<div className="flex min-w-0 flex-col gap-1.5">
 						<Logo
 							compact={collapsed}
-							className="min-w-0 whitespace-nowrap text-sm"
+							size="sm"
+							className="min-w-0 whitespace-nowrap"
 						/>
 						{!collapsed && (
 							<Badge variant="outline" className="ml-9 w-fit">

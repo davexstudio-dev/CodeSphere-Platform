@@ -60,13 +60,15 @@ function StateGate({
 		return (
 			<Alert data-slot="state-gate" variant="destructive">
 				<AlertTitle>{errorTitle}</AlertTitle>
-				<AlertDescription className="flex flex-col items-start gap-2">
-					{errorText}
-					{onRetry && (
-						<Button variant="outline" size="sm" onClick={onRetry}>
-							{retryLabel}
-						</Button>
-					)}
+				<AlertDescription>
+					<span className="flex flex-col items-start gap-2">
+						{errorText}
+						{onRetry && (
+							<Button variant="outline" size="sm" onClick={onRetry}>
+								{retryLabel}
+							</Button>
+						)}
+					</span>
 				</AlertDescription>
 			</Alert>
 		);

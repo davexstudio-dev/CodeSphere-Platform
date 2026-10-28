@@ -101,19 +101,21 @@ function SocialAccounts() {
 					return (
 						<Card key={platform}>
 							<CardHeader>
-								<CardTitle className="flex items-center gap-2">
-									{t(`platforms.${platform}`)}
-									<Badge
-										variant={
-											state === "reconnect-required"
-												? "destructive"
-												: state === "connected"
-													? "default"
-													: "secondary"
-										}
-									>
-										{t(`state.${state}`)}
-									</Badge>
+								<CardTitle>
+									<span className="flex items-center gap-2">
+										{t(`platforms.${platform}`)}
+										<Badge
+											variant={
+												state === "reconnect-required"
+													? "destructive"
+													: state === "connected"
+														? "default"
+														: "secondary"
+											}
+										>
+											{t(`state.${state}`)}
+										</Badge>
+									</span>
 								</CardTitle>
 								<CardDescription>
 									{account.accountName ?? t(`hint.${state}`)}

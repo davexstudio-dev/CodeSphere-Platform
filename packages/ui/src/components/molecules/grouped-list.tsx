@@ -56,8 +56,7 @@ function ListRow({
 			onClick={onClick}
 			className={cn(
 				"flex w-full items-center justify-between gap-3 border-border border-b px-3 py-2 text-left text-sm outline-none transition-colors hover:bg-accent focus-visible:bg-accent",
-				selected &&
-					"bg-accent font-medium shadow-selected",
+				selected && "bg-accent font-medium shadow-selected",
 			)}
 		>
 			<span className="min-w-0 truncate">{name}</span>
@@ -125,7 +124,7 @@ function GroupedList<T extends GroupedListItem>({
 						placeholder={searchPlaceholder}
 						value={query}
 						onChange={(event) => setQuery(event.target.value)}
-						className="pl-8"
+						inset="icon"
 					/>
 				</div>
 				{actions}

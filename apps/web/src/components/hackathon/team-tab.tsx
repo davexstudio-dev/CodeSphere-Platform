@@ -200,7 +200,8 @@ function TeamView({
 								readOnly
 								value={link}
 								aria-label={t("link")}
-								className="min-w-0 flex-1 font-mono text-xs"
+								mono
+								className="min-w-0 flex-1"
 								onFocus={(e) => e.currentTarget.select()}
 							/>
 							<Button

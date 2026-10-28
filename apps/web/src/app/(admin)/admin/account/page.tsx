@@ -218,7 +218,8 @@ function ProfileForm({ className }: { className?: string }) {
 						aria-invalid={!valid}
 						aria-describedby="account-name-hint"
 						onChange={(event) => setName(event.target.value)}
-						className="h-9 max-w-sm flex-1 text-sm md:text-sm"
+						textSize="sm"
+						className="h-9 max-w-sm flex-1"
 					/>
 					<Button type="submit" disabled={busy || !valid || !changed}>
 						{busy ? t("saving") : t("save")}
@@ -233,30 +234,31 @@ function ProfileForm({ className }: { className?: string }) {
 					{valid ? t("nameHint") : t("invalid")}
 				</p>
 			</form>
-			<RecordFields
-				className="mt-2 border-border border-t pt-3"
-				fields={[
-					{ label: t("email"), value: identity.email },
-					{
-						label: t("role"),
-						value: <Badge variant="outline">{tRole(role)}</Badge>,
-					},
-					{
-						label: t("memberSince"),
-						value: new Intl.DateTimeFormat(locale, {
-							dateStyle: "long",
-						}).format(new Date(identity.createdAt)),
-					},
-					{
-						label: t("signIn"),
-						value: accounts.isSuccess
-							? methods.length > 0
-								? methods.join(", ")
-								: t("emailCode")
-							: "…",
-					},
-				]}
-			/>
+			<div className="mt-2 border-border border-t pt-3">
+				<RecordFields
+					fields={[
+						{ label: t("email"), value: identity.email },
+						{
+							label: t("role"),
+							value: <Badge variant="outline">{tRole(role)}</Badge>,
+						},
+						{
+							label: t("memberSince"),
+							value: new Intl.DateTimeFormat(locale, {
+								dateStyle: "long",
+							}).format(new Date(identity.createdAt)),
+						},
+						{
+							label: t("signIn"),
+							value: accounts.isSuccess
+								? methods.length > 0
+									? methods.join(", ")
+									: t("emailCode")
+								: "…",
+						},
+					]}
+				/>
+			</div>
 			<p className="text-muted-foreground text-xs">{t("emailHint")}</p>
 		</RecordSection>
 	);
@@ -511,8 +513,8 @@ function Activity({ selfId }: { selfId?: string }) {
 			)}
 			<Button
 				variant="link"
-				size="sm"
-				className="self-start px-0"
+				size="inline"
+				className="self-start"
 				render={<Link href="/admin/audit" />}
 			>
 				{t("full")}

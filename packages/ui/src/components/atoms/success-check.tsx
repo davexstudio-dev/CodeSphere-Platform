@@ -24,7 +24,7 @@ function SuccessCheck({
 			data-slot="success-check"
 			data-state={state}
 			aria-hidden="true"
-			className={cn("t-success-check", className)}
+			className={cn("t-success-check text-success", className)}
 			{...props}
 		>
 			<svg

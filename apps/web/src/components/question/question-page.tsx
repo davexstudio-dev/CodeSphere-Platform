@@ -86,7 +86,7 @@ export function QuestionPage({ id }: { id: string }) {
 	if (!question.data) {
 		return (
 			<main className="mx-auto max-w-3xl px-4 py-10">
-				<Empty className="rounded-3xl border border-border bg-card py-12">
+				<Empty variant="card">
 					<EmptyHeader>
 						<EmptyTitle>{t("notFound.title")}</EmptyTitle>
 						<EmptyDescription>{t("notFound.description")}</EmptyDescription>
@@ -217,8 +217,8 @@ function Loaded({
 								<ChevronDownIcon className="size-4 transition-transform group-data-[panel-open]:rotate-180" />
 								{t("showQuestion")}
 							</CollapsibleTrigger>
-							<CollapsiblePanel className="pt-3">
-								{questionBlock}
+							<CollapsiblePanel>
+								<div className="pt-3">{questionBlock}</div>
 							</CollapsiblePanel>
 						</Collapsible>
 					</>

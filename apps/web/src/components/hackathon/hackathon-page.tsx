@@ -153,17 +153,11 @@ function HackathonView({ hackathon }: { hackathon: HackathonData }) {
 			>
 				{/* On a phone, the tabs sit in rows of three (two with four): all visible, none hidden off screen. */}
 				<TabsList
-					className={cn(
-						"grid w-full rounded-2xl md:inline-flex md:w-fit md:rounded-full",
-						tabs.length > 4 ? "grid-cols-3" : "grid-cols-2",
-					)}
+					layout="grid"
+					className={tabs.length > 4 ? "grid-cols-3" : "grid-cols-2"}
 				>
 					{tabs.map((key) => (
-						<TabsTrigger
-							key={key}
-							value={key}
-							className="rounded-xl px-2 md:rounded-full md:px-4"
-						>
+						<TabsTrigger key={key} value={key} layout="grid">
 							{t(`tabs.${key}`)}
 						</TabsTrigger>
 					))}
@@ -457,7 +451,11 @@ function Judging({ hackathon }: { hackathon: HackathonData }) {
 						>
 							<div
 								className="h-full w-(--progress) rounded-full bg-primary"
-								style={{ "--progress": `${criterion.weight}%` } as React.CSSProperties}
+								style={
+									{
+										"--progress": `${criterion.weight}%`,
+									} as React.CSSProperties
+								}
 							/>
 						</div>
 					</li>

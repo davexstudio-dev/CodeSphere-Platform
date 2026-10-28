@@ -141,8 +141,8 @@ function AnswerCard({
 				<Button
 					type="button"
 					variant="link"
-					size="sm"
-					className="w-fit px-0"
+					size="inline"
+					className="w-fit"
 					aria-expanded={expanded}
 					aria-controls={bodyId}
 					onClick={() => setExpanded((value) => !value)}

@@ -15,7 +15,7 @@
 						"allow": ["layout", "shape"]
 					},
 					{
-						"pattern": "^(ScrollArea|TabsContent)$",
+						"pattern": "^(ScrollArea|Tabs|TabsContent)$",
 						"allow": ["layout", "spacing", "shape", "color", "typography"]
 					},
 					{

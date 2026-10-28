@@ -64,7 +64,7 @@ function KpiCard({
 			{trend && (
 				<Sparkline
 					data={trend}
-					className={good === false ? "text-destructive" : "text-primary"}
+					tone={good === false ? "destructive" : "primary"}
 				/>
 			)}
 		</div>

@@ -40,7 +40,7 @@ function ProviderButton({
 			size="lg"
 			data-slot="provider-button"
 			data-provider={provider}
-			className={cn("w-full justify-center gap-2", className)}
+			className={cn("w-full justify-center", className)}
 			{...props}
 		>
 			<Icon className="size-4" />

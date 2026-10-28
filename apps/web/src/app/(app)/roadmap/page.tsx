@@ -122,7 +122,9 @@ export default async function Page() {
 						>
 							<div
 								className="h-full w-(--progress) rounded-full bg-primary"
-								style={{ "--progress": `${overall.percent}%` } as React.CSSProperties}
+								style={
+									{ "--progress": `${overall.percent}%` } as React.CSSProperties
+								}
 							/>
 						</div>
 						<ul className="flex flex-wrap gap-x-5 gap-y-1 text-muted-foreground text-xs">
@@ -188,11 +190,13 @@ export default async function Page() {
 								>
 									{section.title}
 								</h2>
-								<Badge variant="secondary" className="tabular-nums">
-									{t("sectionProgress", {
-										done: progress.delivered,
-										total: progress.total,
-									})}
+								<Badge variant="secondary">
+									<span className="tabular-nums">
+										{t("sectionProgress", {
+											done: progress.delivered,
+											total: progress.total,
+										})}
+									</span>
 								</Badge>
 								{section.target && (
 									<span className="text-muted-foreground text-sm">
@@ -235,7 +239,7 @@ export default async function Page() {
 				</section>
 
 				<section aria-labelledby="ideas">
-					<Card className="gap-4 border-primary/20 bg-primary/5 p-5 ring-0 md:p-6">
+					<Card tone="accent" className="gap-4 p-5 md:p-6">
 						<div className="flex items-start gap-3">
 							<LightbulbIcon
 								aria-hidden="true"

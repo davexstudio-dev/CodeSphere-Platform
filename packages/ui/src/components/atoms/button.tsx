@@ -17,6 +17,9 @@ const buttonVariants = cva(
 				destructive:
 					"bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 dark:hover:bg-destructive/30",
 				link: "text-primary underline-offset-4 hover:underline",
+				// A secondary text link: « Changer d'adresse », « Ouvrir le journal ».
+				"link-muted":
+					"text-muted-foreground underline-offset-4 hover:text-foreground hover:underline",
 				// A small framed pill on a card: « Voir le code », filters.
 				chip: "rounded-full border-border bg-card text-muted-foreground shadow-xs hover:border-primary/40 hover:bg-primary/5 hover:text-foreground",
 			},
@@ -30,6 +33,8 @@ const buttonVariants = cva(
 				"icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
 				"icon-sm": "size-7 rounded-md",
 				"icon-lg": "size-9",
+				// No box: a link-styled button that sits in a line of text.
+				inline: "h-auto gap-1 px-0",
 			},
 		},
 		defaultVariants: {

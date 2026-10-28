@@ -435,13 +435,9 @@ export default function SettingsPage() {
 						<ProfileHeader />
 					</div>
 					<ScrollArea orientation="horizontal" className="w-full">
-						<TabsList className="w-max pb-1 lg:w-full lg:flex-col lg:items-stretch lg:rounded-2xl lg:pb-1">
+						<TabsList layout="sidebar" className="w-max">
 							{TABS.map(({ key, icon: Icon }) => (
-								<TabsTrigger
-									key={key}
-									value={key}
-									className="lg:justify-start lg:rounded-xl lg:px-3 lg:py-2"
-								>
+								<TabsTrigger key={key} value={key} layout="sidebar">
 									<Icon className="size-4" />
 									{t(`tabs.${key}`)}
 								</TabsTrigger>

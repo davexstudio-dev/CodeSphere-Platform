@@ -219,7 +219,7 @@ function FeedSection({ signedIn }: { signedIn: boolean }) {
 function EmptyFeed({ signedIn }: { signedIn: boolean }) {
 	const t = useTranslations("home.empty");
 	return (
-		<Empty className="rounded-3xl border border-border bg-card py-12">
+		<Empty variant="card">
 			<EmptyHeader>
 				<EmptyMedia variant="icon">
 					<MessageSquareIcon />

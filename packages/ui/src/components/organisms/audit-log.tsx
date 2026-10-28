@@ -109,15 +109,19 @@ function AuditLog({
 					<TableBody>
 						{entries.map((entry) => (
 							<TableRow key={entry.id}>
-								<TableCell className="whitespace-nowrap font-mono text-muted-foreground text-xs">
-									{entry.at}
+								<TableCell className="whitespace-nowrap">
+									<span className="font-mono text-muted-foreground text-xs">
+										{entry.at}
+									</span>
 								</TableCell>
 								<TableCell>{entry.actor}</TableCell>
 								<TableCell>
 									<ActionBadge entry={entry} />
 								</TableCell>
-								<TableCell className="text-muted-foreground [overflow-wrap:anywhere]">
-									<Target entry={entry} />
+								<TableCell className="[overflow-wrap:anywhere]">
+									<span className="text-muted-foreground">
+										<Target entry={entry} />
+									</span>
 								</TableCell>
 								{actionsOf && (
 									<TableCell className="text-right">
