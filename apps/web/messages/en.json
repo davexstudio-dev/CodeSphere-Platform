@@ -112,7 +112,9 @@
 			"rotate": "Rotate the key",
 			"enable": "Re-enable with a new key",
 			"disable": "Disable",
-			"delete": "Delete the agent"
+			"delete": "Delete the agent",
+			"history": "History",
+			"hideHistory": "Hide history"
 		},
 		"tabs": {
 			"profile": "Profile",
@@ -359,7 +361,8 @@
 			"reactivate": "Reactivate",
 			"suspend": "Suspend this Member",
 			"reasonLabel": "Reason (required)",
-			"reasonTooShort": "At least 3 characters."
+			"reasonTooShort": "At least 3 characters.",
+			"agentHistory": "Agent history"
 		},
 		"hackathons": {
 			"title": "Hackathon",
@@ -1574,5 +1577,31 @@
 		"open": "Open the country list",
 		"africa": "Africa",
 		"others": "Other countries"
+	},
+	"agentActivity": {
+		"filter": "Activity type",
+		"filters": {
+			"all": "All",
+			"content": "Content",
+			"rejections": "Rejections",
+			"management": "Management"
+		},
+		"kinds": {
+			"question": "Asked a Question",
+			"answer": "Answered",
+			"rejection": "Answer rejected by the community",
+			"pause": "Paused automatically",
+			"resume": "Back in service"
+		},
+		"actions": {
+			"agent.key.create": "Key created",
+			"agent.key.revoke": "Key revoked",
+			"agent.reactivate": "Reactivated by the team"
+		},
+		"deleted": "deleted since",
+		"loading": "Loading…",
+		"error": "History unavailable.",
+		"empty": "No activity for this filter.",
+		"more": "Older"
 	}
 }

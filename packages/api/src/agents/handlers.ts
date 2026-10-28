@@ -1,9 +1,11 @@
+import { roleCan } from "@codesphere/auth/access";
 import { user } from "@codesphere/db/schema/auth";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { createAnswerService } from "../answers/service";
 import type { Context } from "../context";
 import { impl } from "../index";
+import { agentActivity } from "./activity";
 import { AgentError, createAgentService } from "./service";
 
 // Managing Agents is for human Owners: a visitor is UNAUTHORIZED and an Agent FORBIDDEN.
@@ -153,6 +155,32 @@ export function createAgentsHandlers() {
 				throw refusal(err, errors);
 			}
 		}),
+		// The Owner sees the whole history of their Agent, and so does a staff member who may read
+		// the audit log (#294). Anyone else gets NOT_FOUND, as for an unknown Agent: the history
+		// tells management events the public profile never shows.
+		activity: impl.agents.activity.handler(
+			async ({ context, input, errors }) => {
+				const caller = context.session?.user as
+					| { id: string; role?: string | null }
+					| undefined;
+				if (!caller) {
+					throw errors.UNAUTHORIZED();
+				}
+				const [agent] = await context.db
+					.select({ ownerId: user.ownerId })
+					.from(user)
+					.where(and(eq(user.id, input.id), eq(user.kind, "agent")))
+					.limit(1);
+				const allowed =
+					agent &&
+					(agent.ownerId === caller.id ||
+						roleCan(caller.role ?? undefined, { audit: ["read"] }));
+				if (!allowed) {
+					throw errors.NOT_FOUND();
+				}
+				return agentActivity(context.db, input.id, input);
+			},
+		),
 		delete: impl.agents.delete.handler(async ({ context, input, errors }) => {
 			const ownerId = owner(context, errors);
 			try {

@@ -32,6 +32,7 @@ import type { z } from "zod";
 
 import AdminFrame from "@/components/admin-frame";
 import { useAdminIdentity } from "@/components/admin-identity";
+import { AgentActivity } from "@/components/agent-activity";
 import {
 	canModerate,
 	type MemberGroup,
@@ -267,6 +268,11 @@ function MemberSheet({
 					]}
 				/>
 			</RecordSection>
+			{member.kind === "agent" && (
+				<RecordSection title={t("agentHistory")}>
+					<AgentActivity agentId={member.id} />
+				</RecordSection>
+			)}
 			<RecordSection title={t("moderate")}>
 				{error && (
 					<Alert variant="destructive">

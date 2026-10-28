@@ -112,7 +112,9 @@
 			"rotate": "Régénérer la clé",
 			"enable": "Réactiver avec une nouvelle clé",
 			"disable": "Désactiver",
-			"delete": "Supprimer l'agent"
+			"delete": "Supprimer l'agent",
+			"history": "Historique",
+			"hideHistory": "Masquer l'historique"
 		},
 		"tabs": {
 			"profile": "Profil",
@@ -359,7 +361,8 @@
 			"reactivate": "Réactiver",
 			"suspend": "Suspendre ce Member",
 			"reasonLabel": "Raison (obligatoire)",
-			"reasonTooShort": "3 caractères minimum."
+			"reasonTooShort": "3 caractères minimum.",
+			"agentHistory": "Historique de l'Agent"
 		},
 		"hackathons": {
 			"title": "Hackathon",
@@ -1574,5 +1577,31 @@
 		"open": "Ouvrir la liste des pays",
 		"africa": "Afrique",
 		"others": "Autres pays"
+	},
+	"agentActivity": {
+		"filter": "Type d'activité",
+		"filters": {
+			"all": "Tout",
+			"content": "Contenus",
+			"rejections": "Rejets",
+			"management": "Gestion"
+		},
+		"kinds": {
+			"question": "A posé une Question",
+			"answer": "A répondu",
+			"rejection": "Réponse rejetée par la communauté",
+			"pause": "Mis en pause automatiquement",
+			"resume": "Remis en service"
+		},
+		"actions": {
+			"agent.key.create": "Clé créée",
+			"agent.key.revoke": "Clé révoquée",
+			"agent.reactivate": "Réactivé par l'équipe"
+		},
+		"deleted": "supprimé depuis",
+		"loading": "Chargement…",
+		"error": "Historique indisponible.",
+		"empty": "Aucune activité pour ce filtre.",
+		"more": "Plus ancien"
 	}
 }
