@@ -459,13 +459,14 @@ export default function DesignSystemPage() {
 						</div>
 					</Specimen>
 					<Specimen label="Checkbox">
-						<Label className="flex items-center gap-2">
+						<div className="flex items-center gap-2">
 							<Checkbox
+								id="ds-follow-tag"
 								checked={checked}
 								onCheckedChange={(v) => setChecked(v === true)}
 							/>
-							Suivre ce tag
-						</Label>
+							<Label htmlFor="ds-follow-tag">Suivre ce tag</Label>
+						</div>
 					</Specimen>
 					<Specimen label="Avatar — tailles et repli">
 						<Avatar size="sm">
@@ -508,15 +509,11 @@ export default function DesignSystemPage() {
 					<Specimen label="Switch, Separator">
 						<div className="flex items-center gap-2">
 							<Switch id="ds-hide-agents" defaultChecked />
-							<Label htmlFor="ds-hide-agents" className="font-normal text-sm">
-								Masquer le contenu d'agent
-							</Label>
+							<Label htmlFor="ds-hide-agents">Masquer le contenu d'agent</Label>
 						</div>
 						<div className="flex items-center gap-2">
 							<Switch id="ds-disabled" disabled />
-							<Label htmlFor="ds-disabled" className="font-normal text-sm">
-								Désactivé
-							</Label>
+							<Label htmlFor="ds-disabled">Désactivé</Label>
 						</div>
 						<Separator orientation="vertical" className="h-6" />
 						<span className="text-muted-foreground text-sm">
@@ -530,7 +527,7 @@ export default function DesignSystemPage() {
 						<div className="w-40 text-destructive">
 							<Sparkline
 								data={[15, 12, 13, 9, 10, 6, 5, 3]}
-								className="text-destructive"
+								tone="destructive"
 							/>
 						</div>
 					</Specimen>
@@ -845,8 +842,10 @@ export default function DesignSystemPage() {
 															}
 														/>
 														<TableCell>{row.tag}</TableCell>
-														<TableCell className="tabular-nums">
-															{row.questions}
+														<TableCell>
+															<span className="tabular-nums">
+																{row.questions}
+															</span>
 														</TableCell>
 														<TableCell className="text-right">
 															<RowActions
@@ -1008,7 +1007,9 @@ export default function DesignSystemPage() {
 								// Remounted when the content changes: the bars are measured on mount and on scroll.
 								key={`${scrollOrientation}-${scrollRows}-${scrollHeight}`}
 								orientation={scrollOrientation}
-								style={{ "--height": `${scrollHeight}px` } as React.CSSProperties}
+								style={
+									{ "--height": `${scrollHeight}px` } as React.CSSProperties
+								}
 								className="h-(--height) w-full rounded-md border"
 							>
 								<ul className="divide-y">
@@ -1122,7 +1123,7 @@ export default function DesignSystemPage() {
 							<DropdownMenuTrigger render={<Button variant="outline" />}>
 								Mon compte
 							</DropdownMenuTrigger>
-							<DropdownMenuContent className="bg-card">
+							<DropdownMenuContent>
 								<DropdownMenuGroup>
 									<DropdownMenuLabel>Compte</DropdownMenuLabel>
 									<DropdownMenuSeparator />
@@ -1394,7 +1395,7 @@ export default function DesignSystemPage() {
 					</Specimen>
 					<Specimen label="AppFooter">
 						<AppFooter
-							className="w-full rounded-md border-t-0"
+							className="w-full"
 							version="1.0.0"
 							sha="6a2db9dd7e5e2bd5b4a4c60c247cc8bb13ff90bf"
 							links={[
@@ -1582,8 +1583,10 @@ export default function DesignSystemPage() {
 									<MessageScrollerViewport>
 										<MessageScrollerContent>
 											{Array.from({ length: 8 }, (_, i) => (
-												<MessageScrollerItem key={i} className="p-2 text-sm">
-													Message {i + 1}
+												<MessageScrollerItem key={i}>
+													<span className="block p-2 text-sm">
+														Message {i + 1}
+													</span>
 												</MessageScrollerItem>
 											))}
 										</MessageScrollerContent>

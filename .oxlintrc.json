@@ -21,6 +21,10 @@
 					{
 						"pattern": "^(Card|CardContent|CardHeader|CardFooter)$",
 						"allow": ["layout", "spacing"]
+					},
+					{
+						"pattern": "^(TextsReveal|RevealLine)$",
+						"allow": ["layout", "spacing", "typography", "color"]
 					}
 				]
 			}
