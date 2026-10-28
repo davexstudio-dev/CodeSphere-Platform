@@ -74,6 +74,8 @@ export function AskForm() {
 	// The Tag of the page that opened the form, once the stored Draft is known.
 	const tag = params.get("tag");
 	const { ready, setValue } = draft;
+	// Only when the Draft is first ready: the Member may remove the Tag afterwards.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: runs once the Draft is ready, on purpose
 	useEffect(() => {
 		if (ready && tag) {
 			const next = prefilled(draft.value, tag);
@@ -81,7 +83,6 @@ export function AskForm() {
 				setValue(next);
 			}
 		}
-		// Only when the Draft is first ready: the Member may remove the Tag afterwards.
 	}, [ready, tag]);
 
 	// Published: open the Question, and the Draft is done with. The form shows « published »

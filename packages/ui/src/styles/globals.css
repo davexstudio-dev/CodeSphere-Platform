@@ -222,8 +222,11 @@
 :root[data-data-saver="true"] *,
 :root[data-data-saver="true"] *::before,
 :root[data-data-saver="true"] *::after {
+	/* biome-ignore lint/complexity/noImportantStyles: data saver must win over every component's motion */
 	animation: none !important;
+	/* biome-ignore lint/complexity/noImportantStyles: same */
 	transition: none !important;
+	/* biome-ignore lint/complexity/noImportantStyles: same */
 	scroll-behavior: auto !important;
 }
 

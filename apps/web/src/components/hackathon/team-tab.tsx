@@ -303,6 +303,8 @@ function SubmissionForm({
 	const [videoUrl, setVideoUrl] = useState(current?.videoUrl ?? "");
 	const [tags, setTags] = useState((current?.tags ?? []).join(", "));
 	// The saved version replaces the editor's copy: a teammate's edit shows up after a reload.
+	// Only a new saved version resets the fields: a refetch must not erase what is being typed.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the version on purpose
 	useEffect(() => {
 		if (current) {
 			setTitle(current.title);
@@ -312,8 +314,6 @@ function SubmissionForm({
 			setVideoUrl(current.videoUrl ?? "");
 			setTags(current.tags.join(", "));
 		}
-		// Only a new saved version resets the fields: a refetch must not erase what is being typed.
-		// biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the version on purpose
 	}, [current?.version]);
 	const save = useMutation(
 		orpc.teams.saveSubmission.mutationOptions({

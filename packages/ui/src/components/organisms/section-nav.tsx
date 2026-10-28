@@ -100,7 +100,9 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 									>
 										<span
 											className="block h-full w-(--progress) rounded-full bg-success"
-											style={{ "--progress": `${share}%` } as React.CSSProperties}
+											style={
+												{ "--progress": `${share}%` } as React.CSSProperties
+											}
 										/>
 									</span>
 								)}

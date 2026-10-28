@@ -9,6 +9,7 @@ import type * as React from "react";
 
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
 	return (
+		// biome-ignore lint/a11y/useSemanticElements: the shadcn input group frames one field; a fieldset would add its own border and minimum width
 		<div
 			data-slot="input-group"
 			role="group"
@@ -53,6 +54,8 @@ function InputGroupAddon({
 	...props
 }: React.ComponentProps<"div"> & VariantProps<typeof inputGroupAddonVariants>) {
 	return (
+		// biome-ignore lint/a11y/useKeyWithClickEvents: a click on the addon only focuses the field, which the keyboard reaches directly
+		// biome-ignore lint/a11y/useSemanticElements: same frame as InputGroup, a fieldset would add its own border
 		<div
 			role="group"
 			data-slot="input-group-addon"
