@@ -252,7 +252,7 @@ function VisitorHome({ hackathon }: { hackathon: HackathonData | undefined }) {
 		<main className="mx-auto grid max-w-3xl gap-6 px-4 py-6 md:px-6 md:py-8">
 			{/* Phone only: the promise before the feed (variant 4 of the prototype). */}
 			<section className="grid gap-3 pt-4 md:hidden">
-				<p className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest">
+				<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
 					{t("eyebrow")}
 				</p>
 				<h1 className="text-balance font-bold text-3xl leading-tight tracking-tight">
@@ -345,7 +345,7 @@ function GettingStartedCard() {
 			<div className="flex items-baseline justify-between gap-2">
 				<p
 					id="getting-started"
-					className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest"
+					className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest"
 				>
 					{t("title")}
 				</p>
@@ -357,7 +357,7 @@ function GettingStartedCard() {
 				{steps.map(({ key, done, href }) => (
 					<li key={key} className="flex items-center gap-2">
 						{done ? (
-							<span className="grid size-5 place-items-center rounded-full bg-emerald-600 text-white">
+							<span className="grid size-5 place-items-center rounded-full bg-success text-white">
 								<CheckIcon className="size-3" />
 								<span className="sr-only">{t("done")}</span>
 							</span>
@@ -393,7 +393,7 @@ function FollowedTagsCard() {
 	const tags = followed.data?.items.map((tag) => tag.name) ?? [];
 	return (
 		<section className="grid gap-3 rounded-2xl border border-border bg-card p-5">
-			<p className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest">
+			<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
 				{t("title")}
 			</p>
 			{tags.length === 0 ? (

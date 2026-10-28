@@ -126,7 +126,7 @@ export const CodeBlock = memo(function CodeBlock({
 			{/* Header bar */}
 			{showHeader && (
 				<div className="flex flex-none items-center justify-between border-border/30 border-b bg-muted px-2 py-2">
-					<span className="font-mono text-xs text-zinc-500">
+					<span className="font-mono text-xs text-muted-foreground">
 						{language || "code"}
 					</span>
 					{showCopyButton && (
@@ -138,7 +138,7 @@ export const CodeBlock = memo(function CodeBlock({
 						>
 							{copied ? (
 								<>
-									<Check className="h-3.5 w-3.5 text-emerald-400" />
+									<Check className="h-3.5 w-3.5 text-success" />
 									<span>copied!</span>
 								</>
 							) : (
@@ -165,7 +165,7 @@ export const CodeBlock = memo(function CodeBlock({
 								)}
 							>
 								{showLineNumbers && (
-									<span className="min-w-[2ch] select-none text-right text-xs text-zinc-600 leading-6">
+									<span className="min-w-[2ch] select-none text-right text-xs text-muted-foreground/70 leading-6">
 										{i + 1}
 									</span>
 								)}
@@ -243,7 +243,7 @@ export const CompactCodeBlock = memo(function CompactCodeBlock({
 				aria-label="Copy code"
 			>
 				{copied ? (
-					<Check className="h-3.5 w-3.5 text-pink-400" />
+					<Check className="h-3.5 w-3.5 text-primary" />
 				) : (
 					<Copy className="h-3.5 w-3.5 text-muted-foreground" />
 				)}

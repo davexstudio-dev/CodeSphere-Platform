@@ -96,7 +96,7 @@ function Countdown({
 					</span>
 					<span
 						aria-hidden="true"
-						className="text-[11px] text-muted-foreground"
+						className="text-2xs text-muted-foreground"
 					>
 						{labels[key]}
 					</span>

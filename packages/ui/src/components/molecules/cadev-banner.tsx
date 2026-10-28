@@ -76,7 +76,7 @@ const pad = (n: number | null) =>
 	n === null ? "…" : n < 10 ? `0${n}` : String(n);
 
 const SURFACE =
-	"relative overflow-hidden text-primary-foreground bg-[radial-gradient(120%_140%_at_100%_0%,color-mix(in_oklab,var(--gold,#d68a1f)_45%,transparent)_0%,transparent_46%),linear-gradient(135deg,var(--primary),color-mix(in_oklab,var(--primary)_55%,black))]";
+	"relative overflow-hidden text-primary-foreground bg-cadev";
 
 /** The CADEV 2026 banner: countdown in the viewer's timezone and the contest calendar. */
 function CadevBanner({
@@ -139,7 +139,7 @@ function CadevBanner({
 				)}
 				{...props}
 			>
-				<p className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest">
+				<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
 					{l.eyebrow}
 				</p>
 				<div className="flex items-center gap-4">
@@ -204,8 +204,8 @@ function CadevBanner({
 		>
 			<div className="flex flex-wrap items-start justify-between gap-4">
 				<div className="min-w-0 max-w-xl">
-					<p className="flex items-center gap-2 font-mono font-semibold text-[0.68rem] uppercase tracking-widest opacity-80">
-						<span className="size-1.5 rounded-full bg-amber-200 shadow-[0_0_0_4px_rgb(253_230_138/0.25)]" />
+					<p className="flex items-center gap-2 font-mono font-semibold text-2xs uppercase tracking-widest opacity-80">
+						<span className="size-1.5 rounded-full bg-gold ring-4 ring-gold/25" />
 						{l.eyebrow}
 					</p>
 					<h2 className="mt-2 text-balance font-bold text-2xl leading-tight tracking-tight md:text-3xl">
@@ -218,7 +218,7 @@ function CadevBanner({
 						<p className="font-semibold text-5xl tabular-nums leading-none tracking-tighter">
 							{pad(left.days)}
 						</p>
-						<p className="mt-1 font-sans text-[0.7rem] uppercase tracking-widest opacity-70">
+						<p className="mt-1 font-sans text-2xs uppercase tracking-widest opacity-70">
 							{l.days}
 						</p>
 					</div>
@@ -226,7 +226,7 @@ function CadevBanner({
 						<p className="font-semibold text-5xl tabular-nums leading-none tracking-tighter">
 							{pad(left.hours)}
 						</p>
-						<p className="mt-1 font-sans text-[0.7rem] uppercase tracking-widest opacity-70">
+						<p className="mt-1 font-sans text-2xs uppercase tracking-widest opacity-70">
 							{l.hours}
 						</p>
 					</div>
@@ -249,12 +249,12 @@ function CadevBanner({
 												"absolute top-0 left-0 size-2.5 rounded-full border-2",
 												done && "border-white bg-white",
 												isNext &&
-													"border-amber-200 bg-amber-200 shadow-[0_0_0_4px_rgb(253_230_138/0.25)]",
+													"border-gold bg-gold ring-4 ring-gold/25",
 												!done && !isNext && "border-white/50 bg-transparent",
 											)}
 										/>
 										<span className="block font-semibold">{m.label}</span>
-										<span className="font-mono text-[0.7rem] opacity-80">
+										<span className="font-mono text-2xs opacity-80">
 											{nowMs === null
 												? "…"
 												: new Intl.DateTimeFormat(locale, {
@@ -271,7 +271,7 @@ function CadevBanner({
 				</div>
 			)}
 			{left.days !== null && (
-				<p className="mt-3 text-[0.72rem] opacity-70">
+				<p className="mt-3 text-2xs opacity-70">
 					{l.remaining(left.days)}
 				</p>
 			)}

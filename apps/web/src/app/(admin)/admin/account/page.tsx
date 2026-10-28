@@ -77,7 +77,7 @@ export default function AccountPage() {
 				<section className="flex flex-wrap items-center gap-5 rounded-xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-5 md:p-6">
 					<span
 						aria-hidden="true"
-						className="grid size-16 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-amber-600 font-bold text-primary-foreground text-xl ring-2 ring-background ring-offset-2 ring-offset-primary"
+						className="grid size-16 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-gold font-bold text-primary-foreground text-xl ring-2 ring-background ring-offset-2 ring-offset-primary"
 					>
 						{initialsOf(identity?.name ?? "")}
 					</span>

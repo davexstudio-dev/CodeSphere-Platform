@@ -175,7 +175,7 @@ function ProfileHeader() {
 		<section className="flex items-center gap-4 rounded-2xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-4 lg:flex-col lg:items-start lg:gap-3 lg:p-5">
 			<span
 				aria-hidden="true"
-				className="grid size-14 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-amber-600 font-bold text-lg text-primary-foreground"
+				className="grid size-14 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-gold font-bold text-lg text-primary-foreground"
 			>
 				{initialsOf(name)}
 			</span>

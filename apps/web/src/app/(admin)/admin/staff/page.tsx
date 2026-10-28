@@ -296,7 +296,7 @@ function MemberSheet({
 			<header className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-4 md:p-5">
 				<span
 					aria-hidden="true"
-					className="grid size-12 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-amber-600 font-bold text-primary-foreground text-sm"
+					className="grid size-12 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-gold font-bold text-primary-foreground text-sm"
 				>
 					{initialsOf(member.name)}
 				</span>

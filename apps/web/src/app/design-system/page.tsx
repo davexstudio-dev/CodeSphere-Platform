@@ -1008,8 +1008,8 @@ export default function DesignSystemPage() {
 								// Remounted when the content changes: the bars are measured on mount and on scroll.
 								key={`${scrollOrientation}-${scrollRows}-${scrollHeight}`}
 								orientation={scrollOrientation}
-								style={{ height: scrollHeight }}
-								className="w-full rounded-md border"
+								style={{ "--height": `${scrollHeight}px` } as React.CSSProperties}
+								className="h-(--height) w-full rounded-md border"
 							>
 								<ul className="divide-y">
 									{Array.from({ length: scrollRows }, (_, row) => (

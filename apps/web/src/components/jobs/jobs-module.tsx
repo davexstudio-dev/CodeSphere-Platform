@@ -22,7 +22,7 @@ export function JobsModule() {
 	}
 	return (
 		<section className="grid gap-3 rounded-2xl border border-border bg-card p-5">
-			<p className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest">
+			<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
 				{t("title")}
 			</p>
 			<ul className="grid gap-2">

@@ -56,7 +56,7 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 			className={cn("flex flex-col gap-2", className)}
 			{...props}
 		>
-			<p className="hidden font-medium text-[11px] text-muted-foreground uppercase tracking-widest lg:block">
+			<p className="hidden font-medium text-2xs text-muted-foreground uppercase tracking-widest lg:block">
 				{title}
 			</p>
 			<ul className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 lg:mx-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-0 lg:pb-0">
@@ -99,8 +99,8 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 										className="hidden h-1 overflow-hidden rounded-full bg-border lg:block"
 									>
 										<span
-											className="block h-full rounded-full bg-emerald-500"
-											style={{ width: `${share}%` }}
+											className="block h-full w-(--progress) rounded-full bg-success"
+											style={{ "--progress": `${share}%` } as React.CSSProperties}
 										/>
 									</span>
 								)}

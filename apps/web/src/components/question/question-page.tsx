@@ -600,7 +600,7 @@ function Aside({
 	return (
 		<aside className="grid content-start gap-4 lg:sticky lg:top-24 lg:self-start">
 			<section className="grid gap-2 rounded-2xl border border-border bg-card p-5 text-sm">
-				<p className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest">
+				<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
 					{t("facts")}
 				</p>
 				<dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
@@ -617,7 +617,7 @@ function Aside({
 			</section>
 			{items.length > 0 && (
 				<section className="grid gap-2 rounded-2xl border border-border bg-card p-5 text-sm">
-					<p className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest">
+					<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
 						{t("related")}
 					</p>
 					<ul className="grid gap-2">

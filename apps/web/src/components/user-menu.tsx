@@ -69,7 +69,7 @@ export default function UserMenu() {
 					<button
 						type="button"
 						aria-label={t("account")}
-						className="grid size-9 place-items-center rounded-full bg-linear-to-br from-primary to-amber-600 font-bold text-primary-foreground text-xs ring-2 ring-background ring-offset-1 ring-offset-primary"
+						className="grid size-9 place-items-center rounded-full bg-linear-to-br from-primary to-gold font-bold text-primary-foreground text-xs ring-2 ring-background ring-offset-1 ring-offset-primary"
 					/>
 				}
 			>

@@ -121,22 +121,22 @@ export default async function Page() {
 							className="h-2 overflow-hidden rounded-full bg-muted"
 						>
 							<div
-								className="h-full rounded-full bg-primary"
-								style={{ width: `${overall.percent}%` }}
+								className="h-full w-(--progress) rounded-full bg-primary"
+								style={{ "--progress": `${overall.percent}%` } as React.CSSProperties}
 							/>
 						</div>
 						<ul className="flex flex-wrap gap-x-5 gap-y-1 text-muted-foreground text-xs">
 							<li className="flex items-center gap-1.5">
 								<span
 									aria-hidden="true"
-									className="size-2 rounded-full bg-emerald-500"
+									className="size-2 rounded-full bg-success"
 								/>
 								{t("legendDelivered", { count: overall.delivered })}
 							</li>
 							<li className="flex items-center gap-1.5">
 								<span
 									aria-hidden="true"
-									className="size-2 rounded-full bg-amber-500"
+									className="size-2 rounded-full bg-gold"
 								/>
 								{t("legendInProgress", { count: overall.inProgress })}
 							</li>

@@ -57,7 +57,7 @@ function ListRow({
 			className={cn(
 				"flex w-full items-center justify-between gap-3 border-border border-b px-3 py-2 text-left text-sm outline-none transition-colors hover:bg-accent focus-visible:bg-accent",
 				selected &&
-					"bg-accent font-medium shadow-[inset_3px_0_0_var(--primary)]",
+					"bg-accent font-medium shadow-selected",
 			)}
 		>
 			<span className="min-w-0 truncate">{name}</span>
@@ -137,7 +137,7 @@ function GroupedList<T extends GroupedListItem>({
 					)}
 					{sections.map((section) => (
 						<section key={section.key} aria-label={section.label}>
-							<h3 className="sticky top-0 z-[1] flex justify-between bg-background px-3 pt-2 pb-1 font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+							<h3 className="sticky top-0 z-[1] flex justify-between bg-background px-3 pt-2 pb-1 font-medium text-2xs text-muted-foreground uppercase tracking-widest">
 								{section.label}
 								<span className="tabular-nums">{section.items.length}</span>
 							</h3>

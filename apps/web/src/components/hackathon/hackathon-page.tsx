@@ -456,8 +456,8 @@ function Judging({ hackathon }: { hackathon: HackathonData }) {
 							role="presentation"
 						>
 							<div
-								className="h-full rounded-full bg-primary"
-								style={{ width: `${criterion.weight}%` }}
+								className="h-full w-(--progress) rounded-full bg-primary"
+								style={{ "--progress": `${criterion.weight}%` } as React.CSSProperties}
 							/>
 						</div>
 					</li>
