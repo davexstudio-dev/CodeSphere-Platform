@@ -18,20 +18,20 @@ export function firstInGroups<T extends { id: string }, G extends string>(
 }
 
 /**
- * A master/detail screen opens on an entry (#291): when nothing is selected, or the selection left
- * the list (a filter, a deletion), the first entry is selected.
+ * A master/detail screen opens on an entry (#291): while nothing is selected, the first entry is.
+ * A screen that drops its selection (a deletion, a filter) sets it to null and lands on the first
+ * entry again. Only null counts: an id missing from the list may be one just created, before the
+ * list is fetched again.
  */
 export function useDefaultSelection(
 	selectedId: string | null,
-	ids: readonly string[],
 	firstId: string | null,
 	select: (id: string) => void,
 	enabled = true,
 ) {
-	const missing = selectedId === null || !ids.includes(selectedId);
 	useEffect(() => {
-		if (enabled && missing && firstId) {
+		if (enabled && selectedId === null && firstId) {
 			select(firstId);
 		}
-	}, [enabled, missing, firstId, select]);
+	}, [enabled, selectedId, firstId, select]);
 }

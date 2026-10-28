@@ -96,12 +96,6 @@ export default function StaffPage() {
 	const mayInvite = offerableRoles(identity?.role).length > 0;
 	useDefaultSelection(
 		selectedId,
-		[
-			...members.map((member) => member.id),
-			...invitations.map(
-				(invitation) => `${INVITATION_PREFIX}${invitation.id}`,
-			),
-		],
 		firstInGroups(members, STAFF_GROUPS, (member) => staffGroup(member.role)),
 		setSelectedId,
 		staff.isSuccess,

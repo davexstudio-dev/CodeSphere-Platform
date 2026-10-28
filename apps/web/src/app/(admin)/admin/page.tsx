@@ -67,7 +67,6 @@ export default function ModerationPage() {
 	const selected = items.find((member) => member.id === selectedId) ?? null;
 	useDefaultSelection(
 		selectedId,
-		items.map((member) => member.id),
 		firstInGroups(items, GROUPS, memberGroup),
 		setSelectedId,
 		members.isSuccess,
@@ -134,7 +133,10 @@ export default function ModerationPage() {
 									size="sm"
 									variant={status === value ? "default" : "outline"}
 									aria-pressed={status === value}
-									onClick={() => setStatus(value)}
+									onClick={() => {
+										setStatus(value);
+										setSelectedId(null);
+									}}
 								>
 									{t(`status.${label}`)}
 								</Button>

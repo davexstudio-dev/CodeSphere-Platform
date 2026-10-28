@@ -55,7 +55,6 @@ export default function AdminTagsPage() {
 	const selected = items.find((tag) => tag.id === selectedId) ?? null;
 	useDefaultSelection(
 		selectedId,
-		items.map((tag) => tag.id),
 		firstInGroups(items, GROUPS, tagGroup),
 		setSelectedId,
 		tags.isSuccess && mode !== "create",
