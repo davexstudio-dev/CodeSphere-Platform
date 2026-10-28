@@ -18,7 +18,9 @@ test.describe("without JavaScript", () => {
 			page.getByText(/Chiffres du .* mis à jour une fois par jour/),
 		).toBeVisible();
 		await expect(
-			page.getByText("Phase 3 : hackathons ouverts et paiements"),
+			page.getByRole("heading", {
+				name: "Phase 3 : hackathons ouverts et paiements",
+			}),
 		).toBeVisible();
 		await expect(page.getByText("Prévu").first()).toBeVisible();
 		await expect(page.getByText("Livré").first()).toBeVisible();
