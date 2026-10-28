@@ -16,6 +16,7 @@ import {
 import {
 	LogInIcon,
 	LogOutIcon,
+	MapIcon,
 	MenuIcon,
 	PlusIcon,
 	SettingsIcon,
@@ -77,6 +78,10 @@ export function MobileMenu() {
 						>
 							<PlusIcon />
 							{t("ask")}
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => router.push("/roadmap")}>
+							<MapIcon />
+							{t("roadmap")}
 						</DropdownMenuItem>
 					</DropdownMenuGroup>
 					<DropdownMenuSeparator />

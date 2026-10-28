@@ -399,7 +399,7 @@ function FollowedTagsCard() {
 			{tags.length === 0 ? (
 				<p className="text-muted-foreground text-sm">{t("none")}</p>
 			) : (
-				<FollowedTags label="" tags={tags} className="flex-wrap" />
+				<FollowedTags label="" tags={tags} wrap />
 			)}
 			<Button
 				variant="outline"
