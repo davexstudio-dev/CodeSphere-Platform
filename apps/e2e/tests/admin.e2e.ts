@@ -228,7 +228,9 @@ test.describe("staff badge and account (#286)", () => {
 		await page.goto("/admin/account");
 		const profile = page.locator("section", { hasText: "Profil" }).first();
 		await expect(profile.getByText(MODERATOR_EMAIL)).toBeVisible();
+		await page.getByRole("tab", { name: "Sécurité" }).click();
 		await expect(page.getByText("Cette session")).toBeVisible();
+		await page.getByRole("tab", { name: "Activité" }).click();
 		await expect(
 			page.getByRole("heading", { name: "Mon activité" }),
 		).toBeVisible();
@@ -345,7 +347,10 @@ test.describe("tags", () => {
 		await page.getByRole("button", { name: "Supprimer ce Tag" }).click();
 		await confirm(page).click();
 		await expect(inList(renamed)).toHaveCount(0);
-		await expect(page.getByText("Choisissez un Tag")).toBeVisible();
+		// The screen falls back on the first Tag of the list (#291).
+		await expect(
+			page.getByRole("button", { name: "Supprimer ce Tag" }),
+		).toBeVisible();
 	});
 
 	test("a protected Tag cannot be renamed or deleted", async ({
@@ -392,7 +397,10 @@ test.describe("tags", () => {
 		).toBeEnabled();
 		await page.getByRole("button", { name: "Supprimer ce Tag" }).click();
 		await confirm(page).click();
-		await expect(page.getByText("Choisissez un Tag")).toBeVisible();
+		// The screen falls back on the first Tag of the list (#291).
+		await expect(
+			page.getByRole("button", { name: "Supprimer ce Tag" }),
+		).toBeVisible();
 	});
 
 	test("a system Tag stays reserved", async ({ browser, baseURL }) => {
@@ -488,9 +496,8 @@ test.describe("moderation", () => {
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
 		await page.goto("/admin");
-		await expect(
-			page.getByText("Choisissez un Member dans la liste."),
-		).toBeVisible();
+		// The screen opens on the first Member of the list (#291).
+		await expect(page.locator("[data-slot=record-sheet]")).toBeVisible();
 		await page.getByRole("button", { name: "Actifs" }).first().click();
 		await expect(
 			page.getByRole("button", { name: "Actifs" }).first(),

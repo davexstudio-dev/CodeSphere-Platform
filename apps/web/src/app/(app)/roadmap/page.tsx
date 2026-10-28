@@ -77,7 +77,7 @@ export default async function Page() {
 	];
 
 	return (
-		<div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 md:px-8 md:py-14 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-12">
+		<div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 md:px-8 md:py-14 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-12">
 			<aside className="lg:sticky lg:top-6 lg:self-start">
 				<SectionNav title={t("summary")} items={summary} />
 				<p className="mt-3 hidden text-muted-foreground text-xs lg:block">
