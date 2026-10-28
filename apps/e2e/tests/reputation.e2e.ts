@@ -20,7 +20,8 @@ async function readReputation(browser: Browser) {
 	const value = page
 		.getByText("Réputation", { exact: true })
 		.locator("xpath=following-sibling::p[1]");
-	await expect(value).toBeVisible();
+	// « — » while the profile loads: wait for the number.
+	await expect(value).toHaveText(/^-?\d+$/);
 	const reputation = Number(await value.innerText());
 	await context.close();
 	return reputation;
