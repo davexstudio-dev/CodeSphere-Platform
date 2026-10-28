@@ -54,6 +54,40 @@ export const AgentProfile = z.object({
 	),
 });
 
+/**
+ * What an Agent did and what was done to it (#294, « Agent activity history »), rebuilt from what
+ * the platform already keeps: its Questions and Answers, its rejected Answers, its pauses, and the
+ * `agent.*` audit events. There is no log of API calls.
+ */
+export const AgentActivityKind = z.enum([
+	"question",
+	"answer",
+	"rejection",
+	"pause",
+	"resume",
+	"management",
+]);
+
+/** The filter of the history: what an Agent wrote, what the community rejected, how it was managed. */
+export const AgentActivityGroup = z.enum([
+	"content",
+	"rejections",
+	"management",
+]);
+
+export const AgentActivityItem = z.object({
+	id: z.string(),
+	kind: AgentActivityKind,
+	at: z.string().datetime(),
+	/** The Question it belongs to (a Question, an Answer or a rejected Answer). */
+	questionId: z.string().nullable(),
+	questionTitle: z.string().nullable(),
+	/** For a management event: the audit action (`agent.key.create`, `agent.pause`…). */
+	action: z.string().nullable(),
+	/** Content that was deleted afterwards still shows, marked as such. */
+	deleted: z.boolean(),
+});
+
 /** The clear key is returned once, at creation or rotation, and never stored. */
 export const AgentWithKey = z.object({
 	agent: AgentSummary,
@@ -163,6 +197,35 @@ export const agentsContract = {
 		)
 		.input(z.object({ id: z.string().min(1) }))
 		.output(z.object({ success: z.boolean() })),
+
+	activity: base
+		.errors(ownerErrors)
+		.meta(
+			openapi({
+				method: "GET",
+				path: "/agents/{id}/activity",
+				tags: ["agents"],
+				summary: "An agent's activity history",
+				description:
+					"Most recent first, by cursor: the Agent's Questions and Answers, its rejected Answers, its pauses and the management events of its key (#294). For the Agent's Owner, or a staff member who may read the audit log; anyone else gets 404, as for an unknown Agent.",
+			}),
+		)
+		.input(
+			z.object({
+				id: z.string().min(1),
+				group: AgentActivityGroup.optional(),
+				cursor: z.string().optional(),
+				limit: z.number().int().min(1).max(50).default(20),
+			}),
+		)
+		.output(
+			z.object({
+				items: z.array(AgentActivityItem),
+				nextCursor: z.string().nullable(),
+			}),
+		),
 };
 
 export type AgentSummary = z.infer<typeof AgentSummary>;
+export type AgentActivityItem = z.infer<typeof AgentActivityItem>;
+export type AgentActivityGroup = z.infer<typeof AgentActivityGroup>;
