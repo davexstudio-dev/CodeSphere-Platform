@@ -3,6 +3,7 @@
 import { roleCan } from "@codesphere/auth/access";
 import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
+import { InitialsAvatar } from "@codesphere/ui/components/atoms/initials-avatar";
 import { Input } from "@codesphere/ui/components/atoms/input";
 import { SegmentedControl } from "@codesphere/ui/components/molecules/segmented-control";
 import {
@@ -44,14 +45,6 @@ import { orpc } from "@/utils/orpc";
 
 const NAME_MAX = 80;
 
-const initialsOf = (name: string) =>
-	name
-		.split(/\s+/)
-		.filter(Boolean)
-		.slice(0, 2)
-		.map((part) => part.charAt(0).toUpperCase())
-		.join("") || "?";
-
 /** « Mon compte » (#286): the signed-in staff member's profile, preferences, sessions and recent activity. */
 export default function AccountPage() {
 	const t = useTranslations("admin.account");
@@ -75,12 +68,7 @@ export default function AccountPage() {
 		<AdminFrame title={t("title")} description={t("description")}>
 			<div className="flex flex-col gap-6">
 				<section className="flex flex-wrap items-center gap-5 rounded-xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-5 md:p-6">
-					<span
-						aria-hidden="true"
-						className="grid size-16 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-gold font-bold text-primary-foreground text-xl ring-2 ring-background ring-offset-2 ring-offset-primary"
-					>
-						{initialsOf(identity?.name ?? "")}
-					</span>
+					<InitialsAvatar name={identity?.name ?? ""} size="xl" ringed />
 					<div className="flex min-w-0 flex-1 flex-col gap-2">
 						<div className="flex flex-wrap items-center gap-2">
 							<h2 className="truncate font-semibold text-2xl tracking-tight">

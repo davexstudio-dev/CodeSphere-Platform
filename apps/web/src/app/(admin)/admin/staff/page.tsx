@@ -6,6 +6,7 @@ import type {
 } from "@codesphere/contract";
 import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
+import { InitialsAvatar } from "@codesphere/ui/components/atoms/initials-avatar";
 import { Textarea } from "@codesphere/ui/components/atoms/textarea";
 import {
 	Alert,
@@ -70,14 +71,6 @@ type AdminMember = z.infer<typeof AdminMemberSchema>;
 type Invitation = z.infer<typeof StaffInvitationSchema>;
 
 const INVITATION_PREFIX = "invitation:";
-
-const initialsOf = (name: string) =>
-	name
-		.split(/\s+/)
-		.filter(Boolean)
-		.slice(0, 2)
-		.map((part) => part.charAt(0).toUpperCase())
-		.join("") || "?";
 
 export default function StaffPage() {
 	const t = useTranslations("admin.staff");
@@ -294,12 +287,7 @@ function MemberSheet({
 		<article className="flex min-w-0 flex-col gap-4">
 			{/* Identity card, then the account as a bento of small tiles. */}
 			<header className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-4 md:p-5">
-				<span
-					aria-hidden="true"
-					className="grid size-12 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-gold font-bold text-primary-foreground text-sm"
-				>
-					{initialsOf(member.name)}
-				</span>
+				<InitialsAvatar name={member.name} size="md" />
 				<div className="flex min-w-0 flex-1 flex-col gap-1">
 					<div className="flex flex-wrap items-center gap-2">
 						<h2 className="truncate font-semibold text-lg">{member.name}</h2>

@@ -2,6 +2,7 @@
 
 import { isStaffRole } from "@codesphere/contract/roles";
 import { Button } from "@codesphere/ui/components/atoms/button";
+import { AvatarButton } from "@codesphere/ui/components/atoms/initials-avatar";
 import { Skeleton } from "@codesphere/ui/components/atoms/skeleton";
 import {
 	DropdownMenu,
@@ -26,15 +27,6 @@ import { useSignOut } from "@/components/outbox-provider";
 import SsoLoginDialog from "@/components/sso-login-dialog";
 import { backOfficeHome } from "@/lib/post-signin";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-
-function initials(name: string) {
-	return name
-		.split(/\s+/)
-		.filter(Boolean)
-		.slice(0, 2)
-		.map((part) => part.charAt(0).toUpperCase())
-		.join("");
-}
 
 /** Visitor: « Se connecter » opens the SSO dialog. Member: the account menu (#129). */
 export default function UserMenu() {
@@ -65,17 +57,9 @@ export default function UserMenu() {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger
-				render={
-					<button
-						type="button"
-						aria-label={t("account")}
-						className="grid size-9 place-items-center rounded-full bg-linear-to-br from-primary to-gold font-bold text-primary-foreground text-xs ring-2 ring-background ring-offset-1 ring-offset-primary"
-					/>
-				}
-			>
-				{initials(user.name)}
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="min-w-56 bg-card">
+				render={<AvatarButton name={user.name} aria-label={t("account")} />}
+			/>
+			<DropdownMenuContent align="end" className="min-w-56">
 				<DropdownMenuGroup>
 					<DropdownMenuLabel>
 						<span className="block font-semibold text-foreground">
