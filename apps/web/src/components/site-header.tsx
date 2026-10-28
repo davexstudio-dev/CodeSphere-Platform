@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@codesphere/ui/components/atoms/button";
+import { Button, buttonVariants } from "@codesphere/ui/components/atoms/button";
 import { ThemeToggle } from "@codesphere/ui/components/molecules/theme-toggle";
 import { AppHeader } from "@codesphere/ui/components/organisms/app-header";
 import { MapIcon, PlusIcon } from "lucide-react";
@@ -58,14 +58,13 @@ export default function SiteHeader() {
 					<div className="flex items-center gap-3 max-sm:hidden">
 						<LocaleSwitcher />
 						{/* The public roadmap (#252): what is shipped and what comes next. */}
-						<Button
-							variant="ghost"
-							render={<Link href="/roadmap" />}
-							nativeButton={false}
+						<Link
+							href="/roadmap"
+							className={buttonVariants({ variant: "ghost" })}
 						>
 							<MapIcon />
 							<span className="max-md:sr-only">{t("roadmap")}</span>
-						</Button>
+						</Link>
 						<AskButton />
 						<UserMenu />
 					</div>
