@@ -168,11 +168,11 @@ function ProfileHeader() {
 	const t = useTranslations("settings");
 	const me = useQuery(orpc.members.me.queryOptions());
 	if (!me.data) {
-		return <Skeleton className="h-24 rounded-2xl" />;
+		return <Skeleton className="h-24 rounded-2xl lg:h-36" />;
 	}
 	const { name, reputation, country } = me.data;
 	return (
-		<section className="flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-5">
+		<section className="flex items-center gap-4 rounded-2xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-4 lg:flex-col lg:items-start lg:gap-3 lg:p-5">
 			<span
 				aria-hidden="true"
 				className="grid size-14 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-amber-600 font-bold text-lg text-primary-foreground"
@@ -180,7 +180,7 @@ function ProfileHeader() {
 				{initialsOf(name)}
 			</span>
 			<div className="flex min-w-0 flex-1 flex-col gap-1">
-				<p className="truncate font-semibold text-xl">{name}</p>
+				<p className="truncate font-semibold text-lg">{name}</p>
 				<p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-sm">
 					{reputation != null && (
 						<span className="flex items-center gap-1.5">
@@ -434,31 +434,37 @@ export default function SettingsPage() {
 	return (
 		<main className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 sm:p-6">
 			<h1 className="font-semibold text-2xl">{t("title")}</h1>
-			<ProfileHeader />
 			<Tabs
 				value={tab}
 				onValueChange={select}
-				className="gap-6 lg:flex-row lg:items-start"
+				className="grid gap-6 lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start lg:gap-8"
 			>
-				{/* A row that scrolls sideways on a phone, a sticky column beside the panel from lg up. */}
-				<ScrollArea
-					orientation="horizontal"
-					className="lg:sticky lg:top-22 lg:w-60 lg:shrink-0"
-				>
-					<TabsList className="w-max pb-1 lg:w-full lg:flex-col lg:items-stretch lg:rounded-2xl lg:pb-1">
-						{TABS.map(({ key, icon: Icon }) => (
-							<TabsTrigger
-								key={key}
-								value={key}
-								className="lg:justify-start lg:rounded-xl lg:px-3 lg:py-2"
-							>
-								<Icon className="size-4" />
-								{t(`tabs.${key}`)}
-							</TabsTrigger>
-						))}
-					</TabsList>
-				</ScrollArea>
-				<div className="min-w-0 flex-1">
+				{/* The sidebar: who you are, then the tabs. On a phone it is a card and a row of tabs
+				    that scrolls sideways, pinned under the site bar; from lg a column that stays put
+				    beside the panel. The sticky element is this plain block, never the ScrollArea. */}
+				<aside className="sticky top-16 z-10 -mx-4 flex flex-col gap-3 bg-background/95 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6 lg:top-22 lg:mx-0 lg:gap-4 lg:self-start lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+					<div className="max-lg:hidden">
+						<ProfileHeader />
+					</div>
+					<ScrollArea orientation="horizontal" className="w-full">
+						<TabsList className="w-max pb-1 lg:w-full lg:flex-col lg:items-stretch lg:rounded-2xl lg:pb-1">
+							{TABS.map(({ key, icon: Icon }) => (
+								<TabsTrigger
+									key={key}
+									value={key}
+									className="lg:justify-start lg:rounded-xl lg:px-3 lg:py-2"
+								>
+									<Icon className="size-4" />
+									{t(`tabs.${key}`)}
+								</TabsTrigger>
+							))}
+						</TabsList>
+					</ScrollArea>
+				</aside>
+				<div className="min-w-0">
+					<div className="mb-6 lg:hidden">
+						<ProfileHeader />
+					</div>
 					<TabsContent value="profile" className="flex flex-col gap-6">
 						<ProfileForm />
 						<TalentCardSection />
