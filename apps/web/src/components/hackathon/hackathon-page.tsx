@@ -20,7 +20,13 @@ import { Timeline } from "@codesphere/ui/components/molecules/timeline";
 import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import { cn } from "@codesphere/ui/lib/utils";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { AlertCircleIcon, ExternalLinkIcon } from "lucide-react";
+import {
+	AlertCircleIcon,
+	ArrowUpRightIcon,
+	CalendarClockIcon,
+	ExternalLinkIcon,
+	UsersIcon,
+} from "lucide-react";
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
@@ -266,9 +272,46 @@ function Overview({ hackathon }: { hackathon: HackathonData }) {
 	const milestones = sortedMilestones(hackathon.milestones);
 	const states = milestoneStates(milestones, new Date());
 	const next = milestones[states.indexOf("current")];
+	const external = !hackathon.teamsEnabled;
+	// Bento: the organiser card is the large tile (two columns, two rows), the next milestone and
+	// the team size stack beside it. Without it, the two small tiles share the row.
 	return (
-		<div className="grid gap-4 md:grid-cols-2">
-			<section className="grid gap-1 rounded-2xl border border-border p-5">
+		<div
+			className={cn(
+				"grid gap-4",
+				external ? "md:grid-cols-3 md:grid-rows-2" : "md:grid-cols-2",
+			)}
+		>
+			{external && (
+				<section className="flex flex-col justify-between gap-4 rounded-2xl border border-primary/40 bg-linear-to-br from-primary/10 via-card to-card p-6 md:col-span-2 md:row-span-2">
+					<div className="grid gap-2">
+						<ExternalLinkIcon
+							aria-hidden="true"
+							className="size-5 text-primary"
+						/>
+						<h2 className="font-semibold text-xl">
+							{t("overview.externalTitle")}
+						</h2>
+						<p className="max-w-prose text-muted-foreground text-sm leading-relaxed">
+							{t("overview.externalText")}
+						</p>
+					</div>
+					<a
+						href={hackathon.sourceUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90"
+					>
+						{t("overview.externalCta")}
+						<ArrowUpRightIcon aria-hidden="true" className="size-4" />
+					</a>
+				</section>
+			)}
+			<section className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-5">
+				<CalendarClockIcon
+					aria-hidden="true"
+					className="mb-1 size-4 text-muted-foreground"
+				/>
 				<h2 className="font-medium text-muted-foreground text-sm">
 					{t("overview.next")}
 				</h2>
@@ -283,25 +326,11 @@ function Overview({ hackathon }: { hackathon: HackathonData }) {
 					<p className="text-muted-foreground">{t("overview.noMilestone")}</p>
 				)}
 			</section>
-			{!hackathon.teamsEnabled && (
-				<section className="grid gap-2 rounded-2xl border border-primary/40 bg-primary/5 p-5 sm:col-span-2">
-					<h2 className="font-semibold text-lg">
-						{t("overview.externalTitle")}
-					</h2>
-					<p className="text-muted-foreground text-sm">
-						{t("overview.externalText")}
-					</p>
-					<a
-						href={hackathon.sourceUrl}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="w-fit font-medium text-primary text-sm underline"
-					>
-						{t("overview.externalCta")}
-					</a>
-				</section>
-			)}
-			<section className="grid gap-1 rounded-2xl border border-border p-5">
+			<section className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-5">
+				<UsersIcon
+					aria-hidden="true"
+					className="mb-1 size-4 text-muted-foreground"
+				/>
 				<h2 className="font-medium text-muted-foreground text-sm">
 					{t("overview.team")}
 				</h2>

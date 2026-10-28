@@ -222,7 +222,8 @@
 		"toggleTheme": "Changer de thème",
 		"menu": "Menu",
 		"language": "Langue",
-		"home": "Accueil CodeSphere"
+		"home": "Accueil CodeSphere",
+		"roadmap": "Feuille de route"
 	},
 	"home": {
 		"tabs": {

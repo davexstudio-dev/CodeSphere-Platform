@@ -3,7 +3,7 @@
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { ThemeToggle } from "@codesphere/ui/components/molecules/theme-toggle";
 import { AppHeader } from "@codesphere/ui/components/organisms/app-header";
-import { PlusIcon } from "lucide-react";
+import { MapIcon, PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "@/components/link";
 
@@ -57,6 +57,15 @@ export default function SiteHeader() {
 					{/* From `sm` up, everything inline; on a phone, one menu holds the rest. */}
 					<div className="flex items-center gap-3 max-sm:hidden">
 						<LocaleSwitcher />
+						{/* The public roadmap (#252): what is shipped and what comes next. */}
+						<Button
+							variant="ghost"
+							render={<Link href="/roadmap" />}
+							nativeButton={false}
+						>
+							<MapIcon />
+							<span className="max-md:sr-only">{t("roadmap")}</span>
+						</Button>
 						<AskButton />
 						<UserMenu />
 					</div>

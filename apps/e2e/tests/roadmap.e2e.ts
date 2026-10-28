@@ -61,4 +61,13 @@ test.describe("in English", () => {
 			.click();
 		await expect(page).toHaveURL(/\/roadmap$/);
 	});
+
+	test("the site header links to it", async ({ page }) => {
+		await page.goto("/");
+		await page
+			.getByRole("banner")
+			.getByRole("link", { name: "Roadmap" })
+			.click();
+		await expect(page).toHaveURL(/\/roadmap$/);
+	});
 });
