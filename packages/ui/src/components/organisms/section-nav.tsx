@@ -78,12 +78,17 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 									!current && "text-muted-foreground",
 								)}
 							>
-								<span className="flex items-center justify-between gap-3">
-									<span className={cn("truncate", current && "font-medium")}>
+								<span className="flex items-start justify-between gap-3">
+									<span
+										className={cn(
+											"min-w-0 whitespace-nowrap lg:line-clamp-2 lg:whitespace-normal",
+											current && "font-medium",
+										)}
+									>
 										{item.label}
 									</span>
 									{item.progress && (
-										<span className="text-xs tabular-nums">
+										<span className="shrink-0 whitespace-nowrap pt-0.5 text-xs tabular-nums">
 											{item.progress.done} / {item.progress.total}
 										</span>
 									)}

@@ -803,13 +803,20 @@
 				"revokeSessions": "Sign out everywhere",
 				"sessionsRevoked": "Sessions revoked.",
 				"refusalSelf": "This is your account: use “My account” for your sessions.",
-				"refusalRank": "Same or higher rank than yours: you cannot manage this account."
+				"refusalRank": "Same or higher rank than yours: you cannot manage this account.",
+				"openAccount": "Open « My account »"
 			},
 			"errors": {
 				"forbidden": "Refused: rank too low.",
 				"conflict": "This account already changed, or a rule forbids it (last super admin, role set by the environment). The list was reloaded.",
 				"notFound": "This account or invitation no longer exists.",
 				"generic": "Something went wrong. Try again."
+			},
+			"stats": {
+				"members": "Team members",
+				"admins": "Admins",
+				"moderators": "Moderators",
+				"pending": "Invitations"
 			}
 		},
 		"account": {
@@ -875,6 +882,12 @@
 				"title": "Preferences",
 				"language": "Interface language",
 				"theme": "Theme"
+			},
+			"tabs": {
+				"profile": "Profile",
+				"security": "Security",
+				"activity": "Activity",
+				"preferences": "Preferences"
 			}
 		},
 		"userMenu": {

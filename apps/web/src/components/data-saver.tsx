@@ -30,12 +30,16 @@ export function DataSaver({
 }
 
 /** Auto (follow the browser's Save-Data), on, or off: stored in a cookie, available to visitors too. */
-export function DataSaverToggle() {
+export function DataSaverToggle({
+	className = "flex flex-wrap items-center justify-center gap-2 px-4 py-3 text-muted-foreground text-xs",
+}: {
+	className?: string;
+}) {
 	const t = useTranslations("dataSaver");
 	const preference = useContext(PreferenceContext);
 	const [pending, startTransition] = useTransition();
 	return (
-		<div className="flex flex-wrap items-center justify-center gap-2 px-4 py-3 text-muted-foreground text-xs">
+		<div className={className}>
 			<span id="data-saver-label">{t("label")}</span>
 			<SegmentedControl
 				aria-labelledby="data-saver-label"

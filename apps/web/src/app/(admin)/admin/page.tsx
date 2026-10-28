@@ -38,6 +38,7 @@ import {
 	memberGroup,
 	moderationErrorKey,
 } from "@/lib/admin-moderation";
+import { firstInGroups, useDefaultSelection } from "@/lib/default-selection";
 import { orpc } from "@/utils/orpc";
 
 type AdminMember = z.infer<typeof AdminMemberSchema>;
@@ -64,6 +65,12 @@ export default function ModerationPage() {
 	);
 	const items = members.data?.pages.flatMap((page) => page.items) ?? [];
 	const selected = items.find((member) => member.id === selectedId) ?? null;
+	useDefaultSelection(
+		selectedId,
+		firstInGroups(items, GROUPS, memberGroup),
+		setSelectedId,
+		members.isSuccess,
+	);
 
 	// A suspension lands in the audit log: refresh it too, so it shows without a manual reload.
 	const refresh = () => {
@@ -126,7 +133,10 @@ export default function ModerationPage() {
 									size="sm"
 									variant={status === value ? "default" : "outline"}
 									aria-pressed={status === value}
-									onClick={() => setStatus(value)}
+									onClick={() => {
+										setStatus(value);
+										setSelectedId(null);
+									}}
 								>
 									{t(`status.${label}`)}
 								</Button>

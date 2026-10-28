@@ -5,7 +5,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 
 import "../index.css";
-import { DataSaver, DataSaverToggle } from "@/components/data-saver";
+import { DataSaver } from "@/components/data-saver";
 import Providers from "@/components/providers";
 import { BRAND } from "@/lib/brand";
 import {
@@ -109,10 +109,7 @@ export default async function RootLayout({
 			<body>
 				<NextIntlClientProvider locale={locale} messages={messages}>
 					<DataSaver active={dataSaver} preference={preference}>
-						<Providers nonce={nonce}>
-							{children}
-							<DataSaverToggle />
-						</Providers>
+						<Providers nonce={nonce}>{children}</Providers>
 					</DataSaver>
 				</NextIntlClientProvider>
 			</body>

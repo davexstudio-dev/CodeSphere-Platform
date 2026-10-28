@@ -34,8 +34,17 @@ import {
 	RecordSection,
 	RecordSheet,
 } from "@codesphere/ui/components/organisms/record-sheet";
+import { StatStrip } from "@codesphere/ui/components/organisms/stat-strip";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircleIcon, MailPlusIcon } from "lucide-react";
+import {
+	ActivityIcon,
+	AlertCircleIcon,
+	CalendarIcon,
+	MailIcon,
+	MailPlusIcon,
+	ShieldIcon,
+	UserCogIcon,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -43,6 +52,7 @@ import type { z } from "zod";
 
 import AdminFrame from "@/components/admin-frame";
 import { useAdminIdentity } from "@/components/admin-identity";
+import Link from "@/components/link";
 import { moderationErrorKey } from "@/lib/admin-moderation";
 import {
 	daysLeft,
@@ -53,12 +63,21 @@ import {
 	STAFF_GROUPS,
 	staffGroup,
 } from "@/lib/admin-staff";
+import { firstInGroups, useDefaultSelection } from "@/lib/default-selection";
 import { client, orpc } from "@/utils/orpc";
 
 type AdminMember = z.infer<typeof AdminMemberSchema>;
 type Invitation = z.infer<typeof StaffInvitationSchema>;
 
 const INVITATION_PREFIX = "invitation:";
+
+const initialsOf = (name: string) =>
+	name
+		.split(/\s+/)
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((part) => part.charAt(0).toUpperCase())
+		.join("") || "?";
 
 export default function StaffPage() {
 	const t = useTranslations("admin.staff");
@@ -75,6 +94,12 @@ export default function StaffPage() {
 		(invitation) => `${INVITATION_PREFIX}${invitation.id}` === selectedId,
 	);
 	const mayInvite = offerableRoles(identity?.role).length > 0;
+	useDefaultSelection(
+		selectedId,
+		firstInGroups(members, STAFF_GROUPS, (member) => staffGroup(member.role)),
+		setSelectedId,
+		staff.isSuccess,
+	);
 
 	return (
 		<AdminFrame
@@ -100,6 +125,33 @@ export default function StaffPage() {
 						</Button>
 					</AlertDescription>
 				</Alert>
+			)}
+			{staff.isSuccess && (
+				<StatStrip
+					className="lg:grid-cols-4"
+					items={[
+						{ label: t("stats.members"), value: String(members.length) },
+						{
+							label: t("stats.admins"),
+							value: String(
+								members.filter(
+									(member) =>
+										member.role === "admin" || member.role === "super_admin",
+								).length,
+							),
+						},
+						{
+							label: t("stats.moderators"),
+							value: String(
+								members.filter((member) => member.role === "moderator").length,
+							),
+						},
+						{
+							label: t("stats.pending"),
+							value: String(invitations.length),
+						},
+					]}
+				/>
 			)}
 			<AdminMasterDetail
 				detailKey={selectedId}
@@ -239,48 +291,84 @@ function MemberSheet({
 	const confirmLabel = (seconds: number) => tc("confirm", { seconds });
 
 	return (
-		<RecordSheet
-			title={member.name}
-			badges={
-				<>
-					<Badge variant="outline">{t(`roles.${member.role}`)}</Badge>
-					{member.suspendedAt && (
-						<Badge variant="destructive">{t("deactivated")}</Badge>
-					)}
-				</>
-			}
-		>
-			<RecordSection title={t("account.section")}>
-				<RecordFields
-					fields={[
-						{ label: t("account.email"), value: member.email },
-						{ label: t("account.role"), value: t(`roles.${member.role}`) },
-						{
-							label: t("account.joined"),
-							value: dateFormat.format(new Date(member.createdAt)),
-						},
-						{
-							label: t("account.status"),
-							value: member.suspendedAt
-								? t("account.suspended")
-								: t("account.active"),
-						},
-					]}
-				/>
-			</RecordSection>
+		<article className="flex min-w-0 flex-col gap-4">
+			{/* Identity card, then the account as a bento of small tiles. */}
+			<header className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-4 md:p-5">
+				<span
+					aria-hidden="true"
+					className="grid size-12 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-amber-600 font-bold text-primary-foreground text-sm"
+				>
+					{initialsOf(member.name)}
+				</span>
+				<div className="flex min-w-0 flex-1 flex-col gap-1">
+					<div className="flex flex-wrap items-center gap-2">
+						<h2 className="truncate font-semibold text-lg">{member.name}</h2>
+						<Badge variant="outline">{t(`roles.${member.role}`)}</Badge>
+						{member.suspendedAt && (
+							<Badge variant="destructive">{t("deactivated")}</Badge>
+						)}
+					</div>
+					<p className="flex items-center gap-1.5 truncate text-muted-foreground text-sm">
+						<MailIcon className="size-3.5 shrink-0" aria-hidden="true" />
+						{member.email}
+					</p>
+				</div>
+			</header>
+			<dl className="grid gap-3 sm:grid-cols-3">
+				{[
+					{
+						icon: ShieldIcon,
+						label: t("account.role"),
+						value: t(`roles.${member.role}`),
+					},
+					{
+						icon: CalendarIcon,
+						label: t("account.joined"),
+						value: dateFormat.format(new Date(member.createdAt)),
+					},
+					{
+						icon: ActivityIcon,
+						label: t("account.status"),
+						value: member.suspendedAt
+							? t("account.suspended")
+							: t("account.active"),
+					},
+				].map(({ icon: Icon, label, value }) => (
+					<div
+						key={label}
+						className="flex flex-col gap-1 rounded-lg border border-border bg-card p-3"
+					>
+						<dt className="flex items-center gap-1.5 text-muted-foreground text-xs">
+							<Icon className="size-3.5" aria-hidden="true" />
+							{label}
+						</dt>
+						<dd className="font-medium text-sm">{value}</dd>
+					</div>
+				))}
+			</dl>
 			{error && (
 				<Alert variant="destructive">
 					<AlertCircleIcon />
 					<AlertDescription>{error}</AlertDescription>
 				</Alert>
 			)}
-			{!manage.ok && (
-				<p className="text-muted-foreground text-sm">
-					{manage.reason === "self"
-						? t("manage.refusalSelf")
-						: t("manage.refusalRank")}
-				</p>
-			)}
+			{!manage.ok &&
+				(manage.reason === "self" ? (
+					<p className="flex flex-wrap items-center gap-2 rounded-lg border border-border border-dashed p-3 text-muted-foreground text-sm">
+						<UserCogIcon className="size-4" aria-hidden="true" />
+						{t("manage.refusalSelf")}
+						<Link
+							href="/admin/account"
+							className="font-medium text-primary hover:underline"
+						>
+							{t("manage.openAccount")}
+						</Link>
+					</p>
+				) : (
+					<p className="text-muted-foreground text-sm">
+						{t("manage.refusalRank")}
+					</p>
+				))}
 			{roles.length > 0 && (
 				<RecordSection title={t("manage.roleSection")}>
 					<Field id="staff-new-role" label={t("manage.newRole")}>
@@ -351,7 +439,7 @@ function MemberSheet({
 					/>
 				</RecordSection>
 			)}
-		</RecordSheet>
+		</article>
 	);
 }
 

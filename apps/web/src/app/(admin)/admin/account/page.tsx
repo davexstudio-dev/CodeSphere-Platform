@@ -6,11 +6,25 @@ import { Button } from "@codesphere/ui/components/atoms/button";
 import { Input } from "@codesphere/ui/components/atoms/input";
 import { SegmentedControl } from "@codesphere/ui/components/molecules/segmented-control";
 import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@codesphere/ui/components/molecules/tabs";
+import {
 	RecordFields,
 	RecordSection,
 } from "@codesphere/ui/components/organisms/record-sheet";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BadgeCheckIcon, CalendarIcon, MailIcon } from "lucide-react";
+import {
+	BadgeCheckIcon,
+	CalendarIcon,
+	HistoryIcon,
+	MailIcon,
+	ShieldCheckIcon,
+	SlidersHorizontalIcon,
+	UserIcon,
+} from "lucide-react";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -19,6 +33,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import AdminFrame, { ADMIN_NAV } from "@/components/admin-frame";
 import { useAdminIdentity } from "@/components/admin-identity";
+import { DataSaverToggle } from "@/components/data-saver";
 import Link from "@/components/link";
 import LocaleSwitcher from "@/components/locale-switcher";
 import { useSignOut } from "@/components/outbox-provider";
@@ -104,24 +119,50 @@ export default function AccountPage() {
 						)}
 					</div>
 				</section>
-				<div className="grid items-start gap-6 xl:grid-cols-3">
-					<div className="flex flex-col gap-6 xl:col-span-2">
-						<ProfileForm />
+				{/* One tab per section, so the page stays one screen high; the profile tab is a bento of
+				    the form and the access. */}
+				<Tabs defaultValue="profile" className="gap-6">
+					<TabsList>
+						<TabsTrigger value="profile">
+							<UserIcon />
+							{t("tabs.profile")}
+						</TabsTrigger>
+						<TabsTrigger value="security">
+							<ShieldCheckIcon />
+							{t("tabs.security")}
+						</TabsTrigger>
+						<TabsTrigger value="activity">
+							<HistoryIcon />
+							{t("tabs.activity")}
+						</TabsTrigger>
+						<TabsTrigger value="preferences">
+							<SlidersHorizontalIcon />
+							{t("tabs.preferences")}
+						</TabsTrigger>
+					</TabsList>
+					<TabsContent value="profile">
+						<div className="grid items-start gap-6 xl:grid-cols-3">
+							<ProfileForm className="xl:col-span-2" />
+							<Access role={identity?.role} />
+						</div>
+					</TabsContent>
+					<TabsContent value="security">
 						<Sessions />
+					</TabsContent>
+					<TabsContent value="activity">
 						<Activity selfId={identity?.id} />
-					</div>
-					<div className="flex flex-col gap-6">
-						<Access role={identity?.role} />
+					</TabsContent>
+					<TabsContent value="preferences">
 						<Preferences />
-					</div>
-				</div>
+					</TabsContent>
+				</Tabs>
 			</div>
 		</AdminFrame>
 	);
 }
 
 /** The name is the one field that is the member's own: the email and the role come from elsewhere. */
-function ProfileForm() {
+function ProfileForm({ className }: { className?: string }) {
 	const t = useTranslations("admin.account.profile");
 	const tRole = useTranslations("admin.staff.roles");
 	const locale = useLocale();
@@ -175,7 +216,7 @@ function ProfileForm() {
 	};
 
 	return (
-		<RecordSection title={t("title")}>
+		<RecordSection title={t("title")} className={className}>
 			<form onSubmit={save} className="flex flex-col gap-1.5">
 				<label htmlFor="account-name" className="font-medium text-sm">
 					{t("name")}
@@ -269,7 +310,7 @@ function Preferences() {
 	const { theme, setTheme } = useTheme();
 	const value = THEMES.find((item) => item === theme) ?? "system";
 	return (
-		<RecordSection title={t("title")}>
+		<RecordSection title={t("title")} className="max-w-2xl">
 			<div className="flex flex-col items-start gap-1.5">
 				<span className="font-medium text-sm">{t("language")}</span>
 				<LocaleSwitcher />
@@ -288,6 +329,8 @@ function Preferences() {
 					aria-label={t("theme")}
 				/>
 			</div>
+			{/* Its own label (« Données allégées »), moved here from the foot of every page. */}
+			<DataSaverToggle className="flex flex-col items-start gap-1.5 font-medium text-sm" />
 		</RecordSection>
 	);
 }

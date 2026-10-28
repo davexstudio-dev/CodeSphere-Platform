@@ -31,6 +31,7 @@ import {
 	tagGroup,
 	tagMutationErrorKey,
 } from "@/lib/admin-tags";
+import { firstInGroups, useDefaultSelection } from "@/lib/default-selection";
 import { orpc } from "@/utils/orpc";
 
 const GROUPS: TagGroup[] = ["protected", "used", "unused"];
@@ -52,6 +53,12 @@ export default function AdminTagsPage() {
 	const [error, setError] = useState<ErrorKey | null>(null);
 	const [errorOnReserve, setErrorOnReserve] = useState(false);
 	const selected = items.find((tag) => tag.id === selectedId) ?? null;
+	useDefaultSelection(
+		selectedId,
+		firstInGroups(items, GROUPS, tagGroup),
+		setSelectedId,
+		tags.isSuccess && mode !== "create",
+	);
 
 	const settled = (nextId: string | null) => {
 		setError(null);

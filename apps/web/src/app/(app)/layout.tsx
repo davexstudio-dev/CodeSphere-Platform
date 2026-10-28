@@ -1,6 +1,7 @@
 import { AppFooter } from "@codesphere/ui/components/organisms/app-footer";
 import { getTranslations } from "next-intl/server";
 
+import { DataSaverToggle } from "@/components/data-saver";
 import { NetworkBanner } from "@/components/network-banner";
 import SiteHeader from "@/components/site-header";
 import { LEGAL_PAGES, legalHref } from "@/lib/legal";
@@ -22,6 +23,8 @@ export default async function AppLayout({
 				<NetworkBanner />
 				{children}
 			</div>
+			{/* The data saver switch (#250) of the visitor pages; the back-office has it in « Mon compte ». */}
+			<DataSaverToggle />
 			<AppFooter
 				version={process.env.APP_VERSION ?? "0.0.0"}
 				sha={process.env.GIT_SHA ?? "dev"}

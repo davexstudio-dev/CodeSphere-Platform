@@ -2,6 +2,7 @@
 
 import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Logo } from "@codesphere/ui/components/atoms/logo";
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { ThemeToggle } from "@codesphere/ui/components/molecules/theme-toggle";
 import { cn } from "@codesphere/ui/lib/utils";
 import { PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react";
@@ -93,28 +94,34 @@ function AdminShell({
 				{/* The nav takes the height left and scrolls inside it, so the account stays in view below. */}
 				<nav
 					aria-label="Administration"
-					className="-mx-1 overflow-x-auto md:mx-0 md:min-h-0 md:flex-1 md:overflow-y-auto md:overflow-x-hidden"
+					className="-mx-1 flex min-h-0 md:mx-0 md:flex-1"
 				>
-					<ul className="flex gap-1 px-1 md:flex-col md:px-0">
-						{nav.map(({ label, href, icon: Icon, active }) => (
-							<li key={href} className="shrink-0">
-								<Link
-									href={href}
-									aria-current={active ? "page" : undefined}
-									title={collapsed ? label : undefined}
-									className={cn(
-										"flex items-center gap-2 rounded-md px-3 py-2 font-medium text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-										collapsed && "md:justify-center md:px-0",
-										active &&
-											"bg-sidebar-accent text-sidebar-accent-foreground",
-									)}
-								>
-									<Icon className="size-4 shrink-0" />
-									<span className={cn(collapsed && "md:sr-only")}>{label}</span>
-								</Link>
-							</li>
-						))}
-					</ul>
+					{/* The project's ScrollArea: a thin themed bar instead of the browser's, horizontal on a
+					    phone (a row of tabs) and vertical in the sidebar. */}
+					<ScrollArea orientation="both" className="w-full flex-1">
+						<ul className="flex gap-1 px-1 pb-2 md:flex-col md:px-0 md:pr-2.5 md:pb-0">
+							{nav.map(({ label, href, icon: Icon, active }) => (
+								<li key={href} className="shrink-0">
+									<Link
+										href={href}
+										aria-current={active ? "page" : undefined}
+										title={collapsed ? label : undefined}
+										className={cn(
+											"flex items-center gap-2 rounded-md px-3 py-2 font-medium text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+											collapsed && "md:justify-center md:px-0",
+											active &&
+												"bg-sidebar-accent text-sidebar-accent-foreground",
+										)}
+									>
+										<Icon className="size-4 shrink-0" />
+										<span className={cn(collapsed && "md:sr-only")}>
+											{label}
+										</span>
+									</Link>
+								</li>
+							))}
+						</ul>
+					</ScrollArea>
 				</nav>
 				{userMenu && (
 					<div className="md:border-sidebar-border md:border-t md:pt-3">

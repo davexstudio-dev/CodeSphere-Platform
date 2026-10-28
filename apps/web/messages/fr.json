@@ -802,14 +802,21 @@
 				"reactivate": "Réactiver",
 				"revokeSessions": "Déconnecter partout",
 				"sessionsRevoked": "Sessions révoquées.",
-				"refusalSelf": "C'est votre compte : utilisez « Mon compte » pour vos sessions.",
-				"refusalRank": "Rang égal ou supérieur au vôtre : vous ne pouvez pas gérer ce compte."
+				"refusalSelf": "C'est votre compte : vos sessions se gèrent dans « Mon compte ».",
+				"refusalRank": "Rang égal ou supérieur au vôtre : vous ne pouvez pas gérer ce compte.",
+				"openAccount": "Ouvrir « Mon compte »"
 			},
 			"errors": {
 				"forbidden": "Action refusée : rang insuffisant.",
 				"conflict": "Ce compte a déjà changé d'état, ou une règle l'interdit (dernier super admin, rôle fixé par l'environnement). La liste a été rechargée.",
 				"notFound": "Ce compte ou cette invitation n'existe plus.",
 				"generic": "Une erreur est survenue. Réessayez."
+			},
+			"stats": {
+				"members": "Membres de l'équipe",
+				"admins": "Admins",
+				"moderators": "Modérateurs",
+				"pending": "Invitations"
 			}
 		},
 		"account": {
@@ -875,6 +882,12 @@
 				"title": "Préférences",
 				"language": "Langue de l'interface",
 				"theme": "Thème"
+			},
+			"tabs": {
+				"profile": "Profil",
+				"security": "Sécurité",
+				"activity": "Activité",
+				"preferences": "Préférences"
 			}
 		},
 		"userMenu": {
