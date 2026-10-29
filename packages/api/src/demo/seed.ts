@@ -9,6 +9,7 @@ import { createQuestionService } from "../questions/service";
 import { NO_FARMING_LIMITS, settleAcceptance } from "../reputation/service";
 import { createVoteService } from "../votes/service";
 import { demoMembers, demoQuestions } from "./content";
+import { resetDemoJobsWatch, seedDemoJobsWatch } from "./jobs-watch";
 
 /** The demo Agent of docs/cadev/demo-script.md. */
 export const DEMO_AGENT_NAME = "Assistant Mobile Money";
@@ -22,6 +23,7 @@ export class DemoSeedError extends Error {}
  * Answer on those Questions, are deleted. The Members themselves are kept: the seed updates them.
  */
 export async function resetDemo(db: Database) {
+	await resetDemoJobsWatch(db);
 	const memberIds = demoMembers.map((m) => m.id);
 	const ownQuestions = await db
 		.select({ id: questions.id })
@@ -185,12 +187,15 @@ export async function seedDemo(
 		}
 	}
 
+	const jobsWatch = await seedDemoJobsWatch(db);
+
 	return {
 		members: demoMembers.length,
 		questions: demoQuestions.length,
 		answers,
 		votes,
 		accepted,
+		...jobsWatch,
 		agent: options.ownerEmail
 			? await seedDemoAgent(db, options.ownerEmail)
 			: null,
