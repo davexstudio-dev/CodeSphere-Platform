@@ -3581,6 +3581,243 @@
 				}
 			}
 		},
+		"/agents/{id}/activity": {
+			"get": {
+				"operationId": "agents.activity",
+				"summary": "An agent's activity history",
+				"description": "Most recent first, by cursor: the Agent's Questions and Answers, its rejected Answers, its pauses and the management events of its key (#294). For the Agent's Owner, or a staff member who may read the audit log; anyone else gets 404, as for an unknown Agent.",
+				"tags": ["agents"],
+				"parameters": [
+					{
+						"in": "path",
+						"required": true,
+						"name": "id",
+						"schema": {
+							"type": "string",
+							"minLength": 1
+						}
+					},
+					{
+						"in": "query",
+						"name": "group",
+						"schema": {
+							"type": "string",
+							"enum": ["content", "rejections", "management"]
+						},
+						"allowEmptyValue": true,
+						"allowReserved": true
+					},
+					{
+						"in": "query",
+						"name": "cursor",
+						"schema": {
+							"type": "string"
+						},
+						"allowEmptyValue": true,
+						"allowReserved": true
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"default": 20,
+							"type": "integer",
+							"minimum": 1,
+							"maximum": 50
+						},
+						"allowEmptyValue": true,
+						"allowReserved": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string"
+													},
+													"kind": {
+														"type": "string",
+														"enum": [
+															"question",
+															"answer",
+															"rejection",
+															"pause",
+															"resume",
+															"management"
+														]
+													},
+													"at": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+													},
+													"questionId": {
+														"type": ["string", "null"]
+													},
+													"questionTitle": {
+														"type": ["string", "null"]
+													},
+													"action": {
+														"type": ["string", "null"]
+													},
+													"deleted": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"id",
+													"kind",
+													"at",
+													"questionId",
+													"questionTitle",
+													"action",
+													"deleted"
+												],
+												"additionalProperties": false
+											}
+										},
+										"nextCursor": {
+											"type": ["string", "null"]
+										}
+									},
+									"required": ["items", "nextCursor"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Unauthorized"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Forbidden"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/NotFound"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/questions/{questionId}/answers": {
 			"get": {
 				"operationId": "answers.list",
@@ -10269,6 +10506,196 @@
 									"oneOf": [
 										{
 											"$ref": "#/components/schemas/Forbidden"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "429",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/TooManyRequests"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "500",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/InternalServerError"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "503",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/ServiceUnavailable"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/me/activity": {
+			"get": {
+				"operationId": "members.activity",
+				"summary": "My recent Questions and Answers",
+				"description": "The caller's 10 latest Questions and 10 latest Answers (deleted ones left out), newest first. Requires a session or an API key.",
+				"tags": ["members"],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"questions": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string"
+													},
+													"title": {
+														"type": "string"
+													},
+													"status": {
+														"type": "string",
+														"enum": ["open", "answered", "closed"]
+													},
+													"score": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"answerCount": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"createdAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+													}
+												},
+												"required": [
+													"id",
+													"title",
+													"status",
+													"score",
+													"answerCount",
+													"createdAt"
+												],
+												"additionalProperties": false
+											}
+										},
+										"answers": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string"
+													},
+													"questionId": {
+														"type": "string"
+													},
+													"questionTitle": {
+														"type": "string"
+													},
+													"score": {
+														"type": "integer",
+														"minimum": -9007199254740991,
+														"maximum": 9007199254740991
+													},
+													"accepted": {
+														"type": "boolean"
+													},
+													"createdAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+													}
+												},
+												"required": [
+													"id",
+													"questionId",
+													"questionTitle",
+													"score",
+													"accepted",
+													"createdAt"
+												],
+												"additionalProperties": false
+											}
+										}
+									},
+									"required": ["questions", "answers"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/BadRequest"
+										},
+										{
+											"$ref": "#/components/schemas/UndefinedError"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"$ref": "#/components/schemas/Unauthorized"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
@@ -20045,243 +20472,6 @@
 										},
 										{
 											"$ref": "#/components/schemas/PrivilegeRequired"
-										},
-										{
-											"$ref": "#/components/schemas/UndefinedError"
-										}
-									]
-								}
-							}
-						}
-					},
-					"503": {
-						"description": "503",
-						"content": {
-							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"$ref": "#/components/schemas/ServiceUnavailable"
-										},
-										{
-											"$ref": "#/components/schemas/UndefinedError"
-										}
-									]
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/agents/{id}/activity": {
-			"get": {
-				"operationId": "agents.activity",
-				"summary": "An agent's activity history",
-				"description": "Most recent first, by cursor: the Agent's Questions and Answers, its rejected Answers, its pauses and the management events of its key (#294). For the Agent's Owner, or a staff member who may read the audit log; anyone else gets 404, as for an unknown Agent.",
-				"tags": ["agents"],
-				"parameters": [
-					{
-						"in": "path",
-						"required": true,
-						"name": "id",
-						"schema": {
-							"type": "string",
-							"minLength": 1
-						}
-					},
-					{
-						"in": "query",
-						"name": "group",
-						"schema": {
-							"type": "string",
-							"enum": ["content", "rejections", "management"]
-						},
-						"allowEmptyValue": true,
-						"allowReserved": true
-					},
-					{
-						"in": "query",
-						"name": "cursor",
-						"schema": {
-							"type": "string"
-						},
-						"allowEmptyValue": true,
-						"allowReserved": true
-					},
-					{
-						"in": "query",
-						"name": "limit",
-						"schema": {
-							"default": 20,
-							"type": "integer",
-							"minimum": 1,
-							"maximum": 50
-						},
-						"allowEmptyValue": true,
-						"allowReserved": true
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"items": {
-											"type": "array",
-											"items": {
-												"type": "object",
-												"properties": {
-													"id": {
-														"type": "string"
-													},
-													"kind": {
-														"type": "string",
-														"enum": [
-															"question",
-															"answer",
-															"rejection",
-															"pause",
-															"resume",
-															"management"
-														]
-													},
-													"at": {
-														"type": "string",
-														"format": "date-time",
-														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-													},
-													"questionId": {
-														"type": ["string", "null"]
-													},
-													"questionTitle": {
-														"type": ["string", "null"]
-													},
-													"action": {
-														"type": ["string", "null"]
-													},
-													"deleted": {
-														"type": "boolean"
-													}
-												},
-												"required": [
-													"id",
-													"kind",
-													"at",
-													"questionId",
-													"questionTitle",
-													"action",
-													"deleted"
-												],
-												"additionalProperties": false
-											}
-										},
-										"nextCursor": {
-											"type": ["string", "null"]
-										}
-									},
-									"required": ["items", "nextCursor"],
-									"additionalProperties": false
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "400",
-						"content": {
-							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"$ref": "#/components/schemas/BadRequest"
-										},
-										{
-											"$ref": "#/components/schemas/UndefinedError"
-										}
-									]
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "401",
-						"content": {
-							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"$ref": "#/components/schemas/Unauthorized"
-										},
-										{
-											"$ref": "#/components/schemas/UndefinedError"
-										}
-									]
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"$ref": "#/components/schemas/Forbidden"
-										},
-										{
-											"$ref": "#/components/schemas/UndefinedError"
-										}
-									]
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"$ref": "#/components/schemas/NotFound"
-										},
-										{
-											"$ref": "#/components/schemas/UndefinedError"
-										}
-									]
-								}
-							}
-						}
-					},
-					"429": {
-						"description": "429",
-						"content": {
-							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"$ref": "#/components/schemas/TooManyRequests"
-										},
-										{
-											"$ref": "#/components/schemas/UndefinedError"
-										}
-									]
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "500",
-						"content": {
-							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"$ref": "#/components/schemas/InternalServerError"
 										},
 										{
 											"$ref": "#/components/schemas/UndefinedError"
