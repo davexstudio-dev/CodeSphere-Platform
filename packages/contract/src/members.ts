@@ -143,6 +143,30 @@ export const MemberExport = z.object({
 	),
 });
 
+/** The « Activité » tab of the settings (#293). */
+export const MemberActivity = z.object({
+	questions: z.array(
+		z.object({
+			id: z.string(),
+			title: z.string(),
+			status: z.enum(["open", "answered", "closed"]),
+			score: z.number().int(),
+			answerCount: z.number().int(),
+			createdAt: z.string().datetime(),
+		}),
+	),
+	answers: z.array(
+		z.object({
+			id: z.string(),
+			questionId: z.string(),
+			questionTitle: z.string(),
+			score: z.number().int(),
+			accepted: z.boolean(),
+			createdAt: z.string().datetime(),
+		}),
+	),
+});
+
 export const membersContract = {
 	me: base
 		.errors({ UNAUTHORIZED: {} })
@@ -178,6 +202,19 @@ export const membersContract = {
 		)
 		.input(ProfileUpdate)
 		.output(OwnProfile),
+	activity: base
+		.errors({ UNAUTHORIZED: {} })
+		.meta(
+			openapi({
+				method: "GET",
+				path: "/me/activity",
+				tags: ["members"],
+				summary: "My recent Questions and Answers",
+				description:
+					"The caller's 10 latest Questions and 10 latest Answers (deleted ones left out), newest first. Requires a session or an API key.",
+			}),
+		)
+		.output(MemberActivity),
 	export: base
 		.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
 		.meta(
