@@ -44,34 +44,35 @@ function SectionList({
 			)}
 		>
 			{entries.map(({ key, label, description, icon: Icon, href }) => (
-				<Item
-					key={key}
-					role="listitem"
-					size="sm"
-					className="rounded-none px-4 py-3.5"
-					render={<Link href={href} />}
-				>
-					<ItemMedia
-						variant="icon"
-						className="size-9 rounded-lg bg-muted text-foreground [&_svg]:size-4"
+				// The row is a link: the list item is its wrapper, so the link keeps its role.
+				<div key={key} role="listitem">
+					<Item
+						size="sm"
+						className="rounded-none px-4 py-3.5"
+						render={<Link href={href} />}
 					>
-						<Icon />
-					</ItemMedia>
-					<ItemContent className="min-w-0 gap-0.5">
-						<ItemTitle className="text-sm">{label}</ItemTitle>
-						{description && (
-							<ItemDescription className="line-clamp-1">
-								{description}
-							</ItemDescription>
-						)}
-					</ItemContent>
-					<ItemActions>
-						<ChevronRightIcon
-							className="size-4 text-muted-foreground"
-							aria-hidden="true"
-						/>
-					</ItemActions>
-				</Item>
+						<ItemMedia
+							variant="icon"
+							className="size-9 rounded-lg bg-muted text-foreground [&_svg]:size-4"
+						>
+							<Icon />
+						</ItemMedia>
+						<ItemContent className="min-w-0 gap-0.5">
+							<ItemTitle className="text-sm">{label}</ItemTitle>
+							{description && (
+								<ItemDescription className="line-clamp-1">
+									{description}
+								</ItemDescription>
+							)}
+						</ItemContent>
+						<ItemActions>
+							<ChevronRightIcon
+								className="size-4 text-muted-foreground"
+								aria-hidden="true"
+							/>
+						</ItemActions>
+					</Item>
+				</div>
 			))}
 		</ItemGroup>
 	);
