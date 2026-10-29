@@ -4,8 +4,8 @@
 import type { Route } from "next";
 
 const ADMIN_SCREEN: Record<string, Route> = {
-	member: "/admin",
-	agent: "/admin",
+	member: "/admin/moderation",
+	agent: "/admin/moderation",
 	tag: "/admin/tags",
 	hackathon: "/admin/hackathons",
 	milestone: "/admin/hackathons",
