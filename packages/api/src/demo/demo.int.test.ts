@@ -6,14 +6,26 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { createDb } from "@codesphere/db";
 import { auditLog } from "@codesphere/db/schema/audit";
 import { apikey, user } from "@codesphere/db/schema/auth";
+import {
+	jobApplications,
+	jobPostings,
+	jobReports,
+} from "@codesphere/db/schema/jobs";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
 import { reputationEvents } from "@codesphere/db/schema/reputation";
+import { watchItems, watchSources } from "@codesphere/db/schema/watch";
 import { and, count, eq, inArray, or } from "drizzle-orm";
 
 import { AnswerError } from "../answers/service";
 import { reputationOf } from "../reputation/service";
 import { createVoteService } from "../votes/service";
 import { demoMembers, demoQuestions } from "./content";
+import {
+	demoItems,
+	demoJobs,
+	demoSources,
+	resetDemoJobsWatch,
+} from "./jobs-watch";
 import { DEMO_AGENT_NAME, DemoSeedError, resetDemo, seedDemo } from "./seed";
 
 const url = process.env.TEST_DATABASE_URL;
@@ -49,6 +61,7 @@ describe.skipIf(!url)("demo content on Postgres", () => {
 			.from(user)
 			.where(eq(user.ownerId, owner));
 		const agentIds = agents.map((a) => a.id);
+		await resetDemoJobsWatch(db);
 		await db
 			.delete(reputationEvents)
 			.where(
@@ -202,6 +215,74 @@ describe.skipIf(!url)("demo content on Postgres", () => {
 			const reloaded = await seedDemo(db);
 			expect(reloaded.questions).toBe(demoQuestions.length);
 			expect(await demoQuestionRows()).toHaveLength(demoQuestions.length);
+		},
+		SEED_TIMEOUT,
+	);
+
+	test(
+		"loads the Job postings and the Watch feed (#291), replays and resets them",
+		async () => {
+			const jobIds = demoJobs.map((j) => j.id);
+			const itemIds = demoItems.map((i) => i.id);
+			const snapshot = async () => {
+				const jobs = await db
+					.select({
+						status: jobPostings.status,
+						expiresAt: jobPostings.expiresAt,
+					})
+					.from(jobPostings)
+					.where(inArray(jobPostings.id, jobIds));
+				const [reports] = await db
+					.select({ n: count() })
+					.from(jobReports)
+					.where(inArray(jobReports.jobId, jobIds));
+				const [applications] = await db
+					.select({ n: count() })
+					.from(jobApplications)
+					.where(inArray(jobApplications.jobId, jobIds));
+				const items = await db
+					.select({ visibility: watchItems.visibility })
+					.from(watchItems)
+					.where(inArray(watchItems.id, itemIds));
+				const [sources] = await db
+					.select({ n: count() })
+					.from(watchSources)
+					.where(
+						inArray(
+							watchSources.id,
+							demoSources.map((s) => s.id),
+						),
+					);
+				return {
+					jobs: jobs.length,
+					removed: jobs.filter((j) => j.status === "removed").length,
+					expired: jobs.filter((j) => j.expiresAt < new Date()).length,
+					reports: reports?.n,
+					applications: applications?.n,
+					items: items.length,
+					pending: items.filter((i) => i.visibility === "pending").length,
+					sources: sources?.n,
+				};
+			};
+
+			await seedDemo(db);
+			const first = await snapshot();
+			expect(first).toEqual({
+				jobs: 6,
+				removed: 1,
+				expired: 1,
+				reports: 2,
+				applications: 3,
+				items: 9,
+				pending: 2,
+				sources: 3,
+			});
+			await seedDemo(db);
+			expect(await snapshot()).toEqual(first);
+
+			await resetDemo(db);
+			const empty = await snapshot();
+			expect(empty).toMatchObject({ jobs: 0, items: 0, sources: 0 });
 		},
 		SEED_TIMEOUT,
 	);
