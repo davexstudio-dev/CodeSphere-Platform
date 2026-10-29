@@ -5,6 +5,7 @@ import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { InitialsAvatar } from "@codesphere/ui/components/atoms/initials-avatar";
 import { Input } from "@codesphere/ui/components/atoms/input";
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { SegmentedControl } from "@codesphere/ui/components/molecules/segmented-control";
 import {
 	Tabs,
@@ -67,19 +68,28 @@ export default function AccountPage() {
 	return (
 		<AdminFrame title={t("title")} description={t("description")}>
 			<div className="flex flex-col gap-6">
-				<section className="flex flex-wrap items-center gap-5 rounded-xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-5 md:p-6">
-					<InitialsAvatar name={identity?.name ?? ""} size="xl" ringed />
+				<section className="flex flex-col gap-4 rounded-xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-4 sm:flex-row sm:items-center sm:gap-5 md:p-6">
+					<div className="flex items-center gap-3 sm:contents">
+						<InitialsAvatar name={identity?.name ?? ""} size="xl" ringed />
+						{/* On a phone the name and the role sit beside the avatar; the details go below. */}
+						<div className="flex min-w-0 flex-col items-start gap-1 sm:hidden">
+							<h2 className="truncate font-semibold text-xl tracking-tight">
+								{identity?.name ?? "—"}
+							</h2>
+							<Badge variant="outline">{tRole(role)}</Badge>
+						</div>
+					</div>
 					<div className="flex min-w-0 flex-1 flex-col gap-2">
-						<div className="flex flex-wrap items-center gap-2">
+						<div className="hidden flex-wrap items-center gap-2 sm:flex">
 							<h2 className="truncate font-semibold text-2xl tracking-tight">
 								{identity?.name ?? "—"}
 							</h2>
 							<Badge variant="outline">{tRole(role)}</Badge>
 						</div>
-						<ul className="flex flex-wrap gap-x-5 gap-y-1 text-muted-foreground text-sm">
-							<li className="flex items-center gap-1.5">
-								<MailIcon className="size-3.5" aria-hidden="true" />
-								{identity?.email ?? "—"}
+						<ul className="flex flex-col gap-1.5 text-muted-foreground text-sm sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-1">
+							<li className="flex min-w-0 items-center gap-1.5">
+								<MailIcon className="size-3.5 shrink-0" aria-hidden="true" />
+								<span className="truncate">{identity?.email ?? "—"}</span>
 							</li>
 							{identity && (
 								<li className="flex items-center gap-1.5">
@@ -110,24 +120,26 @@ export default function AccountPage() {
 				{/* One tab per section, so the page stays one screen high; the profile tab is a bento of
 				    the form and the access. */}
 				<Tabs defaultValue="profile" className="gap-6">
-					<TabsList>
-						<TabsTrigger value="profile">
-							<UserIcon />
-							{t("tabs.profile")}
-						</TabsTrigger>
-						<TabsTrigger value="security">
-							<ShieldCheckIcon />
-							{t("tabs.security")}
-						</TabsTrigger>
-						<TabsTrigger value="activity">
-							<HistoryIcon />
-							{t("tabs.activity")}
-						</TabsTrigger>
-						<TabsTrigger value="preferences">
-							<SlidersHorizontalIcon />
-							{t("tabs.preferences")}
-						</TabsTrigger>
-					</TabsList>
+					<ScrollArea orientation="horizontal" className="w-full min-w-0">
+						<TabsList className="mb-3">
+							<TabsTrigger value="profile">
+								<UserIcon />
+								{t("tabs.profile")}
+							</TabsTrigger>
+							<TabsTrigger value="security">
+								<ShieldCheckIcon />
+								{t("tabs.security")}
+							</TabsTrigger>
+							<TabsTrigger value="activity">
+								<HistoryIcon />
+								{t("tabs.activity")}
+							</TabsTrigger>
+							<TabsTrigger value="preferences">
+								<SlidersHorizontalIcon />
+								{t("tabs.preferences")}
+							</TabsTrigger>
+						</TabsList>
+					</ScrollArea>
 					<TabsContent value="profile">
 						<div className="grid items-start gap-6 xl:grid-cols-3">
 							<ProfileForm className="xl:col-span-2" />
