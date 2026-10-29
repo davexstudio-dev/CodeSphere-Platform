@@ -75,8 +75,7 @@ function useRemaining(target: string, now?: Date) {
 const pad = (n: number | null) =>
 	n === null ? "…" : n < 10 ? `0${n}` : String(n);
 
-const SURFACE =
-	"relative overflow-hidden text-primary-foreground bg-cadev";
+const SURFACE = "relative overflow-hidden text-primary-foreground bg-cadev";
 
 /** The CADEV 2026 banner: countdown in the viewer's timezone and the contest calendar. */
 function CadevBanner({
@@ -248,8 +247,7 @@ function CadevBanner({
 											className={cn(
 												"absolute top-0 left-0 size-2.5 rounded-full border-2",
 												done && "border-white bg-white",
-												isNext &&
-													"border-gold bg-gold ring-4 ring-gold/25",
+												isNext && "border-gold bg-gold ring-4 ring-gold/25",
 												!done && !isNext && "border-white/50 bg-transparent",
 											)}
 										/>
