@@ -119,6 +119,7 @@
 		"tabs": {
 			"profile": "Profile",
 			"reputation": "Reputation and badges",
+			"activity": "Activity",
 			"tags": "Interests",
 			"agents": "Agents",
 			"data": "Privacy and data"
@@ -166,6 +167,23 @@
 			"strongestNone": "No Tag where you stand out yet: answer on your Tags to see some here.",
 			"badges": "Badges",
 			"badgesNone": "No badge yet."
+		},
+		"activity": {
+			"title": "My activity",
+			"questions": "My questions",
+			"answers": "My answers",
+			"noQuestions": "You have not asked a question yet.",
+			"noAnswers": "You have not answered yet.",
+			"loading": "Loading…",
+			"error": "Activity unavailable for now.",
+			"answersCount": "{count, plural, =0 {no answers} one {# answer} other {# answers}}",
+			"score": "{score, plural, one {# vote} other {# votes}}",
+			"accepted": "Accepted",
+			"status": {
+				"open": "Open",
+				"answered": "Solved",
+				"closed": "Closed"
+			}
 		}
 	},
 	"agentProfile": {

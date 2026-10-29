@@ -21,6 +21,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	AwardIcon,
 	BotIcon,
+	CheckIcon,
+	HistoryIcon,
 	MapPinIcon,
 	ShieldIcon,
 	TagIcon,
@@ -394,9 +396,76 @@ function ReputationPanel() {
 	);
 }
 
+/** « Activité » (#293): the Member's latest Questions and Answers, each linking to its page. */
+function ActivityPanel() {
+	const t = useTranslations("settings.activity");
+	const activity = useQuery(orpc.members.activity.queryOptions());
+	if (activity.isPending) {
+		return <p className="text-muted-foreground text-sm">{t("loading")}</p>;
+	}
+	if (activity.isError) {
+		return <p className="text-destructive text-sm">{t("error")}</p>;
+	}
+	const { questions, answers } = activity.data;
+	return (
+		<div className="grid items-start gap-6 xl:grid-cols-2">
+			<SettingsSection title={t("questions")}>
+				{questions.length === 0 ? (
+					<p className="text-muted-foreground text-sm">{t("noQuestions")}</p>
+				) : (
+					<ul className="flex flex-col divide-y divide-border">
+						{questions.map((q) => (
+							<li key={q.id} className="flex flex-col gap-1 py-2.5">
+								<Link
+									href={`/questions/${q.id}`}
+									className="font-medium text-sm hover:underline"
+								>
+									{q.title}
+								</Link>
+								<span className="text-muted-foreground text-xs">
+									{t(`status.${q.status}`)} · {t("score", { score: q.score })} ·{" "}
+									{t("answersCount", { count: q.answerCount })}
+								</span>
+							</li>
+						))}
+					</ul>
+				)}
+			</SettingsSection>
+			<SettingsSection title={t("answers")}>
+				{answers.length === 0 ? (
+					<p className="text-muted-foreground text-sm">{t("noAnswers")}</p>
+				) : (
+					<ul className="flex flex-col divide-y divide-border">
+						{answers.map((a) => (
+							<li key={a.id} className="flex flex-col gap-1 py-2.5">
+								<Link
+									href={`/questions/${a.questionId}`}
+									className="font-medium text-sm hover:underline"
+								>
+									{a.questionTitle}
+								</Link>
+								<span className="flex items-center gap-1.5 text-muted-foreground text-xs">
+									{t("score", { score: a.score })}
+									{a.accepted && (
+										<span className="inline-flex items-center gap-0.5 text-success">
+											<CheckIcon className="size-3" aria-hidden="true" />
+											{t("accepted")}
+										</span>
+									)}
+								</span>
+							</li>
+						))}
+					</ul>
+				)}
+			</SettingsSection>
+		</div>
+	);
+}
+
 const TABS = [
 	{ key: "profile", icon: UserIcon },
 	{ key: "reputation", icon: AwardIcon },
+	{ key: "activity", icon: HistoryIcon },
 	{ key: "tags", icon: TagIcon },
 	{ key: "agents", icon: BotIcon },
 	{ key: "data", icon: ShieldIcon },
@@ -455,6 +524,9 @@ export default function SettingsPage() {
 					</TabsContent>
 					<TabsContent value="reputation">
 						<ReputationPanel />
+					</TabsContent>
+					<TabsContent value="activity">
+						<ActivityPanel />
 					</TabsContent>
 					{/* Outside the profile form: each has its own actions, and forms do not nest. */}
 					<TabsContent value="tags" className="flex flex-col gap-6">

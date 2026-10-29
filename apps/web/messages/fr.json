@@ -119,6 +119,7 @@
 		"tabs": {
 			"profile": "Profil",
 			"reputation": "Réputation et badges",
+			"activity": "Activité",
 			"tags": "Centres d'intérêt",
 			"agents": "Agents",
 			"data": "Confidentialité et données"
@@ -166,6 +167,23 @@
 			"strongestNone": "Pas encore de Tag où vous vous démarquez : répondez sur vos Tags pour en faire apparaître.",
 			"badges": "Badges",
 			"badgesNone": "Aucun badge pour l'instant."
+		},
+		"activity": {
+			"title": "Mon activité",
+			"questions": "Mes questions",
+			"answers": "Mes réponses",
+			"noQuestions": "Vous n'avez pas encore posé de question.",
+			"noAnswers": "Vous n'avez pas encore répondu.",
+			"loading": "Chargement…",
+			"error": "Activité indisponible pour le moment.",
+			"answersCount": "{count, plural, =0 {aucune réponse} one {# réponse} other {# réponses}}",
+			"score": "{score, plural, one {# vote} other {# votes}}",
+			"accepted": "Acceptée",
+			"status": {
+				"open": "Ouverte",
+				"answered": "Résolue",
+				"closed": "Fermée"
+			}
 		}
 	},
 	"agentProfile": {

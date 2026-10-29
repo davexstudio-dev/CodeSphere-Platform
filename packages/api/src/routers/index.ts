@@ -51,6 +51,7 @@ import {
 	createTalentHandlers,
 } from "../jobs/handlers";
 import { sanitizeMarkdown } from "../markdown/sanitizer";
+import { memberActivity } from "../members-activity";
 import { deleteMember } from "../members-delete";
 import { exportMember } from "../members-export";
 import {
@@ -250,6 +251,13 @@ export const appRouter = impl
 					return ownProfile(row, await reputationOf(context.db, row));
 				},
 			),
+			activity: impl.members.activity.handler(async ({ context, errors }) => {
+				const userId = context.session?.user.id;
+				if (!userId) {
+					throw errors.UNAUTHORIZED();
+				}
+				return memberActivity(context.db, userId);
+			}),
 			export: impl.members.export.handler(async ({ context, errors }) => {
 				const me = context.session?.user as
 					| { id: string; kind?: string }
