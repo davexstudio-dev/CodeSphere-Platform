@@ -269,9 +269,7 @@ function CadevBanner({
 				</div>
 			)}
 			{left.days !== null && (
-				<p className="mt-3 text-2xs opacity-70">
-					{l.remaining(left.days)}
-				</p>
+				<p className="mt-3 text-2xs opacity-70">{l.remaining(left.days)}</p>
 			)}
 		</section>
 	);
