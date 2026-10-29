@@ -52,7 +52,7 @@ export function DataSaverToggle({
 				}}
 				value={preference}
 				onValueChange={(next) => startTransition(() => setDataSaver(next))}
-				className="text-xs"
+				size="sm"
 			/>
 			<span className="sr-only">{t(`hint.${preference}`)}</span>
 		</div>

@@ -76,27 +76,33 @@ function CodeDialog({
 	const text = codeOf(source, view);
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-4xl gap-0 overflow-hidden p-0">
-				<DialogHeader className="gap-2 border-b px-5 pt-5 pb-4">
-					<DialogTitle className="truncate pr-8 text-base leading-snug">
-						{label}
-					</DialogTitle>
-					<DialogDescription className="flex flex-wrap items-center gap-1.5">
-						{source.files.length > 0 ? (
-							source.files.map((file) => (
-								<span
-									key={file}
-									className="inline-flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs"
-								>
-									<FileCodeIcon className="size-3" />
-									{file.replace("packages/ui/src/components/", "")}
-								</span>
-							))
-						) : (
-							<span>Code de l'exemple, tel qu'il est écrit dans la page.</span>
-						)}
-					</DialogDescription>
-				</DialogHeader>
+			<DialogContent flush className="max-w-4xl">
+				<div className="border-b px-5 pt-5 pb-4">
+					<DialogHeader>
+						<DialogTitle>
+							<span className="block truncate">{label}</span>
+						</DialogTitle>
+						<DialogDescription>
+							<span className="flex flex-wrap items-center gap-1.5">
+								{source.files.length > 0 ? (
+									source.files.map((file) => (
+										<span
+											key={file}
+											className="inline-flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs"
+										>
+											<FileCodeIcon className="size-3" />
+											{file.replace("packages/ui/src/components/", "")}
+										</span>
+									))
+								) : (
+									<span>
+										Code de l'exemple, tel qu'il est écrit dans la page.
+									</span>
+								)}
+							</span>
+						</DialogDescription>
+					</DialogHeader>
+				</div>
 				<div className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/30 px-5 py-2.5">
 					<SegmentedControl
 						options={VIEWS}
@@ -110,7 +116,8 @@ function CodeDialog({
 				<CodeBlock
 					language="tsx"
 					showHeader={false}
-					className="my-0 max-h-[min(60svh,34rem)] rounded-none border-0 bg-transparent"
+					bare
+					className="max-h-[min(60svh,34rem)]"
 				>
 					{text || "// Rien à importer : l'exemple n'utilise que du HTML."}
 				</CodeBlock>
@@ -140,10 +147,10 @@ export function Specimen({
 				<span className="font-mono text-muted-foreground text-xs">{label}</span>
 				{source && (
 					<Button
-						variant="outline"
+						variant="chip"
 						size="xs"
 						aria-haspopup="dialog"
-						className="shrink-0 rounded-full bg-card px-2.5 text-muted-foreground shadow-xs hover:border-primary/40 hover:bg-primary/5 hover:text-foreground"
+						className="shrink-0"
 						onClick={() => setOpen(true)}
 					>
 						<CodeIcon />

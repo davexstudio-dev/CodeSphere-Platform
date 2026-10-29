@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@codesphere/ui/components/atoms/button";
+import { InitialsAvatar } from "@codesphere/ui/components/atoms/initials-avatar";
 import { Input } from "@codesphere/ui/components/atoms/input";
 import { Skeleton } from "@codesphere/ui/components/atoms/skeleton";
 import { Switch } from "@codesphere/ui/components/atoms/switch";
@@ -155,14 +156,6 @@ function useLeaveWarning(dirty: boolean) {
 	}, [dirty]);
 }
 
-const initialsOf = (name: string) =>
-	name
-		.split(/\s+/)
-		.filter(Boolean)
-		.slice(0, 2)
-		.map((part) => part.charAt(0).toUpperCase())
-		.join("") || "?";
-
 /** Who the reader is, above the tabs: initials, name, Reputation and country. */
 function ProfileHeader() {
 	const t = useTranslations("settings");
@@ -173,12 +166,7 @@ function ProfileHeader() {
 	const { name, reputation, country } = me.data;
 	return (
 		<section className="flex items-center gap-4 rounded-2xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-4 lg:flex-col lg:items-start lg:gap-3 lg:p-5">
-			<span
-				aria-hidden="true"
-				className="grid size-14 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-amber-600 font-bold text-lg text-primary-foreground"
-			>
-				{initialsOf(name)}
-			</span>
+			<InitialsAvatar name={name} size="lg" />
 			<div className="flex min-w-0 flex-1 flex-col gap-1">
 				<p className="truncate font-semibold text-lg">{name}</p>
 				<p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-sm">
@@ -447,13 +435,9 @@ export default function SettingsPage() {
 						<ProfileHeader />
 					</div>
 					<ScrollArea orientation="horizontal" className="w-full">
-						<TabsList className="w-max pb-1 lg:w-full lg:flex-col lg:items-stretch lg:rounded-2xl lg:pb-1">
+						<TabsList layout="sidebar" className="w-max">
 							{TABS.map(({ key, icon: Icon }) => (
-								<TabsTrigger
-									key={key}
-									value={key}
-									className="lg:justify-start lg:rounded-xl lg:px-3 lg:py-2"
-								>
+								<TabsTrigger key={key} value={key} layout="sidebar">
 									<Icon className="size-4" />
 									{t(`tabs.${key}`)}
 								</TabsTrigger>

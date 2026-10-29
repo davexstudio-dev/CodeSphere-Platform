@@ -34,7 +34,6 @@ function Flag({ code, name, base = "/flags", className, ...props }: FlagProps) {
 				<GlobeIcon aria-hidden className="size-3.5 text-muted-foreground" />
 			) : (
 				<>
-					{/* biome-ignore lint/performance/noImgElement: static SVG, no optimisation to gain */}
 					<img
 						data-slot="flag-image"
 						src={`${base}/${upper}.svg`}
@@ -43,7 +42,7 @@ function Flag({ code, name, base = "/flags", className, ...props }: FlagProps) {
 						height={12}
 						loading="lazy"
 						decoding="async"
-						className="h-3 w-[18px] rounded-[2px] object-cover ring-1 ring-border"
+						className="h-3 w-4.5 rounded-xs object-cover ring-1 ring-border"
 					/>
 					<span
 						data-slot="flag-code"

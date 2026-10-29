@@ -81,6 +81,8 @@ export interface CodeBlockProps {
 	enableHighlighting?: boolean;
 	/** Custom text size class */
 	textSize?: string;
+	/** No frame, margin or background: the block fills a pane drawn by its container. */
+	bare?: boolean;
 }
 
 /**
@@ -95,6 +97,7 @@ export const CodeBlock = memo(function CodeBlock({
 	showHeader = true,
 	enableHighlighting = true,
 	textSize,
+	bare = false,
 }: CodeBlockProps) {
 	const [copied, setCopied] = useState(false);
 
@@ -119,14 +122,17 @@ export const CodeBlock = memo(function CodeBlock({
 	return (
 		<div
 			className={cn(
-				"group/codeblock relative my-6 flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-muted/40 dark:bg-muted/20",
+				"group/codeblock relative flex min-h-0 flex-col overflow-hidden",
+				bare
+					? "my-0"
+					: "my-6 rounded-lg border border-border bg-muted/40 dark:bg-muted/20",
 				className,
 			)}
 		>
 			{/* Header bar */}
 			{showHeader && (
 				<div className="flex flex-none items-center justify-between border-border/30 border-b bg-muted px-2 py-2">
-					<span className="font-mono text-xs text-zinc-500">
+					<span className="font-mono text-muted-foreground text-xs">
 						{language || "code"}
 					</span>
 					{showCopyButton && (
@@ -138,7 +144,7 @@ export const CodeBlock = memo(function CodeBlock({
 						>
 							{copied ? (
 								<>
-									<Check className="h-3.5 w-3.5 text-emerald-400" />
+									<Check className="h-3.5 w-3.5 text-success" />
 									<span>copied!</span>
 								</>
 							) : (
@@ -165,7 +171,7 @@ export const CodeBlock = memo(function CodeBlock({
 								)}
 							>
 								{showLineNumbers && (
-									<span className="min-w-[2ch] select-none text-right text-xs text-zinc-600 leading-6">
+									<span className="min-w-[2ch] select-none text-right text-muted-foreground/70 text-xs leading-6">
 										{i + 1}
 									</span>
 								)}
@@ -243,7 +249,7 @@ export const CompactCodeBlock = memo(function CompactCodeBlock({
 				aria-label="Copy code"
 			>
 				{copied ? (
-					<Check className="h-3.5 w-3.5 text-pink-400" />
+					<Check className="h-3.5 w-3.5 text-primary" />
 				) : (
 					<Copy className="h-3.5 w-3.5 text-muted-foreground" />
 				)}

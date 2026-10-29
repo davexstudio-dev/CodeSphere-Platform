@@ -1,15 +1,79 @@
 {
 	"$schema": "./node_modules/oxlint/configuration_schema.json",
 	"jsPlugins": ["@shadcn/lint"],
-	"categories": { "correctness": "off" },
+	"categories": {
+		"correctness": "off"
+	},
 	"rules": {
-		"shadcn/no-restyle": "warn",
+		"shadcn/no-restyle": [
+			"warn",
+			{
+				"allow": ["layout"],
+				"contracts": [
+					{
+						"pattern": "^Skeleton$",
+						"allow": ["layout", "shape"]
+					},
+					{
+						"pattern": "^(ScrollArea|Tabs|TabsContent)$",
+						"allow": ["layout", "spacing", "shape", "color", "typography"]
+					},
+					{
+						"pattern": "^(Card|CardContent|CardHeader|CardFooter)$",
+						"allow": ["layout", "spacing"]
+					},
+					{
+						"pattern": "^(TextsReveal|RevealLine)$",
+						"allow": ["layout", "spacing", "typography", "color"]
+					}
+				]
+			}
+		],
 		"shadcn/no-raw-colors": "warn",
-		"shadcn/no-arbitrary-values": "warn",
+		"shadcn/no-arbitrary-values": [
+			"warn",
+			{
+				"allow": ["layout", "motion"]
+			}
+		],
 		"shadcn/no-inline-styles": "warn",
-		"shadcn/no-unknown-classes": "warn",
+		"shadcn/no-unknown-classes": [
+			"warn",
+			{
+				"allow": [
+					"cn-*",
+					"t-*",
+					"prose-codesphere",
+					"scroll-fade-x",
+					"scroll-fade-b",
+					"scrollbar-none",
+					"scrollbar-thin",
+					"scrollbar-gutter-stable",
+					"toaster"
+				]
+			}
+		],
 		"shadcn/require-static-classes": "warn"
 	},
+	"overrides": [
+		{
+			"files": [
+				"packages/email/src/**",
+				"apps/web/src/lib/og-*.tsx",
+				"apps/web/src/app/**/opengraph-image.tsx",
+				"apps/web/src/app/og/**"
+			],
+			"rules": {
+				"shadcn/no-inline-styles": "off"
+			}
+		},
+		{
+			"files": ["packages/ui/src/components/atoms/brand-icons.tsx"],
+			"rules": {
+				"shadcn/no-raw-colors": "off"
+			}
+		}
+	],
 	"ignorePatterns": [
 		"**/node_modules/**",
 		"**/.next/**",

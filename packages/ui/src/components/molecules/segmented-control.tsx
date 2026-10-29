@@ -12,6 +12,8 @@ type SegmentedControlProps<T extends string> = Omit<
 	onValueChange: (value: T) => void;
 	/** What each option shows, when it should read differently from its value. */
 	labels?: Partial<Record<T, string>>;
+	/** `sm`: a smaller label, for a control inside a line of text or a filter bar. */
+	size?: "sm" | "md";
 };
 
 function SegmentedControl<T extends string>({
@@ -19,6 +21,7 @@ function SegmentedControl<T extends string>({
 	value,
 	onValueChange,
 	labels,
+	size = "md",
 	className,
 	...props
 }: SegmentedControlProps<T>) {
@@ -29,7 +32,8 @@ function SegmentedControl<T extends string>({
 			role="tablist"
 			data-slot="segmented-control"
 			className={cn(
-				"relative flex gap-1 rounded-full border border-border bg-card p-1 text-sm",
+				"relative flex gap-1 rounded-full border border-border bg-card p-1",
+				size === "sm" ? "text-xs" : "text-sm",
 				className,
 			)}
 			{...props}

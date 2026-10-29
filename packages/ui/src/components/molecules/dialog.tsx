@@ -20,8 +20,13 @@ function DialogContent({
 	className,
 	children,
 	showCloseButton = true,
+	flush = false,
 	...props
-}: DialogPrimitive.Popup.Props & { showCloseButton?: boolean }) {
+}: DialogPrimitive.Popup.Props & {
+	showCloseButton?: boolean;
+	/** No padding or gap: the content draws its own bands (a header, a toolbar, a pane). */
+	flush?: boolean;
+}) {
 	return (
 		<DialogPrimitive.Portal>
 			<DialogPrimitive.Backdrop
@@ -32,6 +37,7 @@ function DialogContent({
 				data-slot="dialog-content"
 				className={cn(
 					"fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col gap-4 overflow-y-auto rounded-xl border border-border bg-card p-6 text-card-foreground shadow-lg outline-none transition duration-250 ease-(--ease-smooth-out) data-[ending-style]:scale-[0.96] data-[starting-style]:scale-[0.96] data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 data-[ending-style]:duration-150",
+					flush && "gap-0 overflow-hidden p-0",
 					className,
 				)}
 				{...props}

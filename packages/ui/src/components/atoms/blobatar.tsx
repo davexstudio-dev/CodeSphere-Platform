@@ -102,7 +102,7 @@ export function Blobatar({
         from its `size`, so the picture follows the Avatar's box — `size-8` by
         default, whatever you pass otherwise — rather than fighting it.
       */}
-			<AvatarFallback className="bg-transparent">
+			<AvatarFallback transparent>
 				<Generated {...blobatar} name={name} className="size-full" />
 			</AvatarFallback>
 		</Avatar>

@@ -74,6 +74,8 @@ export function AskForm() {
 	// The Tag of the page that opened the form, once the stored Draft is known.
 	const tag = params.get("tag");
 	const { ready, setValue } = draft;
+	// Only when the Draft is first ready: the Member may remove the Tag afterwards.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: runs once the Draft is ready, on purpose
 	useEffect(() => {
 		if (ready && tag) {
 			const next = prefilled(draft.value, tag);
@@ -81,7 +83,6 @@ export function AskForm() {
 				setValue(next);
 			}
 		}
-		// Only when the Draft is first ready: the Member may remove the Tag afterwards.
 	}, [ready, tag]);
 
 	// Published: open the Question, and the Draft is done with. The form shows « published »
@@ -194,8 +195,8 @@ export function AskForm() {
 								<BubbleContent>{t("prompts.details")}</BubbleContent>
 							</Bubble>
 							<Bubble align="end">
-								<BubbleContent className="line-clamp-3">
-									{value.body}
+								<BubbleContent>
+									<span className="line-clamp-3">{value.body}</span>
 								</BubbleContent>
 							</Bubble>
 						</>
@@ -240,7 +241,8 @@ export function AskForm() {
 								<TabsContent value="write">
 									<Textarea
 										id="ask-body"
-										className="min-h-64 font-mono"
+										mono
+										className="min-h-64"
 										value={value.body}
 										maxLength={20_000}
 										aria-invalid={Boolean(errors.body)}

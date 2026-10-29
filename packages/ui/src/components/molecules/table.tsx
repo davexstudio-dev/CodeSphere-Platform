@@ -15,11 +15,18 @@ function Table({ className, maxHeight, ...props }: TableProps) {
 			data-slot="table-container"
 			data-scroll={maxHeight === undefined ? undefined : ""}
 			orientation={maxHeight === undefined ? "horizontal" : "both"}
-			style={maxHeight === undefined ? undefined : { maxHeight }}
+			style={
+				maxHeight === undefined
+					? undefined
+					: ({
+							"--max-height":
+								typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight,
+						} as React.CSSProperties)
+			}
 			className={cn(
 				"w-full rounded-lg border border-border",
 				maxHeight !== undefined &&
-					"[&_thead_th]:sticky [&_thead_th]:top-0 [&_thead_th]:z-[1] [&_thead_th]:bg-muted",
+					"max-h-(--max-height) [&_thead_th]:sticky [&_thead_th]:top-0 [&_thead_th]:z-1 [&_thead_th]:bg-muted",
 			)}
 		>
 			<table

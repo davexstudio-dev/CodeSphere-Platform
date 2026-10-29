@@ -77,7 +77,8 @@ export function AgentActivity({ agentId }: { agentId: string }) {
 				labels={Object.fromEntries(
 					FILTERS.map((key) => [key, t(`filters.${key}`)]),
 				)}
-				className="w-fit max-w-full text-xs"
+				size="sm"
+				className="w-fit max-w-full"
 			/>
 			{history.isPending ? (
 				<p className="text-muted-foreground text-sm">{t("loading")}</p>

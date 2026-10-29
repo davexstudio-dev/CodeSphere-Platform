@@ -18,8 +18,8 @@ type RoadmapTimelineProps = Omit<React.ComponentProps<"ol">, "children"> & {
 };
 
 const LABEL_TONE: Record<RoadmapStatus, string> = {
-	delivered: "text-emerald-700 dark:text-emerald-300",
-	in_progress: "text-amber-700 dark:text-amber-300",
+	delivered: "text-success",
+	in_progress: "text-gold-foreground dark:text-gold",
 	planned: "text-muted-foreground",
 };
 
@@ -55,14 +55,14 @@ function RoadmapTimeline({ items, className, ...props }: RoadmapTimelineProps) {
 						{item.status === "delivered" ? (
 							<span
 								aria-hidden="true"
-								className="flex size-5 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+								className="flex size-5 items-center justify-center rounded-full bg-success/15 text-success"
 							>
 								<CheckIcon className="size-3.5" strokeWidth={3} />
 							</span>
 						) : item.status === "in_progress" ? (
 							<span
 								aria-hidden="true"
-								className="size-3 rounded-full bg-amber-500 ring-4 ring-amber-500/20"
+								className="size-3 rounded-full bg-gold ring-4 ring-gold/20"
 							/>
 						) : (
 							<span

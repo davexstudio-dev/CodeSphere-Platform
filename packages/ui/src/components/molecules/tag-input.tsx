@@ -72,7 +72,7 @@ function TagInput({
 				)}
 			>
 				{value.map((tag) => (
-					<Tag key={tag} className="gap-1 pr-1">
+					<Tag key={tag} removable>
 						{tag}
 						<button
 							type="button"

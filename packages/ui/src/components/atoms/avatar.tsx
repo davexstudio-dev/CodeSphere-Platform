@@ -43,14 +43,16 @@ function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
 }
 
 function AvatarFallback({
+	transparent = false,
 	className,
 	...props
-}: AvatarPrimitive.Fallback.Props) {
+}: AvatarPrimitive.Fallback.Props & { transparent?: boolean }) {
 	return (
 		<AvatarPrimitive.Fallback
 			data-slot="avatar-fallback"
 			className={cn(
 				"flex size-full items-center justify-center rounded-full bg-muted text-muted-foreground text-sm group-data-[size=sm]/avatar:text-xs",
+				transparent && "bg-transparent",
 				className,
 			)}
 			{...props}

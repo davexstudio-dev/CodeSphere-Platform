@@ -57,7 +57,7 @@ export function MobileMenu() {
 				>
 					<MenuIcon />
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="min-w-56 bg-card">
+				<DropdownMenuContent align="end" className="min-w-56">
 					{session && (
 						<>
 							<DropdownMenuGroup>

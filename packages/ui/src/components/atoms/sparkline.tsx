@@ -5,7 +5,15 @@ type SparklineProps = Omit<React.ComponentProps<"svg">, "children"> & {
 };
 
 /** Tiny trend line; the colour comes from `currentColor`. Decorative: the value is written next to it. */
-function Sparkline({ data, className, ...props }: SparklineProps) {
+function Sparkline({
+	data,
+	tone = "primary",
+	className,
+	...props
+}: SparklineProps & {
+	/** `destructive`: a figure that is bad when it rises (errors, response time). */
+	tone?: "primary" | "destructive";
+}) {
 	if (data.length < 2) {
 		return null;
 	}
@@ -25,7 +33,11 @@ function Sparkline({ data, className, ...props }: SparklineProps) {
 			preserveAspectRatio="none"
 			aria-hidden="true"
 			data-slot="sparkline"
-			className={cn("h-7 w-full text-primary", className)}
+			className={cn(
+				"h-7 w-full",
+				tone === "destructive" ? "text-destructive" : "text-primary",
+				className,
+			)}
 			{...props}
 		>
 			<polyline

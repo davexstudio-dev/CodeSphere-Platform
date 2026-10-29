@@ -66,7 +66,7 @@ function SaveBar({
 				{dirty ? dirtyText : cleanText}
 				<SuccessCheck
 					show={saved && !dirty}
-					className="ml-1.5 size-4 align-middle text-success"
+					className="ml-1.5 size-4 align-middle"
 				/>
 			</span>
 			<span className="flex gap-2">

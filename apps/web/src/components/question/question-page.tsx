@@ -86,7 +86,7 @@ export function QuestionPage({ id }: { id: string }) {
 	if (!question.data) {
 		return (
 			<main className="mx-auto max-w-3xl px-4 py-10">
-				<Empty className="rounded-3xl border border-border bg-card py-12">
+				<Empty variant="card">
 					<EmptyHeader>
 						<EmptyTitle>{t("notFound.title")}</EmptyTitle>
 						<EmptyDescription>{t("notFound.description")}</EmptyDescription>
@@ -217,8 +217,8 @@ function Loaded({
 								<ChevronDownIcon className="size-4 transition-transform group-data-[panel-open]:rotate-180" />
 								{t("showQuestion")}
 							</CollapsibleTrigger>
-							<CollapsiblePanel className="pt-3">
-								{questionBlock}
+							<CollapsiblePanel>
+								<div className="pt-3">{questionBlock}</div>
 							</CollapsiblePanel>
 						</Collapsible>
 					</>
@@ -600,7 +600,7 @@ function Aside({
 	return (
 		<aside className="grid content-start gap-4 lg:sticky lg:top-24 lg:self-start">
 			<section className="grid gap-2 rounded-2xl border border-border bg-card p-5 text-sm">
-				<p className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest">
+				<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
 					{t("facts")}
 				</p>
 				<dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
@@ -617,7 +617,7 @@ function Aside({
 			</section>
 			{items.length > 0 && (
 				<section className="grid gap-2 rounded-2xl border border-border bg-card p-5 text-sm">
-					<p className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest">
+					<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
 						{t("related")}
 					</p>
 					<ul className="grid gap-2">
