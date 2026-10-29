@@ -17,8 +17,8 @@ const MODERATOR_EMAIL = "e2e.moderator@example.com";
 
 // Pages of the back-office, in the order of the sidebar.
 const MENUS = [
-	{ name: "Tableau de bord", path: "/dashboard" },
-	{ name: "Modération", path: "/admin" },
+	{ name: "Tableau de bord", path: "/admin" },
+	{ name: "Modération", path: "/admin/moderation" },
 	{ name: "Hackathon", path: "/admin/hackathons" },
 	{ name: "Tags", path: "/admin/tags" },
 	{ name: "Web Vitals", path: "/admin/vitals" },
@@ -102,7 +102,7 @@ test.describe("access", () => {
 			[ADMIN_EMAIL, "Admin"],
 		] as const) {
 			const page = await sessionAs(browser, baseURL, email);
-			await page.goto("/dashboard");
+			await page.goto("/admin");
 			await expect(
 				page.getByRole("heading", { name: "Tableau de bord" }),
 			).toBeVisible();
@@ -118,7 +118,7 @@ test.describe("menus", () => {
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/dashboard");
+		await page.goto("/admin");
 		for (const { name, path } of MENUS) {
 			await sidebar(page).getByRole("link", { name }).click();
 			await expect(page).toHaveURL(new RegExp(`${path}$`));
@@ -135,7 +135,7 @@ test.describe("menus", () => {
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/dashboard");
+		await page.goto("/admin");
 		const metrics = [
 			"Membres actifs",
 			"Questions posées",
@@ -159,7 +159,7 @@ test.describe("menus", () => {
 
 	test("the sidebar collapses and expands", async ({ browser, baseURL }) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/dashboard");
+		await page.goto("/admin");
 		const shell = page.locator("[data-slot=admin-shell]");
 		await page.getByRole("button", { name: "Réduire le menu" }).click();
 		await expect(shell).toHaveAttribute("data-collapsed", "true");
@@ -175,7 +175,7 @@ test.describe("menus", () => {
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/dashboard");
+		await page.goto("/admin");
 		await accountMenu(page).click();
 		await page.getByRole("menuitemradio", { name: "English" }).click();
 		await expect(
@@ -192,11 +192,11 @@ test.describe("menus", () => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL, {
 			fresh: true,
 		});
-		await page.goto("/dashboard");
+		await page.goto("/admin");
 		await accountMenu(page).click();
 		await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
 		await expect(page).toHaveURL(baseURL ? `${baseURL}/` : "/");
-		await page.goto("/admin");
+		await page.goto("/admin/moderation");
 		await expect(page).toHaveURL(/\/signin/);
 	});
 });
@@ -207,7 +207,7 @@ test.describe("staff badge and account (#286)", () => {
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/dashboard");
+		await page.goto("/admin");
 		await accountMenu(page).click();
 		await expect(page.getByText(ADMIN_EMAIL)).toBeVisible();
 		await page.getByRole("menuitem", { name: "Mon compte" }).click();
@@ -287,7 +287,7 @@ test.describe("staff badge and account (#286)", () => {
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, MODERATOR_EMAIL);
-		await page.goto("/dashboard");
+		await page.goto("/admin");
 		await expect(
 			sidebar(page).getByRole("link", { name: "Équipe" }),
 		).toHaveCount(0);
@@ -314,7 +314,7 @@ test.describe("staff badge and account (#286)", () => {
 
 		// The guest signs in for the first time: the account is created and the offer applied.
 		const page = await sessionAs(browser, baseURL, guest, { fresh: true });
-		await page.goto("/dashboard");
+		await page.goto("/admin");
 		await expect(accountMenu(page)).toContainText("Modérateur");
 	});
 });
@@ -430,7 +430,7 @@ test.describe("moderation", () => {
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/admin");
+		await page.goto("/admin/moderation");
 		await page.getByRole("button", { name: /Awa Seed/ }).click();
 		await expect(page.getByRole("heading", { name: "Awa Seed" })).toBeVisible();
 
@@ -456,7 +456,7 @@ test.describe("moderation", () => {
 			).toBeVisible();
 		} finally {
 			// Leave the seeded Member as found, whatever failed above.
-			await page.goto("/admin");
+			await page.goto("/admin/moderation");
 			await page.getByRole("button", { name: /Awa Seed/ }).click();
 			const reactivate = page.getByRole("button", { name: "Réactiver" });
 			if (await reactivate.isVisible()) {
@@ -481,7 +481,7 @@ test.describe("moderation", () => {
 		// The Admin has to exist: signing in creates the account.
 		await sessionAs(browser, baseURL, ADMIN_EMAIL);
 		const page = await sessionAs(browser, baseURL, MODERATOR_EMAIL);
-		await page.goto("/admin");
+		await page.goto("/admin/moderation");
 		await page.getByLabel("Rechercher un Member").fill(ADMIN_EMAIL);
 		await page.getByRole("button", { name: /e2e/i }).first().click();
 		await expect(page.getByText(/Rang égal ou supérieur/)).toBeVisible();
@@ -495,7 +495,7 @@ test.describe("moderation", () => {
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/admin");
+		await page.goto("/admin/moderation");
 		// The screen opens on the first Member of the list (#291).
 		await expect(page.locator("[data-slot=record-sheet]")).toBeVisible();
 		await page.getByRole("button", { name: "Actifs" }).first().click();
@@ -712,7 +712,7 @@ test.describe("responsive", () => {
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
 		await page.setViewportSize({ width: 375, height: 800 });
-		await page.goto("/dashboard");
+		await page.goto("/admin");
 		await page.getByRole("button", { name: "Menu", exact: true }).click();
 		const sheet = page.getByRole("dialog");
 		await expect(sheet.getByText("Contenu", { exact: true })).toBeVisible();

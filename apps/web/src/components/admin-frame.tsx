@@ -40,7 +40,7 @@ const NAV: {
 	{
 		group: "pilot",
 		key: "dashboard.title",
-		href: "/dashboard",
+		href: "/admin",
 		icon: BarChart3Icon,
 		can: { kpi: ["read"] },
 	},
@@ -68,7 +68,7 @@ const NAV: {
 	{
 		group: "content",
 		key: "moderation.title",
-		href: "/admin",
+		href: "/admin/moderation",
 		icon: ShieldIcon,
 		can: { moderation: ["list"] },
 	},

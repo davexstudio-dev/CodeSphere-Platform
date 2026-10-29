@@ -1561,10 +1561,13 @@ export default function DesignSystemPage() {
 					</Specimen>
 					<Specimen label="Pages complètes">
 						<Link href="/admin" className="text-primary text-sm underline">
-							/admin (modération)
+							/admin (tableau de bord)
 						</Link>
-						<Link href="/dashboard" className="text-primary text-sm underline">
-							/dashboard
+						<Link
+							href="/admin/moderation"
+							className="text-primary text-sm underline"
+						>
+							/admin/moderation
 						</Link>
 						<Link
 							href="/admin/audit"

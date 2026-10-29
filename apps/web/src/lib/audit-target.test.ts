@@ -5,8 +5,8 @@ import { auditActionMessageKey, auditTargetPath } from "./audit-target";
 
 describe("auditTargetPath", () => {
 	test("leads each admin target to its screen", () => {
-		expect(auditTargetPath("member", "u1")).toBe("/admin");
-		expect(auditTargetPath("agent", "a1")).toBe("/admin");
+		expect(auditTargetPath("member", "u1")).toBe("/admin/moderation");
+		expect(auditTargetPath("agent", "a1")).toBe("/admin/moderation");
 		expect(auditTargetPath("tag", "t1")).toBe("/admin/tags");
 		expect(auditTargetPath("milestone", "m1")).toBe("/admin/hackathons");
 		expect(auditTargetPath("watch_item", "w1")).toBe("/admin/watch");

@@ -9,12 +9,12 @@ describe("postSignInPath", () => {
 	});
 
 	test("sends an Admin to the back-office", () => {
-		expect(postSignInPath({ role: "admin" })).toBe("/dashboard");
+		expect(postSignInPath({ role: "admin" })).toBe("/admin");
 	});
 
 	test("sends every staff role to the back-office", () => {
-		expect(postSignInPath({ role: "super_admin" })).toBe("/dashboard");
-		expect(postSignInPath({ role: "moderator" })).toBe("/admin");
+		expect(postSignInPath({ role: "super_admin" })).toBe("/admin");
+		expect(postSignInPath({ role: "moderator" })).toBe("/admin/moderation");
 	});
 
 	test("sends any other Member home", () => {

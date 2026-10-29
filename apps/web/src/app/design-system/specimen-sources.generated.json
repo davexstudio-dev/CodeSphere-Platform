@@ -367,7 +367,7 @@
 	},
 	"Pages complètes": {
 		"imports": "import Link from \"@/components/link\";",
-		"jsx": "<Link href=\"/admin\" className=\"text-primary text-sm underline\">\n\t/admin (modération)\n</Link>\n<Link href=\"/dashboard\" className=\"text-primary text-sm underline\">\n\t/dashboard\n</Link>\n<Link\n\thref=\"/admin/audit\"\n\tclassName=\"text-primary text-sm underline\"\n>\n\t/admin/audit\n</Link>\n<Link href=\"/signin\" className=\"text-primary text-sm underline\">\n\t/signin (connexion SSO)\n</Link>",
+		"jsx": "<Link href=\"/admin\" className=\"text-primary text-sm underline\">\n\t/admin (tableau de bord)\n</Link>\n<Link\n\thref=\"/admin/moderation\"\n\tclassName=\"text-primary text-sm underline\"\n>\n\t/admin/moderation\n</Link>\n<Link\n\thref=\"/admin/audit\"\n\tclassName=\"text-primary text-sm underline\"\n>\n\t/admin/audit\n</Link>\n<Link href=\"/signin\" className=\"text-primary text-sm underline\">\n\t/signin (connexion SSO)\n</Link>",
 		"files": []
 	},
 	"MessageScroller": {

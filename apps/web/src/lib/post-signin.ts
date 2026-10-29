@@ -5,8 +5,8 @@ import { isStaffRole } from "@codesphere/contract/roles";
  * The first back-office screen of a staff role (#285): the KPI dashboard for those who read it,
  * moderation for a moderator.
  */
-export function backOfficeHome(role: unknown): "/dashboard" | "/admin" {
-	return roleCan(role, { kpi: ["read"] }) ? "/dashboard" : "/admin";
+export function backOfficeHome(role: unknown): "/admin" | "/admin/moderation" {
+	return roleCan(role, { kpi: ["read"] }) ? "/admin" : "/admin/moderation";
 }
 
 // Where a sign-in lands (#121): staff (admin, super admin, moderator) go to the back-office, any other Member home, and
@@ -14,7 +14,7 @@ export function backOfficeHome(role: unknown): "/dashboard" | "/admin" {
 // in advance, so it always comes through /post-signin, which applies this rule.
 export function postSignInPath(
 	user: { role?: string | null } | null | undefined,
-): "/dashboard" | "/admin" | "/" | "/signin" {
+): "/admin" | "/admin/moderation" | "/" | "/signin" {
 	if (!user) {
 		return "/signin";
 	}
