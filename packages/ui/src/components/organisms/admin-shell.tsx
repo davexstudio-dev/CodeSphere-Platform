@@ -66,21 +66,26 @@ function AdminShell({
 			>
 				<div
 					className={cn(
-						"flex items-start justify-between gap-2",
+						"flex items-center justify-between gap-2 md:items-start",
 						collapsed && "md:flex-col md:items-center",
 					)}
 				>
-					<div className="flex min-w-0 flex-col gap-1.5">
+					{/* On a phone the badge sits beside the logo, so the bar is one row high. */}
+					<div className="flex min-w-0 items-center gap-2 md:flex-col md:items-start md:gap-1.5">
 						<Logo
 							compact={collapsed}
 							size="sm"
 							className="min-w-0 whitespace-nowrap"
 						/>
 						{!collapsed && (
-							<Badge variant="outline" className="ml-9 w-fit">
+							<Badge variant="outline" className="w-fit shrink-0 md:ml-9">
 								Admin
 							</Badge>
 						)}
+					</div>
+					<div className="flex shrink-0 items-center gap-1 md:hidden">
+						<ThemeToggle />
+						{userMenu?.({ collapsed: true })}
 					</div>
 					<button
 						type="button"
@@ -128,7 +133,7 @@ function AdminShell({
 					</ScrollArea>
 				</nav>
 				{userMenu && (
-					<div className="md:border-sidebar-border md:border-t md:pt-3">
+					<div className="hidden border-sidebar-border border-t pt-3 md:block">
 						{userMenu({ collapsed })}
 					</div>
 				)}
@@ -136,18 +141,22 @@ function AdminShell({
 
 			<div className="flex min-w-0 flex-col">
 				{/* Fixed page title and subtitle (#131): the list and the record scroll under it. */}
-				<header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-border border-b bg-background/95 px-4 py-4 backdrop-blur md:px-8">
+				<header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-border border-b bg-background/95 px-4 py-3 backdrop-blur md:px-8 md:py-4">
 					<div className="min-w-0">
-						<h1 className="truncate font-semibold text-xl tracking-tight">
+						<h1 className="truncate font-semibold text-lg tracking-tight md:text-xl">
 							{title}
 						</h1>
 						{description && (
-							<p className="text-muted-foreground text-sm">{description}</p>
+							<p className="line-clamp-2 text-muted-foreground text-xs md:text-sm">
+								{description}
+							</p>
 						)}
 					</div>
 					<div className="flex items-center gap-2">
 						{actions}
-						<ThemeToggle />
+						<span className="hidden md:contents">
+							<ThemeToggle />
+						</span>
 					</div>
 				</header>
 				<main className="flex flex-col gap-6 p-4 md:p-8">{children}</main>
