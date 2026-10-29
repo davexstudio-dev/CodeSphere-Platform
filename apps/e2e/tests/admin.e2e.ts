@@ -706,17 +706,20 @@ test.describe("responsive", () => {
 		expect(record?.width ?? 0).toBeGreaterThan(200);
 	});
 
-	test("on a phone the menu is a scrolling bar and the logo stays round", async ({
+	test("on a phone the menu opens in a sheet, closes on a link, and the logo stays round", async ({
 		browser,
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
 		await page.setViewportSize({ width: 375, height: 800 });
 		await page.goto("/dashboard");
-		await expect(
-			sidebar(page).getByRole("link", { name: "Tableau de bord" }),
-		).toBeVisible();
-		const mark = page.locator("[data-slot=logo] > span").first();
+		await page.getByRole("button", { name: "Menu", exact: true }).click();
+		const sheet = page.getByRole("dialog");
+		await expect(sheet.getByText("Contenu", { exact: true })).toBeVisible();
+		await sheet.getByRole("link", { name: "Tags" }).click();
+		await expect(page).toHaveURL(/\/admin\/tags$/);
+		await expect(sheet).toBeHidden();
+		const mark = page.locator("[data-slot=logo] > span:visible").first();
 		const size = await mark.boundingBox();
 		expect(size?.width).toBeCloseTo(size?.height ?? 0, 0);
 	});

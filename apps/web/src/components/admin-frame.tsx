@@ -31,82 +31,95 @@ import Link from "@/components/link";
 // Each screen with the permission its procedures require (#285): the same access control the API
 // enforces, so a moderator sees only what they can use.
 const NAV: {
+	group: "pilot" | "content" | "community" | "team";
 	key: string;
 	href: string;
 	icon: typeof ShieldIcon;
 	can: Permissions;
 }[] = [
 	{
+		group: "pilot",
 		key: "dashboard.title",
 		href: "/dashboard",
 		icon: BarChart3Icon,
 		can: { kpi: ["read"] },
 	},
 	{
-		key: "moderation.title",
-		href: "/admin",
-		icon: ShieldIcon,
-		can: { moderation: ["list"] },
-	},
-	{
-		key: "hackathons.title",
-		href: "/admin/hackathons",
-		icon: TrophyIcon,
-		can: { hackathon: ["update"] },
-	},
-	{
-		key: "tags.title",
-		href: "/admin/tags",
-		icon: TagIcon,
-		can: { tag: ["list"] },
-	},
-	{
-		key: "organizations.title",
-		href: "/admin/organizations",
-		icon: BuildingIcon,
-		can: { organization: ["manage"] },
-	},
-	{
-		key: "jobs.title",
-		href: "/admin/jobs",
-		icon: BriefcaseIcon,
-		can: { job: ["manage"] },
-	},
-	{
-		key: "watch.title",
-		href: "/admin/watch",
-		icon: RssIcon,
-		can: { watch: ["manage"] },
-	},
-	{
-		key: "social.title",
-		href: "/admin/social",
-		icon: ShareIcon,
-		can: { social: ["manage"] },
-	},
-	{
+		group: "pilot",
 		key: "vitals.title",
 		href: "/admin/vitals",
 		icon: GaugeIcon,
 		can: { kpi: ["read"] },
 	},
 	{
+		group: "pilot",
 		key: "reputation.title",
 		href: "/admin/reputation",
 		icon: ScaleIcon,
 		can: { moderation: ["list"] },
 	},
 	{
+		group: "pilot",
 		key: "audit.title",
 		href: "/admin/audit",
 		icon: ScrollTextIcon,
 		can: { audit: ["read"] },
 	},
 	{
+		group: "content",
+		key: "moderation.title",
+		href: "/admin",
+		icon: ShieldIcon,
+		can: { moderation: ["list"] },
+	},
+	{
+		group: "content",
+		key: "tags.title",
+		href: "/admin/tags",
+		icon: TagIcon,
+		can: { tag: ["list"] },
+	},
+	{
+		group: "content",
+		key: "watch.title",
+		href: "/admin/watch",
+		icon: RssIcon,
+		can: { watch: ["manage"] },
+	},
+	{
+		group: "community",
+		key: "hackathons.title",
+		href: "/admin/hackathons",
+		icon: TrophyIcon,
+		can: { hackathon: ["update"] },
+	},
+	{
+		group: "community",
+		key: "organizations.title",
+		href: "/admin/organizations",
+		icon: BuildingIcon,
+		can: { organization: ["manage"] },
+	},
+	{
+		group: "community",
+		key: "jobs.title",
+		href: "/admin/jobs",
+		icon: BriefcaseIcon,
+		can: { job: ["manage"] },
+	},
+	{
+		group: "team",
 		key: "staff.title",
 		href: "/admin/staff",
 		icon: UsersIcon,
 		can: { staff: ["list"] },
+	},
+	{
+		group: "team",
+		key: "social.title",
+		href: "/admin/social",
+		icon: ShareIcon,
+		can: { social: ["manage"] },
 	},
 ];
 
@@ -147,13 +160,15 @@ export default function AdminFrame({
 			LinkComponent={Link}
 			userMenu={({ collapsed }) => <AdminAccountMenu compact={collapsed} />}
 			nav={NAV.filter((item) => roleCan(identity?.role, item.can)).map(
-				({ key, can: _can, ...item }) => ({
+				({ key, can: _can, group, ...item }) => ({
 					...item,
+					group: t(`navGroups.${group}`),
 					label: t(key),
 					active: pathname === item.href,
 				}),
 			)}
 			actions={actions}
+			menuLabel={t("navGroups.menu")}
 		>
 			{allowed ? (
 				children

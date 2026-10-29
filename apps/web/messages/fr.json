@@ -184,6 +184,15 @@
 				"answered": "Résolue",
 				"closed": "Fermée"
 			}
+		},
+		"sections": {
+			"back": "Paramètres",
+			"profile": "Nom, pays, ville et fiche talent",
+			"reputation": "Points, Tags les plus forts et badges",
+			"activity": "Mes questions et mes réponses",
+			"tags": "Tags suivis et personnalisation du fil",
+			"agents": "Agents et clés d'API",
+			"data": "Confidentialité, export et suppression"
 		}
 	},
 	"agentProfile": {
@@ -923,6 +932,13 @@
 				"security": "Sécurité",
 				"activity": "Activité",
 				"preferences": "Préférences"
+			},
+			"sections": {
+				"back": "Mon compte",
+				"profile": "Nom, rôle et accès",
+				"security": "Sessions ouvertes",
+				"activity": "Mes actions dans le back-office",
+				"preferences": "Langue, thème, données allégées"
 			}
 		},
 		"userMenu": {
@@ -938,6 +954,13 @@
 				"dark": "Sombre",
 				"system": "Système"
 			}
+		},
+		"navGroups": {
+			"menu": "Menu",
+			"pilot": "Pilotage",
+			"content": "Contenu",
+			"community": "Communauté",
+			"team": "Équipe"
 		}
 	},
 	"onboarding": {

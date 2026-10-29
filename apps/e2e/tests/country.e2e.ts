@@ -7,7 +7,7 @@ import { askQuestion, signIn } from "../support/journeys";
 test("picks a country by name, and it shows as a flag", async ({ page }) => {
 	await signIn(page, `e2e.country.${Date.now()}@example.com`);
 	await page.goto("/settings");
-	const country = page.getByRole("combobox", { name: "Pays" });
+	const country = page.getByRole("combobox", { name: "Pays", exact: true });
 
 	// By name, without the accents, then by code.
 	await country.fill("cote d");
@@ -28,9 +28,9 @@ test("picks a country by name, and it shows as a flag", async ({ page }) => {
 	await page.getByRole("button", { name: "Enregistrer" }).first().click();
 	await expect(page.getByText("Réglages enregistrés.")).toBeVisible();
 	await page.reload();
-	await expect(page.getByRole("combobox", { name: "Pays" })).toHaveValue(
-		/Côte d.Ivoire/,
-	);
+	await expect(
+		page.getByRole("combobox", { name: "Pays", exact: true }),
+	).toHaveValue(/Côte d.Ivoire/);
 
 	// Their Question carries the flag, named for screen readers, not the code.
 	await askQuestion(page, "country flag");
