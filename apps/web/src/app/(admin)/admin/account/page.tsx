@@ -5,7 +5,10 @@ import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { InitialsAvatar } from "@codesphere/ui/components/atoms/initials-avatar";
 import { Input } from "@codesphere/ui/components/atoms/input";
-import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
+import {
+	SectionBack,
+	SectionList,
+} from "@codesphere/ui/components/molecules/section-list";
 import { SegmentedControl } from "@codesphere/ui/components/molecules/segmented-control";
 import {
 	Tabs,
@@ -17,6 +20,7 @@ import {
 	RecordFields,
 	RecordSection,
 } from "@codesphere/ui/components/organisms/record-sheet";
+import { cn } from "@codesphere/ui/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	BadgeCheckIcon,
@@ -28,7 +32,7 @@ import {
 	UserIcon,
 } from "lucide-react";
 import type { Route } from "next";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useState } from "react";
@@ -46,6 +50,17 @@ import { orpc } from "@/utils/orpc";
 
 const NAME_MAX = 80;
 
+const SECTIONS = [
+	{ key: "profile", icon: UserIcon },
+	{ key: "security", icon: ShieldCheckIcon },
+	{ key: "activity", icon: HistoryIcon },
+	{ key: "preferences", icon: SlidersHorizontalIcon },
+] as const;
+type Section = (typeof SECTIONS)[number]["key"];
+
+const isSection = (value: string | null): value is Section =>
+	SECTIONS.some((section) => section.key === value);
+
 /** « Mon compte » (#286): the signed-in staff member's profile, preferences, sessions and recent activity. */
 export default function AccountPage() {
 	const t = useTranslations("admin.account");
@@ -59,6 +74,16 @@ export default function AccountPage() {
 		identity?.role === "moderator"
 			? identity.role
 			: "member";
+	const router = useRouter();
+	const requested = useSearchParams().get("tab");
+	// In the address (?tab=security): a link opens the right section, and « Retour » goes back.
+	const opened = isSection(requested);
+	const tab: Section = opened ? requested : "profile";
+	const select = (next: unknown) => {
+		if (isSection(next as string)) {
+			router.replace(`/admin/account?tab=${next as string}`, { scroll: false });
+		}
+	};
 	const day = new Intl.DateTimeFormat(locale, { dateStyle: "long" });
 	const moment = new Intl.DateTimeFormat(locale, {
 		dateStyle: "medium",
@@ -68,7 +93,12 @@ export default function AccountPage() {
 	return (
 		<AdminFrame title={t("title")} description={t("description")}>
 			<div className="flex flex-col gap-6">
-				<section className="flex flex-col gap-4 rounded-xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-4 sm:flex-row sm:items-center sm:gap-5 md:p-6">
+				<section
+					className={cn(
+						opened && "max-md:hidden",
+						"flex flex-col gap-4 rounded-xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-4 sm:flex-row sm:items-center sm:gap-5 md:p-6",
+					)}
+				>
 					<div className="flex items-center gap-3 sm:contents">
 						<InitialsAvatar name={identity?.name ?? ""} size="xl" ringed />
 						{/* On a phone the name and the role sit beside the avatar; the details go below. */}
@@ -118,28 +148,40 @@ export default function AccountPage() {
 					</div>
 				</section>
 				{/* One tab per section, so the page stays one screen high; the profile tab is a bento of
-				    the form and the access. */}
-				<Tabs defaultValue="profile" className="gap-6">
-					<ScrollArea orientation="horizontal" className="w-full min-w-0">
-						<TabsList className="mb-3">
-							<TabsTrigger value="profile">
-								<UserIcon />
-								{t("tabs.profile")}
+				    the form and the access. On a phone the tabs become a list of sections. */}
+				{opened ? (
+					<SectionBack
+						href="/admin/account"
+						label={t("sections.back")}
+						LinkComponent={Link}
+						className="-mb-2 md:hidden"
+					/>
+				) : (
+					<SectionList
+						className="md:hidden"
+						LinkComponent={Link}
+						entries={SECTIONS.map(({ key, icon }) => ({
+							key,
+							icon,
+							label: t(`tabs.${key}`),
+							description: t(`sections.${key}`),
+							href: `/admin/account?tab=${key}`,
+						}))}
+					/>
+				)}
+				<Tabs
+					value={tab}
+					onValueChange={select}
+					className={cn("gap-6", !opened && "max-md:hidden")}
+				>
+					<TabsList className="max-md:hidden">
+						{SECTIONS.map(({ key, icon: Icon }) => (
+							<TabsTrigger key={key} value={key}>
+								<Icon />
+								{t(`tabs.${key}`)}
 							</TabsTrigger>
-							<TabsTrigger value="security">
-								<ShieldCheckIcon />
-								{t("tabs.security")}
-							</TabsTrigger>
-							<TabsTrigger value="activity">
-								<HistoryIcon />
-								{t("tabs.activity")}
-							</TabsTrigger>
-							<TabsTrigger value="preferences">
-								<SlidersHorizontalIcon />
-								{t("tabs.preferences")}
-							</TabsTrigger>
-						</TabsList>
-					</ScrollArea>
+						))}
+					</TabsList>
 					<TabsContent value="profile">
 						<div className="grid items-start gap-6 xl:grid-cols-3">
 							<ProfileForm className="xl:col-span-2" />

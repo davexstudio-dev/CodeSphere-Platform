@@ -184,6 +184,15 @@
 				"answered": "Solved",
 				"closed": "Closed"
 			}
+		},
+		"sections": {
+			"back": "Settings",
+			"profile": "Name, country, city and talent card",
+			"reputation": "Points, strongest Tags and badges",
+			"activity": "My questions and answers",
+			"tags": "Followed Tags and feed tuning",
+			"agents": "Agents and API keys",
+			"data": "Privacy, export and deletion"
 		}
 	},
 	"agentProfile": {
@@ -923,6 +932,13 @@
 				"security": "Security",
 				"activity": "Activity",
 				"preferences": "Preferences"
+			},
+			"sections": {
+				"back": "My account",
+				"profile": "Name, role and access",
+				"security": "Open sessions",
+				"activity": "My actions in the back office",
+				"preferences": "Language, theme, data saver"
 			}
 		},
 		"userMenu": {
@@ -938,6 +954,13 @@
 				"dark": "Dark",
 				"system": "System"
 			}
+		},
+		"navGroups": {
+			"menu": "Menu",
+			"pilot": "Insights",
+			"content": "Content",
+			"community": "Community",
+			"team": "Team"
 		}
 	},
 	"onboarding": {

@@ -6,7 +6,10 @@ import { Input } from "@codesphere/ui/components/atoms/input";
 import { Skeleton } from "@codesphere/ui/components/atoms/skeleton";
 import { Switch } from "@codesphere/ui/components/atoms/switch";
 import { Field } from "@codesphere/ui/components/molecules/field";
-import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
+import {
+	SectionBack,
+	SectionList,
+} from "@codesphere/ui/components/molecules/section-list";
 import {
 	SettingRow,
 	SettingsSection,
@@ -17,6 +20,7 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "@codesphere/ui/components/molecules/tabs";
+import { cn } from "@codesphere/ui/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	AwardIcon,
@@ -482,6 +486,7 @@ export default function SettingsPage() {
 	const requested = params.get("tab");
 	// In the address (?tab=tags): a link opens the right tab, and reloading keeps it.
 	const tab: SettingsTab = isTab(requested) ? requested : "profile";
+	const opened = isTab(requested);
 	const select = (next: unknown) => {
 		if (isTab(next as string)) {
 			router.replace(`/settings?tab=${next as string}`, { scroll: false });
@@ -496,68 +501,85 @@ export default function SettingsPage() {
 				onValueChange={select}
 				className="grid gap-6 lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start lg:gap-8"
 			>
-				{/* The sidebar: who you are, then the tabs. On a phone it is a card and a row of tabs
-				    that scrolls sideways, pinned under the site bar; from lg a column that stays put
-				    beside the panel. The sticky element is this plain block, never the ScrollArea. */}
-				<aside className="sticky top-16 z-10 -mx-4 flex flex-col gap-3 bg-background/95 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6 lg:top-22 lg:mx-0 lg:gap-4 lg:self-start lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
-					<div className="max-lg:hidden">
-						<ProfileHeader />
-					</div>
-					<ScrollArea orientation="horizontal" className="w-full">
-						<TabsList layout="sidebar" className="w-max">
-							{TABS.map(({ key, icon: Icon }) => (
-								<TabsTrigger key={key} value={key} layout="sidebar">
-									<Icon className="size-4" />
-									{t(`tabs.${key}`)}
-								</TabsTrigger>
-							))}
-						</TabsList>
-					</ScrollArea>
+				{/* From lg, the sidebar: who you are, then the tabs, in a column that stays put beside
+				    the panel. On a phone the tabs become a list of sections (below). */}
+				<aside className="sticky top-22 z-10 flex flex-col gap-4 self-start max-lg:hidden">
+					<ProfileHeader />
+					<TabsList layout="sidebar" className="w-max">
+						{TABS.map(({ key, icon: Icon }) => (
+							<TabsTrigger key={key} value={key} layout="sidebar">
+								<Icon className="size-4" />
+								{t(`tabs.${key}`)}
+							</TabsTrigger>
+						))}
+					</TabsList>
 				</aside>
 				<div className="min-w-0">
-					<div className="mb-6 lg:hidden">
-						<ProfileHeader />
+					{/* Phone: the list of sections, or the open one under a « Retour » link. */}
+					{opened ? (
+						<SectionBack
+							href="/settings"
+							label={t("sections.back")}
+							LinkComponent={Link}
+							className="mb-4 lg:hidden"
+						/>
+					) : (
+						<div className="flex flex-col gap-6 lg:hidden">
+							<ProfileHeader />
+							<SectionList
+								LinkComponent={Link}
+								entries={TABS.map(({ key, icon }) => ({
+									key,
+									icon,
+									label: t(`tabs.${key}`),
+									description: t(`sections.${key}`),
+									href: `/settings?tab=${key}`,
+								}))}
+							/>
+						</div>
+					)}
+					<div className={cn(!opened && "max-lg:hidden")}>
+						<TabsContent value="profile" className="flex flex-col gap-6">
+							<ProfileForm />
+							<TalentCardSection />
+						</TabsContent>
+						<TabsContent value="reputation">
+							<ReputationPanel />
+						</TabsContent>
+						<TabsContent value="activity">
+							<ActivityPanel />
+						</TabsContent>
+						{/* Outside the profile form: each has its own actions, and forms do not nest. */}
+						<TabsContent value="tags" className="flex flex-col gap-6">
+							<TagsSection />
+							<FeedPersonalization />
+							<SettingsSection title={t("preferences.title")}>
+								<ProfileSwitch
+									field="hideAgentContent"
+									title={t("preferences.hideAgentContent")}
+									description={t("preferences.hideAgentContentHint")}
+								/>
+							</SettingsSection>
+						</TabsContent>
+						<TabsContent value="agents">
+							<AgentsSection />
+						</TabsContent>
+						<TabsContent value="data" className="flex flex-col gap-6">
+							<SettingsSection title={t("privacy.title")}>
+								<ProfileSwitch
+									field="cityPublic"
+									title={t("privacy.cityPublic")}
+									description={t("privacy.cityPublicHint")}
+								/>
+							</SettingsSection>
+							<SettingsSection
+								title={t("privacy.dataTitle")}
+								description={t("privacy.dataDescription")}
+							>
+								<PrivacyActions />
+							</SettingsSection>
+						</TabsContent>
 					</div>
-					<TabsContent value="profile" className="flex flex-col gap-6">
-						<ProfileForm />
-						<TalentCardSection />
-					</TabsContent>
-					<TabsContent value="reputation">
-						<ReputationPanel />
-					</TabsContent>
-					<TabsContent value="activity">
-						<ActivityPanel />
-					</TabsContent>
-					{/* Outside the profile form: each has its own actions, and forms do not nest. */}
-					<TabsContent value="tags" className="flex flex-col gap-6">
-						<TagsSection />
-						<FeedPersonalization />
-						<SettingsSection title={t("preferences.title")}>
-							<ProfileSwitch
-								field="hideAgentContent"
-								title={t("preferences.hideAgentContent")}
-								description={t("preferences.hideAgentContentHint")}
-							/>
-						</SettingsSection>
-					</TabsContent>
-					<TabsContent value="agents">
-						<AgentsSection />
-					</TabsContent>
-					<TabsContent value="data" className="flex flex-col gap-6">
-						<SettingsSection title={t("privacy.title")}>
-							<ProfileSwitch
-								field="cityPublic"
-								title={t("privacy.cityPublic")}
-								description={t("privacy.cityPublicHint")}
-							/>
-						</SettingsSection>
-						<SettingsSection
-							title={t("privacy.dataTitle")}
-							description={t("privacy.dataDescription")}
-						>
-							<PrivacyActions />
-						</SettingsSection>
-					</TabsContent>
 				</div>
 			</Tabs>
 		</main>
