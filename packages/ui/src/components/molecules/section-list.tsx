@@ -3,7 +3,6 @@ import {
 	ItemActions,
 	ItemContent,
 	ItemDescription,
-	ItemGroup,
 	ItemMedia,
 	ItemTitle,
 } from "@codesphere/ui/components/molecules/item";
@@ -36,16 +35,15 @@ function SectionList({
 }: SectionListProps) {
 	const Link = LinkComponent;
 	return (
-		<ItemGroup
+		<ul
 			data-slot="section-list"
 			className={cn(
-				"gap-0 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card",
+				"flex flex-col divide-y divide-border overflow-hidden rounded-xl border border-border bg-card",
 				className,
 			)}
 		>
 			{entries.map(({ key, label, description, icon: Icon, href }) => (
-				// The row is a link: the list item is its wrapper, so the link keeps its role.
-				<div key={key} role="listitem">
+				<li key={key}>
 					<Item
 						size="sm"
 						className="rounded-none px-4 py-3.5"
@@ -72,9 +70,9 @@ function SectionList({
 							/>
 						</ItemActions>
 					</Item>
-				</div>
+				</li>
 			))}
-		</ItemGroup>
+		</ul>
 	);
 }
 
