@@ -7,14 +7,15 @@ import {
 	AlertDescription,
 	AlertTitle,
 } from "@codesphere/ui/components/molecules/alert";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@codesphere/ui/components/molecules/card";
 import { ConfirmTwoStep } from "@codesphere/ui/components/molecules/confirm-two-step";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@codesphere/ui/components/molecules/table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -65,6 +66,8 @@ function SocialAccounts() {
 	);
 
 	const accounts = status.data?.accounts ?? [];
+	// Bluesky publishes from the deployment's secrets: nothing to connect, only to know (#324).
+	const bluesky = status.data?.platforms.includes("bluesky") ?? false;
 	return (
 		<AdminFrame title={t("title")} description={t("description")}>
 			{status.isError && (
@@ -94,91 +97,120 @@ function SocialAccounts() {
 			{status.isSuccess && accounts.length === 0 && (
 				<p className="text-muted-foreground text-sm">{t("notSetUp")}</p>
 			)}
-			<div className="grid gap-4 md:grid-cols-2">
-				{accounts.map((account) => {
-					const state = accountState(account);
-					const platform = account.platform as Platform;
-					return (
-						<Card key={platform}>
-							<CardHeader>
-								<CardTitle>
-									<span className="flex items-center gap-2">
-										{t(`platforms.${platform}`)}
-										<Badge
-											variant={
-												state === "reconnect-required"
-													? "destructive"
-													: state === "connected"
-														? "default"
-														: "secondary"
-											}
-										>
-											{t(`state.${state}`)}
-										</Badge>
-									</span>
-								</CardTitle>
-								<CardDescription>
-									{account.accountName ?? t(`hint.${state}`)}
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-3">
-								{account.connected && (
-									<dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-										<dt className="text-muted-foreground">{t("expires")}</dt>
-										<dd>
-											{account.expiresAt
-												? dateFormat.format(new Date(account.expiresAt))
-												: t("noExpiry")}
-											{isExpired(account.expiresAt) &&
-												state === "connected" &&
-												` · ${t("renewsOnNextPost")}`}
-										</dd>
-										{account.connectedAt && (
-											<>
-												<dt className="text-muted-foreground">
-													{t("connectedAt")}
-												</dt>
-												<dd>
+			{(accounts.length > 0 || bluesky) && (
+				<div className="rounded-xl border bg-card">
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead>{t("table.account")}</TableHead>
+								<TableHead>{t("table.state")}</TableHead>
+								<TableHead>{t("table.details")}</TableHead>
+								<TableHead className="text-right">
+									{t("table.actions")}
+								</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{accounts.map((account) => {
+								const state = accountState(account);
+								const platform = account.platform as Platform;
+								return (
+									<TableRow key={platform}>
+										<TableCell className="whitespace-normal">
+											<span className="block font-medium">
+												{t(`platforms.${platform}`)}
+											</span>
+											<span className="text-muted-foreground text-xs">
+												{account.accountName ?? t(`hint.${state}`)}
+											</span>
+										</TableCell>
+										<TableCell>
+											<Badge
+												variant={
+													state === "reconnect-required"
+														? "destructive"
+														: state === "connected"
+															? "default"
+															: "secondary"
+												}
+											>
+												{t(`state.${state}`)}
+											</Badge>
+										</TableCell>
+										<TableCell className="whitespace-normal text-xs">
+											{state === "reconnect-required" && (
+												<p className="text-destructive">
+													{t("hint.reconnect-required")}
+												</p>
+											)}
+											{account.connected && (
+												<p>
+													{t("expires")} :{" "}
+													{account.expiresAt
+														? dateFormat.format(new Date(account.expiresAt))
+														: t("noExpiry")}
+													{isExpired(account.expiresAt) &&
+														state === "connected" &&
+														` · ${t("renewsOnNextPost")}`}
+												</p>
+											)}
+											{account.connectedAt && (
+												<p className="text-muted-foreground">
+													{t("connectedAt")} :{" "}
 													{dateFormat.format(new Date(account.connectedAt))}
-												</dd>
-											</>
-										)}
-									</dl>
-								)}
-								{state === "reconnect-required" && (
-									<p className="text-destructive text-sm">
-										{t("hint.reconnect-required")}
-									</p>
-								)}
-								<div className="flex flex-wrap gap-2">
-									{state !== "not-configured" && (
-										<Button
-											variant={
-												state === "reconnect-required" ? "default" : "outline"
-											}
-											disabled={connect.isPending}
-											onClick={() => {
-												setError(null);
-												connect.mutate({ platform });
-											}}
-										>
-											{account.connected ? t("reconnect") : t("connect")}
-										</Button>
-									)}
-									{account.connected && (
-										<ConfirmTwoStep
-											label={t("disconnect")}
-											confirmLabel={(seconds) => tc("confirm", { seconds })}
-											cancelLabel={tc("cancel")}
-											onConfirm={() => disconnect.mutate({ platform })}
-										/>
-									)}
-								</div>
-							</CardContent>
-						</Card>
-					);
-				})}
-			</div>
+												</p>
+											)}
+										</TableCell>
+										<TableCell>
+											<div className="flex flex-wrap justify-end gap-2">
+												{state !== "not-configured" && (
+													<Button
+														size="sm"
+														variant={
+															state === "connected" ? "outline" : "default"
+														}
+														disabled={connect.isPending}
+														onClick={() => {
+															setError(null);
+															connect.mutate({ platform });
+														}}
+													>
+														{account.connected ? t("reconnect") : t("connect")}
+													</Button>
+												)}
+												{account.connected && (
+													<ConfirmTwoStep
+														label={t("disconnect")}
+														confirmLabel={(seconds) =>
+															tc("confirm", { seconds })
+														}
+														cancelLabel={tc("cancel")}
+														onConfirm={() => disconnect.mutate({ platform })}
+													/>
+												)}
+											</div>
+										</TableCell>
+									</TableRow>
+								);
+							})}
+							{bluesky && (
+								<TableRow>
+									<TableCell className="font-medium">
+										{t("platforms.bluesky")}
+									</TableCell>
+									<TableCell>
+										<Badge variant="secondary">{t("bySecret")}</Badge>
+									</TableCell>
+									<TableCell className="whitespace-normal text-muted-foreground text-xs">
+										{t("bySecretHint")}
+									</TableCell>
+									<TableCell />
+								</TableRow>
+							)}
+						</TableBody>
+					</Table>
+				</div>
+			)}
 		</AdminFrame>
 	);
 }

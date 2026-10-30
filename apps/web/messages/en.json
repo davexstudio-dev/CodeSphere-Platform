@@ -485,6 +485,14 @@
 		"social": {
 			"title": "Social accounts",
 			"description": "Connect CodeSphere's official X and LinkedIn accounts. Tokens are stored encrypted and renewed before they expire.",
+			"table": {
+				"account": "Account",
+				"state": "State",
+				"details": "Details",
+				"actions": "Actions"
+			},
+			"bySecret": "By secret",
+			"bySecretHint": "Publishes with the deployment's secrets: nothing to connect.",
 			"callbackDescription": "Finishing the connection…",
 			"finishing": "Finishing the connection…",
 			"back": "Back to social accounts",
@@ -493,7 +501,8 @@
 			"notSetUp": "No OAuth application is set up on this deployment (see SOCIAL_CREDENTIALS_SECRET, X_CLIENT_ID, LINKEDIN_CLIENT_ID).",
 			"platforms": {
 				"x": "X",
-				"linkedin": "LinkedIn"
+				"linkedin": "LinkedIn",
+				"bluesky": "Bluesky"
 			},
 			"state": {
 				"not-configured": "Not set up",
@@ -668,6 +677,10 @@
 		"watch": {
 			"title": "Watch",
 			"description": "Trusted Sources, proposals and reports, blocked domains.",
+			"stats": {
+				"sources": "Active sources",
+				"errors": "Feeds in error"
+			},
 			"errors": {
 				"forbidden": "Action refused.",
 				"conflict": "This already exists.",
@@ -748,6 +761,10 @@
 		"jobs": {
 			"title": "Jobs",
 			"description": "Reported postings. A founded report removes the posting; two suspend the Organization.",
+			"stats": {
+				"jobs": "Reported postings",
+				"reports": "Reports"
+			},
 			"none": "No reported posting.",
 			"reports": "{count, plural, one {# report} other {# reports}}",
 			"uphold": "Founded: remove",
