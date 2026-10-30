@@ -60,11 +60,7 @@
 					},
 					"data": {}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message"
-				]
+				"required": ["defined", "code", "message"]
 			},
 			"BadRequest": {
 				"title": "BAD_REQUEST",
@@ -90,36 +86,23 @@
 										"path": {
 											"type": "array",
 											"items": {
-												"type": [
-													"string",
-													"number"
-												]
+												"type": ["string", "number"]
 											}
 										},
 										"message": {
 											"type": "string"
 										}
 									},
-									"required": [
-										"path",
-										"message"
-									],
+									"required": ["path", "message"],
 									"additionalProperties": false
 								}
 							}
 						},
-						"required": [
-							"issues"
-						],
+						"required": ["issues"],
 						"additionalProperties": false
 					}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message",
-					"data"
-				]
+				"required": ["defined", "code", "message", "data"]
 			},
 			"InternalServerError": {
 				"title": "INTERNAL_SERVER_ERROR",
@@ -144,18 +127,11 @@
 								"type": "string"
 							}
 						},
-						"required": [
-							"requestId"
-						],
+						"required": ["requestId"],
 						"additionalProperties": false
 					}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message",
-					"data"
-				]
+				"required": ["defined", "code", "message", "data"]
 			},
 			"TooManyRequests": {
 				"title": "TOO_MANY_REQUESTS",
@@ -177,18 +153,11 @@
 								"type": "number"
 							}
 						},
-						"required": [
-							"retryAfter"
-						],
+						"required": ["retryAfter"],
 						"additionalProperties": false
 					}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message",
-					"data"
-				]
+				"required": ["defined", "code", "message", "data"]
 			},
 			"ServiceUnavailable": {
 				"title": "SERVICE_UNAVAILABLE",
@@ -205,11 +174,7 @@
 					},
 					"data": {}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message"
-				]
+				"required": ["defined", "code", "message"]
 			},
 			"Unauthorized": {
 				"title": "UNAUTHORIZED",
@@ -226,11 +191,7 @@
 					},
 					"data": {}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message"
-				]
+				"required": ["defined", "code", "message"]
 			},
 			"Forbidden": {
 				"title": "FORBIDDEN",
@@ -247,11 +208,7 @@
 					},
 					"data": {}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message"
-				]
+				"required": ["defined", "code", "message"]
 			},
 			"NotFound": {
 				"title": "NOT_FOUND",
@@ -268,11 +225,7 @@
 					},
 					"data": {}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message"
-				]
+				"required": ["defined", "code", "message"]
 			},
 			"Conflict": {
 				"title": "CONFLICT",
@@ -294,18 +247,11 @@
 								"type": "number"
 							}
 						},
-						"required": [
-							"version"
-						],
+						"required": ["version"],
 						"additionalProperties": false
 					}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message",
-					"data"
-				]
+				"required": ["defined", "code", "message", "data"]
 			},
 			"AgentCreationBlocked": {
 				"title": "AGENT_CREATION_BLOCKED",
@@ -329,18 +275,11 @@
 								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
 							}
 						},
-						"required": [
-							"until"
-						],
+						"required": ["until"],
 						"additionalProperties": false
 					}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message",
-					"data"
-				]
+				"required": ["defined", "code", "message", "data"]
 			},
 			"Conflict2": {
 				"title": "CONFLICT",
@@ -357,11 +296,7 @@
 					},
 					"data": {}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message"
-				]
+				"required": ["defined", "code", "message"]
 			},
 			"Conflict3": {
 				"title": "CONFLICT",
@@ -395,12 +330,7 @@
 						"additionalProperties": false
 					}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message",
-					"data"
-				]
+				"required": ["defined", "code", "message", "data"]
 			},
 			"PrivilegeRequired": {
 				"title": "PRIVILEGE_REQUIRED",
@@ -440,20 +370,11 @@
 								"maximum": 9007199254740991
 							}
 						},
-						"required": [
-							"privilege",
-							"required",
-							"current"
-						],
+						"required": ["privilege", "required", "current"],
 						"additionalProperties": false
 					}
 				},
-				"required": [
-					"defined",
-					"code",
-					"message",
-					"data"
-				]
+				"required": ["defined", "code", "message", "data"]
 			}
 		}
 	},
@@ -464,19 +385,14 @@
 				"operationId": "admin.kpi",
 				"summary": "Community KPIs",
 				"description": "Activity over the last 7 or 30 days, with the previous window and a trend: active Members, Questions, answer rate, median time to first answer, unanswered Questions, accepted rate and agent share. Requires a staff role.",
-				"tags": [
-					"admin"
-				],
+				"tags": ["admin"],
 				"parameters": [
 					{
 						"in": "query",
 						"name": "period",
 						"schema": {
 							"type": "string",
-							"enum": [
-								"7d",
-								"30d"
-							]
+							"enum": ["7d", "30d"]
 						},
 						"allowEmptyValue": true,
 						"allowReserved": true,
@@ -493,10 +409,7 @@
 									"properties": {
 										"period": {
 											"type": "string",
-											"enum": [
-												"7d",
-												"30d"
-											]
+											"enum": ["7d", "30d"]
 										},
 										"from": {
 											"type": "string",
@@ -526,43 +439,24 @@
 														]
 													},
 													"value": {
-														"type": [
-															"number",
-															"null"
-														]
+														"type": ["number", "null"]
 													},
 													"previous": {
-														"type": [
-															"number",
-															"null"
-														]
+														"type": ["number", "null"]
 													},
 													"trend": {
 														"type": "array",
 														"items": {
-															"type": [
-																"number",
-																"null"
-															]
+															"type": ["number", "null"]
 														}
 													}
 												},
-												"required": [
-													"id",
-													"value",
-													"previous",
-													"trend"
-												],
+												"required": ["id", "value", "previous", "trend"],
 												"additionalProperties": false
 											}
 										}
 									},
-									"required": [
-										"period",
-										"from",
-										"to",
-										"metrics"
-									],
+									"required": ["period", "from", "to", "metrics"],
 									"additionalProperties": false
 								}
 							}
@@ -676,9 +570,7 @@
 		"/admin/members": {
 			"get": {
 				"operationId": "admin.members.list",
-				"tags": [
-					"admin"
-				],
+				"tags": ["admin"],
 				"parameters": [
 					{
 						"in": "query",
@@ -706,10 +598,7 @@
 						"name": "status",
 						"schema": {
 							"type": "string",
-							"enum": [
-								"active",
-								"suspended"
-							]
+							"enum": ["active", "suspended"]
 						},
 						"allowEmptyValue": true,
 						"allowReserved": true
@@ -747,16 +636,10 @@
 													},
 													"kind": {
 														"type": "string",
-														"enum": [
-															"human",
-															"agent"
-														]
+														"enum": ["human", "agent"]
 													},
 													"ownerId": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"email": {
 														"type": "string"
@@ -788,10 +671,7 @@
 														]
 													},
 													"suspensionReason": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													}
 												},
 												"required": [
@@ -809,16 +689,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -934,9 +808,7 @@
 				"operationId": "admin.webVitals.byCountry",
 				"summary": "Real-user Web Vitals by country",
 				"description": "LCP, INP, CLS, FCP and TTFB measured in visitors' browsers over the last N days, by country: the sample count, the 75th percentile and the share within the good threshold. Aggregated on arrival, no personal data. Requires a staff role.",
-				"tags": [
-					"admin"
-				],
+				"tags": ["admin"],
 				"parameters": [
 					{
 						"in": "query",
@@ -979,13 +851,7 @@
 															"properties": {
 																"metric": {
 																	"type": "string",
-																	"enum": [
-																		"LCP",
-																		"INP",
-																		"CLS",
-																		"FCP",
-																		"TTFB"
-																	]
+																	"enum": ["LCP", "INP", "CLS", "FCP", "TTFB"]
 																},
 																"samples": {
 																	"type": "integer",
@@ -993,16 +859,10 @@
 																	"maximum": 9007199254740991
 																},
 																"p75": {
-																	"type": [
-																		"number",
-																		"null"
-																	]
+																	"type": ["number", "null"]
 																},
 																"p75Above": {
-																	"type": [
-																		"number",
-																		"null"
-																	]
+																	"type": ["number", "null"]
 																},
 																"goodShare": {
 																	"type": "number"
@@ -1019,18 +879,12 @@
 														}
 													}
 												},
-												"required": [
-													"country",
-													"metrics"
-												],
+												"required": ["country", "metrics"],
 												"additionalProperties": false
 											}
 										}
 									},
-									"required": [
-										"days",
-										"countries"
-									],
+									"required": ["days", "countries"],
 									"additionalProperties": false
 								}
 							}
@@ -1146,9 +1000,7 @@
 				"operationId": "admin.auditLog.list",
 				"summary": "List the audit log",
 				"description": "Admin audit log, newest first, filterable by action, actor and target type. Requires a staff role: UNAUTHORIZED without a session, FORBIDDEN without one.",
-				"tags": [
-					"admin"
-				],
+				"tags": ["admin"],
 				"parameters": [
 					{
 						"in": "query",
@@ -1232,10 +1084,7 @@
 														"type": "string"
 													},
 													"actorId": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"action": {
 														"type": "string"
@@ -1244,10 +1093,7 @@
 														"type": "string"
 													},
 													"targetId": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"details": {
 														"anyOf": [
@@ -1297,16 +1143,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -1422,9 +1262,7 @@
 				"operationId": "admin.reputationFlags.list",
 				"summary": "List cancelled Reputation events",
 				"description": "Reputation events the anti-farming rules cancelled, newest first: by default the repeated votes of one voter on one author (repeat_voter). They stay in the journal, voided, and count for nothing. Requires a staff role.",
-				"tags": [
-					"admin"
-				],
+				"tags": ["admin"],
 				"parameters": [
 					{
 						"in": "query",
@@ -1452,11 +1290,7 @@
 						"name": "reason",
 						"schema": {
 							"type": "string",
-							"enum": [
-								"new_account",
-								"repeat_voter",
-								"daily_cap"
-							]
+							"enum": ["new_account", "repeat_voter", "daily_cap"]
 						},
 						"allowEmptyValue": true,
 						"allowReserved": true
@@ -1480,18 +1314,11 @@
 													},
 													"reason": {
 														"type": "string",
-														"enum": [
-															"new_account",
-															"repeat_voter",
-															"daily_cap"
-														]
+														"enum": ["new_account", "repeat_voter", "daily_cap"]
 													},
 													"cause": {
 														"type": "string",
-														"enum": [
-															"vote",
-															"accept"
-														]
+														"enum": ["vote", "accept"]
 													},
 													"points": {
 														"type": "integer",
@@ -1511,10 +1338,7 @@
 																"type": "string"
 															}
 														},
-														"required": [
-															"id",
-															"name"
-														],
+														"required": ["id", "name"],
 														"additionalProperties": false
 													},
 													"author": {
@@ -1527,18 +1351,12 @@
 																"type": "string"
 															}
 														},
-														"required": [
-															"id",
-															"name"
-														],
+														"required": ["id", "name"],
 														"additionalProperties": false
 													},
 													"targetType": {
 														"type": "string",
-														"enum": [
-															"question",
-															"answer"
-														]
+														"enum": ["question", "answer"]
 													},
 													"targetId": {
 														"type": "string"
@@ -1565,16 +1383,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -1690,9 +1502,7 @@
 				"operationId": "admin.hackathons.list",
 				"summary": "List every hackathon",
 				"description": "Every hackathon whatever its status, drafts included, with its number of submissions. Requires a staff role.",
-				"tags": [
-					"admin"
-				],
+				"tags": ["admin"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -1716,22 +1526,14 @@
 														"type": "string"
 													},
 													"organizationSlug": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"summary": {
 														"type": "string"
 													},
 													"status": {
 														"type": "string",
-														"enum": [
-															"draft",
-															"published",
-															"ended",
-															"archived"
-														]
+														"enum": ["draft", "published", "ended", "archived"]
 													},
 													"teamMin": {
 														"type": "integer",
@@ -1790,23 +1592,13 @@
 																	"type": "string"
 																},
 																"amount": {
-																	"type": [
-																		"string",
-																		"null"
-																	]
+																	"type": ["string", "null"]
 																},
 																"conditions": {
-																	"type": [
-																		"string",
-																		"null"
-																	]
+																	"type": ["string", "null"]
 																}
 															},
-															"required": [
-																"label",
-																"amount",
-																"conditions"
-															],
+															"required": ["label", "amount", "conditions"],
 															"additionalProperties": false
 														}
 													},
@@ -1825,18 +1617,10 @@
 																},
 																"scoredBy": {
 																	"type": "string",
-																	"enum": [
-																		"jury",
-																		"public",
-																		"peers"
-																	]
+																	"enum": ["jury", "public", "peers"]
 																}
 															},
-															"required": [
-																"label",
-																"weight",
-																"scoredBy"
-															],
+															"required": ["label", "weight", "scoredBy"],
 															"additionalProperties": false
 														}
 													},
@@ -1845,10 +1629,7 @@
 														"format": "uri"
 													},
 													"sourceNote": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"opensAt": {
 														"anyOf": [
@@ -1905,9 +1686,7 @@
 											}
 										}
 									},
-									"required": [
-										"items"
-									],
+									"required": ["items"],
 									"additionalProperties": false
 								}
 							}
@@ -2055,9 +1834,7 @@
 				"operationId": "admin.hackathons.create",
 				"summary": "Create a hackathon",
 				"description": "Creates a draft listed by a validated Organization. A slug already taken or an Organization that is not validated answers 400. Requires a staff role. Audited.",
-				"tags": [
-					"admin"
-				],
+				"tags": ["admin"],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -2142,22 +1919,14 @@
 											"type": "string"
 										},
 										"organizationSlug": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"summary": {
 											"type": "string"
 										},
 										"status": {
 											"type": "string",
-											"enum": [
-												"draft",
-												"published",
-												"ended",
-												"archived"
-											]
+											"enum": ["draft", "published", "ended", "archived"]
 										},
 										"teamMin": {
 											"type": "integer",
@@ -2198,12 +1967,7 @@
 														]
 													}
 												},
-												"required": [
-													"key",
-													"label",
-													"startsAt",
-													"endsAt"
-												],
+												"required": ["key", "label", "startsAt", "endsAt"],
 												"additionalProperties": false
 											}
 										},
@@ -2216,23 +1980,13 @@
 														"type": "string"
 													},
 													"amount": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"conditions": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													}
 												},
-												"required": [
-													"label",
-													"amount",
-													"conditions"
-												],
+												"required": ["label", "amount", "conditions"],
 												"additionalProperties": false
 											}
 										},
@@ -2251,18 +2005,10 @@
 													},
 													"scoredBy": {
 														"type": "string",
-														"enum": [
-															"jury",
-															"public",
-															"peers"
-														]
+														"enum": ["jury", "public", "peers"]
 													}
 												},
-												"required": [
-													"label",
-													"weight",
-													"scoredBy"
-												],
+												"required": ["label", "weight", "scoredBy"],
 												"additionalProperties": false
 											}
 										},
@@ -2271,10 +2017,7 @@
 											"format": "uri"
 										},
 										"sourceNote": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"opensAt": {
 											"anyOf": [
@@ -2470,9 +2213,7 @@
 				"operationId": "admin.hackathons.advance",
 				"summary": "Move a hackathon to its next status",
 				"description": "draft to published, published to ended, ended to archived; never back. Publishing needs a milestone and criteria totalling 100. expectedVersion must match (409 CONFLICT otherwise). Requires a staff role. Audited.",
-				"tags": [
-					"admin"
-				],
+				"tags": ["admin"],
 				"parameters": [
 					{
 						"in": "path",
@@ -2496,9 +2237,7 @@
 										"maximum": 9007199254740991
 									}
 								},
-								"required": [
-									"expectedVersion"
-								]
+								"required": ["expectedVersion"]
 							}
 						}
 					}
@@ -2521,22 +2260,14 @@
 											"type": "string"
 										},
 										"organizationSlug": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"summary": {
 											"type": "string"
 										},
 										"status": {
 											"type": "string",
-											"enum": [
-												"draft",
-												"published",
-												"ended",
-												"archived"
-											]
+											"enum": ["draft", "published", "ended", "archived"]
 										},
 										"teamMin": {
 											"type": "integer",
@@ -2577,12 +2308,7 @@
 														]
 													}
 												},
-												"required": [
-													"key",
-													"label",
-													"startsAt",
-													"endsAt"
-												],
+												"required": ["key", "label", "startsAt", "endsAt"],
 												"additionalProperties": false
 											}
 										},
@@ -2595,23 +2321,13 @@
 														"type": "string"
 													},
 													"amount": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"conditions": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													}
 												},
-												"required": [
-													"label",
-													"amount",
-													"conditions"
-												],
+												"required": ["label", "amount", "conditions"],
 												"additionalProperties": false
 											}
 										},
@@ -2630,18 +2346,10 @@
 													},
 													"scoredBy": {
 														"type": "string",
-														"enum": [
-															"jury",
-															"public",
-															"peers"
-														]
+														"enum": ["jury", "public", "peers"]
 													}
 												},
-												"required": [
-													"label",
-													"weight",
-													"scoredBy"
-												],
+												"required": ["label", "weight", "scoredBy"],
 												"additionalProperties": false
 											}
 										},
@@ -2650,10 +2358,7 @@
 											"format": "uri"
 										},
 										"sourceNote": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"opensAt": {
 											"anyOf": [
@@ -2849,9 +2554,7 @@
 				"operationId": "admin.hackathons.update",
 				"summary": "Update a hackathon",
 				"description": "Edits a hackathon: its fields and, when given, its milestones, prizes and judging criteria (a list replaces the stored one; criteria weights must total 100). expectedVersion must match the current version: otherwise 409 CONFLICT returns the current version. Requires a staff role. Audited.",
-				"tags": [
-					"admin"
-				],
+				"tags": ["admin"],
 				"parameters": [
 					{
 						"in": "path",
@@ -2966,12 +2669,7 @@
 													]
 												}
 											},
-											"required": [
-												"key",
-												"label",
-												"startsAt",
-												"endsAt"
-											]
+											"required": ["key", "label", "startsAt", "endsAt"]
 										}
 									},
 									"prizes": {
@@ -3008,11 +2706,7 @@
 													]
 												}
 											},
-											"required": [
-												"label",
-												"amount",
-												"conditions"
-											]
+											"required": ["label", "amount", "conditions"]
 										}
 									},
 									"criteria": {
@@ -3033,24 +2727,14 @@
 												},
 												"scoredBy": {
 													"type": "string",
-													"enum": [
-														"jury",
-														"public",
-														"peers"
-													]
+													"enum": ["jury", "public", "peers"]
 												}
 											},
-											"required": [
-												"label",
-												"weight",
-												"scoredBy"
-											]
+											"required": ["label", "weight", "scoredBy"]
 										}
 									}
 								},
-								"required": [
-									"expectedVersion"
-								]
+								"required": ["expectedVersion"]
 							}
 						}
 					}
@@ -3073,22 +2757,14 @@
 											"type": "string"
 										},
 										"organizationSlug": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"summary": {
 											"type": "string"
 										},
 										"status": {
 											"type": "string",
-											"enum": [
-												"draft",
-												"published",
-												"ended",
-												"archived"
-											]
+											"enum": ["draft", "published", "ended", "archived"]
 										},
 										"teamMin": {
 											"type": "integer",
@@ -3129,12 +2805,7 @@
 														]
 													}
 												},
-												"required": [
-													"key",
-													"label",
-													"startsAt",
-													"endsAt"
-												],
+												"required": ["key", "label", "startsAt", "endsAt"],
 												"additionalProperties": false
 											}
 										},
@@ -3147,23 +2818,13 @@
 														"type": "string"
 													},
 													"amount": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"conditions": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													}
 												},
-												"required": [
-													"label",
-													"amount",
-													"conditions"
-												],
+												"required": ["label", "amount", "conditions"],
 												"additionalProperties": false
 											}
 										},
@@ -3182,18 +2843,10 @@
 													},
 													"scoredBy": {
 														"type": "string",
-														"enum": [
-															"jury",
-															"public",
-															"peers"
-														]
+														"enum": ["jury", "public", "peers"]
 													}
 												},
-												"required": [
-													"label",
-													"weight",
-													"scoredBy"
-												],
+												"required": ["label", "weight", "scoredBy"],
 												"additionalProperties": false
 											}
 										},
@@ -3202,10 +2855,7 @@
 											"format": "uri"
 										},
 										"sourceNote": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"opensAt": {
 											"anyOf": [
@@ -3401,9 +3051,7 @@
 				"operationId": "admin.agents.reactivate",
 				"summary": "Bring back a paused agent",
 				"description": "Enables the Agent's key again and ends its pause, however many times it was paused (the Owner can lift only the first pause). Requires a staff role. Audited.",
-				"tags": [
-					"admin"
-				],
+				"tags": ["admin"],
 				"parameters": [
 					{
 						"in": "path",
@@ -3437,9 +3085,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
@@ -3589,9 +3235,7 @@
 				"operationId": "admin.questions.remove",
 				"summary": "Remove a question (moderation)",
 				"description": "Soft-deletes any question, whoever wrote it. expectedVersion must match the current version (409 CONFLICT otherwise). Requires a staff role. Audited.",
-				"tags": [
-					"admin"
-				],
+				"tags": ["admin"],
 				"parameters": [
 					{
 						"in": "path",
@@ -3617,9 +3261,7 @@
 										"maximum": 9007199254740991
 									}
 								},
-								"required": [
-									"expectedVersion"
-								]
+								"required": ["expectedVersion"]
 							}
 						}
 					}
@@ -3636,9 +3278,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
@@ -3788,9 +3428,7 @@
 				"operationId": "agents.list",
 				"summary": "List my agents",
 				"description": "The Agents owned by the caller, deleted ones excluded.",
-				"tags": [
-					"agents"
-				],
+				"tags": ["agents"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -3812,11 +3450,7 @@
 													},
 													"preset": {
 														"type": "string",
-														"enum": [
-															"read",
-															"contribute",
-															"curate"
-														]
+														"enum": ["read", "contribute", "curate"]
 													},
 													"enabled": {
 														"type": "boolean"
@@ -3828,10 +3462,7 @@
 														"type": "boolean"
 													},
 													"keyStart": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"createdAt": {
 														"type": "string",
@@ -3853,9 +3484,7 @@
 											}
 										}
 									},
-									"required": [
-										"items"
-									],
+									"required": ["items"],
 									"additionalProperties": false
 								}
 							}
@@ -3986,9 +3615,7 @@
 				"operationId": "agents.create",
 				"summary": "Create an agent",
 				"description": "Creates an Agent and its key, shown once. At most 3 Agents per Owner (409 CONFLICT). Audited.",
-				"tags": [
-					"agents"
-				],
+				"tags": ["agents"],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -4003,17 +3630,10 @@
 									},
 									"preset": {
 										"type": "string",
-										"enum": [
-											"read",
-											"contribute",
-											"curate"
-										]
+										"enum": ["read", "contribute", "curate"]
 									}
 								},
-								"required": [
-									"name",
-									"preset"
-								]
+								"required": ["name", "preset"]
 							}
 						}
 					}
@@ -4037,11 +3657,7 @@
 												},
 												"preset": {
 													"type": "string",
-													"enum": [
-														"read",
-														"contribute",
-														"curate"
-													]
+													"enum": ["read", "contribute", "curate"]
 												},
 												"enabled": {
 													"type": "boolean"
@@ -4053,10 +3669,7 @@
 													"type": "boolean"
 												},
 												"keyStart": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"createdAt": {
 													"type": "string",
@@ -4080,10 +3693,7 @@
 											"type": "string"
 										}
 									},
-									"required": [
-										"agent",
-										"key"
-									],
+									"required": ["agent", "key"],
 									"additionalProperties": false
 								}
 							}
@@ -4236,9 +3846,7 @@
 				"operationId": "agents.rotateKey",
 				"summary": "Rotate an agent's key",
 				"description": "Replaces the key (the old one stops working) and enables the Agent. The new key is shown once. For an Agent paused automatically (#245) this is how the Owner brings it back, once: after a second pause it is 403 FORBIDDEN and an Admin must reactivate it. Audited.",
-				"tags": [
-					"agents"
-				],
+				"tags": ["agents"],
 				"parameters": [
 					{
 						"in": "path",
@@ -4279,11 +3887,7 @@
 												},
 												"preset": {
 													"type": "string",
-													"enum": [
-														"read",
-														"contribute",
-														"curate"
-													]
+													"enum": ["read", "contribute", "curate"]
 												},
 												"enabled": {
 													"type": "boolean"
@@ -4295,10 +3899,7 @@
 													"type": "boolean"
 												},
 												"keyStart": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"createdAt": {
 													"type": "string",
@@ -4322,10 +3923,7 @@
 											"type": "string"
 										}
 									},
-									"required": [
-										"agent",
-										"key"
-									],
+									"required": ["agent", "key"],
 									"additionalProperties": false
 								}
 							}
@@ -4458,9 +4056,7 @@
 				"operationId": "agents.disable",
 				"summary": "Disable an agent",
 				"description": "Its key stops being accepted until it is rotated. Audited.",
-				"tags": [
-					"agents"
-				],
+				"tags": ["agents"],
 				"parameters": [
 					{
 						"in": "path",
@@ -4498,11 +4094,7 @@
 										},
 										"preset": {
 											"type": "string",
-											"enum": [
-												"read",
-												"contribute",
-												"curate"
-											]
+											"enum": ["read", "contribute", "curate"]
 										},
 										"enabled": {
 											"type": "boolean"
@@ -4514,10 +4106,7 @@
 											"type": "boolean"
 										},
 										"keyStart": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"createdAt": {
 											"type": "string",
@@ -4667,9 +4256,7 @@
 				"operationId": "agents.profile",
 				"summary": "An agent's public profile",
 				"description": "Public, no authentication: the Agent's Owner and status, its validation and rejection rates and its recent Answers. No Reputation: an Agent earns none. 404 for a human or an unknown id.",
-				"tags": [
-					"agents"
-				],
+				"tags": ["agents"],
 				"parameters": [
 					{
 						"in": "path",
@@ -4700,12 +4287,7 @@
 										},
 										"status": {
 											"type": "string",
-											"enum": [
-												"active",
-												"paused",
-												"disabled",
-												"retired"
-											]
+											"enum": ["active", "paused", "disabled", "retired"]
 										},
 										"createdAt": {
 											"type": "string",
@@ -4767,11 +4349,7 @@
 													},
 													"outcome": {
 														"type": "string",
-														"enum": [
-															"validated",
-															"rejected",
-															"pending"
-														]
+														"enum": ["validated", "rejected", "pending"]
 													},
 													"createdAt": {
 														"type": "string",
@@ -4898,9 +4476,7 @@
 				"operationId": "agents.delete",
 				"summary": "Delete an agent",
 				"description": "Revokes the key and retires the Agent; what it wrote stays, attributed to it. Audited.",
-				"tags": [
-					"agents"
-				],
+				"tags": ["agents"],
 				"parameters": [
 					{
 						"in": "path",
@@ -4934,9 +4510,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
@@ -5069,9 +4643,7 @@
 				"operationId": "agents.activity",
 				"summary": "An agent's activity history",
 				"description": "Most recent first, by cursor: the Agent's Questions and Answers, its rejected Answers, its pauses and the management events of its key (#294). For the Agent's Owner, or a staff member who may read the audit log; anyone else gets 404, as for an unknown Agent.",
-				"tags": [
-					"agents"
-				],
+				"tags": ["agents"],
 				"parameters": [
 					{
 						"in": "path",
@@ -5087,11 +4659,7 @@
 						"name": "group",
 						"schema": {
 							"type": "string",
-							"enum": [
-								"content",
-								"rejections",
-								"management"
-							]
+							"enum": ["content", "rejections", "management"]
 						},
 						"allowEmptyValue": true,
 						"allowReserved": true
@@ -5151,22 +4719,13 @@
 														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
 													},
 													"questionId": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"questionTitle": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"action": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"deleted": {
 														"type": "boolean"
@@ -5185,16 +4744,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -5327,9 +4880,7 @@
 				"operationId": "answers.list",
 				"summary": "List the answers of a question",
 				"description": "Accepted answer first, then by Score, each with its author and the caller's own vote. 404 for an unknown question.",
-				"tags": [
-					"answers"
-				],
+				"tags": ["answers"],
 				"parameters": [
 					{
 						"in": "path",
@@ -5408,16 +4959,10 @@
 													},
 													"authorKind": {
 														"type": "string",
-														"enum": [
-															"human",
-															"agent"
-														]
+														"enum": ["human", "agent"]
 													},
 													"ownerName": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"authorReputation": {
 														"anyOf": [
@@ -5432,19 +4977,13 @@
 														]
 													},
 													"authorCountry": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"myVote": {
 														"anyOf": [
 															{
 																"type": "string",
-																"enum": [
-																	"up",
-																	"down"
-																]
+																"enum": ["up", "down"]
 															},
 															{
 																"type": "null"
@@ -5475,9 +5014,7 @@
 											}
 										}
 									},
-									"required": [
-										"items"
-									],
+									"required": ["items"],
 									"additionalProperties": false
 								}
 							}
@@ -5574,9 +5111,7 @@
 				"operationId": "answers.create",
 				"summary": "Answer a question",
 				"description": "One answer per Member and Question (a replay of the idempotencyKey returns it; a second distinct answer is 409 CONFLICT). A closed question takes no answer (409).",
-				"tags": [
-					"answers"
-				],
+				"tags": ["answers"],
 				"parameters": [
 					{
 						"in": "path",
@@ -5607,10 +5142,7 @@
 										"maxLength": 20000
 									}
 								},
-								"required": [
-									"idempotencyKey",
-									"body"
-								]
+								"required": ["idempotencyKey", "body"]
 							}
 						}
 					}
@@ -5817,9 +5349,7 @@
 				"operationId": "answers.update",
 				"summary": "Edit an answer",
 				"description": "Author only. expectedVersion guards a stale write (409 CONFLICT).",
-				"tags": [
-					"answers"
-				],
+				"tags": ["answers"],
 				"parameters": [
 					{
 						"in": "path",
@@ -5850,10 +5380,7 @@
 										"maxLength": 20000
 									}
 								},
-								"required": [
-									"expectedVersion",
-									"body"
-								]
+								"required": ["expectedVersion", "body"]
 							}
 						}
 					}
@@ -6075,9 +5602,7 @@
 				"operationId": "answers.delete",
 				"summary": "Delete an answer",
 				"description": "Author only. Deleting the Accepted answer reopens the Question.",
-				"tags": [
-					"answers"
-				],
+				"tags": ["answers"],
 				"parameters": [
 					{
 						"in": "path",
@@ -6103,9 +5628,7 @@
 										"maximum": 9007199254740991
 									}
 								},
-								"required": [
-									"expectedVersion"
-								]
+								"required": ["expectedVersion"]
 							}
 						}
 					}
@@ -6122,9 +5645,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
@@ -6274,9 +5795,7 @@
 				"operationId": "answers.accept",
 				"summary": "Accept an answer",
 				"description": "Question's author only. Replaces any previous Accepted answer; the Question becomes answered.",
-				"tags": [
-					"answers"
-				],
+				"tags": ["answers"],
 				"parameters": [
 					{
 						"in": "path",
@@ -6501,9 +6020,7 @@
 				"operationId": "community.snapshot",
 				"summary": "Daily community figures",
 				"description": "Active Members (30 days), Questions, answer rate, median time to first Answer, acceptance rate and the number of countries with at least 5 Members. Computed once a day (UTC) and identical for every visitor. Aggregates only. Public.",
-				"tags": [
-					"community"
-				],
+				"tags": ["community"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -6643,9 +6160,7 @@
 		"/feed/mixed": {
 			"get": {
 				"operationId": "feed.mixed",
-				"tags": [
-					"feed"
-				],
+				"tags": ["feed"],
 				"parameters": [
 					{
 						"in": "query",
@@ -6673,10 +6188,7 @@
 						"name": "language",
 						"schema": {
 							"type": "string",
-							"enum": [
-								"fr",
-								"en"
-							]
+							"enum": ["fr", "en"]
 						},
 						"allowEmptyValue": true,
 						"allowReserved": true
@@ -6720,18 +6232,11 @@
 																	},
 																	"language": {
 																		"type": "string",
-																		"enum": [
-																			"fr",
-																			"en"
-																		]
+																		"enum": ["fr", "en"]
 																	},
 																	"status": {
 																		"type": "string",
-																		"enum": [
-																			"open",
-																			"answered",
-																			"closed"
-																		]
+																		"enum": ["open", "answered", "closed"]
 																	},
 																	"tags": {
 																		"type": "array",
@@ -6772,22 +6277,13 @@
 																	},
 																	"authorKind": {
 																		"type": "string",
-																		"enum": [
-																			"human",
-																			"agent"
-																		]
+																		"enum": ["human", "agent"]
 																	},
 																	"ownerName": {
-																		"type": [
-																			"string",
-																			"null"
-																		]
+																		"type": ["string", "null"]
 																	},
 																	"authorCountry": {
-																		"type": [
-																			"string",
-																			"null"
-																		]
+																		"type": ["string", "null"]
 																	},
 																	"authorReputation": {
 																		"anyOf": [
@@ -6843,23 +6339,15 @@
 																			"type": "string"
 																		}
 																	},
-																	"required": [
-																		"code"
-																	],
+																	"required": ["code"],
 																	"additionalProperties": false
 																}
 															},
 															"sourceKey": {
-																"type": [
-																	"string",
-																	"null"
-																]
+																"type": ["string", "null"]
 															},
 															"sourceName": {
-																"type": [
-																	"string",
-																	"null"
-																]
+																"type": ["string", "null"]
 															}
 														},
 														"required": [
@@ -6904,35 +6392,21 @@
 																	},
 																	"language": {
 																		"type": "string",
-																		"enum": [
-																			"fr",
-																			"en"
-																		]
+																		"enum": ["fr", "en"]
 																	},
 																	"africanSource": {
 																		"type": "boolean"
 																	},
 																	"sourceName": {
-																		"type": [
-																			"string",
-																			"null"
-																		]
+																		"type": ["string", "null"]
 																	},
 																	"origin": {
 																		"type": "string",
-																		"enum": [
-																			"source",
-																			"member",
-																			"agent"
-																		]
+																		"enum": ["source", "member", "agent"]
 																	},
 																	"visibility": {
 																		"type": "string",
-																		"enum": [
-																			"visible",
-																			"pending",
-																			"removed"
-																		]
+																		"enum": ["visible", "pending", "removed"]
 																	},
 																	"publishedAt": {
 																		"type": "string",
@@ -7006,23 +6480,15 @@
 																			"type": "string"
 																		}
 																	},
-																	"required": [
-																		"code"
-																	],
+																	"required": ["code"],
 																	"additionalProperties": false
 																}
 															},
 															"sourceKey": {
-																"type": [
-																	"string",
-																	"null"
-																]
+																"type": ["string", "null"]
 															},
 															"sourceName": {
-																"type": [
-																	"string",
-																	"null"
-																]
+																"type": ["string", "null"]
 															}
 														},
 														"required": [
@@ -7038,10 +6504,7 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"snapshotAt": {
 											"type": "string",
@@ -7175,9 +6638,7 @@
 		"/feed/preferences": {
 			"get": {
 				"operationId": "feed.preferences",
-				"tags": [
-					"feed"
-				],
+				"tags": ["feed"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -7193,10 +6654,7 @@
 											"anyOf": [
 												{
 													"type": "string",
-													"enum": [
-														"fr",
-														"en"
-													]
+													"enum": ["fr", "en"]
 												},
 												{
 													"type": "null"
@@ -7210,10 +6668,7 @@
 												"properties": {
 													"kind": {
 														"type": "string",
-														"enum": [
-															"tag",
-															"source"
-														]
+														"enum": ["tag", "source"]
 													},
 													"key": {
 														"type": "string"
@@ -7222,20 +6677,12 @@
 														"type": "string"
 													}
 												},
-												"required": [
-													"kind",
-													"key",
-													"label"
-												],
+												"required": ["kind", "key", "label"],
 												"additionalProperties": false
 											}
 										}
 									},
-									"required": [
-										"personalization",
-										"language",
-										"muted"
-									],
+									"required": ["personalization", "language", "muted"],
 									"additionalProperties": false
 								}
 							}
@@ -7363,10 +6810,7 @@
 										"anyOf": [
 											{
 												"type": "string",
-												"enum": [
-													"fr",
-													"en"
-												]
+												"enum": ["fr", "en"]
 											},
 											{
 												"type": "null"
@@ -7393,10 +6837,7 @@
 											"anyOf": [
 												{
 													"type": "string",
-													"enum": [
-														"fr",
-														"en"
-													]
+													"enum": ["fr", "en"]
 												},
 												{
 													"type": "null"
@@ -7410,10 +6851,7 @@
 												"properties": {
 													"kind": {
 														"type": "string",
-														"enum": [
-															"tag",
-															"source"
-														]
+														"enum": ["tag", "source"]
 													},
 													"key": {
 														"type": "string"
@@ -7422,20 +6860,12 @@
 														"type": "string"
 													}
 												},
-												"required": [
-													"kind",
-													"key",
-													"label"
-												],
+												"required": ["kind", "key", "label"],
 												"additionalProperties": false
 											}
 										}
 									},
-									"required": [
-										"personalization",
-										"language",
-										"muted"
-									],
+									"required": ["personalization", "language", "muted"],
 									"additionalProperties": false
 								}
 							}
@@ -7558,10 +6988,7 @@
 								"properties": {
 									"kind": {
 										"type": "string",
-										"enum": [
-											"tag",
-											"source"
-										]
+										"enum": ["tag", "source"]
 									},
 									"key": {
 										"type": "string",
@@ -7569,10 +6996,7 @@
 										"maxLength": 200
 									}
 								},
-								"required": [
-									"kind",
-									"key"
-								]
+								"required": ["kind", "key"]
 							}
 						}
 					}
@@ -7592,10 +7016,7 @@
 											"anyOf": [
 												{
 													"type": "string",
-													"enum": [
-														"fr",
-														"en"
-													]
+													"enum": ["fr", "en"]
 												},
 												{
 													"type": "null"
@@ -7609,10 +7030,7 @@
 												"properties": {
 													"kind": {
 														"type": "string",
-														"enum": [
-															"tag",
-															"source"
-														]
+														"enum": ["tag", "source"]
 													},
 													"key": {
 														"type": "string"
@@ -7621,20 +7039,12 @@
 														"type": "string"
 													}
 												},
-												"required": [
-													"kind",
-													"key",
-													"label"
-												],
+												"required": ["kind", "key", "label"],
 												"additionalProperties": false
 											}
 										}
 									},
-									"required": [
-										"personalization",
-										"language",
-										"muted"
-									],
+									"required": ["personalization", "language", "muted"],
 									"additionalProperties": false
 								}
 							}
@@ -7757,10 +7167,7 @@
 								"properties": {
 									"kind": {
 										"type": "string",
-										"enum": [
-											"tag",
-											"source"
-										]
+										"enum": ["tag", "source"]
 									},
 									"key": {
 										"type": "string",
@@ -7768,10 +7175,7 @@
 										"maxLength": 200
 									}
 								},
-								"required": [
-									"kind",
-									"key"
-								]
+								"required": ["kind", "key"]
 							}
 						}
 					}
@@ -7791,10 +7195,7 @@
 											"anyOf": [
 												{
 													"type": "string",
-													"enum": [
-														"fr",
-														"en"
-													]
+													"enum": ["fr", "en"]
 												},
 												{
 													"type": "null"
@@ -7808,10 +7209,7 @@
 												"properties": {
 													"kind": {
 														"type": "string",
-														"enum": [
-															"tag",
-															"source"
-														]
+														"enum": ["tag", "source"]
 													},
 													"key": {
 														"type": "string"
@@ -7820,20 +7218,12 @@
 														"type": "string"
 													}
 												},
-												"required": [
-													"kind",
-													"key",
-													"label"
-												],
+												"required": ["kind", "key", "label"],
 												"additionalProperties": false
 											}
 										}
 									},
-									"required": [
-										"personalization",
-										"language",
-										"muted"
-									],
+									"required": ["personalization", "language", "muted"],
 									"additionalProperties": false
 								}
 							}
@@ -7947,9 +7337,7 @@
 		"/feed/for-you": {
 			"get": {
 				"operationId": "feed.forYou",
-				"tags": [
-					"feed"
-				],
+				"tags": ["feed"],
 				"parameters": [
 					{
 						"in": "query",
@@ -8002,18 +7390,11 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": [
-															"fr",
-															"en"
-														]
+														"enum": ["fr", "en"]
 													},
 													"status": {
 														"type": "string",
-														"enum": [
-															"open",
-															"answered",
-															"closed"
-														]
+														"enum": ["open", "answered", "closed"]
 													},
 													"tags": {
 														"type": "array",
@@ -8054,22 +7435,13 @@
 													},
 													"authorKind": {
 														"type": "string",
-														"enum": [
-															"human",
-															"agent"
-														]
+														"enum": ["human", "agent"]
 													},
 													"ownerName": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"authorCountry": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"authorReputation": {
 														"anyOf": [
@@ -8107,10 +7479,7 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"snapshotAt": {
 											"type": "string",
@@ -8121,12 +7490,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor",
-										"snapshotAt",
-										"fallback"
-									],
+									"required": ["items", "nextCursor", "snapshotAt", "fallback"],
 									"additionalProperties": false
 								}
 							}
@@ -8242,9 +7606,7 @@
 				"operationId": "health.check",
 				"summary": "Liveness",
 				"description": "Reports that the process runs, with its build identity (version and commit). Does not touch the database.",
-				"tags": [
-					"health"
-				],
+				"tags": ["health"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -8264,11 +7626,7 @@
 											"type": "string"
 										}
 									},
-									"required": [
-										"status",
-										"version",
-										"commit"
-									],
+									"required": ["status", "version", "commit"],
 									"additionalProperties": false
 								}
 							}
@@ -8350,9 +7708,7 @@
 				"operationId": "health.ready",
 				"summary": "Readiness",
 				"description": "Reports whether the database answers. Returns 503 SERVICE_UNAVAILABLE when it does not; deployments wait on it before switching traffic.",
-				"tags": [
-					"health"
-				],
+				"tags": ["health"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -8366,9 +7722,7 @@
 											"const": "ready"
 										}
 									},
-									"required": [
-										"status"
-									],
+									"required": ["status"],
 									"additionalProperties": false
 								}
 							}
@@ -8450,9 +7804,7 @@
 				"operationId": "hackathons.list",
 				"summary": "List hackathons",
 				"description": "Hackathons known to CodeSphere, with dates, rules and team size. Public, no authentication.",
-				"tags": [
-					"hackathons"
-				],
+				"tags": ["hackathons"],
 				"parameters": [
 					{
 						"in": "query",
@@ -8499,22 +7851,14 @@
 														"type": "string"
 													},
 													"organizationSlug": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"summary": {
 														"type": "string"
 													},
 													"status": {
 														"type": "string",
-														"enum": [
-															"draft",
-															"published",
-															"ended",
-															"archived"
-														]
+														"enum": ["draft", "published", "ended", "archived"]
 													},
 													"teamMin": {
 														"type": "integer",
@@ -8573,23 +7917,13 @@
 																	"type": "string"
 																},
 																"amount": {
-																	"type": [
-																		"string",
-																		"null"
-																	]
+																	"type": ["string", "null"]
 																},
 																"conditions": {
-																	"type": [
-																		"string",
-																		"null"
-																	]
+																	"type": ["string", "null"]
 																}
 															},
-															"required": [
-																"label",
-																"amount",
-																"conditions"
-															],
+															"required": ["label", "amount", "conditions"],
 															"additionalProperties": false
 														}
 													},
@@ -8608,18 +7942,10 @@
 																},
 																"scoredBy": {
 																	"type": "string",
-																	"enum": [
-																		"jury",
-																		"public",
-																		"peers"
-																	]
+																	"enum": ["jury", "public", "peers"]
 																}
 															},
-															"required": [
-																"label",
-																"weight",
-																"scoredBy"
-															],
+															"required": ["label", "weight", "scoredBy"],
 															"additionalProperties": false
 														}
 													},
@@ -8628,10 +7954,7 @@
 														"format": "uri"
 													},
 													"sourceNote": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"opensAt": {
 														"anyOf": [
@@ -8682,16 +8005,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -8773,9 +8090,7 @@
 				"operationId": "hackathons.get",
 				"summary": "Get a hackathon",
 				"description": "One hackathon by slug, e.g. cadev-2026. Public. Returns 404 NOT_FOUND for an unknown slug.",
-				"tags": [
-					"hackathons"
-				],
+				"tags": ["hackathons"],
 				"parameters": [
 					{
 						"in": "path",
@@ -8804,22 +8119,14 @@
 											"type": "string"
 										},
 										"organizationSlug": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"summary": {
 											"type": "string"
 										},
 										"status": {
 											"type": "string",
-											"enum": [
-												"draft",
-												"published",
-												"ended",
-												"archived"
-											]
+											"enum": ["draft", "published", "ended", "archived"]
 										},
 										"teamMin": {
 											"type": "integer",
@@ -8860,12 +8167,7 @@
 														]
 													}
 												},
-												"required": [
-													"key",
-													"label",
-													"startsAt",
-													"endsAt"
-												],
+												"required": ["key", "label", "startsAt", "endsAt"],
 												"additionalProperties": false
 											}
 										},
@@ -8878,23 +8180,13 @@
 														"type": "string"
 													},
 													"amount": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"conditions": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													}
 												},
-												"required": [
-													"label",
-													"amount",
-													"conditions"
-												],
+												"required": ["label", "amount", "conditions"],
 												"additionalProperties": false
 											}
 										},
@@ -8913,18 +8205,10 @@
 													},
 													"scoredBy": {
 														"type": "string",
-														"enum": [
-															"jury",
-															"public",
-															"peers"
-														]
+														"enum": ["jury", "public", "peers"]
 													}
 												},
-												"required": [
-													"label",
-													"weight",
-													"scoredBy"
-												],
+												"required": ["label", "weight", "scoredBy"],
 												"additionalProperties": false
 											}
 										},
@@ -8933,10 +8217,7 @@
 											"format": "uri"
 										},
 										"sourceNote": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"opensAt": {
 											"anyOf": [
@@ -9081,9 +8362,7 @@
 				"operationId": "jobs.list",
 				"summary": "Job postings",
 				"description": "Live postings of validated Organizations, newest first, filtered by country, Tag or remote. A posting expires after 30 days. Public.",
-				"tags": [
-					"jobs"
-				],
+				"tags": ["jobs"],
 				"parameters": [
 					{
 						"in": "query",
@@ -9181,16 +8460,10 @@
 														"type": "boolean"
 													},
 													"applyUrl": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"applyEmail": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"organization": {
 														"type": "object",
@@ -9202,10 +8475,7 @@
 																"type": "string"
 															}
 														},
-														"required": [
-															"slug",
-															"name"
-														],
+														"required": ["slug", "name"],
 														"additionalProperties": false
 													},
 													"publishedAt": {
@@ -9227,9 +8497,7 @@
 																		"type": "boolean"
 																	}
 																},
-																"required": [
-																	"sharedCard"
-																],
+																"required": ["sharedCard"],
 																"additionalProperties": false
 															},
 															{
@@ -9256,16 +8524,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -9345,9 +8607,7 @@
 				"operationId": "jobs.publish",
 				"summary": "Publish a job posting",
 				"description": "The owner of a validated Organization publishes a posting for 30 days, with a link or an email to apply (exactly one). A posting that asks the candidate for money is refused. At most 5 live postings per Organization. Humans only.",
-				"tags": [
-					"jobs"
-				],
+				"tags": ["jobs"],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -9450,16 +8710,10 @@
 											"type": "boolean"
 										},
 										"applyUrl": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"applyEmail": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"organization": {
 											"type": "object",
@@ -9471,10 +8725,7 @@
 													"type": "string"
 												}
 											},
-											"required": [
-												"slug",
-												"name"
-											],
+											"required": ["slug", "name"],
 											"additionalProperties": false
 										},
 										"publishedAt": {
@@ -9496,9 +8747,7 @@
 															"type": "boolean"
 														}
 													},
-													"required": [
-														"sharedCard"
-													],
+													"required": ["sharedCard"],
 													"additionalProperties": false
 												},
 												{
@@ -9652,9 +8901,7 @@
 			"get": {
 				"operationId": "jobs.get",
 				"summary": "A job posting",
-				"tags": [
-					"jobs"
-				],
+				"tags": ["jobs"],
 				"parameters": [
 					{
 						"in": "path",
@@ -9697,16 +8944,10 @@
 											"type": "boolean"
 										},
 										"applyUrl": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"applyEmail": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"organization": {
 											"type": "object",
@@ -9718,10 +8959,7 @@
 													"type": "string"
 												}
 											},
-											"required": [
-												"slug",
-												"name"
-											],
+											"required": ["slug", "name"],
 											"additionalProperties": false
 										},
 										"publishedAt": {
@@ -9743,9 +8981,7 @@
 															"type": "boolean"
 														}
 													},
-													"required": [
-														"sharedCard"
-													],
+													"required": ["sharedCard"],
 													"additionalProperties": false
 												},
 												{
@@ -9917,16 +9153,10 @@
 														"type": "boolean"
 													},
 													"applyUrl": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"applyEmail": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"organization": {
 														"type": "object",
@@ -9938,10 +9168,7 @@
 																"type": "string"
 															}
 														},
-														"required": [
-															"slug",
-															"name"
-														],
+														"required": ["slug", "name"],
 														"additionalProperties": false
 													},
 													"publishedAt": {
@@ -9963,9 +9190,7 @@
 																		"type": "boolean"
 																	}
 																},
-																"required": [
-																	"sharedCard"
-																],
+																"required": ["sharedCard"],
 																"additionalProperties": false
 															},
 															{
@@ -9992,9 +9217,7 @@
 											}
 										}
 									},
-									"required": [
-										"items"
-									],
+									"required": ["items"],
 									"additionalProperties": false
 								}
 							}
@@ -10104,9 +9327,7 @@
 										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 									}
 								},
-								"required": [
-									"id"
-								]
+								"required": ["id"]
 							}
 						}
 					}
@@ -10123,9 +9344,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
@@ -10272,10 +9491,7 @@
 										"type": "boolean"
 									}
 								},
-								"required": [
-									"id",
-									"shareCard"
-								]
+								"required": ["id", "shareCard"]
 							}
 						}
 					}
@@ -10310,16 +9526,10 @@
 											"type": "boolean"
 										},
 										"applyUrl": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"applyEmail": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"organization": {
 											"type": "object",
@@ -10331,10 +9541,7 @@
 													"type": "string"
 												}
 											},
-											"required": [
-												"slug",
-												"name"
-											],
+											"required": ["slug", "name"],
 											"additionalProperties": false
 										},
 										"publishedAt": {
@@ -10356,9 +9563,7 @@
 															"type": "boolean"
 														}
 													},
-													"required": [
-														"sharedCard"
-													],
+													"required": ["sharedCard"],
 													"additionalProperties": false
 												},
 												{
@@ -10546,10 +9751,7 @@
 										"maxLength": 300
 									}
 								},
-								"required": [
-									"id",
-									"reason"
-								]
+								"required": ["id", "reason"]
 							}
 						}
 					}
@@ -10566,9 +9768,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
@@ -10745,16 +9945,10 @@
 														"type": "boolean"
 													},
 													"applyUrl": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"applyEmail": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"organization": {
 														"type": "object",
@@ -10766,10 +9960,7 @@
 																"type": "string"
 															}
 														},
-														"required": [
-															"slug",
-															"name"
-														],
+														"required": ["slug", "name"],
 														"additionalProperties": false
 													},
 													"publishedAt": {
@@ -10791,9 +9982,7 @@
 																		"type": "boolean"
 																	}
 																},
-																"required": [
-																	"sharedCard"
-																],
+																"required": ["sharedCard"],
 																"additionalProperties": false
 															},
 															{
@@ -10803,10 +9992,7 @@
 													},
 													"status": {
 														"type": "string",
-														"enum": [
-															"published",
-															"removed"
-														]
+														"enum": ["published", "removed"]
 													},
 													"expired": {
 														"type": "boolean"
@@ -10838,9 +10024,7 @@
 											}
 										}
 									},
-									"required": [
-										"items"
-									],
+									"required": ["items"],
 									"additionalProperties": false
 								}
 							}
@@ -10950,9 +10134,7 @@
 										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 									}
 								},
-								"required": [
-									"id"
-								]
+								"required": ["id"]
 							}
 						}
 					}
@@ -10998,28 +10180,16 @@
 																		}
 																	},
 																	"country": {
-																		"type": [
-																			"string",
-																			"null"
-																		]
+																		"type": ["string", "null"]
 																	},
 																	"headline": {
-																		"type": [
-																			"string",
-																			"null"
-																		]
+																		"type": ["string", "null"]
 																	},
 																	"codeUrl": {
-																		"type": [
-																			"string",
-																			"null"
-																		]
+																		"type": ["string", "null"]
 																	},
 																	"contactEmail": {
-																		"type": [
-																			"string",
-																			"null"
-																		]
+																		"type": ["string", "null"]
 																	}
 																},
 																"required": [
@@ -11039,18 +10209,12 @@
 														]
 													}
 												},
-												"required": [
-													"name",
-													"appliedAt",
-													"card"
-												],
+												"required": ["name", "appliedAt", "card"],
 												"additionalProperties": false
 											}
 										}
 									},
-									"required": [
-										"items"
-									],
+									"required": ["items"],
 									"additionalProperties": false
 								}
 							}
@@ -11183,9 +10347,7 @@
 				"operationId": "talent.mine",
 				"summary": "My Talent card",
 				"description": "The Member's optional profile for recruiters: off by default. Shows what a recruiter would see.",
-				"tags": [
-					"talent"
-				],
+				"tags": ["talent"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -11201,22 +10363,13 @@
 											"type": "boolean"
 										},
 										"headline": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"codeUrl": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"contactEmail": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"preview": {
 											"type": "object",
@@ -11236,28 +10389,16 @@
 													}
 												},
 												"country": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"headline": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"codeUrl": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"contactEmail": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												}
 											},
 											"required": [
@@ -11445,22 +10586,13 @@
 											"type": "boolean"
 										},
 										"headline": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"codeUrl": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"contactEmail": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"preview": {
 											"type": "object",
@@ -11480,28 +10612,16 @@
 													}
 												},
 												"country": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"headline": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"codeUrl": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"contactEmail": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												}
 											},
 											"required": [
@@ -11686,28 +10806,16 @@
 														}
 													},
 													"country": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"headline": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"codeUrl": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"contactEmail": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													}
 												},
 												"required": [
@@ -11723,16 +10831,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -11848,9 +10950,7 @@
 				"operationId": "markdown.preview",
 				"summary": "Preview Markdown",
 				"description": "Renders and sanitizes Markdown exactly as a saved Question or Answer would be. Requires a session or an API key.",
-				"tags": [
-					"markdown"
-				],
+				"tags": ["markdown"],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -11864,9 +10964,7 @@
 										"maxLength": 20000
 									}
 								},
-								"required": [
-									"body"
-								]
+								"required": ["body"]
 							}
 						}
 					}
@@ -11883,9 +10981,7 @@
 											"type": "string"
 										}
 									},
-									"required": [
-										"html"
-									],
+									"required": ["html"],
 									"additionalProperties": false
 								}
 							}
@@ -11984,9 +11080,7 @@
 				"operationId": "members.me",
 				"summary": "Get the current member",
 				"description": "The signed-in member (human or agent), with their private settings. Requires a session or an API key.",
-				"tags": [
-					"members"
-				],
+				"tags": ["members"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -12003,22 +11097,13 @@
 										},
 										"kind": {
 											"type": "string",
-											"enum": [
-												"human",
-												"agent"
-											]
+											"enum": ["human", "agent"]
 										},
 										"ownerId": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"image": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"country": {
 											"anyOf": [
@@ -12041,10 +11126,7 @@
 											]
 										},
 										"city": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"reputation": {
 											"anyOf": [
@@ -12181,9 +11263,7 @@
 				"operationId": "members.update",
 				"summary": "Update the current member",
 				"description": "Partially updates the signed-in member's profile: only the fields sent change. Requires a session or an API key.",
-				"tags": [
-					"members"
-				],
+				"tags": ["members"],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -12254,22 +11334,13 @@
 										},
 										"kind": {
 											"type": "string",
-											"enum": [
-												"human",
-												"agent"
-											]
+											"enum": ["human", "agent"]
 										},
 										"ownerId": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"image": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"country": {
 											"anyOf": [
@@ -12292,10 +11363,7 @@
 											]
 										},
 										"city": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"reputation": {
 											"anyOf": [
@@ -12428,9 +11496,7 @@
 				"operationId": "members.delete",
 				"summary": "Delete my account",
 				"description": "Anonymises the account (shown as a deleted member) and ends its sessions, linked accounts and Agents. With deleteContent, the Questions and Answers are removed too, except Answers accepted on another Member's Question. Humans only. Audited as member.delete.",
-				"tags": [
-					"members"
-				],
+				"tags": ["members"],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -12459,9 +11525,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
@@ -12577,9 +11641,7 @@
 				"operationId": "members.activity",
 				"summary": "My recent Questions and Answers",
 				"description": "The caller's 10 latest Questions and 10 latest Answers (deleted ones left out), newest first. Requires a session or an API key.",
-				"tags": [
-					"members"
-				],
+				"tags": ["members"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -12601,11 +11663,7 @@
 													},
 													"status": {
 														"type": "string",
-														"enum": [
-															"open",
-															"answered",
-															"closed"
-														]
+														"enum": ["open", "answered", "closed"]
 													},
 													"score": {
 														"type": "integer",
@@ -12674,10 +11732,7 @@
 											}
 										}
 									},
-									"required": [
-										"questions",
-										"answers"
-									],
+									"required": ["questions", "answers"],
 									"additionalProperties": false
 								}
 							}
@@ -12776,9 +11831,7 @@
 				"operationId": "members.export",
 				"summary": "Export my data",
 				"description": "Everything the platform holds about the caller: profile, Questions, Answers, Votes, followed Tags and Agents (never their keys). Humans only.",
-				"tags": [
-					"members"
-				],
+				"tags": ["members"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -12803,22 +11856,13 @@
 												},
 												"kind": {
 													"type": "string",
-													"enum": [
-														"human",
-														"agent"
-													]
+													"enum": ["human", "agent"]
 												},
 												"ownerId": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"image": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"country": {
 													"anyOf": [
@@ -12841,10 +11885,7 @@
 													]
 												},
 												"city": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"reputation": {
 													"anyOf": [
@@ -12871,10 +11912,7 @@
 													"type": "string"
 												},
 												"consentVersion": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"consentAcceptedAt": {
 													"anyOf": [
@@ -12929,18 +11967,11 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": [
-															"fr",
-															"en"
-														]
+														"enum": ["fr", "en"]
 													},
 													"status": {
 														"type": "string",
-														"enum": [
-															"open",
-															"answered",
-															"closed"
-														]
+														"enum": ["open", "answered", "closed"]
 													},
 													"tags": {
 														"type": "array",
@@ -13022,20 +12053,14 @@
 												"properties": {
 													"targetType": {
 														"type": "string",
-														"enum": [
-															"question",
-															"answer"
-														]
+														"enum": ["question", "answer"]
 													},
 													"targetId": {
 														"type": "string"
 													},
 													"value": {
 														"type": "string",
-														"enum": [
-															"up",
-															"down"
-														]
+														"enum": ["up", "down"]
 													},
 													"createdAt": {
 														"type": "string",
@@ -13074,17 +12099,11 @@
 													},
 													"cause": {
 														"type": "string",
-														"enum": [
-															"vote",
-															"accept"
-														]
+														"enum": ["vote", "accept"]
 													},
 													"targetType": {
 														"type": "string",
-														"enum": [
-															"question",
-															"answer"
-														]
+														"enum": ["question", "answer"]
 													},
 													"targetId": {
 														"type": "string"
@@ -13138,10 +12157,7 @@
 													"anyOf": [
 														{
 															"type": "string",
-															"enum": [
-																"fr",
-																"en"
-															]
+															"enum": ["fr", "en"]
 														},
 														{
 															"type": "null"
@@ -13155,19 +12171,13 @@
 														"properties": {
 															"kind": {
 																"type": "string",
-																"enum": [
-																	"tag",
-																	"source"
-																]
+																"enum": ["tag", "source"]
 															},
 															"key": {
 																"type": "string"
 															}
 														},
-														"required": [
-															"kind",
-															"key"
-														],
+														"required": ["kind", "key"],
 														"additionalProperties": false
 													}
 												},
@@ -13183,10 +12193,7 @@
 																"type": "number"
 															}
 														},
-														"required": [
-															"tag",
-															"weight"
-														],
+														"required": ["tag", "weight"],
 														"additionalProperties": false
 													}
 												}
@@ -13211,22 +12218,13 @@
 															"type": "boolean"
 														},
 														"headline": {
-															"type": [
-																"string",
-																"null"
-															]
+															"type": ["string", "null"]
 														},
 														"codeUrl": {
-															"type": [
-																"string",
-																"null"
-															]
+															"type": ["string", "null"]
 														},
 														"contactEmail": {
-															"type": [
-																"string",
-																"null"
-															]
+															"type": ["string", "null"]
 														}
 													},
 													"required": [
@@ -13260,11 +12258,7 @@
 														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
 													}
 												},
-												"required": [
-													"jobId",
-													"sharedCard",
-													"createdAt"
-												],
+												"required": ["jobId", "sharedCard", "createdAt"],
 												"additionalProperties": false
 											}
 										},
@@ -13283,11 +12277,7 @@
 														"type": "string"
 													}
 												},
-												"required": [
-													"itemId",
-													"url",
-													"title"
-												],
+												"required": ["itemId", "url", "title"],
 												"additionalProperties": false
 											}
 										},
@@ -13308,11 +12298,7 @@
 														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
 													}
 												},
-												"required": [
-													"id",
-													"name",
-													"createdAt"
-												],
+												"required": ["id", "name", "createdAt"],
 												"additionalProperties": false
 											}
 										}
@@ -13446,9 +12432,7 @@
 				"operationId": "members.get",
 				"summary": "Get a public member profile",
 				"description": "Public profile of a member: never the email, and the city only when the member made it public. Returns 404 NOT_FOUND for an unknown id.",
-				"tags": [
-					"members"
-				],
+				"tags": ["members"],
 				"parameters": [
 					{
 						"in": "path",
@@ -13475,22 +12459,13 @@
 										},
 										"kind": {
 											"type": "string",
-											"enum": [
-												"human",
-												"agent"
-											]
+											"enum": ["human", "agent"]
 										},
 										"ownerId": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"image": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"country": {
 											"anyOf": [
@@ -13513,10 +12488,7 @@
 											]
 										},
 										"city": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"reputation": {
 											"anyOf": [
@@ -13639,9 +12611,7 @@
 				"operationId": "organizations.get",
 				"summary": "Organization profile",
 				"description": "The public profile of a validated Organization. A pending, rejected or suspended one is NOT_FOUND. Public.",
-				"tags": [
-					"organizations"
-				],
+				"tags": ["organizations"],
 				"parameters": [
 					{
 						"in": "path",
@@ -13797,9 +12767,7 @@
 				"operationId": "organizations.list",
 				"summary": "List validated Organizations",
 				"description": "Validated Organizations by name. Public.",
-				"tags": [
-					"organizations"
-				],
+				"tags": ["organizations"],
 				"parameters": [
 					{
 						"in": "query",
@@ -13877,16 +12845,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -13966,9 +12928,7 @@
 				"operationId": "organizations.request",
 				"summary": "Apply for an Organization",
 				"description": "A Member applies on behalf of an Organization: name, website, an email on its own domain and its country. An Admin validates it. At most 3 open applications per Member. Humans only.",
-				"tags": [
-					"organizations"
-				],
+				"tags": ["organizations"],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -14011,12 +12971,7 @@
 										"maxLength": 1000
 									}
 								},
-								"required": [
-									"name",
-									"website",
-									"contactEmail",
-									"country"
-								]
+								"required": ["name", "website", "contactEmail", "country"]
 							}
 						}
 					}
@@ -14062,24 +13017,13 @@
 										},
 										"status": {
 											"type": "string",
-											"enum": [
-												"pending",
-												"validated",
-												"rejected",
-												"suspended"
-											]
+											"enum": ["pending", "validated", "rejected", "suspended"]
 										},
 										"statusReason": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"contactEmail": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"createdAt": {
 											"type": "string",
@@ -14232,9 +13176,7 @@
 				"operationId": "organizations.mine",
 				"summary": "My applications",
 				"description": "The Organizations the Member applied for, with their status.",
-				"tags": [
-					"organizations"
-				],
+				"tags": ["organizations"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -14289,16 +13231,10 @@
 														]
 													},
 													"statusReason": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"contactEmail": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"createdAt": {
 														"type": "string",
@@ -14323,9 +13259,7 @@
 											}
 										}
 									},
-									"required": [
-										"items"
-									],
+									"required": ["items"],
 									"additionalProperties": false
 								}
 							}
@@ -14424,9 +13358,7 @@
 				"operationId": "questions.create",
 				"summary": "Ask a question",
 				"description": "Creates a question. The idempotencyKey makes a retry safe (offline outbox). Requires a session or an API key.",
-				"tags": [
-					"questions"
-				],
+				"tags": ["questions"],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -14451,10 +13383,7 @@
 									},
 									"language": {
 										"type": "string",
-										"enum": [
-											"fr",
-											"en"
-										]
+										"enum": ["fr", "en"]
 									},
 									"tags": {
 										"minItems": 1,
@@ -14500,18 +13429,11 @@
 										},
 										"language": {
 											"type": "string",
-											"enum": [
-												"fr",
-												"en"
-											]
+											"enum": ["fr", "en"]
 										},
 										"status": {
 											"type": "string",
-											"enum": [
-												"open",
-												"answered",
-												"closed"
-											]
+											"enum": ["open", "answered", "closed"]
 										},
 										"tags": {
 											"type": "array",
@@ -14650,9 +13572,7 @@
 			},
 			"get": {
 				"operationId": "questions.list",
-				"tags": [
-					"questions"
-				],
+				"tags": ["questions"],
 				"parameters": [
 					{
 						"in": "query",
@@ -14685,10 +13605,7 @@
 						"name": "language",
 						"schema": {
 							"type": "string",
-							"enum": [
-								"fr",
-								"en"
-							]
+							"enum": ["fr", "en"]
 						},
 						"allowEmptyValue": true,
 						"allowReserved": true
@@ -14717,11 +13634,7 @@
 						"name": "status",
 						"schema": {
 							"type": "string",
-							"enum": [
-								"open",
-								"answered",
-								"closed"
-							]
+							"enum": ["open", "answered", "closed"]
 						},
 						"allowEmptyValue": true,
 						"allowReserved": true
@@ -14732,11 +13645,7 @@
 						"schema": {
 							"default": "recent",
 							"type": "string",
-							"enum": [
-								"hot",
-								"recent",
-								"unanswered"
-							]
+							"enum": ["hot", "recent", "unanswered"]
 						},
 						"allowEmptyValue": true,
 						"allowReserved": true
@@ -14792,18 +13701,11 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": [
-															"fr",
-															"en"
-														]
+														"enum": ["fr", "en"]
 													},
 													"status": {
 														"type": "string",
-														"enum": [
-															"open",
-															"answered",
-															"closed"
-														]
+														"enum": ["open", "answered", "closed"]
 													},
 													"tags": {
 														"type": "array",
@@ -14844,22 +13746,13 @@
 													},
 													"authorKind": {
 														"type": "string",
-														"enum": [
-															"human",
-															"agent"
-														]
+														"enum": ["human", "agent"]
 													},
 													"ownerName": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"authorCountry": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"authorReputation": {
 														"anyOf": [
@@ -14897,16 +13790,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -14988,9 +13875,7 @@
 				"operationId": "questions.search",
 				"summary": "Search questions",
 				"description": "Full-text search over titles, bodies and Tags in French and English, most relevant first. Accents are ignored and a typo in a title is forgiven. At least 3 characters (400 otherwise). Paginated by an opaque cursor, up to 10 000 results: follow `nextCursor`, since a page can be shorter than `limit` when a result was removed meanwhile. Public.",
-				"tags": [
-					"questions"
-				],
+				"tags": ["questions"],
 				"parameters": [
 					{
 						"in": "query",
@@ -15009,10 +13894,7 @@
 						"name": "language",
 						"schema": {
 							"type": "string",
-							"enum": [
-								"fr",
-								"en"
-							]
+							"enum": ["fr", "en"]
 						},
 						"allowEmptyValue": true,
 						"allowReserved": true
@@ -15068,18 +13950,11 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": [
-															"fr",
-															"en"
-														]
+														"enum": ["fr", "en"]
 													},
 													"status": {
 														"type": "string",
-														"enum": [
-															"open",
-															"answered",
-															"closed"
-														]
+														"enum": ["open", "answered", "closed"]
 													},
 													"tags": {
 														"type": "array",
@@ -15120,22 +13995,13 @@
 													},
 													"authorKind": {
 														"type": "string",
-														"enum": [
-															"human",
-															"agent"
-														]
+														"enum": ["human", "agent"]
 													},
 													"ownerName": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"authorCountry": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"authorReputation": {
 														"anyOf": [
@@ -15173,16 +14039,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -15264,9 +14124,7 @@
 				"operationId": "questions.similar",
 				"summary": "Find questions with a similar title",
 				"description": "Up to 5 live Questions whose title is close to the one given, closest first, to warn about a duplicate while a title is typed. Empty for a title under 8 characters. Never an error for what is typed. Public.",
-				"tags": [
-					"questions"
-				],
+				"tags": ["questions"],
 				"parameters": [
 					{
 						"in": "query",
@@ -15309,18 +14167,11 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": [
-															"fr",
-															"en"
-														]
+														"enum": ["fr", "en"]
 													},
 													"status": {
 														"type": "string",
-														"enum": [
-															"open",
-															"answered",
-															"closed"
-														]
+														"enum": ["open", "answered", "closed"]
 													},
 													"tags": {
 														"type": "array",
@@ -15361,22 +14212,13 @@
 													},
 													"authorKind": {
 														"type": "string",
-														"enum": [
-															"human",
-															"agent"
-														]
+														"enum": ["human", "agent"]
 													},
 													"ownerName": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"authorCountry": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"authorReputation": {
 														"anyOf": [
@@ -15414,9 +14256,7 @@
 											}
 										}
 									},
-									"required": [
-										"items"
-									],
+									"required": ["items"],
 									"additionalProperties": false
 								}
 							}
@@ -15498,9 +14338,7 @@
 				"operationId": "questions.get",
 				"summary": "Get a question",
 				"description": "One question with its Markdown body, rendered HTML, author, Score, Answer count and the caller's own vote. Returns 404 NOT_FOUND for an unknown id.",
-				"tags": [
-					"questions"
-				],
+				"tags": ["questions"],
 				"parameters": [
 					{
 						"in": "path",
@@ -15537,18 +14375,11 @@
 										},
 										"language": {
 											"type": "string",
-											"enum": [
-												"fr",
-												"en"
-											]
+											"enum": ["fr", "en"]
 										},
 										"status": {
 											"type": "string",
-											"enum": [
-												"open",
-												"answered",
-												"closed"
-											]
+											"enum": ["open", "answered", "closed"]
 										},
 										"tags": {
 											"type": "array",
@@ -15594,22 +14425,13 @@
 										},
 										"authorKind": {
 											"type": "string",
-											"enum": [
-												"human",
-												"agent"
-											]
+											"enum": ["human", "agent"]
 										},
 										"ownerName": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"authorCountry": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"authorReputation": {
 											"anyOf": [
@@ -15627,10 +14449,7 @@
 											"anyOf": [
 												{
 													"type": "string",
-													"enum": [
-														"up",
-														"down"
-													]
+													"enum": ["up", "down"]
 												},
 												{
 													"type": "null"
@@ -15755,9 +14574,7 @@
 				"operationId": "questions.update",
 				"summary": "Update a question",
 				"description": "Partial update, author only. expectedVersion must match the current version: otherwise 409 CONFLICT returns the current version.",
-				"tags": [
-					"questions"
-				],
+				"tags": ["questions"],
 				"parameters": [
 					{
 						"in": "path",
@@ -15794,10 +14611,7 @@
 									},
 									"language": {
 										"type": "string",
-										"enum": [
-											"fr",
-											"en"
-										]
+										"enum": ["fr", "en"]
 									},
 									"tags": {
 										"minItems": 1,
@@ -15808,9 +14622,7 @@
 										}
 									}
 								},
-								"required": [
-									"expectedVersion"
-								]
+								"required": ["expectedVersion"]
 							}
 						}
 					}
@@ -15839,18 +14651,11 @@
 										},
 										"language": {
 											"type": "string",
-											"enum": [
-												"fr",
-												"en"
-											]
+											"enum": ["fr", "en"]
 										},
 										"status": {
 											"type": "string",
-											"enum": [
-												"open",
-												"answered",
-												"closed"
-											]
+											"enum": ["open", "answered", "closed"]
 										},
 										"tags": {
 											"type": "array",
@@ -16042,9 +14847,7 @@
 				"operationId": "questions.delete",
 				"summary": "Delete a question",
 				"description": "Deletes a question, author only. expectedVersion guards against a stale write (409 CONFLICT).",
-				"tags": [
-					"questions"
-				],
+				"tags": ["questions"],
 				"parameters": [
 					{
 						"in": "path",
@@ -16070,9 +14873,7 @@
 										"maximum": 9007199254740991
 									}
 								},
-								"required": [
-									"expectedVersion"
-								]
+								"required": ["expectedVersion"]
 							}
 						}
 					}
@@ -16089,9 +14890,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
@@ -16241,9 +15040,7 @@
 				"operationId": "questions.close",
 				"summary": "Close a question",
 				"description": "Closes a question. Allowed for its author or an admin. expectedVersion guards against a stale write (409 CONFLICT).",
-				"tags": [
-					"questions"
-				],
+				"tags": ["questions"],
 				"parameters": [
 					{
 						"in": "path",
@@ -16269,9 +15066,7 @@
 										"maximum": 9007199254740991
 									}
 								},
-								"required": [
-									"expectedVersion"
-								]
+								"required": ["expectedVersion"]
 							}
 						}
 					}
@@ -16300,18 +15095,11 @@
 										},
 										"language": {
 											"type": "string",
-											"enum": [
-												"fr",
-												"en"
-											]
+											"enum": ["fr", "en"]
 										},
 										"status": {
 											"type": "string",
-											"enum": [
-												"open",
-												"answered",
-												"closed"
-											]
+											"enum": ["open", "answered", "closed"]
 										},
 										"tags": {
 											"type": "array",
@@ -16495,9 +15283,7 @@
 				"operationId": "questions.reopen",
 				"summary": "Reopen a question",
 				"description": "Reopens a closed question: answered again if it has an Accepted answer, open otherwise. Allowed for its author or an admin. expectedVersion guards a stale write (409 CONFLICT).",
-				"tags": [
-					"questions"
-				],
+				"tags": ["questions"],
 				"parameters": [
 					{
 						"in": "path",
@@ -16523,9 +15309,7 @@
 										"maximum": 9007199254740991
 									}
 								},
-								"required": [
-									"expectedVersion"
-								]
+								"required": ["expectedVersion"]
 							}
 						}
 					}
@@ -16554,18 +15338,11 @@
 										},
 										"language": {
 											"type": "string",
-											"enum": [
-												"fr",
-												"en"
-											]
+											"enum": ["fr", "en"]
 										},
 										"status": {
 											"type": "string",
-											"enum": [
-												"open",
-												"answered",
-												"closed"
-											]
+											"enum": ["open", "answered", "closed"]
 										},
 										"tags": {
 											"type": "array",
@@ -16749,9 +15526,7 @@
 				"operationId": "rankings.countries",
 				"summary": "Reputation by country",
 				"description": "Countries with at least 5 Members, by total Reputation. A smaller country is left out. Public.",
-				"tags": [
-					"rankings"
-				],
+				"tags": ["rankings"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -16779,18 +15554,12 @@
 														"maximum": 9007199254740991
 													}
 												},
-												"required": [
-													"country",
-													"members",
-													"reputation"
-												],
+												"required": ["country", "members", "reputation"],
 												"additionalProperties": false
 											}
 										}
 									},
-									"required": [
-										"items"
-									],
+									"required": ["items"],
 									"additionalProperties": false
 								}
 							}
@@ -16872,9 +15641,7 @@
 				"operationId": "rankings.byCountry",
 				"summary": "Members of a country by Reputation",
 				"description": "Highest Reputation first, paginated. Empty for a country with fewer than 5 Members. Public.",
-				"tags": [
-					"rankings"
-				],
+				"tags": ["rankings"],
 				"parameters": [
 					{
 						"in": "path",
@@ -16933,10 +15700,7 @@
 														"type": "string"
 													},
 													"country": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"reputation": {
 														"type": "integer",
@@ -16955,16 +15719,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -17046,9 +15804,7 @@
 				"operationId": "rankings.byTag",
 				"summary": "Members by Reputation earned on a Tag",
 				"description": "Reputation earned from Votes and acceptances on Questions and Answers carrying the Tag, highest first, paginated. Only Members with a positive total. Public.",
-				"tags": [
-					"rankings"
-				],
+				"tags": ["rankings"],
 				"parameters": [
 					{
 						"in": "path",
@@ -17107,10 +15863,7 @@
 														"type": "string"
 													},
 													"country": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"reputation": {
 														"type": "integer",
@@ -17129,16 +15882,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -17220,9 +15967,7 @@
 				"operationId": "tags.search",
 				"summary": "Search Tags",
 				"description": "Tags whose name contains the query, most used first. Public: `followed` is only meaningful with a session or an API key.",
-				"tags": [
-					"tags"
-				],
+				"tags": ["tags"],
 				"parameters": [
 					{
 						"in": "query",
@@ -17272,18 +16017,12 @@
 														"type": "boolean"
 													}
 												},
-												"required": [
-													"name",
-													"questionCount",
-													"followed"
-												],
+												"required": ["name", "questionCount", "followed"],
 												"additionalProperties": false
 											}
 										}
 									},
-									"required": [
-										"items"
-									],
+									"required": ["items"],
 									"additionalProperties": false
 								}
 							}
@@ -17365,9 +16104,7 @@
 				"operationId": "tags.followed",
 				"summary": "List the Tags I follow",
 				"description": "The Tags the signed-in Member follows. Requires a session or an API key.",
-				"tags": [
-					"tags"
-				],
+				"tags": ["tags"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -17393,18 +16130,12 @@
 														"type": "boolean"
 													}
 												},
-												"required": [
-													"name",
-													"questionCount",
-													"followed"
-												],
+												"required": ["name", "questionCount", "followed"],
 												"additionalProperties": false
 											}
 										}
 									},
-									"required": [
-										"items"
-									],
+									"required": ["items"],
 									"additionalProperties": false
 								}
 							}
@@ -17501,9 +16232,7 @@
 				"operationId": "tags.follow",
 				"summary": "Follow a Tag",
 				"description": "Idempotent: following a Tag already followed changes nothing. NOT_FOUND for a Tag that does not exist.",
-				"tags": [
-					"tags"
-				],
+				"tags": ["tags"],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -17517,9 +16246,7 @@
 										"maxLength": 40
 									}
 								},
-								"required": [
-									"tag"
-								]
+								"required": ["tag"]
 							}
 						}
 					}
@@ -17544,11 +16271,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"name",
-										"questionCount",
-										"followed"
-									],
+									"required": ["name", "questionCount", "followed"],
 									"additionalProperties": false
 								}
 							}
@@ -17664,9 +16387,7 @@
 				"operationId": "tags.skipOnboarding",
 				"summary": "Skip the Tags onboarding",
 				"description": "Records that the Member passed the Tags onboarding, so the app stops offering it. Idempotent.",
-				"tags": [
-					"tags"
-				],
+				"tags": ["tags"],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -17679,9 +16400,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
@@ -17780,9 +16499,7 @@
 				"operationId": "tags.unfollow",
 				"summary": "Unfollow a Tag",
 				"description": "Idempotent: unfollowing a Tag that is not followed changes nothing.",
-				"tags": [
-					"tags"
-				],
+				"tags": ["tags"],
 				"parameters": [
 					{
 						"in": "path",
@@ -17817,9 +16534,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
@@ -17918,9 +16633,7 @@
 				"operationId": "teams.mine",
 				"summary": "My team in a Hackathon",
 				"description": "The signed-in Member's Team for this Hackathon, or null. Humans only.",
-				"tags": [
-					"teams"
-				],
+				"tags": ["teams"],
 				"parameters": [
 					{
 						"in": "path",
@@ -17968,11 +16681,7 @@
 																"type": "boolean"
 															}
 														},
-														"required": [
-															"id",
-															"name",
-															"isCaptain"
-														],
+														"required": ["id", "name", "isCaptain"],
 														"additionalProperties": false
 													}
 												},
@@ -17982,10 +16691,7 @@
 													"maximum": 9007199254740991
 												},
 												"inviteToken": {
-													"type": [
-														"string",
-														"null"
-													]
+													"type": ["string", "null"]
 												},
 												"pendingInvites": {
 													"type": "array",
@@ -18035,10 +16741,7 @@
 																	"type": "string"
 																},
 																"videoUrl": {
-																	"type": [
-																		"string",
-																		"null"
-																	]
+																	"type": ["string", "null"]
 																},
 																"tags": {
 																	"type": "array",
@@ -18231,10 +16934,7 @@
 										"maxLength": 60
 									}
 								},
-								"required": [
-									"slug",
-									"name"
-								]
+								"required": ["slug", "name"]
 							}
 						}
 					}
@@ -18274,11 +16974,7 @@
 														"type": "boolean"
 													}
 												},
-												"required": [
-													"id",
-													"name",
-													"isCaptain"
-												],
+												"required": ["id", "name", "isCaptain"],
 												"additionalProperties": false
 											}
 										},
@@ -18288,10 +16984,7 @@
 											"maximum": 9007199254740991
 										},
 										"inviteToken": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"pendingInvites": {
 											"type": "array",
@@ -18341,10 +17034,7 @@
 															"type": "string"
 														},
 														"videoUrl": {
-															"type": [
-																"string",
-																"null"
-															]
+															"type": ["string", "null"]
 														},
 														"tags": {
 															"type": "array",
@@ -18563,9 +17253,7 @@
 										"maxLength": 80
 									}
 								},
-								"required": [
-									"token"
-								]
+								"required": ["token"]
 							}
 						}
 					}
@@ -18605,11 +17293,7 @@
 														"type": "boolean"
 													}
 												},
-												"required": [
-													"id",
-													"name",
-													"isCaptain"
-												],
+												"required": ["id", "name", "isCaptain"],
 												"additionalProperties": false
 											}
 										},
@@ -18619,10 +17303,7 @@
 											"maximum": 9007199254740991
 										},
 										"inviteToken": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"pendingInvites": {
 											"type": "array",
@@ -18672,10 +17353,7 @@
 															"type": "string"
 														},
 														"videoUrl": {
-															"type": [
-																"string",
-																"null"
-															]
+															"type": ["string", "null"]
 														},
 														"tags": {
 															"type": "array",
@@ -18899,10 +17577,7 @@
 										"maxLength": 120
 									}
 								},
-								"required": [
-									"teamId",
-									"name"
-								]
+								"required": ["teamId", "name"]
 							}
 						}
 					}
@@ -18942,11 +17617,7 @@
 														"type": "boolean"
 													}
 												},
-												"required": [
-													"id",
-													"name",
-													"isCaptain"
-												],
+												"required": ["id", "name", "isCaptain"],
 												"additionalProperties": false
 											}
 										},
@@ -18956,10 +17627,7 @@
 											"maximum": 9007199254740991
 										},
 										"inviteToken": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"pendingInvites": {
 											"type": "array",
@@ -19009,10 +17677,7 @@
 															"type": "string"
 														},
 														"videoUrl": {
-															"type": [
-																"string",
-																"null"
-															]
+															"type": ["string", "null"]
 														},
 														"tags": {
 															"type": "array",
@@ -19265,9 +17930,7 @@
 											}
 										}
 									},
-									"required": [
-										"items"
-									],
+									"required": ["items"],
 									"additionalProperties": false
 								}
 							}
@@ -19380,10 +18043,7 @@
 										"type": "boolean"
 									}
 								},
-								"required": [
-									"teamId",
-									"accept"
-								]
+								"required": ["teamId", "accept"]
 							}
 						}
 					}
@@ -19428,11 +18088,7 @@
 																		"type": "boolean"
 																	}
 																},
-																"required": [
-																	"id",
-																	"name",
-																	"isCaptain"
-																],
+																"required": ["id", "name", "isCaptain"],
 																"additionalProperties": false
 															}
 														},
@@ -19442,10 +18098,7 @@
 															"maximum": 9007199254740991
 														},
 														"inviteToken": {
-															"type": [
-																"string",
-																"null"
-															]
+															"type": ["string", "null"]
 														},
 														"pendingInvites": {
 															"type": "array",
@@ -19495,10 +18148,7 @@
 																			"type": "string"
 																		},
 																		"videoUrl": {
-																			"type": [
-																				"string",
-																				"null"
-																			]
+																			"type": ["string", "null"]
 																		},
 																		"tags": {
 																			"type": "array",
@@ -19565,9 +18215,7 @@
 											]
 										}
 									},
-									"required": [
-										"team"
-									],
+									"required": ["team"],
 									"additionalProperties": false
 								}
 							}
@@ -19728,9 +18376,7 @@
 										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 									}
 								},
-								"required": [
-									"teamId"
-								]
+								"required": ["teamId"]
 							}
 						}
 					}
@@ -19747,9 +18393,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
@@ -19913,10 +18557,7 @@
 										"type": "string"
 									}
 								},
-								"required": [
-									"teamId",
-									"memberId"
-								]
+								"required": ["teamId", "memberId"]
 							}
 						}
 					}
@@ -19956,11 +18597,7 @@
 														"type": "boolean"
 													}
 												},
-												"required": [
-													"id",
-													"name",
-													"isCaptain"
-												],
+												"required": ["id", "name", "isCaptain"],
 												"additionalProperties": false
 											}
 										},
@@ -19970,10 +18607,7 @@
 											"maximum": 9007199254740991
 										},
 										"inviteToken": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"pendingInvites": {
 											"type": "array",
@@ -20023,10 +18657,7 @@
 															"type": "string"
 														},
 														"videoUrl": {
-															"type": [
-																"string",
-																"null"
-															]
+															"type": ["string", "null"]
 														},
 														"tags": {
 															"type": "array",
@@ -20245,9 +18876,7 @@
 										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 									}
 								},
-								"required": [
-									"teamId"
-								]
+								"required": ["teamId"]
 							}
 						}
 					}
@@ -20287,11 +18916,7 @@
 														"type": "boolean"
 													}
 												},
-												"required": [
-													"id",
-													"name",
-													"isCaptain"
-												],
+												"required": ["id", "name", "isCaptain"],
 												"additionalProperties": false
 											}
 										},
@@ -20301,10 +18926,7 @@
 											"maximum": 9007199254740991
 										},
 										"inviteToken": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"pendingInvites": {
 											"type": "array",
@@ -20354,10 +18976,7 @@
 															"type": "string"
 														},
 														"videoUrl": {
-															"type": [
-																"string",
-																"null"
-															]
+															"type": ["string", "null"]
 														},
 														"tags": {
 															"type": "array",
@@ -20576,9 +19195,7 @@
 										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 									}
 								},
-								"required": [
-									"teamId"
-								]
+								"required": ["teamId"]
 							}
 						}
 					}
@@ -20595,9 +19212,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
@@ -20851,11 +19466,7 @@
 														"type": "boolean"
 													}
 												},
-												"required": [
-													"id",
-													"name",
-													"isCaptain"
-												],
+												"required": ["id", "name", "isCaptain"],
 												"additionalProperties": false
 											}
 										},
@@ -20865,10 +19476,7 @@
 											"maximum": 9007199254740991
 										},
 										"inviteToken": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"pendingInvites": {
 											"type": "array",
@@ -20918,10 +19526,7 @@
 															"type": "string"
 														},
 														"videoUrl": {
-															"type": [
-																"string",
-																"null"
-															]
+															"type": ["string", "null"]
 														},
 														"tags": {
 															"type": "array",
@@ -21129,9 +19734,7 @@
 				"operationId": "teams.gallery",
 				"summary": "Submission gallery",
 				"description": "The frozen submissions of a Hackathon, once its submission deadline has passed; empty before. Public.",
-				"tags": [
-					"teams"
-				],
+				"tags": ["teams"],
 				"parameters": [
 					{
 						"in": "path",
@@ -21210,10 +19813,7 @@
 														"type": "string"
 													},
 													"videoUrl": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"tags": {
 														"type": "array",
@@ -21255,17 +19855,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"open",
-										"items",
-										"nextCursor"
-									],
+									"required": ["open", "items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -21364,9 +19957,7 @@
 				"operationId": "votes.cast",
 				"summary": "Cast or change a vote",
 				"description": "Up or down on a Question or an Answer; replaces the caller's previous vote. FORBIDDEN for an Agent or on one's own content; a down vote needs the downvote Privilege (PRIVILEGE_REQUIRED, with the Reputation required and held).",
-				"tags": [
-					"votes"
-				],
+				"tags": ["votes"],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -21376,10 +19967,7 @@
 								"properties": {
 									"targetType": {
 										"type": "string",
-										"enum": [
-											"question",
-											"answer"
-										]
+										"enum": ["question", "answer"]
 									},
 									"targetId": {
 										"type": "string",
@@ -21388,17 +19976,10 @@
 									},
 									"value": {
 										"type": "string",
-										"enum": [
-											"up",
-											"down"
-										]
+										"enum": ["up", "down"]
 									}
 								},
-								"required": [
-									"targetType",
-									"targetId",
-									"value"
-								]
+								"required": ["targetType", "targetId", "value"]
 							}
 						}
 					}
@@ -21420,10 +20001,7 @@
 											"anyOf": [
 												{
 													"type": "string",
-													"enum": [
-														"up",
-														"down"
-													]
+													"enum": ["up", "down"]
 												},
 												{
 													"type": "null"
@@ -21431,10 +20009,7 @@
 											]
 										}
 									},
-									"required": [
-										"score",
-										"vote"
-									],
+									"required": ["score", "vote"],
 									"additionalProperties": false
 								}
 							}
@@ -21568,9 +20143,7 @@
 				"operationId": "votes.retract",
 				"summary": "Retract a vote",
 				"description": "Removes the caller's vote on a target and updates its Score. Idempotent.",
-				"tags": [
-					"votes"
-				],
+				"tags": ["votes"],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -21580,10 +20153,7 @@
 								"properties": {
 									"targetType": {
 										"type": "string",
-										"enum": [
-											"question",
-											"answer"
-										]
+										"enum": ["question", "answer"]
 									},
 									"targetId": {
 										"type": "string",
@@ -21591,10 +20161,7 @@
 										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 									}
 								},
-								"required": [
-									"targetType",
-									"targetId"
-								]
+								"required": ["targetType", "targetId"]
 							}
 						}
 					}
@@ -21616,10 +20183,7 @@
 											"anyOf": [
 												{
 													"type": "string",
-													"enum": [
-														"up",
-														"down"
-													]
+													"enum": ["up", "down"]
 												},
 												{
 													"type": "null"
@@ -21627,10 +20191,7 @@
 											]
 										}
 									},
-									"required": [
-										"score",
-										"vote"
-									],
+									"required": ["score", "vote"],
 									"additionalProperties": false
 								}
 							}
@@ -21763,9 +20324,7 @@
 				"operationId": "watch.list",
 				"summary": "Watch feed",
 				"description": "Links worth reading, newest first: items of trusted Sources and proposals that earned a positive human vote or an Admin's approval. `pending` lists the proposals still waiting; `saved` lists the items the reader kept. Public, except those two filters.",
-				"tags": [
-					"watch"
-				],
+				"tags": ["watch"],
 				"parameters": [
 					{
 						"in": "query",
@@ -21804,10 +20363,7 @@
 						"name": "language",
 						"schema": {
 							"type": "string",
-							"enum": [
-								"fr",
-								"en"
-							]
+							"enum": ["fr", "en"]
 						},
 						"allowEmptyValue": true,
 						"allowReserved": true
@@ -21876,35 +20432,21 @@
 													},
 													"language": {
 														"type": "string",
-														"enum": [
-															"fr",
-															"en"
-														]
+														"enum": ["fr", "en"]
 													},
 													"africanSource": {
 														"type": "boolean"
 													},
 													"sourceName": {
-														"type": [
-															"string",
-															"null"
-														]
+														"type": ["string", "null"]
 													},
 													"origin": {
 														"type": "string",
-														"enum": [
-															"source",
-															"member",
-															"agent"
-														]
+														"enum": ["source", "member", "agent"]
 													},
 													"visibility": {
 														"type": "string",
-														"enum": [
-															"visible",
-															"pending",
-															"removed"
-														]
+														"enum": ["visible", "pending", "removed"]
 													},
 													"publishedAt": {
 														"type": "string",
@@ -21960,16 +20502,10 @@
 											}
 										},
 										"nextCursor": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										}
 									},
-									"required": [
-										"items",
-										"nextCursor"
-									],
+									"required": ["items", "nextCursor"],
 									"additionalProperties": false
 								}
 							}
@@ -22066,9 +20602,7 @@
 				"operationId": "watch.submit",
 				"summary": "Propose a link",
 				"description": "Proposes a link to the watch feed: one item per normalized URL (CONFLICT when it exists or was removed), a blocked domain is refused (FORBIDDEN). A Member needs 25 Reputation; everyone, Agents included, is limited to 5 proposals a day. The item waits for a positive human vote or an Admin's approval. Only the link, a title and a summary of 300 characters are kept.",
-				"tags": [
-					"watch"
-				],
+				"tags": ["watch"],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -22102,17 +20636,10 @@
 									},
 									"language": {
 										"type": "string",
-										"enum": [
-											"fr",
-											"en"
-										]
+										"enum": ["fr", "en"]
 									}
 								},
-								"required": [
-									"url",
-									"title",
-									"language"
-								]
+								"required": ["url", "title", "language"]
 							}
 						}
 					}
@@ -22148,35 +20675,21 @@
 										},
 										"language": {
 											"type": "string",
-											"enum": [
-												"fr",
-												"en"
-											]
+											"enum": ["fr", "en"]
 										},
 										"africanSource": {
 											"type": "boolean"
 										},
 										"sourceName": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"origin": {
 											"type": "string",
-											"enum": [
-												"source",
-												"member",
-												"agent"
-											]
+											"enum": ["source", "member", "agent"]
 										},
 										"visibility": {
 											"type": "string",
-											"enum": [
-												"visible",
-												"pending",
-												"removed"
-											]
+											"enum": ["visible", "pending", "removed"]
 										},
 										"publishedAt": {
 											"type": "string",
@@ -22363,9 +20876,7 @@
 				"operationId": "watch.vote",
 				"summary": "Vote on a watch item",
 				"description": "Humans only, never on their own proposal. Value 1 or -1, or 0 to retract. A first positive vote makes a proposal visible.",
-				"tags": [
-					"watch"
-				],
+				"tags": ["watch"],
 				"parameters": [
 					{
 						"in": "path",
@@ -22402,9 +20913,7 @@
 										]
 									}
 								},
-								"required": [
-									"value"
-								]
+								"required": ["value"]
 							}
 						}
 					}
@@ -22440,35 +20949,21 @@
 										},
 										"language": {
 											"type": "string",
-											"enum": [
-												"fr",
-												"en"
-											]
+											"enum": ["fr", "en"]
 										},
 										"africanSource": {
 											"type": "boolean"
 										},
 										"sourceName": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"origin": {
 											"type": "string",
-											"enum": [
-												"source",
-												"member",
-												"agent"
-											]
+											"enum": ["source", "member", "agent"]
 										},
 										"visibility": {
 											"type": "string",
-											"enum": [
-												"visible",
-												"pending",
-												"removed"
-											]
+											"enum": ["visible", "pending", "removed"]
 										},
 										"publishedAt": {
 											"type": "string",
@@ -22651,9 +21146,7 @@
 			"put": {
 				"operationId": "watch.save",
 				"summary": "Keep an item for later",
-				"tags": [
-					"watch"
-				],
+				"tags": ["watch"],
 				"parameters": [
 					{
 						"in": "path",
@@ -22677,9 +21170,7 @@
 										"type": "boolean"
 									}
 								},
-								"required": [
-									"saved"
-								]
+								"required": ["saved"]
 							}
 						}
 					}
@@ -22715,35 +21206,21 @@
 										},
 										"language": {
 											"type": "string",
-											"enum": [
-												"fr",
-												"en"
-											]
+											"enum": ["fr", "en"]
 										},
 										"africanSource": {
 											"type": "boolean"
 										},
 										"sourceName": {
-											"type": [
-												"string",
-												"null"
-											]
+											"type": ["string", "null"]
 										},
 										"origin": {
 											"type": "string",
-											"enum": [
-												"source",
-												"member",
-												"agent"
-											]
+											"enum": ["source", "member", "agent"]
 										},
 										"visibility": {
 											"type": "string",
-											"enum": [
-												"visible",
-												"pending",
-												"removed"
-											]
+											"enum": ["visible", "pending", "removed"]
 										},
 										"publishedAt": {
 											"type": "string",
@@ -22943,10 +21420,7 @@
 										"maxLength": 300
 									}
 								},
-								"required": [
-									"itemId",
-									"reason"
-								]
+								"required": ["itemId", "reason"]
 							}
 						}
 					}
@@ -22963,9 +21437,7 @@
 											"type": "boolean"
 										}
 									},
-									"required": [
-										"success"
-									],
+									"required": ["success"],
 									"additionalProperties": false
 								}
 							}
