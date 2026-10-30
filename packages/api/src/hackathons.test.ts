@@ -11,6 +11,7 @@ const row = {
 	opensAt: null,
 	teamsEnabled: true,
 	summary: "Concours en ligne.",
+	status: "published" as const,
 	teamMin: 2,
 	teamMax: 5,
 	sourceUrl: "https://systalink.com/fr/coupe-afrique-des-developpeurs-cadev",

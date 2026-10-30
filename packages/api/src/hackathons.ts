@@ -7,7 +7,7 @@ import {
 	hackathonPrize,
 } from "@codesphere/db/schema/hackathons";
 import { organization } from "@codesphere/db/schema/organizations";
-import { asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import type * as z from "zod";
 
 type HackathonRow = typeof hackathon.$inferSelect;
@@ -48,6 +48,7 @@ export function toHackathon(
 		organizer: children.organization.name,
 		organizationSlug: children.organization.slug,
 		summary: row.summary,
+		status: row.status,
 		teamMin: row.teamMin,
 		teamMax: row.teamMax,
 		milestones: [...children.milestones].sort(byPosition).map((m) => ({
@@ -76,10 +77,21 @@ export function toHackathon(
 	};
 }
 
-/** Loads Hackathons with their Milestones, Prizes and criteria in four queries, no join fan-out. */
+type Status = HackathonRow["status"];
+
+/** What a public page can open: everything but a draft (#325). */
+export const PUBLIC_STATUSES: Status[] = ["published", "ended", "archived"];
+/** What the public lists show: an archived Hackathon keeps its page but leaves them. */
+export const LISTED_STATUSES: Status[] = ["published", "ended"];
+export const ALL_STATUSES: Status[] = ["draft", ...PUBLIC_STATUSES];
+
+/**
+ * Loads Hackathons with their Milestones, Prizes and criteria in four queries, no join fan-out.
+ * Drafts stay out unless `statuses` asks for them.
+ */
 export async function loadHackathons(
 	db: Database,
-	filter?: { slug: string },
+	filter: { slug?: string; statuses?: Status[] } = {},
 	limit = 20,
 ) {
 	const joined = await db
@@ -91,7 +103,12 @@ export async function loadHackathons(
 		})
 		.from(hackathon)
 		.innerJoin(organization, eq(organization.id, hackathon.organizationId))
-		.where(filter ? eq(hackathon.slug, filter.slug) : undefined)
+		.where(
+			and(
+				inArray(hackathon.status, filter.statuses ?? PUBLIC_STATUSES),
+				filter.slug ? eq(hackathon.slug, filter.slug) : undefined,
+			),
+		)
 		.orderBy(asc(hackathon.createdAt))
 		.limit(limit);
 	if (!joined.length) {

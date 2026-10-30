@@ -12,7 +12,13 @@ import type { RouterContractClient } from "@orpc/contract";
 import { ORPCError } from "@orpc/server";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import { updateHackathon } from "../admin-hackathons";
+import {
+	advanceHackathon,
+	createHackathon,
+	type HackathonWriteOutcome,
+	listAdminHackathons,
+	updateHackathon,
+} from "../admin-hackathons";
 import { kpiReport } from "../admin-kpi";
 import { listMembers, setSuspension } from "../admin-members";
 import {
@@ -43,7 +49,7 @@ import { decodeCursor, encodeCursor } from "../cursor";
 import { unexpectedErrors } from "../errors";
 import { isRead, isWatchSubmission } from "../exposure";
 import { createMixedFeedHandlers } from "../feed-mixed/handlers";
-import { loadHackathons } from "../hackathons";
+import { LISTED_STATUSES, loadHackathons } from "../hackathons";
 import { impl } from "../index";
 import {
 	createJobsAdminHandlers,
@@ -188,6 +194,31 @@ const enforceAgentPreset = impl.middleware(
 	},
 );
 
+/** A Hackathon write's outcome as the contract's errors (#325). */
+function hackathonOr(
+	errors: {
+		BAD_REQUEST: (options: {
+			data: { issues: { path: string[]; message: string }[] };
+		}) => Error;
+		NOT_FOUND: () => Error;
+		CONFLICT: (options: { data: { version: number } }) => Error;
+	},
+	outcome: HackathonWriteOutcome,
+) {
+	if (outcome.ok) {
+		return outcome.hackathon;
+	}
+	if (outcome.code === "BAD_REQUEST") {
+		throw errors.BAD_REQUEST({
+			data: { issues: [{ path: [outcome.path], message: outcome.message }] },
+		});
+	}
+	if (outcome.code === "NOT_FOUND") {
+		throw errors.NOT_FOUND();
+	}
+	throw errors.CONFLICT({ data: { version: outcome.version } });
+}
+
 export const appRouter = impl
 	.use(unexpectedErrors)
 	.use(refuseRateLimitedKeys)
@@ -308,7 +339,11 @@ export const appRouter = impl
 		},
 		hackathons: {
 			list: impl.hackathons.list.handler(async ({ context, input }) => ({
-				items: await loadHackathons(context.db, undefined, input.limit),
+				items: await loadHackathons(
+					context.db,
+					{ statuses: LISTED_STATUSES },
+					input.limit,
+				),
 				nextCursor: null,
 			})),
 			get: impl.hackathons.get.handler(async ({ context, input, errors }) => {
@@ -330,6 +365,35 @@ export const appRouter = impl
 					kpiReport(context.db, input.period),
 				),
 			hackathons: {
+				list: impl.admin.hackathons.list
+					.use(staffMay({ hackathon: ["update"] }))
+					.handler(async ({ context }) => ({
+						items: await listAdminHackathons(context.db),
+					})),
+				create: impl.admin.hackathons.create
+					.use(staffMay({ hackathon: ["update"] }))
+					.handler(async ({ context, input, errors }) =>
+						hackathonOr(
+							errors,
+							await createHackathon(
+								context.db,
+								actorOf(context.session),
+								input,
+							),
+						),
+					),
+				advance: impl.admin.hackathons.advance
+					.use(staffMay({ hackathon: ["update"] }))
+					.handler(async ({ context, input, errors }) =>
+						hackathonOr(
+							errors,
+							await advanceHackathon(
+								context.db,
+								actorOf(context.session),
+								input,
+							),
+						),
+					),
 				update: impl.admin.hackathons.update
 					.use(staffMay({ hackathon: ["update"] }))
 					.handler(async ({ context, input, errors }) => {

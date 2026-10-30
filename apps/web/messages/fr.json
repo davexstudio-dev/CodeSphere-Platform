@@ -311,7 +311,8 @@
 			"closes": "Clôture des soumissions le {date}",
 			"timeline": "Calendrier du hackathon",
 			"see": "Voir le Hackathon",
-			"daysShort": "j"
+			"daysShort": "j",
+			"all": "Tous les hackathons"
 		},
 		"loadError": "Impossible de charger le Hackathon.",
 		"feed": {
@@ -393,7 +394,7 @@
 		},
 		"hackathons": {
 			"title": "Hackathon",
-			"description": "Le CADEV, ses Milestones et ses critères de jugement.",
+			"description": "Les Hackathons, leurs Milestones et leurs critères de jugement.",
 			"list": "Hackathons",
 			"group": "Hackathon",
 			"loading": "Chargement…",
@@ -430,12 +431,47 @@
 			"reload": "Recharger",
 			"failure": {
 				"forbidden": "Action réservée au staff.",
-				"failed": "L'enregistrement a échoué. Réessayez."
+				"failed": "L'enregistrement a échoué. Réessayez.",
+				"advance": "Le changement d'état a échoué : vérifiez les Milestones et le total des critères."
 			},
 			"teamsEnabled": "Équipes sur CodeSphere",
 			"teamsEnabledHint": "Activé : les Members créent leur équipe et déposent leur projet ici. Désactivé : l'inscription se fait chez l'organisateur, l'onglet équipe est masqué et un lien vers sa page est affiché.",
 			"yes": "Oui",
-			"no": "Non"
+			"no": "Non",
+			"statusGroup": {
+				"published": "Publiés",
+				"draft": "Brouillons",
+				"ended": "Terminés",
+				"archived": "Archivés"
+			},
+			"status": {
+				"draft": "Brouillon",
+				"published": "Publié",
+				"ended": "Terminé",
+				"archived": "Archivé"
+			},
+			"advance": {
+				"draft": "Publier",
+				"published": "Terminer",
+				"ended": "Archiver"
+			},
+			"advanceNote": {
+				"draft": "Le Hackathon devient public. Il faut au moins un Milestone et des critères à 100 %. Sans retour en arrière.",
+				"published": "Le Hackathon passe en terminé. Sans retour en arrière.",
+				"ended": "Le Hackathon quitte les listes publiques et garde sa page. Sans retour en arrière."
+			},
+			"newMilestone": "Nouvelle étape",
+			"addMilestone": "Ajouter une étape",
+			"submissions": "Soumissions",
+			"submissionsElsewhere": "Chez l'organisateur",
+			"new": "Nouveau Hackathon",
+			"createDescription": "Il est créé en brouillon, invisible du public, avec les critères habituels à ajuster.",
+			"slug": "Adresse (slug)",
+			"slugHint": "Minuscules, chiffres et tirets : /hackathons/mon-hackathon.",
+			"sourceUrl": "Page de l'organisateur",
+			"submissionClose": "Clôture des soumissions",
+			"createAction": "Créer le brouillon",
+			"createFailed": "La création a échoué : vérifiez l'adresse, qui doit être libre, et l'Organisation."
 		},
 		"tags": {
 			"title": "Tags",
@@ -630,7 +666,9 @@
 				"watch_source_create": "Source de veille ajoutée",
 				"watch_source_remove": "Source de veille retirée",
 				"watch_source_update": "Source de veille modifiée",
-				"staff_invite": "Invitation au staff envoyée"
+				"staff_invite": "Invitation au staff envoyée",
+				"hackathon_create": "Hackathon créé",
+				"hackathon_status": "État du Hackathon changé"
 			}
 		},
 		"forbidden": {
@@ -1662,6 +1700,17 @@
 		"error": "Historique indisponible.",
 		"empty": "Aucune activité pour ce filtre.",
 		"more": "Plus ancien"
+	},
+	"hackathonsPage": {
+		"title": "Hackathons",
+		"intro": "Les concours en cours et passés listés sur CodeSphere.",
+		"empty": "Aucun Hackathon pour le moment.",
+		"error": "Impossible de charger les Hackathons.",
+		"retry": "Réessayer",
+		"organizedBy": "Organisé par {name}",
+		"published": "En cours",
+		"ended": "Terminé",
+		"next": "Prochaine étape : {label}, {date}"
 	},
 	"notFound": {
 		"eyebrow": "Erreur 404",

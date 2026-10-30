@@ -1,0 +1,1 @@
+ALTER TABLE "hackathon" ADD COLUMN "status" text DEFAULT 'published' NOT NULL;

@@ -9,6 +9,7 @@ import {
 	AlertDescription,
 	AlertTitle,
 } from "@codesphere/ui/components/molecules/alert";
+import { CadevBanner } from "@codesphere/ui/components/molecules/cadev-banner";
 import { ConfirmTwoStep } from "@codesphere/ui/components/molecules/confirm-two-step";
 import { Field } from "@codesphere/ui/components/molecules/field";
 import { GroupedList } from "@codesphere/ui/components/molecules/grouped-list";
@@ -25,15 +26,15 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 import AdminFrame from "@/components/admin-frame";
+import { CreateHackathon } from "@/components/hackathon/create-hackathon";
 import {
 	criteriaTotal,
 	fromLocalInput,
 	isDirty,
 	toLocalInput,
 } from "@/lib/admin-hackathon";
+import { submissionClose } from "@/lib/home";
 import { orpc } from "@/utils/orpc";
-
-const SLUG = "cadev-2026";
 
 type Draft = {
 	name: string;
@@ -61,6 +62,7 @@ type Draft = {
 export default function AdminHackathonsPage() {
 	const t = useTranslations("admin.hackathons");
 	const tc = useTranslations("admin.common");
+	const tb = useTranslations("home.banner");
 	const locale = useLocale();
 	const dateFormat = new Intl.DateTimeFormat(locale, {
 		dateStyle: "medium",
@@ -68,9 +70,13 @@ export default function AdminHackathonsPage() {
 	});
 	const queryClient = useQueryClient();
 	const query = useQuery(
-		orpc.hackathons.get.queryOptions({ input: { slug: SLUG } }),
+		orpc.admin.hackathons.list.queryOptions({ input: {} }),
 	);
-	const hackathon = query.data;
+	const [selected, setSelected] = useState<string | null>(null);
+	const hackathons = query.data?.items ?? [];
+	const hackathon =
+		hackathons.find((h) => h.slug === selected) ?? hackathons[0];
+	const slug = hackathon?.slug ?? "";
 	// Only validated Organizations can list a Hackathon (#257).
 	const organizations = useQuery(
 		orpc.organizations.list.queryOptions({ input: { limit: 50 } }),
@@ -78,7 +84,9 @@ export default function AdminHackathonsPage() {
 	const [draft, setDraft] = useState<Draft | null>(null);
 	const [confirming, setConfirming] = useState(false);
 	const [conflictVersion, setConflictVersion] = useState<number | null>(null);
-	const [failure, setFailure] = useState<"forbidden" | "failed" | null>(null);
+	const [failure, setFailure] = useState<
+		"forbidden" | "failed" | "advance" | null
+	>(null);
 
 	const original: Draft | null = hackathon
 		? {
@@ -103,16 +111,30 @@ export default function AdminHackathonsPage() {
 			}
 		: null;
 
+	const refresh = () => {
+		void queryClient.invalidateQueries({
+			queryKey: orpc.admin.hackathons.key(),
+		});
+		void queryClient.invalidateQueries({ queryKey: orpc.hackathons.key() });
+		void queryClient.invalidateQueries({ queryKey: orpc.admin.auditLog.key() });
+	};
+	const advance = useMutation(
+		orpc.admin.hackathons.advance.mutationOptions({
+			onSuccess: () => {
+				refresh();
+				setFailure(null);
+			},
+			onError: () => {
+				refresh();
+				setFailure("advance");
+			},
+		}),
+	);
+
 	const save = useMutation(
 		orpc.admin.hackathons.update.mutationOptions({
-			onSuccess: (updated) => {
-				queryClient.setQueryData(
-					orpc.hackathons.get.queryKey({ input: { slug: SLUG } }),
-					updated,
-				);
-				void queryClient.invalidateQueries({
-					queryKey: orpc.admin.auditLog.key(),
-				});
+			onSuccess: () => {
+				refresh();
 				setDraft(null);
 				setConfirming(false);
 				setConflictVersion(null);
@@ -151,7 +173,7 @@ export default function AdminHackathonsPage() {
 			return;
 		}
 		save.mutate({
-			slug: SLUG,
+			slug,
 			expectedVersion: hackathon.version,
 			name: draft.name,
 			organizationSlug: draft.organizationSlug || undefined,
@@ -195,336 +217,427 @@ export default function AdminHackathonsPage() {
 				list={
 					<GroupedList
 						label={t("list")}
-						groups={[{ key: "hackathon", label: t("group") }]}
-						selectedId={hackathon ? SLUG : null}
-						onSelect={() => undefined}
-						emptyText={query.isPending ? t("loading") : t("empty")}
-						items={
-							hackathon
-								? [{ id: SLUG, name: hackathon.name, group: "hackathon" }]
-								: []
+						groups={(["published", "draft", "ended", "archived"] as const).map(
+							(status) => ({
+								key: status,
+								label: t(`statusGroup.${status}`),
+							}),
+						)}
+						selectedId={hackathon?.slug ?? null}
+						onSelect={(item) => {
+							setSelected(item.id);
+							setDraft(null);
+							setConfirming(false);
+							setConflictVersion(null);
+							setFailure(null);
+						}}
+						actions={
+							<CreateHackathon
+								organizations={organizations.data?.items ?? []}
+								onCreated={(created) => {
+									refresh();
+									setSelected(created);
+									setDraft(null);
+								}}
+							/>
 						}
+						emptyText={query.isPending ? t("loading") : t("empty")}
+						items={hackathons.map((h) => ({
+							id: h.slug,
+							name: h.name,
+							group: h.status,
+						}))}
 					/>
 				}
 				detail={
 					hackathon && original ? (
-						<RecordSheet
-							title={hackathon.name}
-							editing={Boolean(draft)}
-							onEdit={() => setDraft(original)}
-						>
-							{conflictVersion !== null && (
-								<Alert variant="destructive">
-									<AlertCircleIcon />
-									<AlertTitle>{t("staleTitle")}</AlertTitle>
-									<AlertDescription>
-										{t("stale", { version: conflictVersion })}{" "}
-										<Button variant="link" size="sm" onClick={reload}>
-											{t("reload")}
-										</Button>
-									</AlertDescription>
-								</Alert>
+						<div className="grid gap-6">
+							{hackathon.milestones.length > 0 && (
+								<CadevBanner
+									name={hackathon.name}
+									summary={hackathon.summary}
+									closesAt={
+										submissionClose(hackathon.milestones) ??
+										hackathon.verifiedAt
+									}
+									milestones={hackathon.milestones}
+									locale={locale}
+									labels={{
+										eyebrow: t(`status.${hackathon.status}`),
+										days: tb("days"),
+										daysShort: tb("daysShort"),
+										hours: tb("hours"),
+										remaining: (days) => tb("remaining", { days }),
+										timeline: tb("timeline"),
+									}}
+								/>
 							)}
-							{failure && (
-								<Alert variant="destructive">
-									<AlertCircleIcon />
-									<AlertDescription>{t(`failure.${failure}`)}</AlertDescription>
-								</Alert>
-							)}
-							{draft ? (
-								<>
-									<RecordSection title={t("general")}>
-										<Field id="h-name" label={t("name")}>
-											<Input
-												id="h-name"
-												value={draft.name}
-												onChange={(e) => set("name", e.target.value)}
-											/>
-										</Field>
-										<Field id="h-organizer" label={t("organizer")}>
-											<select
-												id="h-organizer"
-												className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
-												value={draft.organizationSlug}
-												onChange={(e) =>
-													set("organizationSlug", e.target.value)
-												}
-											>
-												{/* The current organizer first, even when its profile is no longer public. */}
-												{!(organizations.data?.items ?? []).some(
-													(o) => o.slug === hackathon.organizationSlug,
-												) && (
-													<option
-														value={hackathon.organizationSlug ?? ""}
-														disabled={!hackathon.organizationSlug}
-													>
-														{hackathon.organizer}
-													</option>
-												)}
-												{(organizations.data?.items ?? []).map((o) => (
-													<option key={o.slug} value={o.slug}>
-														{o.name}
-													</option>
-												))}
-											</select>
-										</Field>
-										<div className="grid grid-cols-2 gap-3">
-											<Field id="h-min" label={t("teamMin")}>
-												<Input
-													id="h-min"
-													type="number"
-													min={1}
-													value={draft.teamMin}
-													onChange={(e) =>
-														set("teamMin", Number(e.target.value))
-													}
-												/>
-											</Field>
-											<Field id="h-max" label={t("teamMax")}>
-												<Input
-													id="h-max"
-													type="number"
-													min={1}
-													value={draft.teamMax}
-													onChange={(e) =>
-														set("teamMax", Number(e.target.value))
-													}
-												/>
-											</Field>
-										</div>
-										<Field id="h-summary" label={t("summary")}>
-											<Textarea
-												id="h-summary"
-												value={draft.summary}
-												onChange={(e) => set("summary", e.target.value)}
-											/>
-										</Field>
-										<Field
-											id="h-teams"
-											label={t("teamsEnabled")}
-											description={t("teamsEnabledHint")}
-										>
-											<Switch
-												id="h-teams"
-												aria-label={t("teamsEnabled")}
-												checked={draft.teamsEnabled}
-												onCheckedChange={(checked) =>
-													set("teamsEnabled", checked)
-												}
-											/>
-										</Field>
-										<Field
-											id="h-source"
-											label={t("sourceNote")}
-											description={t("sourceNoteHint")}
-										>
-											<Textarea
-												id="h-source"
-												maxLength={500}
-												value={draft.sourceNote}
-												onChange={(e) => set("sourceNote", e.target.value)}
-											/>
-										</Field>
-									</RecordSection>
-									<RecordSection title={t("milestones")}>
-										{draft.milestones.map((m, index) => (
-											<div
-												key={m.key}
-												className="grid gap-3 sm:grid-cols-[1fr_auto_auto]"
-											>
-												<Field id={`m-${m.key}-label`} label={t("label")}>
-													<Input
-														id={`m-${m.key}-label`}
-														value={m.label}
-														onChange={(e) =>
-															set(
-																"milestones",
-																draft.milestones.map((x, i) =>
-																	i === index
-																		? { ...x, label: e.target.value }
-																		: x,
-																),
-															)
-														}
-													/>
-												</Field>
-												<Field id={`m-${m.key}-start`} label={t("start")}>
-													<Input
-														id={`m-${m.key}-start`}
-														type="datetime-local"
-														value={m.startsAt}
-														onChange={(e) =>
-															set(
-																"milestones",
-																draft.milestones.map((x, i) =>
-																	i === index
-																		? { ...x, startsAt: e.target.value }
-																		: x,
-																),
-															)
-														}
-													/>
-												</Field>
-												<Field id={`m-${m.key}-end`} label={t("end")}>
-													<Input
-														id={`m-${m.key}-end`}
-														type="datetime-local"
-														value={m.endsAt}
-														onChange={(e) =>
-															set(
-																"milestones",
-																draft.milestones.map((x, i) =>
-																	i === index
-																		? { ...x, endsAt: e.target.value }
-																		: x,
-																),
-															)
-														}
-													/>
-												</Field>
-											</div>
-										))}
-										<p className="text-muted-foreground text-xs">
-											{t("timezone")}
-										</p>
-									</RecordSection>
-									<RecordSection title={t("criteria")}>
-										{draft.criteria.map((c, index) => (
-											<div
-												key={c.label}
-												className="grid grid-cols-[1fr_6rem] gap-3"
-											>
-												<Field id={`c-${index}-label`} label={t("label")}>
-													<Input
-														id={`c-${index}-label`}
-														value={c.label}
-														onChange={(e) =>
-															set(
-																"criteria",
-																draft.criteria.map((x, i) =>
-																	i === index
-																		? { ...x, label: e.target.value }
-																		: x,
-																),
-															)
-														}
-													/>
-												</Field>
-												<Field id={`c-${index}-weight`} label={t("weight")}>
-													<Input
-														id={`c-${index}-weight`}
-														type="number"
-														min={0}
-														max={100}
-														value={c.weight}
-														onChange={(e) =>
-															set(
-																"criteria",
-																draft.criteria.map((x, i) =>
-																	i === index
-																		? { ...x, weight: Number(e.target.value) }
-																		: x,
-																),
-															)
-														}
-													/>
-												</Field>
-											</div>
-										))}
-										<p
-											aria-live="polite"
-											className={
-												total === 100
-													? "text-muted-foreground text-sm"
-													: "font-medium text-destructive text-sm"
-											}
-										>
-											{t("total", { total })}{" "}
-											{total === 100 ? "" : t("mustBe100")}
-										</p>
-									</RecordSection>
-									{confirming && (
-										<RecordSection title={t("confirmTitle")}>
-											<p className="text-sm">{t("confirmBody")}</p>
-											<div className="flex flex-wrap gap-2">
-												<ConfirmTwoStep
-													label={t("confirmAction")}
-													confirmLabel={(seconds) => tc("confirm", { seconds })}
-													cancelLabel={tc("cancel")}
-													disabled={save.isPending}
-													onConfirm={submit}
-												/>
-												<Button
-													variant="outline"
-													onClick={() => setConfirming(false)}
-												>
-													{tc("cancel")}
-												</Button>
-											</div>
-										</RecordSection>
-									)}
-									<SaveBar
-										dirty={dirty && total === 100}
-										saving={save.isPending}
-										saveLabel={tc("save")}
-										discardLabel={tc("cancel")}
-										dirtyText={tc("dirty")}
-										cleanText={tc("clean")}
-										onSave={() => setConfirming(true)}
-										onDiscard={() => {
-											setDraft(null);
-											setConfirming(false);
-										}}
+							{hackathon.status !== "archived" && (
+								<div className="grid justify-items-start gap-1">
+									<ConfirmTwoStep
+										label={t(`advance.${hackathon.status}`)}
+										confirmLabel={(seconds) => tc("confirm", { seconds })}
+										cancelLabel={tc("cancel")}
+										onConfirm={() =>
+											advance.mutate({
+												slug,
+												expectedVersion: hackathon.version,
+											})
+										}
 									/>
 									<p className="text-muted-foreground text-xs">
-										{t("noDelete")}
+										{t(`advanceNote.${hackathon.status}`)}
 									</p>
-								</>
-							) : (
-								<>
-									<RecordSection title={t("general")}>
-										<RecordFields
-											fields={[
-												{ label: t("organizer"), value: hackathon.organizer },
-												{
-													label: t("team"),
-													value: t("teamRange", {
-														min: hackathon.teamMin,
-														max: hackathon.teamMax,
-													}),
-												},
-												{ label: t("summary"), value: hackathon.summary },
-												{
-													label: t("teamsEnabled"),
-													value: hackathon.teamsEnabled ? t("yes") : t("no"),
-												},
-												{
-													label: t("sourceNote"),
-													value: hackathon.sourceNote ?? "—",
-												},
-												{ label: t("version"), value: hackathon.version },
-											]}
-										/>
-									</RecordSection>
-									<RecordSection title={t("milestones")}>
-										<RecordFields
-											fields={hackathon.milestones.map((m) => ({
-												label: m.label,
-												value: dateFormat.format(new Date(m.startsAt)),
-											}))}
-										/>
-									</RecordSection>
-									<RecordSection title={t("criteria")}>
-										<RecordFields
-											fields={hackathon.criteria.map((c) => ({
-												label: c.label,
-												value: `${c.weight} %`,
-											}))}
-										/>
-									</RecordSection>
-								</>
+								</div>
 							)}
-						</RecordSheet>
+							<RecordSheet
+								title={hackathon.name}
+								editing={Boolean(draft)}
+								onEdit={() => setDraft(original)}
+							>
+								{conflictVersion !== null && (
+									<Alert variant="destructive">
+										<AlertCircleIcon />
+										<AlertTitle>{t("staleTitle")}</AlertTitle>
+										<AlertDescription>
+											{t("stale", { version: conflictVersion })}{" "}
+											<Button variant="link" size="sm" onClick={reload}>
+												{t("reload")}
+											</Button>
+										</AlertDescription>
+									</Alert>
+								)}
+								{failure && (
+									<Alert variant="destructive">
+										<AlertCircleIcon />
+										<AlertDescription>
+											{t(`failure.${failure}`)}
+										</AlertDescription>
+									</Alert>
+								)}
+								{draft ? (
+									<>
+										<RecordSection title={t("general")}>
+											<Field id="h-name" label={t("name")}>
+												<Input
+													id="h-name"
+													value={draft.name}
+													onChange={(e) => set("name", e.target.value)}
+												/>
+											</Field>
+											<Field id="h-organizer" label={t("organizer")}>
+												<select
+													id="h-organizer"
+													className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+													value={draft.organizationSlug}
+													onChange={(e) =>
+														set("organizationSlug", e.target.value)
+													}
+												>
+													{/* The current organizer first, even when its profile is no longer public. */}
+													{!(organizations.data?.items ?? []).some(
+														(o) => o.slug === hackathon.organizationSlug,
+													) && (
+														<option
+															value={hackathon.organizationSlug ?? ""}
+															disabled={!hackathon.organizationSlug}
+														>
+															{hackathon.organizer}
+														</option>
+													)}
+													{(organizations.data?.items ?? []).map((o) => (
+														<option key={o.slug} value={o.slug}>
+															{o.name}
+														</option>
+													))}
+												</select>
+											</Field>
+											<div className="grid grid-cols-2 gap-3">
+												<Field id="h-min" label={t("teamMin")}>
+													<Input
+														id="h-min"
+														type="number"
+														min={1}
+														value={draft.teamMin}
+														onChange={(e) =>
+															set("teamMin", Number(e.target.value))
+														}
+													/>
+												</Field>
+												<Field id="h-max" label={t("teamMax")}>
+													<Input
+														id="h-max"
+														type="number"
+														min={1}
+														value={draft.teamMax}
+														onChange={(e) =>
+															set("teamMax", Number(e.target.value))
+														}
+													/>
+												</Field>
+											</div>
+											<Field id="h-summary" label={t("summary")}>
+												<Textarea
+													id="h-summary"
+													value={draft.summary}
+													onChange={(e) => set("summary", e.target.value)}
+												/>
+											</Field>
+											<Field
+												id="h-teams"
+												label={t("teamsEnabled")}
+												description={t("teamsEnabledHint")}
+											>
+												<Switch
+													id="h-teams"
+													aria-label={t("teamsEnabled")}
+													checked={draft.teamsEnabled}
+													onCheckedChange={(checked) =>
+														set("teamsEnabled", checked)
+													}
+												/>
+											</Field>
+											<Field
+												id="h-source"
+												label={t("sourceNote")}
+												description={t("sourceNoteHint")}
+											>
+												<Textarea
+													id="h-source"
+													maxLength={500}
+													value={draft.sourceNote}
+													onChange={(e) => set("sourceNote", e.target.value)}
+												/>
+											</Field>
+										</RecordSection>
+										<RecordSection title={t("milestones")}>
+											{draft.milestones.map((m, index) => (
+												<div
+													key={m.key}
+													className="grid gap-3 sm:grid-cols-[1fr_auto_auto]"
+												>
+													<Field id={`m-${m.key}-label`} label={t("label")}>
+														<Input
+															id={`m-${m.key}-label`}
+															value={m.label}
+															onChange={(e) =>
+																set(
+																	"milestones",
+																	draft.milestones.map((x, i) =>
+																		i === index
+																			? { ...x, label: e.target.value }
+																			: x,
+																	),
+																)
+															}
+														/>
+													</Field>
+													<Field id={`m-${m.key}-start`} label={t("start")}>
+														<Input
+															id={`m-${m.key}-start`}
+															type="datetime-local"
+															value={m.startsAt}
+															onChange={(e) =>
+																set(
+																	"milestones",
+																	draft.milestones.map((x, i) =>
+																		i === index
+																			? { ...x, startsAt: e.target.value }
+																			: x,
+																	),
+																)
+															}
+														/>
+													</Field>
+													<Field id={`m-${m.key}-end`} label={t("end")}>
+														<Input
+															id={`m-${m.key}-end`}
+															type="datetime-local"
+															value={m.endsAt}
+															onChange={(e) =>
+																set(
+																	"milestones",
+																	draft.milestones.map((x, i) =>
+																		i === index
+																			? { ...x, endsAt: e.target.value }
+																			: x,
+																	),
+																)
+															}
+														/>
+													</Field>
+												</div>
+											))}
+											{hackathon.status === "draft" && (
+												<Button
+													size="sm"
+													variant="outline"
+													className="justify-self-start"
+													onClick={() =>
+														set("milestones", [
+															...draft.milestones,
+															{
+																key: `step-${crypto.randomUUID().slice(0, 8)}`,
+																label: t("newMilestone"),
+																startsAt: "",
+																endsAt: "",
+															},
+														])
+													}
+												>
+													{t("addMilestone")}
+												</Button>
+											)}
+											<p className="text-muted-foreground text-xs">
+												{t("timezone")}
+											</p>
+										</RecordSection>
+										<RecordSection title={t("criteria")}>
+											{draft.criteria.map((c, index) => (
+												<div
+													key={c.label}
+													className="grid grid-cols-[1fr_6rem] gap-3"
+												>
+													<Field id={`c-${index}-label`} label={t("label")}>
+														<Input
+															id={`c-${index}-label`}
+															value={c.label}
+															onChange={(e) =>
+																set(
+																	"criteria",
+																	draft.criteria.map((x, i) =>
+																		i === index
+																			? { ...x, label: e.target.value }
+																			: x,
+																	),
+																)
+															}
+														/>
+													</Field>
+													<Field id={`c-${index}-weight`} label={t("weight")}>
+														<Input
+															id={`c-${index}-weight`}
+															type="number"
+															min={0}
+															max={100}
+															value={c.weight}
+															onChange={(e) =>
+																set(
+																	"criteria",
+																	draft.criteria.map((x, i) =>
+																		i === index
+																			? { ...x, weight: Number(e.target.value) }
+																			: x,
+																	),
+																)
+															}
+														/>
+													</Field>
+												</div>
+											))}
+											<p
+												aria-live="polite"
+												className={
+													total === 100
+														? "text-muted-foreground text-sm"
+														: "font-medium text-destructive text-sm"
+												}
+											>
+												{t("total", { total })}{" "}
+												{total === 100 ? "" : t("mustBe100")}
+											</p>
+										</RecordSection>
+										{confirming && (
+											<RecordSection title={t("confirmTitle")}>
+												<p className="text-sm">{t("confirmBody")}</p>
+												<div className="flex flex-wrap gap-2">
+													<ConfirmTwoStep
+														label={t("confirmAction")}
+														confirmLabel={(seconds) =>
+															tc("confirm", { seconds })
+														}
+														cancelLabel={tc("cancel")}
+														disabled={save.isPending}
+														onConfirm={submit}
+													/>
+													<Button
+														variant="outline"
+														onClick={() => setConfirming(false)}
+													>
+														{tc("cancel")}
+													</Button>
+												</div>
+											</RecordSection>
+										)}
+										<SaveBar
+											dirty={dirty && total === 100}
+											saving={save.isPending}
+											saveLabel={tc("save")}
+											discardLabel={tc("cancel")}
+											dirtyText={tc("dirty")}
+											cleanText={tc("clean")}
+											onSave={() => setConfirming(true)}
+											onDiscard={() => {
+												setDraft(null);
+												setConfirming(false);
+											}}
+										/>
+										<p className="text-muted-foreground text-xs">
+											{t("noDelete")}
+										</p>
+									</>
+								) : (
+									<>
+										<RecordSection title={t("general")}>
+											<RecordFields
+												fields={[
+													{ label: t("organizer"), value: hackathon.organizer },
+													{
+														label: t("team"),
+														value: t("teamRange", {
+															min: hackathon.teamMin,
+															max: hackathon.teamMax,
+														}),
+													},
+													{ label: t("summary"), value: hackathon.summary },
+													{
+														label: t("teamsEnabled"),
+														value: hackathon.teamsEnabled ? t("yes") : t("no"),
+													},
+													{
+														label: t("submissions"),
+														value: hackathon.teamsEnabled
+															? hackathon.submissionCount
+															: t("submissionsElsewhere"),
+													},
+													{
+														label: t("sourceNote"),
+														value: hackathon.sourceNote ?? "—",
+													},
+													{ label: t("version"), value: hackathon.version },
+												]}
+											/>
+										</RecordSection>
+										<RecordSection title={t("milestones")}>
+											<RecordFields
+												fields={hackathon.milestones.map((m) => ({
+													label: m.label,
+													value: dateFormat.format(new Date(m.startsAt)),
+												}))}
+											/>
+										</RecordSection>
+										<RecordSection title={t("criteria")}>
+											<RecordFields
+												fields={hackathon.criteria.map((c) => ({
+													label: c.label,
+													value: `${c.weight} %`,
+												}))}
+											/>
+										</RecordSection>
+									</>
+								)}
+							</RecordSheet>
+						</div>
 					) : (
 						<p className="text-muted-foreground text-sm">
 							{query.isPending ? t("loading") : t("empty")}

@@ -73,7 +73,8 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 
 	async function loadHackathon(where: ReturnType<typeof eq>) {
 		const [row] = await db.select().from(hackathon).where(where);
-		if (!row) {
+		// A draft does not exist for a Member (#325).
+		if (!row || row.status === "draft") {
 			throw new TeamError("NOT_FOUND");
 		}
 		const milestones = await db
