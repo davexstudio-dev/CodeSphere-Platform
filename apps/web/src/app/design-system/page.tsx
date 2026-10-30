@@ -177,7 +177,6 @@ import {
 	type Vote,
 	VoteControl,
 } from "@codesphere/ui/components/molecules/vote-control";
-import { Dithering404 } from "@codesphere/ui/components/organisms/dithering-404";
 import { AdminMasterDetail } from "@codesphere/ui/components/organisms/admin-master-detail";
 import { AdminUserMenu } from "@codesphere/ui/components/organisms/admin-user-menu";
 import { AnswerForm } from "@codesphere/ui/components/organisms/answer-form";
@@ -185,6 +184,7 @@ import { ApiKeyReveal } from "@codesphere/ui/components/organisms/api-key-reveal
 import { AppFooter } from "@codesphere/ui/components/organisms/app-footer";
 import { AppHeader } from "@codesphere/ui/components/organisms/app-header";
 import { AuditLog } from "@codesphere/ui/components/organisms/audit-log";
+import { Dithering404 } from "@codesphere/ui/components/organisms/dithering-404";
 import { FeedFilters } from "@codesphere/ui/components/organisms/feed-filters";
 import { KpiGrid } from "@codesphere/ui/components/organisms/kpi-grid";
 import { LoginCard } from "@codesphere/ui/components/organisms/login-card";
