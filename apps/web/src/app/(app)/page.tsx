@@ -22,7 +22,7 @@ import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import type * as z from "zod";
 import { FeedSkeleton, HomeFeed, useFeed } from "@/components/home-feed";
-import { JobsModule } from "@/components/jobs/jobs-module";
+import { JobsModule, LatestJobs } from "@/components/jobs/jobs-module";
 import Link from "@/components/link";
 import { AskButton } from "@/components/site-header";
 import TagsOnboardingRedirect from "@/components/tags-onboarding-redirect";
@@ -35,9 +35,9 @@ import { orpc } from "@/utils/orpc";
 
 type HackathonData = z.infer<typeof Hackathon>;
 
-// Home (#130, design from the home prototype): desktop visitor = one centred column with the
-// banner; desktop Member = feed and a sticky rail; phone = promise for a visitor, greeting and a
-// compact ribbon for a Member. The feed (#66): three tabs, language and country filters, cards
+// Home (#130, #323): desktop = feed and a sticky rail, with the latest job postings for a visitor;
+// phone = promise, banner and a row of postings for a visitor, greeting and a compact ribbon for a
+// Member. The feed (#66): three tabs, language and country filters, cards
 // leading to the Question page, Agents' Questions dashed and hidden on request.
 export default function Home() {
 	const { data: session, isPending } = useHydratedSession();
@@ -107,7 +107,7 @@ function Banner({
 		: "…";
 	const see = (
 		<Button
-			variant={variant === "rail" ? "outline" : "secondary"}
+			variant="secondary"
 			size="sm"
 			render={<Link href={`/hackathons/${hackathon.slug}` as Route} />}
 			nativeButton={false}
@@ -249,19 +249,29 @@ function EmptyFeed({ signedIn }: { signedIn: boolean }) {
 function VisitorHome({ hackathon }: { hackathon: HackathonData | undefined }) {
 	const t = useTranslations("home.hero");
 	return (
-		<main className="mx-auto grid max-w-3xl gap-6 px-4 py-6 md:px-6 md:py-8">
-			{/* Phone only: the promise before the feed (variant 4 of the prototype). */}
-			<section className="grid gap-3 pt-4 md:hidden">
-				<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
-					{t("eyebrow")}
-				</p>
-				<h1 className="text-balance font-bold text-3xl leading-tight tracking-tight">
-					{t("title")}
-				</h1>
-				<p className="text-muted-foreground">{t("lead")}</p>
-			</section>
-			<Banner hackathon={hackathon} />
-			<FeedSection signedIn={false} />
+		<main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 md:grid-cols-[minmax(0,1fr)_20rem] md:gap-8 md:px-6 md:py-8">
+			<div className="grid min-w-0 content-start gap-5">
+				{/* Phone only: the promise, the banner and a row of postings, before a feed that never ends. */}
+				<div className="grid min-w-0 gap-5 md:hidden">
+					<section className="grid gap-3 pt-4">
+						<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
+							{t("eyebrow")}
+						</p>
+						<h1 className="text-balance font-bold text-3xl leading-tight tracking-tight">
+							{t("title")}
+						</h1>
+						<p className="text-muted-foreground">{t("lead")}</p>
+					</section>
+					<Banner hackathon={hackathon} />
+					<LatestJobs layout="row" />
+				</div>
+				<FeedSection signedIn={false} />
+			</div>
+			{/* Desktop only: sticky rail. */}
+			<aside className="sticky top-24 hidden content-start gap-4 self-start md:grid">
+				<Banner hackathon={hackathon} variant="rail" />
+				<LatestJobs />
+			</aside>
 		</main>
 	);
 }

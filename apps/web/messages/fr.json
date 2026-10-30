@@ -1578,6 +1578,7 @@
 		},
 		"module": {
 			"title": "Emplois pour vos Tags",
+			"latest": "Derniers emplois",
 			"all": "Toutes les offres"
 		},
 		"publishPage": {

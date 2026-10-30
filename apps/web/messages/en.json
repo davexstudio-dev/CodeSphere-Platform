@@ -1578,6 +1578,7 @@
 		},
 		"module": {
 			"title": "Jobs for your Tags",
+			"latest": "Latest jobs",
 			"all": "All postings"
 		},
 		"publishPage": {
