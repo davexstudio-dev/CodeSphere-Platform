@@ -40,7 +40,7 @@ export type AppDeps = {
 	release: { version: string; commit: string };
 	/** Emails the API sends on its own; left out where there is no mail provider. */
 	notifications?: ApiContext["notifications"];
-	/** Publishing to the official social accounts (#265); left out where it is not wired (the Worker). */
+	/** Publishing to the official social accounts (#265, #322). */
 	social?: ApiContext["social"];
 	/** Serve the OpenAPI spec and its reference UI under /api/v1. Off on the public deployments. */
 	apiDocs: boolean;
