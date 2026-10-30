@@ -203,8 +203,13 @@ export async function updateHackathon(
 
 	const steps: SQL[] = [];
 	if (replaceMilestones) {
+		// One statement sees one snapshot: a DELETE then INSERT of the same key would break the
+		// unique constraint, so the kept keys are upserted and only the others deleted.
+		const keys = replaceMilestones.map((m) => sql`${m.key}::text`);
 		steps.push(
-			sql`DELETE FROM hackathon_milestone WHERE hackathon_id IN (SELECT id FROM m)`,
+			replaceMilestones.length
+				? sql`DELETE FROM hackathon_milestone WHERE hackathon_id IN (SELECT id FROM m) AND key NOT IN (${sql.join(keys, sql`, `)})`
+				: sql`DELETE FROM hackathon_milestone WHERE hackathon_id IN (SELECT id FROM m)`,
 		);
 		if (replaceMilestones.length) {
 			const rows = replaceMilestones.map(
@@ -215,6 +220,8 @@ export async function updateHackathon(
 				INSERT INTO hackathon_milestone (hackathon_id, key, label, starts_at, ends_at, position)
 				SELECT m.id, v.key, v.label, v.starts_at, v.ends_at, v.position
 				FROM m CROSS JOIN (VALUES ${sql.join(rows, sql`, `)}) AS v(key, label, starts_at, ends_at, position)
+				ON CONFLICT (hackathon_id, key) DO UPDATE
+				SET label = EXCLUDED.label, starts_at = EXCLUDED.starts_at, ends_at = EXCLUDED.ends_at, position = EXCLUDED.position
 			`);
 		}
 	}

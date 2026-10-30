@@ -15,6 +15,7 @@ import {
 import { FollowedTags } from "@codesphere/ui/components/molecules/followed-tags";
 import { SegmentedControl } from "@codesphere/ui/components/molecules/segmented-control";
 import { FeedFilters } from "@codesphere/ui/components/organisms/feed-filters";
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import { useQuery } from "@tanstack/react-query";
 import { CheckIcon, MessageSquareIcon, TagIcon } from "lucide-react";
 import type { Route } from "next";
@@ -26,6 +27,7 @@ import { JobsModule, LatestJobs } from "@/components/jobs/jobs-module";
 import Link from "@/components/link";
 import { AskButton } from "@/components/site-header";
 import TagsOnboardingRedirect from "@/components/tags-onboarding-redirect";
+import { pageSizeFor } from "@/lib/data-saver";
 import { HAS_DATABASE } from "@/lib/deployment";
 import {
 	featuredHackathon,
@@ -46,9 +48,12 @@ type HackathonData = z.infer<typeof Hackathon>;
 // leading to the Question page, Agents' Questions dashed and hidden on request.
 export default function Home() {
 	const { data: session, isPending } = useHydratedSession();
+	const dataSaver = useDataSaver();
 	// Without a database the banner is simply absent.
 	const hackathons = useQuery({
-		...orpc.hackathons.list.queryOptions({ input: { limit: 20 } }),
+		...orpc.hackathons.list.queryOptions({
+			input: { limit: pageSizeFor(20, dataSaver) },
+		}),
 		enabled: HAS_DATABASE,
 	});
 	// Undefined while loading, null when no Hackathon has a step to come.

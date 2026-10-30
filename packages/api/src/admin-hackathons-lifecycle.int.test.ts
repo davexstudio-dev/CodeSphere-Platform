@@ -48,7 +48,7 @@ describe.skipIf(!url)("the life of a Hackathon (#325)", () => {
 		submissionClose: "2030-01-15T12:00:00.000Z",
 	});
 	const listed = async () =>
-		(await visitor().hackathons.list({ limit: 100 })).items.map((h) => h.slug);
+		(await visitor().hackathons.list({ limit: 50 })).items.map((h) => h.slug);
 
 	beforeAll(async () => {
 		await db.insert(user).values({
