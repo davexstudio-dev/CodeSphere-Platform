@@ -101,3 +101,32 @@ export function toMixed(question: QuestionListItem): MixedItem {
 		sourceName: null,
 	};
 }
+
+/**
+ * The Hackathon on the home banner (#325): the published one whose next Milestone comes first.
+ * Null when none has a Milestone left.
+ */
+export function featuredHackathon<
+	T extends {
+		status: string;
+		milestones: readonly { startsAt: string }[];
+	},
+>(hackathons: readonly T[], now: number): T | null {
+	let best: { item: T; next: number } | null = null;
+	for (const item of hackathons) {
+		if (item.status !== "published") {
+			continue;
+		}
+		const upcoming = item.milestones
+			.map((m) => Date.parse(m.startsAt))
+			.filter((at) => at > now);
+		if (upcoming.length === 0) {
+			continue;
+		}
+		const next = Math.min(...upcoming);
+		if (!best || next < best.next) {
+			best = { item, next };
+		}
+	}
+	return best?.item ?? null;
+}

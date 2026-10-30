@@ -15,6 +15,7 @@ import {
 import { FollowedTags } from "@codesphere/ui/components/molecules/followed-tags";
 import { SegmentedControl } from "@codesphere/ui/components/molecules/segmented-control";
 import { FeedFilters } from "@codesphere/ui/components/organisms/feed-filters";
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import { useQuery } from "@tanstack/react-query";
 import { CheckIcon, MessageSquareIcon, TagIcon } from "lucide-react";
 import type { Route } from "next";
@@ -26,8 +27,14 @@ import { JobsModule, LatestJobs } from "@/components/jobs/jobs-module";
 import Link from "@/components/link";
 import { AskButton } from "@/components/site-header";
 import TagsOnboardingRedirect from "@/components/tags-onboarding-redirect";
+import { pageSizeFor } from "@/lib/data-saver";
 import { HAS_DATABASE } from "@/lib/deployment";
-import { firstName, greetingKey, submissionClose } from "@/lib/home";
+import {
+	featuredHackathon,
+	firstName,
+	greetingKey,
+	submissionClose,
+} from "@/lib/home";
 import { gettingStarted } from "@/lib/tags-onboarding";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useMounted } from "@/lib/use-mounted";
@@ -41,18 +48,25 @@ type HackathonData = z.infer<typeof Hackathon>;
 // leading to the Question page, Agents' Questions dashed and hidden on request.
 export default function Home() {
 	const { data: session, isPending } = useHydratedSession();
+	const dataSaver = useDataSaver();
 	// Without a database the banner is simply absent.
-	const hackathon = useQuery({
-		...orpc.hackathons.get.queryOptions({ input: { slug: "cadev-2026" } }),
+	const hackathons = useQuery({
+		...orpc.hackathons.list.queryOptions({
+			input: { limit: pageSizeFor(20, dataSaver) },
+		}),
 		enabled: HAS_DATABASE,
 	});
+	// Undefined while loading, null when no Hackathon has a step to come.
+	const hackathon = hackathons.data
+		? featuredHackathon(hackathons.data.items, Date.now())
+		: undefined;
 	if (isPending) {
 		return <PageSkeleton />;
 	}
 	return session ? (
-		<MemberHome name={session.user.name} hackathon={hackathon.data} />
+		<MemberHome name={session.user.name} hackathon={hackathon} />
 	) : (
-		<VisitorHome hackathon={hackathon.data} />
+		<VisitorHome hackathon={hackathon} />
 	);
 }
 
@@ -73,7 +87,7 @@ function Banner({
 	variant = "card",
 	className,
 }: {
-	hackathon: HackathonData | undefined;
+	hackathon: HackathonData | null | undefined;
 	variant?: "card" | "ribbon" | "rail";
 	className?: string;
 }) {
@@ -82,6 +96,9 @@ function Banner({
 	const format = useFormatter();
 	const locale = useLocale();
 	const mounted = useMounted();
+	if (hackathon === null) {
+		return null;
+	}
 	if (!hackathon) {
 		return (
 			<Skeleton
@@ -106,14 +123,19 @@ function Banner({
 			})
 		: "…";
 	const see = (
-		<Button
-			variant="secondary"
-			size="sm"
-			render={<Link href={`/hackathons/${hackathon.slug}` as Route} />}
-			nativeButton={false}
-		>
-			{t("see")}
-		</Button>
+		<div className="flex flex-wrap items-center gap-3">
+			<Button
+				variant="secondary"
+				size="sm"
+				render={<Link href={`/hackathons/${hackathon.slug}` as Route} />}
+				nativeButton={false}
+			>
+				{t("see")}
+			</Button>
+			<Link href="/hackathons" className="text-sm underline underline-offset-4">
+				{t("all")}
+			</Link>
+		</div>
 	);
 	return (
 		<CadevBanner
@@ -246,7 +268,11 @@ function EmptyFeed({ signedIn }: { signedIn: boolean }) {
 	);
 }
 
-function VisitorHome({ hackathon }: { hackathon: HackathonData | undefined }) {
+function VisitorHome({
+	hackathon,
+}: {
+	hackathon: HackathonData | null | undefined;
+}) {
 	const t = useTranslations("home.hero");
 	return (
 		<main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 md:grid-cols-[minmax(0,1fr)_20rem] md:gap-8 md:px-6 md:py-8">
@@ -281,7 +307,7 @@ function MemberHome({
 	hackathon,
 }: {
 	name: string;
-	hackathon: HackathonData | undefined;
+	hackathon: HackathonData | null | undefined;
 }) {
 	const t = useTranslations("home");
 	const mounted = useMounted();
