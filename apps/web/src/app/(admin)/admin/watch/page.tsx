@@ -3,11 +3,16 @@
 import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { Input } from "@codesphere/ui/components/atoms/input";
+import { StatStrip } from "@codesphere/ui/components/organisms/stat-strip";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import {
+	ConfirmWithNote,
+	useReasonDecision,
+} from "@/components/admin-decision";
 import AdminFrame from "@/components/admin-frame";
 import { adminErrorKey } from "@/i18n/errors";
 import { orpc } from "@/utils/orpc";
@@ -17,6 +22,7 @@ export default function AdminWatchPage() {
 	const t = useTranslations("admin.watch");
 	const tErrors = useTranslations("admin.watch.errors");
 	const format = useFormatter();
+	const { ask, dialog } = useReasonDecision();
 	const queryClient = useQueryClient();
 	const refresh = () =>
 		queryClient.invalidateQueries({ queryKey: orpc.admin.watch.key() });
@@ -93,21 +99,120 @@ export default function AdminWatchPage() {
 	const [domain, setDomain] = useState("");
 
 	return (
-		<AdminFrame title={t("title")} description={t("description")}>
+		<AdminFrame
+			title={t("title")}
+			description={t("description")}
+			actions={
+				<Button
+					size="sm"
+					variant="outline"
+					disabled={ingest.isPending}
+					onClick={() => ingest.mutate({})}
+				>
+					{t("sources.ingest")}
+				</Button>
+			}
+		>
+			<StatStrip
+				className="sm:grid-cols-2 lg:grid-cols-4"
+				items={[
+					{
+						label: t("stats.sources"),
+						value: String(
+							sources.data?.items.filter((s) => s.active).length ?? 0,
+						),
+					},
+					{
+						label: t("review.title"),
+						value: String(review.data?.items.length ?? 0),
+					},
+					{
+						label: t("stats.errors"),
+						value: String(
+							sources.data?.items.filter((s) => s.lastError).length ?? 0,
+						),
+					},
+					{
+						label: t("domains.title"),
+						value: String(domains.data?.items.length ?? 0),
+					},
+				]}
+			/>
+			<section aria-labelledby="w-review" className="grid gap-3">
+				<h2 id="w-review" className="font-semibold text-lg">
+					{t("review.title")}
+				</h2>
+				{(review.data?.items.length ?? 0) === 0 ? (
+					<p className="text-muted-foreground text-sm">{t("review.none")}</p>
+				) : (
+					<ul className="grid gap-4 md:grid-cols-2">
+						{review.data?.items.map((item) => (
+							<li
+								key={item.id}
+								className="grid content-start gap-2 rounded-xl border bg-card p-5 text-sm"
+							>
+								<a
+									href={item.url}
+									target="_blank"
+									rel="noopener noreferrer nofollow ugc"
+									className="font-semibold text-base leading-snug hover:underline"
+								>
+									{item.title}
+								</a>
+								<span className="text-muted-foreground text-xs">
+									{item.domain} · {t(`review.origin.${item.origin}`)} ·{" "}
+									{t("review.score", { score: item.score })}
+									{item.visibility === "pending"
+										? ` · ${t("review.pending")}`
+										: ""}
+								</span>
+								{item.reports > 0 && (
+									<span className="text-destructive text-xs">
+										{t("review.reports", { count: item.reports })} :{" "}
+										{item.reasons.join(" / ")}
+									</span>
+								)}
+								<span className="flex flex-wrap gap-2">
+									{item.visibility === "pending" && (
+										<Button
+											size="sm"
+											onClick={() => approve.mutate({ itemId: item.id })}
+										>
+											{t("review.approve")}
+										</Button>
+									)}
+									<Button
+										size="sm"
+										variant="destructive"
+										onClick={() =>
+											ask({
+												title: item.title,
+												description: item.domain,
+												confirmLabel: t("review.remove"),
+												reasonLabel: t("review.reason"),
+												onSubmit: (reason) =>
+													removeItem.mutate({ itemId: item.id, reason }),
+											})
+										}
+									>
+										{t("review.remove")}
+									</Button>
+									<ConfirmWithNote
+										label={t("review.blockDomain")}
+										note={t("domains.confirmBlock", { domain: item.domain })}
+										onConfirm={() => block.mutate({ domain: item.domain })}
+									/>
+								</span>
+							</li>
+						))}
+					</ul>
+				)}
+			</section>
+
 			<section aria-labelledby="w-sources" className="grid gap-3">
-				<div className="flex flex-wrap items-center justify-between gap-2">
-					<h2 id="w-sources" className="font-semibold text-lg">
-						{t("sources.title")}
-					</h2>
-					<Button
-						size="sm"
-						variant="outline"
-						disabled={ingest.isPending}
-						onClick={() => ingest.mutate({})}
-					>
-						{t("sources.ingest")}
-					</Button>
-				</div>
+				<h2 id="w-sources" className="font-semibold text-lg">
+					{t("sources.title")}
+				</h2>
 				<form
 					className="flex flex-wrap items-center gap-2"
 					onSubmit={(event) => {
@@ -177,11 +282,11 @@ export default function AdminWatchPage() {
 				{(sources.data?.items.length ?? 0) === 0 ? (
 					<p className="text-muted-foreground text-sm">{t("sources.none")}</p>
 				) : (
-					<ul className="grid gap-2">
+					<ul className="divide-y divide-border rounded-xl border bg-card">
 						{sources.data?.items.map((s) => (
 							<li
 								key={s.id}
-								className="flex flex-wrap items-center gap-2 rounded-xl border p-3 text-sm"
+								className="flex flex-wrap items-center gap-2 p-3 text-sm"
 							>
 								<span className="font-medium">{s.name}</span>
 								<span className="text-muted-foreground">{s.domain}</span>
@@ -217,101 +322,11 @@ export default function AdminWatchPage() {
 									>
 										{s.active ? t("sources.stop") : t("sources.resume")}
 									</Button>
-									<Button
-										size="sm"
-										variant="destructive"
-										onClick={() => {
-											if (
-												window.confirm(
-													t("sources.confirmRemove", { name: s.name }),
-												)
-											) {
-												remove.mutate({ id: s.id });
-											}
-										}}
-									>
-										{t("sources.remove")}
-									</Button>
-								</span>
-							</li>
-						))}
-					</ul>
-				)}
-			</section>
-
-			<section aria-labelledby="w-review" className="grid gap-3">
-				<h2 id="w-review" className="font-semibold text-lg">
-					{t("review.title")}
-				</h2>
-				{(review.data?.items.length ?? 0) === 0 ? (
-					<p className="text-muted-foreground text-sm">{t("review.none")}</p>
-				) : (
-					<ul className="grid gap-2">
-						{review.data?.items.map((item) => (
-							<li
-								key={item.id}
-								className="grid gap-1 rounded-xl border p-3 text-sm"
-							>
-								<a
-									href={item.url}
-									target="_blank"
-									rel="noopener noreferrer nofollow ugc"
-									className="font-medium hover:underline"
-								>
-									{item.title}
-								</a>
-								<span className="text-muted-foreground text-xs">
-									{item.domain} · {t(`review.origin.${item.origin}`)} ·{" "}
-									{t("review.score", { score: item.score })}
-									{item.visibility === "pending"
-										? ` · ${t("review.pending")}`
-										: ""}
-								</span>
-								{item.reports > 0 && (
-									<span className="text-destructive text-xs">
-										{t("review.reports", { count: item.reports })} :{" "}
-										{item.reasons.join(" / ")}
-									</span>
-								)}
-								<span className="flex flex-wrap gap-2">
-									{item.visibility === "pending" && (
-										<Button
-											size="sm"
-											onClick={() => approve.mutate({ itemId: item.id })}
-										>
-											{t("review.approve")}
-										</Button>
-									)}
-									<Button
-										size="sm"
-										variant="destructive"
-										onClick={() => {
-											const reason = window.prompt(t("review.reason"));
-											if (reason?.trim()) {
-												removeItem.mutate({
-													itemId: item.id,
-													reason: reason.trim(),
-												});
-											}
-										}}
-									>
-										{t("review.remove")}
-									</Button>
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={() => {
-											if (
-												window.confirm(
-													t("domains.confirmBlock", { domain: item.domain }),
-												)
-											) {
-												block.mutate({ domain: item.domain });
-											}
-										}}
-									>
-										{t("review.blockDomain")}
-									</Button>
+									<ConfirmWithNote
+										label={t("sources.remove")}
+										note={t("sources.confirmRemove", { name: s.name })}
+										onConfirm={() => remove.mutate({ id: s.id })}
+									/>
 								</span>
 							</li>
 						))}
@@ -345,9 +360,12 @@ export default function AdminWatchPage() {
 				{(domains.data?.items.length ?? 0) === 0 ? (
 					<p className="text-muted-foreground text-sm">{t("domains.none")}</p>
 				) : (
-					<ul className="grid gap-1">
+					<ul className="divide-y divide-border rounded-xl border bg-card">
 						{domains.data?.items.map((d) => (
-							<li key={d.domain} className="flex items-center gap-2 text-sm">
+							<li
+								key={d.domain}
+								className="flex flex-wrap items-center gap-2 p-3 text-sm"
+							>
 								<span className="font-mono">{d.domain}</span>
 								{d.reason && (
 									<span className="text-muted-foreground text-xs">
@@ -366,6 +384,7 @@ export default function AdminWatchPage() {
 					</ul>
 				)}
 			</section>
+			{dialog}
 		</AdminFrame>
 	);
 }

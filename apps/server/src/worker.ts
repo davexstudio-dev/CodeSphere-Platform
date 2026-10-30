@@ -25,6 +25,7 @@ import type { ExecutionContext, Hono } from "hono";
 
 import { type AppDeps, createApp } from "./app";
 import { createMailHooks, createNotifications } from "./mail";
+import { type SocialDepsEnv, socialFromEnv } from "./social";
 
 /**
  * Cloudflare Worker entry for the API (pull request previews, staging; #103).
@@ -33,7 +34,7 @@ import { createMailHooks, createNotifications } from "./mail";
  * Worker bindings (`wrangler preview --var` and `--secrets-file`), the database is reached
  * over HTTP, and logs are JSON lines on the console that Workers Logs collects.
  */
-export type WorkerEnv = {
+export type WorkerEnv = SocialDepsEnv & {
 	/** Absent on a preview without a database (map #86, #150): the API then answers 503 on readiness. */
 	DATABASE_URL?: string;
 	BETTER_AUTH_SECRET: string;
@@ -117,6 +118,13 @@ function buildApp(env: WorkerEnv) {
 		// Console, not stdout: there is no file descriptor to write to on Workers.
 		destination: { write: (line) => console.log(line.trimEnd()) },
 	});
+	// A bad encryption secret turns the social accounts off, not the whole API.
+	let social: AppDeps["social"];
+	try {
+		social = socialFromEnv(env, db);
+	} catch (error) {
+		logger.error({ error: String(error) }, "social accounts disabled");
+	}
 	const deps: AppDeps = {
 		auth: createAuth(env, db, [], createMailHooks(env, logger)),
 		db,
@@ -138,6 +146,7 @@ function buildApp(env: WorkerEnv) {
 		teamDeps: { requireGithub: env.HACKATHON_REQUIRE_GITHUB === "true" },
 		privilegeThresholds: parsePrivilegeThresholds(env.PRIVILEGE_THRESHOLDS),
 		notifications: createNotifications(env, logger),
+		...(social ? { social } : {}),
 		resendWebhookSecret: env.RESEND_WEBHOOK_SECRET,
 	};
 	return createApp(deps) as unknown as Hono<never>;

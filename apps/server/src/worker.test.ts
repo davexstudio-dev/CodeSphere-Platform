@@ -40,6 +40,21 @@ describe("Worker without DATABASE_URL", () => {
 		expect(response.status).toBe(503);
 	});
 
+	test("a too short social secret leaves the API up (#322)", async () => {
+		const response = await apiFetch(
+			new Request("https://pr-2.preview.example/api/v1/health"),
+			{
+				...env,
+				BETTER_AUTH_URL: "https://pr-2.preview.example",
+				SOCIAL_CREDENTIALS_SECRET: "short",
+				PUBLIC_SITE_URL: "https://pr-2.preview.example",
+				LINKEDIN_CLIENT_ID: "client",
+			},
+			{ waitUntil: () => {}, passThroughOnException: () => {} } as never,
+		);
+		expect(response.status).toBe(200);
+	});
+
 	test("every query on the fallback database rejects", async () => {
 		const db = withoutDatabase();
 		expect(() => db.select()).toThrow("no database configured");
