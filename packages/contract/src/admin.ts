@@ -75,6 +75,30 @@ export const AUDIT_EXPORT_LIMIT = 5000;
  * stored one. Milestones keep their keys (the countdowns hang on them): only their label and
  * dates change. A stale `expectedVersion` gets CONFLICT.
  */
+/** A new Hackathon, always a draft (#325): one Milestone and the usual criteria to edit before publishing. */
+export const HackathonCreate = z.object({
+	name: z.string().trim().min(1).max(120),
+	slug: z
+		.string()
+		.trim()
+		.min(3)
+		.max(80)
+		.regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+	/** Slug of a validated Organization (#257). */
+	organizationSlug: z.string().trim().min(1).max(120),
+	summary: z.string().trim().min(1).max(2000),
+	teamMin: z.number().int().min(1).max(50),
+	teamMax: z.number().int().min(1).max(50),
+	sourceUrl: z.url(),
+	teamsEnabled: z.boolean(),
+	submissionClose: Timestamp,
+});
+
+/** A Hackathon as the back-office lists it, drafts included. */
+export const AdminHackathon = Hackathon.extend({
+	submissionCount: z.number().int().min(0),
+});
+
 export const HackathonUpdate = z
 	.object({
 		slug: z.string(),
@@ -514,6 +538,48 @@ export const adminContract = {
 			.output(Page(ReputationFlag)),
 	},
 	hackathons: {
+		list: base
+			.errors(staffErrors)
+			.meta(
+				openapi({
+					method: "GET",
+					path: "/admin/hackathons",
+					tags: ["admin"],
+					summary: "List every hackathon",
+					description:
+						"Every hackathon whatever its status, drafts included, with its number of submissions. Requires a staff role.",
+				}),
+			)
+			.input(z.object({}))
+			.output(z.object({ items: z.array(AdminHackathon) })),
+		create: base
+			.errors(staffErrors)
+			.meta(
+				openapi({
+					method: "POST",
+					path: "/admin/hackathons",
+					tags: ["admin"],
+					summary: "Create a hackathon",
+					description:
+						"Creates a draft listed by a validated Organization. A slug already taken or an Organization that is not validated answers 400. Requires a staff role. Audited.",
+				}),
+			)
+			.input(HackathonCreate)
+			.output(Hackathon),
+		advance: base
+			.errors(staffErrors)
+			.meta(
+				openapi({
+					method: "POST",
+					path: "/admin/hackathons/{slug}/advance",
+					tags: ["admin"],
+					summary: "Move a hackathon to its next status",
+					description:
+						"draft to published, published to ended, ended to archived; never back. Publishing needs a milestone and criteria totalling 100. expectedVersion must match (409 CONFLICT otherwise). Requires a staff role. Audited.",
+				}),
+			)
+			.input(z.object({ slug: z.string(), expectedVersion: ExpectedVersion }))
+			.output(Hackathon),
 		update: base
 			.errors(staffErrors)
 			.meta(

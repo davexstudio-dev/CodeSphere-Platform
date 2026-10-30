@@ -2,6 +2,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+	featuredHackathon,
 	firstName,
 	greetingKey,
 	submissionClose,
@@ -122,5 +123,44 @@ describe("visibleEntries", () => {
 		expect(
 			visibleEntries(entries, { ...all, country: "SN" }).map((e) => e.kind),
 		).toEqual(["question"]);
+	});
+});
+
+describe("featuredHackathon", () => {
+	const now = Date.parse("2026-11-01T00:00:00Z");
+	const at = (slug: string, status: string, ...dates: string[]) => ({
+		slug,
+		status,
+		milestones: dates.map((startsAt) => ({ startsAt })),
+	});
+
+	test("is the published one whose next Milestone comes first", () => {
+		expect(
+			featuredHackathon(
+				[
+					at("later", "published", "2026-12-01T00:00:00Z"),
+					at(
+						"past-then-soon",
+						"published",
+						"2026-10-01T00:00:00Z",
+						"2026-11-05T00:00:00Z",
+					),
+				],
+				now,
+			)?.slug,
+		).toBe("past-then-soon");
+	});
+
+	test("skips a draft, an ended one, and one with no Milestone left", () => {
+		expect(
+			featuredHackathon(
+				[
+					at("draft", "draft", "2026-11-02T00:00:00Z"),
+					at("ended", "ended", "2026-11-02T00:00:00Z"),
+					at("over", "published", "2026-10-01T00:00:00Z"),
+				],
+				now,
+			),
+		).toBeNull();
 	});
 });

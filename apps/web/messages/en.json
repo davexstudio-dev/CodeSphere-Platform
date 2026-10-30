@@ -311,7 +311,8 @@
 			"closes": "Submissions close on {date}",
 			"timeline": "Hackathon calendar",
 			"see": "See the Hackathon",
-			"daysShort": "d"
+			"daysShort": "d",
+			"all": "All hackathons"
 		},
 		"loadError": "Could not load the Hackathon.",
 		"feed": {
@@ -393,7 +394,7 @@
 		},
 		"hackathons": {
 			"title": "Hackathon",
-			"description": "The CADEV, its Milestones and judging criteria.",
+			"description": "Hackathons, their Milestones and judging criteria.",
 			"list": "Hackathons",
 			"group": "Hackathon",
 			"loading": "Loading…",
@@ -430,12 +431,47 @@
 			"reload": "Reload",
 			"failure": {
 				"forbidden": "Staff only.",
-				"failed": "Saving failed. Try again."
+				"failed": "Saving failed. Try again.",
+				"advance": "The status change failed: check the Milestones and the criteria total."
 			},
 			"teamsEnabled": "Teams on CodeSphere",
 			"teamsEnabledHint": "On: Members create their team and submit their project here. Off: registration is on the organiser's site, the team tab is hidden and a link to its page is shown.",
 			"yes": "Yes",
-			"no": "No"
+			"no": "No",
+			"statusGroup": {
+				"published": "Published",
+				"draft": "Drafts",
+				"ended": "Ended",
+				"archived": "Archived"
+			},
+			"status": {
+				"draft": "Draft",
+				"published": "Published",
+				"ended": "Ended",
+				"archived": "Archived"
+			},
+			"advance": {
+				"draft": "Publish",
+				"published": "End",
+				"ended": "Archive"
+			},
+			"advanceNote": {
+				"draft": "The Hackathon goes public. It needs a Milestone and criteria totalling 100%. No way back.",
+				"published": "The Hackathon moves to ended. No way back.",
+				"ended": "The Hackathon leaves the public lists and keeps its page. No way back."
+			},
+			"newMilestone": "New step",
+			"addMilestone": "Add a step",
+			"submissions": "Submissions",
+			"submissionsElsewhere": "On the organizer's site",
+			"new": "New Hackathon",
+			"createDescription": "It starts as a draft, hidden from the public, with the usual criteria to adjust.",
+			"slug": "Address (slug)",
+			"slugHint": "Lowercase letters, digits and hyphens: /hackathons/my-hackathon.",
+			"sourceUrl": "Organizer's page",
+			"submissionClose": "Submissions close",
+			"createAction": "Create the draft",
+			"createFailed": "Creation failed: check that the address is free, and the Organization."
 		},
 		"tags": {
 			"title": "Tags",
@@ -621,7 +657,9 @@
 				"watch_source_create": "Watch source added",
 				"watch_source_update": "Watch source updated",
 				"watch_source_remove": "Watch source removed",
-				"staff_invite": "Staff invitation sent"
+				"staff_invite": "Staff invitation sent",
+				"hackathon_create": "Hackathon created",
+				"hackathon_status": "Hackathon status changed"
 			}
 		},
 		"forbidden": {
@@ -1645,5 +1683,16 @@
 		"error": "History unavailable.",
 		"empty": "No activity for this filter.",
 		"more": "Older"
+	},
+	"hackathonsPage": {
+		"title": "Hackathons",
+		"intro": "Current and past contests listed on CodeSphere.",
+		"empty": "No Hackathon yet.",
+		"error": "The Hackathons could not be loaded.",
+		"retry": "Retry",
+		"organizedBy": "Organized by {name}",
+		"published": "Running",
+		"ended": "Ended",
+		"next": "Next step: {label}, {date}"
 	}
 }

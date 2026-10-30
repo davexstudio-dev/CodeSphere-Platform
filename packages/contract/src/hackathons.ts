@@ -24,6 +24,14 @@ export const JudgingCriterion = z.object({
 	scoredBy: z.enum(["jury", "public", "peers"]),
 });
 
+/** One way, by hand (#325): a draft is never public; an archived Hackathon leaves the lists. */
+export const HackathonStatus = z.enum([
+	"draft",
+	"published",
+	"ended",
+	"archived",
+]);
+
 export const Hackathon = z.object({
 	slug: z.string(),
 	name: z.string(),
@@ -32,6 +40,7 @@ export const Hackathon = z.object({
 	/** Slug of that Organization's public profile; null while it is not public (suspended). */
 	organizationSlug: z.string().nullable(),
 	summary: z.string(),
+	status: HackathonStatus,
 	teamMin: z.number().int(),
 	teamMax: z.number().int(),
 	milestones: z.array(Milestone),

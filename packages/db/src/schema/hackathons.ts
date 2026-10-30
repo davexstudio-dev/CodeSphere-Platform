@@ -22,6 +22,12 @@ export const hackathon = pgTable("hackathon", {
 		.notNull()
 		.references(() => organization.id),
 	summary: text("summary").notNull(),
+	// draft -> published -> ended -> archived, by hand (#325). A draft is never public. What exists
+	// before this column is published; a new Hackathon is created as a draft explicitly.
+	status: text("status")
+		.$type<"draft" | "published" | "ended" | "archived">()
+		.default("published")
+		.notNull(),
 	// When the Hackathon opens (#261): a repository whose first commit is older is flagged.
 	opensAt: timestamp("opens_at"),
 	// Teams and submissions are run on CodeSphere (#261). Off for an event whose registration and
