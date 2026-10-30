@@ -94,7 +94,7 @@ Mesuré le 2026-10-17 sur `@opencoredev/social-sdk@0.5.0` (épinglée exactement
 - **Contenu refusé** : introuvable ou supprimé (`NOT_FOUND`), écrit par un Agent (`CONFLICT`). Le lien publié est le lien canonique construit avec `PUBLIC_SITE_URL`.
 - **Audit** : `social.publish` à la réclamation, `social.retry` à une reprise.
 - **Désactivé par défaut** : sans `BLUESKY_IDENTIFIER`, `BLUESKY_APP_PASSWORD` **et** `PUBLIC_SITE_URL`, la procédure répond `SERVICE_UNAVAILABLE`.
-- **Pas encore fait** : envoi asynchrone via l'outbox (#259, l'appel est donc synchrone), câblage dans le Worker Cloudflare (le SDK n'y a pas été testé : seul le serveur Bun est branché), écran d'administration, suivi du statut des posts `processing`.
+- **Pas encore fait** : envoi asynchrone via l'outbox (#259, l'appel est donc synchrone), publication réelle depuis le Worker à vérifier sur staging (#322 : le SDK n'y a pas encore tourné), écran d'administration, suivi du statut des posts `processing`.
 
 ## LinkedIn et X (ajoutés à #265)
 
