@@ -177,6 +177,7 @@ import {
 	type Vote,
 	VoteControl,
 } from "@codesphere/ui/components/molecules/vote-control";
+import { Dithering404 } from "@codesphere/ui/components/organisms/dithering-404";
 import { AdminMasterDetail } from "@codesphere/ui/components/organisms/admin-master-detail";
 import { AdminUserMenu } from "@codesphere/ui/components/organisms/admin-user-menu";
 import { AnswerForm } from "@codesphere/ui/components/organisms/answer-form";
@@ -1176,6 +1177,14 @@ export default function DesignSystemPage() {
 								<QuestionCard key={question.id} {...question} />
 							))}
 						</div>
+					</Specimen>
+					<Specimen label="Dithering404">
+						<Dithering404
+							className="min-h-96 rounded-xl"
+							eyebrow="Erreur 404"
+							title="Perdu dans le bruit"
+							description="Cette page n'existe pas ou a changé d'adresse."
+						/>
 					</Specimen>
 					<Specimen label="CadevBanner">
 						<CadevBanner

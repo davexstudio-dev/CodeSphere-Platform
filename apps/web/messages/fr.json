@@ -1662,5 +1662,12 @@
 		"error": "Historique indisponible.",
 		"empty": "Aucune activité pour ce filtre.",
 		"more": "Plus ancien"
+	},
+	"notFound": {
+		"eyebrow": "Erreur 404",
+		"title": "Perdu dans le bruit",
+		"description": "Cette page n'existe pas ou a changé d'adresse. Revenez aux questions de la communauté, ou posez la vôtre.",
+		"home": "Retour à l'accueil",
+		"ask": "Poser une question"
 	}
 }

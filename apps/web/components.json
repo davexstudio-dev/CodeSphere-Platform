@@ -20,5 +20,7 @@
   },
   "menuColor": "default",
   "menuAccent": "subtle",
-  "registries": {}
+  "registries": {
+    "@shaderscn": "https://www.shaderscn.com/r/{name}.json"
+  }
 }

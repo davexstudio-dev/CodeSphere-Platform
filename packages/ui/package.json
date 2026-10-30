@@ -16,6 +16,7 @@
   "dependencies": {
     "@base-ui/react": "^1.8.0",
     "@blobatar/react": "^2.7.0",
+    "@paper-design/shaders-react": "0.0.82",
     "@shadcn/react": "^0.3.1",
     "blobatar": "^2.7.0",
     "class-variance-authority": "^0.7.1",
