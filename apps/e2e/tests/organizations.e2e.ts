@@ -49,11 +49,20 @@ test("a Member applies, an Admin validates, the public profile appears", async (
 	const admin = await (await browser.newContext({ baseURL })).newPage();
 	await signIn(admin, ADMIN_EMAIL);
 	await admin.goto("/admin/organizations");
-	const card = admin.getByRole("listitem").filter({ hasText: NAME });
+	const card = admin
+		.getByRole("region", { name: "À valider" })
+		.getByRole("listitem")
+		.filter({ hasText: NAME });
 	await expect(card).toBeVisible();
 	await expect(card.getByText(`contact@${HOST}`)).toBeVisible();
 	await card.getByRole("button", { name: "Valider" }).click();
 	await expect(card).toHaveCount(0);
+	await expect(
+		admin
+			.getByRole("region", { name: "Validées" })
+			.getByRole("listitem")
+			.filter({ hasText: NAME }),
+	).toBeVisible();
 
 	await member.goto(`/organizations/${slug}`);
 	await expect(member.getByRole("heading", { name: NAME })).toBeVisible();

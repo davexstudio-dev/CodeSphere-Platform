@@ -485,6 +485,14 @@
 		"social": {
 			"title": "Comptes sociaux",
 			"description": "Connectez les comptes officiels X et LinkedIn de CodeSphere. Les jetons sont chiffrés et renouvelés avant leur expiration.",
+			"table": {
+				"account": "Compte",
+				"state": "État",
+				"details": "Détails",
+				"actions": "Actions"
+			},
+			"bySecret": "Par secret",
+			"bySecretHint": "Publie avec les secrets du déploiement : aucune connexion à faire.",
 			"callbackDescription": "Finalisation de la connexion…",
 			"finishing": "Finalisation de la connexion…",
 			"back": "Retour aux comptes sociaux",
@@ -493,7 +501,8 @@
 			"notSetUp": "Aucune application OAuth n'est configurée sur ce déploiement (voir SOCIAL_CREDENTIALS_SECRET, X_CLIENT_ID, LINKEDIN_CLIENT_ID).",
 			"platforms": {
 				"x": "X",
-				"linkedin": "LinkedIn"
+				"linkedin": "LinkedIn",
+				"bluesky": "Bluesky"
 			},
 			"state": {
 				"not-configured": "Non configuré",
@@ -668,6 +677,10 @@
 		"watch": {
 			"title": "Veille",
 			"description": "Sources de confiance, propositions et signalements, domaines bloqués.",
+			"stats": {
+				"sources": "Sources actives",
+				"errors": "Flux en erreur"
+			},
 			"errors": {
 				"forbidden": "Action refusée.",
 				"conflict": "Cet élément existe déjà.",
@@ -748,6 +761,10 @@
 		"jobs": {
 			"title": "Emplois",
 			"description": "Offres signalées. Un signalement fondé retire l'offre ; deux suspendent l'Organisation.",
+			"stats": {
+				"jobs": "Offres signalées",
+				"reports": "Signalements"
+			},
 			"none": "Aucune offre signalée.",
 			"reports": "{count, plural, one {# signalement} other {# signalements}}",
 			"uphold": "Fondé : retirer",
