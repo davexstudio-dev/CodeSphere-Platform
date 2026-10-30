@@ -1,5 +1,6 @@
 "use client";
 
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import { cn } from "@codesphere/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -53,9 +54,11 @@ export function LatestJobs({
 	layout?: "column" | "row";
 }) {
 	const t = useTranslations("jobs.module");
+	// A side block: data saver mode (#250) does not spend a request on it.
+	const dataSaver = useDataSaver();
 	const latest = useQuery({
 		...orpc.jobs.list.queryOptions({ input: { limit: 4 } }),
-		enabled: HAS_DATABASE,
+		enabled: HAS_DATABASE && !dataSaver,
 	});
 	const items = latest.data?.items ?? [];
 	if (items.length === 0) {
