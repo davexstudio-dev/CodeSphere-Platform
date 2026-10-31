@@ -560,7 +560,39 @@
 			"reconnect": "Reconnecter",
 			"disconnect": "Déconnecter",
 			"connectedNow": "{platform} connecté.",
-			"error": "La connexion a échoué. Réessayez."
+			"error": "La connexion a échoué. Réessayez.",
+			"publish": {
+				"title": "Publier sur un compte officiel",
+				"description": "Relayez une Question ou un Hackathon public, avec son lien.",
+				"type": "Type de contenu",
+				"types": {
+					"question": "Question",
+					"hackathon": "Hackathon"
+				},
+				"platform": "Compte",
+				"choosePlatform": "Choisir un compte",
+				"search": "Chercher une Question",
+				"content": "Contenu",
+				"chooseContent": "Choisir un contenu",
+				"text": "Texte avant le lien",
+				"textHint": "{max} caractères au plus. Vide : le titre du contenu.",
+				"once": "Un contenu part une seule fois par compte, et ne peut pas être retiré d'ici.",
+				"submit": "Publier",
+				"viewPost": "Voir la publication",
+				"states": {
+					"published": "Publié.",
+					"processing": "En cours de traitement par la plateforme. Vérifiez le compte avant de republier.",
+					"failed": "La publication a échoué.",
+					"unknown": "Résultat inconnu. Vérifiez le compte avant de republier."
+				},
+				"errors": {
+					"conflict": "Publication refusée : contenu d'un Agent, envoi en cours ou résultat inconnu. Vérifiez le compte.",
+					"notFound": "Ce contenu n'est plus public.",
+					"unavailable": "La publication n'est pas configurée pour ce compte.",
+					"rateLimited": "Trop de publications. Réessayez plus tard.",
+					"generic": "La publication a échoué. Vérifiez le compte avant de réessayer."
+				}
+			}
 		},
 		"kpi": "KPI",
 		"vitals": {
@@ -1691,9 +1723,13 @@
 			"resume": "Remis en service"
 		},
 		"actions": {
-			"agent.key.create": "Clé créée",
-			"agent.key.revoke": "Clé révoquée",
-			"agent.reactivate": "Réactivé par l'équipe"
+			"agent": {
+				"key": {
+					"create": "Clé créée",
+					"revoke": "Clé révoquée"
+				},
+				"reactivate": "Réactivé par l'équipe"
+			}
 		},
 		"deleted": "supprimé depuis",
 		"loading": "Chargement…",

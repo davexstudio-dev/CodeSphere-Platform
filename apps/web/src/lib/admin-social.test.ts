@@ -5,7 +5,11 @@ import {
 	accountState,
 	connectErrorMessage,
 	isExpired,
+	publicationTone,
+	publishablePlatforms,
+	publishErrorKey,
 	type SocialAccountView,
+	shareableQuestions,
 } from "./admin-social";
 
 const account = (
@@ -57,5 +61,67 @@ describe("connectErrorMessage", () => {
 			connectErrorMessage({ code: "INTERNAL", message: "boom" }, "Oops"),
 		).toBe("Oops");
 		expect(connectErrorMessage(null, "Oops")).toBe("Oops");
+	});
+});
+
+describe("publishablePlatforms", () => {
+	const row = (
+		platform: "x" | "linkedin",
+		patch: Partial<SocialAccountView> = {},
+	) => ({ ...account(patch), platform });
+
+	test("a platform with secrets and no OAuth account can publish", () => {
+		expect(publishablePlatforms(["bluesky"], [])).toEqual(["bluesky"]);
+	});
+	test("a connected account can publish", () => {
+		expect(publishablePlatforms(["x"], [row("x")])).toEqual(["x"]);
+	});
+	test("an account to connect or reconnect cannot", () => {
+		expect(
+			publishablePlatforms(
+				["bluesky", "x", "linkedin"],
+				[
+					row("x", { status: "reconnect-required" }),
+					row("linkedin", { connected: false, status: null }),
+				],
+			),
+		).toEqual(["bluesky"]);
+	});
+});
+
+describe("publicationTone", () => {
+	test("only a published post is a success", () => {
+		expect(publicationTone("published")).toBe("default");
+	});
+	test("every other state is shown as a problem", () => {
+		expect(publicationTone("failed")).toBe("destructive");
+		expect(publicationTone("unknown")).toBe("destructive");
+		expect(publicationTone("processing")).toBe("destructive");
+	});
+});
+
+describe("publishErrorKey", () => {
+	test("each refusal of the server has its message", () => {
+		expect(publishErrorKey({ code: "CONFLICT" })).toBe("conflict");
+		expect(publishErrorKey({ code: "NOT_FOUND" })).toBe("notFound");
+		expect(publishErrorKey({ code: "SERVICE_UNAVAILABLE" })).toBe(
+			"unavailable",
+		);
+		expect(publishErrorKey({ code: "TOO_MANY_REQUESTS" })).toBe("rateLimited");
+	});
+	test("anything else is a generic failure", () => {
+		expect(publishErrorKey(new Error("network"))).toBe("generic");
+		expect(publishErrorKey(null)).toBe("generic");
+	});
+});
+
+describe("shareableQuestions", () => {
+	test("a Question written by an Agent is not offered", () => {
+		expect(
+			shareableQuestions([
+				{ id: "1", title: "Humain", authorKind: "human" },
+				{ id: "2", title: "Agent", authorKind: "agent" },
+			]),
+		).toEqual([{ value: "1", label: "Humain" }]);
 	});
 });
