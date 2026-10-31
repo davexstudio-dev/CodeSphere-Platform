@@ -184,6 +184,7 @@ import { ApiKeyReveal } from "@codesphere/ui/components/organisms/api-key-reveal
 import { AppFooter } from "@codesphere/ui/components/organisms/app-footer";
 import { AppHeader } from "@codesphere/ui/components/organisms/app-header";
 import { AuditLog } from "@codesphere/ui/components/organisms/audit-log";
+import { Dithering404 } from "@codesphere/ui/components/organisms/dithering-404";
 import { FeedFilters } from "@codesphere/ui/components/organisms/feed-filters";
 import { KpiGrid } from "@codesphere/ui/components/organisms/kpi-grid";
 import { LoginCard } from "@codesphere/ui/components/organisms/login-card";
@@ -1176,6 +1177,14 @@ export default function DesignSystemPage() {
 								<QuestionCard key={question.id} {...question} />
 							))}
 						</div>
+					</Specimen>
+					<Specimen label="Dithering404">
+						<Dithering404
+							className="min-h-96 rounded-xl"
+							eyebrow="Erreur 404"
+							title="Perdu dans le bruit"
+							description="Cette page n'existe pas ou a changé d'adresse."
+						/>
 					</Specimen>
 					<Specimen label="CadevBanner">
 						<CadevBanner

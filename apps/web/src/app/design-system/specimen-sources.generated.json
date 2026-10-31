@@ -239,6 +239,11 @@
 		"jsx": "<div className=\"grid w-full gap-4 md:grid-cols-2\">\n\t{SAMPLE_QUESTIONS.slice(0, 2).map((question) => (\n\t\t<QuestionCard key={question.id} {...question} />\n\t))}\n</div>",
 		"files": ["packages/ui/src/components/molecules/question-card.tsx"]
 	},
+	"Dithering404": {
+		"imports": "import { Dithering404 } from \"@codesphere/ui/components/organisms/dithering-404\";",
+		"jsx": "<Dithering404\n\tclassName=\"min-h-96 rounded-xl\"\n\teyebrow=\"Erreur 404\"\n\ttitle=\"Perdu dans le bruit\"\n\tdescription=\"Cette page n'existe pas ou a changé d'adresse.\"\n/>",
+		"files": ["packages/ui/src/components/organisms/dithering-404.tsx"]
+	},
 	"CadevBanner": {
 		"imports": "import { CadevBanner } from \"@codesphere/ui/components/molecules/cadev-banner\";",
 		"jsx": "<CadevBanner\n\tclassName=\"w-full\"\n\tname=\"Hackathon CADEV 2026\"\n\tsummary=\"Concours de développement ouvert aux équipes africaines.\"\n\tclosesAt=\"2026-10-25T17:00:00Z\"\n\tnow={new Date(\"2026-10-11T22:00:00Z\")}\n\tmilestones={[\n\t\t{\n\t\t\tkey: \"submission_close\",\n\t\t\tlabel: \"Soumissions\",\n\t\t\tstartsAt: \"2026-10-25T17:00:00Z\",\n\t\t},\n\t\t{\n\t\t\tkey: \"peer_vote\",\n\t\t\tlabel: \"Votes entre pairs\",\n\t\t\tstartsAt: \"2026-10-25T18:00:00Z\",\n\t\t},\n\t\t{\n\t\t\tkey: \"public_vote\",\n\t\t\tlabel: \"Vote du public\",\n\t\t\tstartsAt: \"2026-10-27T00:00:00Z\",\n\t\t},\n\t\t{\n\t\t\tkey: \"jury\",\n\t\t\tlabel: \"Jury\",\n\t\t\tstartsAt: \"2026-11-01T00:00:00Z\",\n\t\t},\n\t]}\n\taction={\n\t\t<span className=\"rounded-full bg-background px-4 py-2 font-semibold text-primary text-sm\">\n\t\t\tVoir les règles →\n\t\t</span>\n\t}\n/>",

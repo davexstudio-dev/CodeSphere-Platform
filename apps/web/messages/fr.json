@@ -1711,5 +1711,12 @@
 		"published": "En cours",
 		"ended": "Terminé",
 		"next": "Prochaine étape : {label}, {date}"
+	},
+	"notFound": {
+		"eyebrow": "Erreur 404",
+		"title": "Perdu dans le bruit",
+		"description": "Cette page n'existe pas ou a changé d'adresse. Revenez aux questions de la communauté, ou posez la vôtre.",
+		"home": "Retour à l'accueil",
+		"ask": "Poser une question"
 	}
 }

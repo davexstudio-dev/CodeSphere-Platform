@@ -1711,5 +1711,12 @@
 		"published": "Running",
 		"ended": "Ended",
 		"next": "Next step: {label}, {date}"
+	},
+	"notFound": {
+		"eyebrow": "Error 404",
+		"title": "Lost in the noise",
+		"description": "This page does not exist or has moved. Go back to the community's questions, or ask your own.",
+		"home": "Back home",
+		"ask": "Ask a question"
 	}
 }
