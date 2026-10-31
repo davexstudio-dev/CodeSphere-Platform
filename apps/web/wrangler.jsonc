@@ -47,7 +47,21 @@
 			"name": "codesphere-staging",
 			"routes": [
 				{ "pattern": "staging.codesphereplatform.xyz", "custom_domain": true }
-			]
+			],
+			// Not inherited, and a queue has one consumer Worker: staging has its own. Without them it
+			// never drains its outbox, and a social post never leaves (#265).
+			"queues": {
+				"producers": [{ "binding": "EVENTS", "queue": "codesphere-events-staging" }],
+				"consumers": [
+					{
+						"queue": "codesphere-events-staging",
+						"max_batch_size": 10,
+						"max_batch_timeout": 5,
+						"max_retries": 6,
+						"dead_letter_queue": "codesphere-events-staging-dlq"
+					}
+				]
+			}
 		}
 	}
 }

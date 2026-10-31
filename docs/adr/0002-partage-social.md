@@ -94,7 +94,8 @@ Mesuré le 2026-10-17 sur `@opencoredev/social-sdk@0.5.0` (épinglée exactement
 - **Contenu refusé** : introuvable ou supprimé (`NOT_FOUND`), écrit par un Agent (`CONFLICT`). Le lien publié est le lien canonique construit avec `PUBLIC_SITE_URL`.
 - **Audit** : `social.publish` à la réclamation, `social.retry` à une reprise.
 - **Désactivé par défaut** : sans `BLUESKY_IDENTIFIER`, `BLUESKY_APP_PASSWORD` **et** `PUBLIC_SITE_URL`, la procédure répond `SERVICE_UNAVAILABLE`.
-- **Pas encore fait** : envoi asynchrone via l'outbox (#259, l'appel est donc synchrone), publication réelle depuis le Worker à vérifier sur staging (#322 : le SDK n'y a pas encore tourné), écran d'administration, suivi du statut des posts `processing`.
+- **Envoi par l'outbox** : `publish` réserve la ligne et écrit l'événement `social.publish_requested` dans la même requête ; le consommateur `social` envoie. La ligne passe de `pending` à `sending` avant tout envoi : une relivraison ne republie pas, et un plantage en plein envoi ne renvoie rien. L'écran `/admin/social` suit les publications récentes. Après 15 minutes, une ligne restée `pending` devient un échec réessayable (rien n'est parti), une ligne restée `sending` devient `unknown`.
+- **Pas encore fait** : publication réelle depuis le Worker à vérifier sur staging (#322 : le SDK n'y a pas encore tourné). Un post `processing` reste affiché tel quel : le SDK ne donne pas de lecture de son état, il n'est donc ni interrogé ni renvoyé.
 
 ## LinkedIn et X (ajoutés à #265)
 

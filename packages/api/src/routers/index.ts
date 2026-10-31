@@ -25,6 +25,7 @@ import {
 	createShareTargetLoader,
 	createSocialPostStore,
 	publishShare,
+	recentPosts,
 } from "../admin-social";
 import { revokeStaffSessions, setRole } from "../admin-staff";
 import {
@@ -702,6 +703,11 @@ export const appRouter = impl
 						}
 						return { success: true };
 					}),
+				posts: impl.admin.social.posts
+					.use(staffMay({ social: ["manage"] }))
+					.handler(async ({ context }) => ({
+						items: await recentPosts(context.db),
+					})),
 				publish: impl.admin.social.publish
 					.use(staffMay({ social: ["manage"] }))
 					.handler(async ({ context, input, errors }) => {

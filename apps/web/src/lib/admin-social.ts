@@ -61,11 +61,13 @@ export function publishablePlatforms<P extends string>(
 	});
 }
 
-/** Only a published post is a success: anything else asks the Admin to read what happened. */
+/** A post on its way or published is fine: anything else asks the Admin to read what happened. */
 export function publicationTone(
-	state: "published" | "processing" | "failed" | "unknown",
+	state: "pending" | "published" | "processing" | "failed" | "unknown",
 ): "default" | "destructive" {
-	return state === "published" ? "default" : "destructive";
+	return state === "published" || state === "pending"
+		? "default"
+		: "destructive";
 }
 
 /** The message key for a publication the server refused. */

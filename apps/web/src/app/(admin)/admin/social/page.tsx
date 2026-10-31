@@ -23,6 +23,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Suspense, useState } from "react";
 
 import AdminFrame from "@/components/admin-frame";
+import { SocialPostsList } from "@/components/social-posts-list";
 import { SocialPublishForm } from "@/components/social-publish-form";
 import {
 	accountState,
@@ -218,6 +219,7 @@ function SocialAccounts() {
 				</div>
 			)}
 			{publishable.length > 0 && <SocialPublishForm platforms={publishable} />}
+			{status.isSuccess && <SocialPostsList />}
 		</AdminFrame>
 	);
 }

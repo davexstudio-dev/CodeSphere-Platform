@@ -583,7 +583,8 @@
 					"published": "Published.",
 					"processing": "The platform is still processing it. Check the account before publishing again.",
 					"failed": "The post failed.",
-					"unknown": "Unknown result. Check the account before publishing again."
+					"unknown": "Unknown result. Check the account before publishing again.",
+					"pending": "On its way. Follow it in the recent posts."
 				},
 				"errors": {
 					"conflict": "Refused: an Agent's content, a post in progress or an unknown result. Check the account.",
@@ -591,6 +592,16 @@
 					"unavailable": "Publishing is not set up for this account.",
 					"rateLimited": "Too many posts. Try again later.",
 					"generic": "The post failed. Check the account before trying again."
+				}
+			},
+			"posts": {
+				"title": "Recent posts",
+				"states": {
+					"pending": "In progress",
+					"published": "Published",
+					"processing": "Processing",
+					"failed": "Failed",
+					"unknown": "Unknown"
 				}
 			}
 		},

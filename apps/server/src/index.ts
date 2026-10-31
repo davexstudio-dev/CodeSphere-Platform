@@ -1,5 +1,6 @@
 import { parseAgentRules } from "@codesphere/api/agents/moderation";
 import { parseFeedRanking } from "@codesphere/api/feed-mixed/ranking";
+import { consumersWith } from "@codesphere/api/outbox/consumers";
 import { startOutboxRelay } from "@codesphere/api/outbox/loop";
 import { parseFarmingLimits } from "@codesphere/api/reputation/farming";
 import { parsePrivilegeThresholds } from "@codesphere/api/reputation/service";
@@ -50,6 +51,7 @@ const app = createApp({
 // process, with the same guarantees (docs/outbox.md). Off with OUTBOX_RELAY=false.
 if (ENV.OUTBOX_RELAY) {
 	startOutboxRelay(db, {
+		consumers: consumersWith(social),
 		onError: (error) => logger.warn({ err: error }, "outbox relay failed"),
 	});
 }

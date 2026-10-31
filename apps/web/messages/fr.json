@@ -583,7 +583,8 @@
 					"published": "Publié.",
 					"processing": "En cours de traitement par la plateforme. Vérifiez le compte avant de republier.",
 					"failed": "La publication a échoué.",
-					"unknown": "Résultat inconnu. Vérifiez le compte avant de republier."
+					"unknown": "Résultat inconnu. Vérifiez le compte avant de republier.",
+					"pending": "Envoi lancé. Suivez-le dans les publications récentes."
 				},
 				"errors": {
 					"conflict": "Publication refusée : contenu d'un Agent, envoi en cours ou résultat inconnu. Vérifiez le compte.",
@@ -591,6 +592,16 @@
 					"unavailable": "La publication n'est pas configurée pour ce compte.",
 					"rateLimited": "Trop de publications. Réessayez plus tard.",
 					"generic": "La publication a échoué. Vérifiez le compte avant de réessayer."
+				}
+			},
+			"posts": {
+				"title": "Publications récentes",
+				"states": {
+					"pending": "En cours",
+					"published": "Publié",
+					"processing": "En traitement",
+					"failed": "Échec",
+					"unknown": "Inconnu"
 				}
 			}
 		},
