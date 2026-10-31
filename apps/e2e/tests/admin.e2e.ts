@@ -724,3 +724,95 @@ test.describe("responsive", () => {
 		expect(size?.width).toBeCloseTo(size?.height ?? 0, 0);
 	});
 });
+
+// The API is simulated: a real post needs an official account, and must never leave a test run.
+test.describe("social publication", () => {
+	const QUESTION = {
+		id: "11111111-1111-4111-8111-111111111111",
+		title: "Comment payer par mobile money ?",
+		authorKind: "human",
+	};
+
+	async function publishPage(browser: Browser, baseURL: string | undefined) {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		const answer = (status: number, json: unknown) => ({
+			status,
+			contentType: "application/json",
+			body: JSON.stringify({ json }),
+		});
+		await page.route("**/rpc/admin/social/status", (route) =>
+			route.fulfill(answer(200, { platforms: ["bluesky"], accounts: [] })),
+		);
+		await page.route("**/rpc/questions/list*", (route) =>
+			route.fulfill(
+				answer(200, {
+					items: [
+						QUESTION,
+						{
+							...QUESTION,
+							id: "agent",
+							title: "Question d'un Agent",
+							authorKind: "agent",
+						},
+					],
+					nextCursor: null,
+				}),
+			),
+		);
+		return { page, answer };
+	}
+
+	const chooseQuestion = async (page: Page) => {
+		await page.goto("/admin/social");
+		await page.getByRole("combobox", { name: "Contenu", exact: true }).click();
+		await expect(page.getByRole("option")).toHaveText([QUESTION.title]);
+		await page.getByRole("option", { name: QUESTION.title }).click();
+	};
+	const confirmPublish = async (page: Page) => {
+		await page.getByRole("button", { name: /^Publier/ }).click();
+		await page.getByRole("button", { name: /Confirmer/ }).click();
+	};
+
+	test("an Admin publishes a Question and sees the post", async ({
+		browser,
+		baseURL,
+	}) => {
+		const { page, answer } = await publishPage(browser, baseURL);
+		const sent: unknown[] = [];
+		await page.route("**/rpc/admin/social/publish", (route) => {
+			sent.push(route.request().postDataJSON());
+			return route.fulfill(
+				answer(200, {
+					platform: "bluesky",
+					type: "question",
+					id: QUESTION.id,
+					state: "published",
+					postUrl: "https://bsky.app/p/1",
+					message: null,
+					retryable: false,
+				}),
+			);
+		});
+		await chooseQuestion(page);
+		await confirmPublish(page);
+		await expect(page.getByText("Publié.")).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: "Voir la publication" }),
+		).toHaveAttribute("href", "https://bsky.app/p/1");
+		expect(sent).toEqual([
+			{ json: { type: "question", id: QUESTION.id, platform: "bluesky" } },
+		]);
+	});
+
+	test("a refused publication says so", async ({ browser, baseURL }) => {
+		const { page, answer } = await publishPage(browser, baseURL);
+		await page.route("**/rpc/admin/social/publish", (route) =>
+			route.fulfill(
+				answer(409, { defined: true, code: "CONFLICT", message: "refused" }),
+			),
+		);
+		await chooseQuestion(page);
+		await confirmPublish(page);
+		await expect(page.getByText(/^Publication refusée/)).toBeVisible();
+	});
+});

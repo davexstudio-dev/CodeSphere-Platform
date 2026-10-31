@@ -23,10 +23,12 @@ import { useLocale, useTranslations } from "next-intl";
 import { Suspense, useState } from "react";
 
 import AdminFrame from "@/components/admin-frame";
+import { SocialPublishForm } from "@/components/social-publish-form";
 import {
 	accountState,
 	connectErrorMessage,
 	isExpired,
+	publishablePlatforms,
 } from "@/lib/admin-social";
 import { orpc } from "@/utils/orpc";
 
@@ -68,6 +70,10 @@ function SocialAccounts() {
 	const accounts = status.data?.accounts ?? [];
 	// Bluesky publishes from the deployment's secrets: nothing to connect, only to know (#324).
 	const bluesky = status.data?.platforms.includes("bluesky") ?? false;
+	const publishable = publishablePlatforms(
+		status.data?.platforms ?? [],
+		accounts,
+	);
 	return (
 		<AdminFrame title={t("title")} description={t("description")}>
 			{status.isError && (
@@ -211,6 +217,7 @@ function SocialAccounts() {
 					</Table>
 				</div>
 			)}
+			{publishable.length > 0 && <SocialPublishForm platforms={publishable} />}
 		</AdminFrame>
 	);
 }

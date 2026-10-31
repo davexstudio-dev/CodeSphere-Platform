@@ -560,7 +560,39 @@
 			"reconnect": "Reconnect",
 			"disconnect": "Disconnect",
 			"connectedNow": "{platform} connected.",
-			"error": "The connection failed. Try again."
+			"error": "The connection failed. Try again.",
+			"publish": {
+				"title": "Publish to an official account",
+				"description": "Share a public Question or Hackathon, with its link.",
+				"type": "Content type",
+				"types": {
+					"question": "Question",
+					"hackathon": "Hackathon"
+				},
+				"platform": "Account",
+				"choosePlatform": "Choose an account",
+				"search": "Search for a Question",
+				"content": "Content",
+				"chooseContent": "Choose content",
+				"text": "Text before the link",
+				"textHint": "{max} characters at most. Empty: the content's title.",
+				"once": "Content goes out once per account, and cannot be taken back from here.",
+				"submit": "Publish",
+				"viewPost": "View the post",
+				"states": {
+					"published": "Published.",
+					"processing": "The platform is still processing it. Check the account before publishing again.",
+					"failed": "The post failed.",
+					"unknown": "Unknown result. Check the account before publishing again."
+				},
+				"errors": {
+					"conflict": "Refused: an Agent's content, a post in progress or an unknown result. Check the account.",
+					"notFound": "This content is no longer public.",
+					"unavailable": "Publishing is not set up for this account.",
+					"rateLimited": "Too many posts. Try again later.",
+					"generic": "The post failed. Check the account before trying again."
+				}
+			}
 		},
 		"kpi": "KPIs",
 		"vitals": {
@@ -1691,9 +1723,13 @@
 			"resume": "Back in service"
 		},
 		"actions": {
-			"agent.key.create": "Key created",
-			"agent.key.revoke": "Key revoked",
-			"agent.reactivate": "Reactivated by the team"
+			"agent": {
+				"key": {
+					"create": "Key created",
+					"revoke": "Key revoked"
+				},
+				"reactivate": "Reactivated by the team"
+			}
 		},
 		"deleted": "deleted since",
 		"loading": "Loading…",
