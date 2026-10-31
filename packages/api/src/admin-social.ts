@@ -7,10 +7,11 @@ import {
 	type SocialPublisher,
 	SocialSignInError,
 } from "@codesphere/social";
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, lt, sql } from "drizzle-orm";
 
 import { withAudit } from "./audit";
 import { loadHackathons } from "./hackathons";
+import { outboxInsert } from "./outbox/events";
 import { authorsById } from "./questions/authors";
 import { createQuestionService, QuestionError } from "./questions/service";
 
@@ -18,7 +19,8 @@ import { createQuestionService, QuestionError } from "./questions/service";
  * Publishing a public page to CodeSphere's own social accounts (#265, ADR 0001).
  *
  * The `social_post` row is the lock: it is claimed BEFORE anything is sent, so two clicks or a retry
- * can never post twice. A row left `pending` or `unknown` means the platform may hold the post:
+ * can never post twice. The claim writes an outbox event in the same statement; the consumer sends
+ * the post (`sendShare`). A row left `sending` or `unknown` means the platform may hold the post:
  * it is never sent again blindly. Only a failure that provably sent nothing is retryable.
  */
 
@@ -46,11 +48,17 @@ export type Publication = {
 	platform: SharePlatform;
 	type: ShareType;
 	id: string;
-	state: Exclude<SocialPostState, "pending">;
+	state: Exclude<SocialPostState, "sending">;
 	postUrl: string | null;
 	message: string | null;
 	retryable: boolean;
 };
+
+/** A post about to leave. */
+export type ClaimedPost = Pick<
+	SocialPostRow,
+	"targetType" | "targetId" | "platform"
+> & { text: string };
 
 /** What is stored per post; the Postgres implementation is below, tests use a memory one. */
 export interface SocialPostStore {
@@ -64,6 +72,8 @@ export interface SocialPostStore {
 	find(key: string): Promise<SocialPostRow | null>;
 	/** Atomically moves a retryable `failed` row back to `pending`. False when it was not one. */
 	reclaim(key: string, actorId: string): Promise<boolean>;
+	/** Atomically moves a `pending` row to `sending`. Null when it was not one. */
+	begin(key: string): Promise<ClaimedPost | null>;
 	finish(
 		key: string,
 		patch: Pick<SocialPostRow, "state" | "postUrl" | "message" | "retryable">,
@@ -98,7 +108,8 @@ const toPublication = (row: SocialPostRow): Publication => ({
 	platform: row.platform,
 	type: row.targetType,
 	id: row.targetId,
-	state: row.state === "pending" ? "unknown" : row.state,
+	// `sending` is still in progress for the Admin, until it ends or `settleStalePosts` calls it unknown.
+	state: row.state === "sending" ? "pending" : row.state,
 	postUrl: row.postUrl,
 	message: row.message,
 	retryable: row.retryable,
@@ -196,15 +207,71 @@ export async function publishShare(
 		};
 	}
 
+	const row = await deps.store.find(key);
+	return {
+		ok: true,
+		publication: toPublication(
+			row ?? {
+				targetType: input.type,
+				targetId: input.id,
+				platform: input.platform,
+				state: "pending",
+				postUrl: null,
+				message: null,
+				retryable: false,
+			},
+		),
+	};
+}
+
+/**
+ * Sends a claimed post: the outbox's consumer calls it. The queue delivers at least once, so the
+ * row moves from `pending` to `sending` BEFORE anything leaves: a second delivery finds nothing to
+ * take, and a crash mid-send leaves a post nobody re-sends. Returns null when there was nothing to take.
+ */
+export async function sendShare(
+	deps: ShareDeps,
+	key: string,
+): Promise<Publication | null> {
+	const post = await deps.store.begin(key);
+	if (!post) {
+		return null;
+	}
+	const finish = async (
+		outcome: Pick<SocialPostRow, "state" | "postUrl" | "message" | "retryable">,
+	) => {
+		await deps.store.finish(key, outcome);
+		return toPublication({ ...post, ...outcome });
+	};
+	const { publisher, siteUrl } = deps;
+	if (!publisher || !siteUrl || !publisher.platforms.includes(post.platform)) {
+		return finish({
+			state: "failed",
+			postUrl: null,
+			message: "Social publishing is not configured for this platform.",
+			retryable: true,
+		});
+	}
+	// Read again: the content may have been deleted since the Admin asked.
+	const target = await deps.loadTarget(post.targetType, post.targetId);
+	if (!target.ok) {
+		return finish({
+			state: "failed",
+			postUrl: null,
+			message: "This content is no longer public.",
+			retryable: false,
+		});
+	}
+
 	let outcome: ReturnType<typeof settle>;
 	try {
 		const reports = await publisher.publish(
 			{
-				text,
+				text: post.text,
 				url: `${siteUrl.replace(/\/$/, "")}${target.path}`,
 				idempotencyKey: key,
 			},
-			input.platform,
+			post.platform,
 		);
 		outcome = settle(reports);
 		if (reports.some((report) => report.authFailure)) {
@@ -235,19 +302,7 @@ export async function publishShare(
 						retryable: false,
 					};
 	}
-	await deps.store.finish(key, outcome);
-	const row = await deps.store.find(key);
-	return {
-		ok: true,
-		publication: toPublication(
-			row ?? {
-				targetType: input.type,
-				targetId: input.id,
-				platform: input.platform,
-				...outcome,
-			},
-		),
-	};
+	return finish(outcome);
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -300,6 +355,17 @@ const columns = {
 	retryable: socialPost.retryable,
 };
 
+/** The event that hands a claimed post to the consumer. */
+export const SOCIAL_PUBLISH_REQUESTED = "social.publish_requested";
+
+const requestedEvent = (key: string) =>
+	outboxInsert({
+		type: SOCIAL_PUBLISH_REQUESTED,
+		aggregateType: "social_post",
+		aggregateIdColumn: "id",
+		payload: { key },
+	});
+
 /** Postgres store. Each step is one statement (the Worker's HTTP driver has no transactions). */
 export function createSocialPostStore(db: Database): SocialPostStore {
 	return {
@@ -326,6 +392,7 @@ export function createSocialPostStore(db: Database): SocialPostStore {
 					})
 					.onConflictDoNothing()
 					.returning({ id: socialPost.id }),
+				[requestedEvent(key)],
 			);
 			return rows.length === 1;
 		},
@@ -362,8 +429,27 @@ export function createSocialPostStore(db: Database): SocialPostStore {
 						),
 					)
 					.returning({ id: socialPost.id }),
+				[requestedEvent(key)],
 			);
 			return rows.length === 1;
+		},
+		async begin(key) {
+			const [row] = await db
+				.update(socialPost)
+				.set({ state: "sending", updatedAt: sql`now()` })
+				.where(
+					and(
+						eq(socialPost.idempotencyKey, key),
+						eq(socialPost.state, "pending"),
+					),
+				)
+				.returning({
+					targetType: socialPost.targetType,
+					targetId: socialPost.targetId,
+					platform: socialPost.platform,
+					text: socialPost.text,
+				});
+			return row ?? null;
 		},
 		async finish(key, patch) {
 			await db
@@ -372,4 +458,61 @@ export function createSocialPostStore(db: Database): SocialPostStore {
 				.where(eq(socialPost.idempotencyKey, key));
 		},
 	};
+}
+
+/** How long a post may wait or be sent before the back-office stops calling it in progress. */
+const STALE_POST = sql`now() - interval '15 minutes'`;
+
+/**
+ * Ends the posts nothing will finish. One still `pending` never left (no queue, a stopped relay):
+ * publishing again is safe, and `begin` no longer takes it. One still `sending` may be live: it
+ * becomes `unknown` and is never re-sent.
+ */
+export async function settleStalePosts(db: Database) {
+	await db
+		.update(socialPost)
+		.set({
+			state: "failed",
+			message: "The post was never sent; publish it again.",
+			retryable: true,
+			updatedAt: sql`now()`,
+		})
+		.where(
+			and(
+				eq(socialPost.state, "pending"),
+				lt(socialPost.updatedAt, STALE_POST),
+			),
+		);
+	await db
+		.update(socialPost)
+		.set({
+			state: "unknown",
+			message: "The send did not finish; check the account.",
+			updatedAt: sql`now()`,
+		})
+		.where(
+			and(
+				eq(socialPost.state, "sending"),
+				lt(socialPost.updatedAt, STALE_POST),
+			),
+		);
+}
+
+/** The latest posts, for the back-office to follow what became of them. */
+export async function recentPosts(db: Database, limit = 20) {
+	await settleStalePosts(db);
+	const rows = await db
+		.select({
+			...columns,
+			text: socialPost.text,
+			updatedAt: socialPost.updatedAt,
+		})
+		.from(socialPost)
+		.orderBy(desc(socialPost.createdAt))
+		.limit(limit);
+	return rows.map((row) => ({
+		...toPublication(row),
+		text: row.text,
+		updatedAt: row.updatedAt.toISOString(),
+	}));
 }

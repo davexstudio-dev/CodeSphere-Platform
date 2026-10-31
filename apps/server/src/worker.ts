@@ -1,7 +1,7 @@
 import { parseAgentRules } from "@codesphere/api/agents/moderation";
 import { parseFeedRanking } from "@codesphere/api/feed-mixed/ranking";
 import { deliver } from "@codesphere/api/outbox/consumer";
-import { consumers } from "@codesphere/api/outbox/consumers";
+import { consumersWith } from "@codesphere/api/outbox/consumers";
 import {
 	cloudflareQueue,
 	type QueueBinding,
@@ -225,6 +225,16 @@ export async function apiQueue(
 		return;
 	}
 	const db = createEdgeDb({ DATABASE_URL: env.DATABASE_URL });
+	// A bad encryption secret fails the posts, retryably, not the other consumers.
+	let social: AppDeps["social"];
+	try {
+		social = socialFromEnv(env, db);
+	} catch (error) {
+		console.error(
+			JSON.stringify({ msg: "social accounts disabled", error: String(error) }),
+		);
+	}
+	const consumers = consumersWith(social);
 	for (const message of batch.messages) {
 		try {
 			await deliver(db, consumers, message.body);

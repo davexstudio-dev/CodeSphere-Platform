@@ -8,12 +8,13 @@ import {
 } from "@codesphere/social";
 
 import {
-	publishShare,
+	publishShare as claimShare,
 	type ShareDeps,
 	type ShareInput,
 	type ShareTarget,
 	type SocialPostRow,
 	type SocialPostStore,
+	sendShare,
 	shareKey,
 } from "./admin-social";
 
@@ -21,10 +22,12 @@ const input: ShareInput = { type: "question", id: "q1", platform: "bluesky" };
 
 function memoryStore(): SocialPostStore & { rows: Map<string, SocialPostRow> } {
 	const rows = new Map<string, SocialPostRow>();
+	const texts = new Map<string, string>();
 	return {
 		rows,
-		async claim({ key, input: i }) {
+		async claim({ key, text, input: i }) {
 			if (rows.has(key)) return false;
+			texts.set(key, text);
 			rows.set(key, {
 				targetType: i.type,
 				targetId: i.id,
@@ -49,6 +52,17 @@ function memoryStore(): SocialPostStore & { rows: Map<string, SocialPostRow> } {
 				message: null,
 			});
 			return true;
+		},
+		async begin(key) {
+			const row = rows.get(key);
+			if (row?.state !== "pending") return null;
+			rows.set(key, { ...row, state: "sending" });
+			return {
+				targetType: row.targetType,
+				targetId: row.targetId,
+				platform: row.platform,
+				text: texts.get(key) ?? "",
+			};
 		},
 		async finish(key, patch) {
 			const row = rows.get(key);
@@ -94,6 +108,80 @@ function deps(
 const published = async (): Promise<PublishReport[]> => [
 	{ platform: "bluesky", state: "published", url: "https://bsky.app/p/1" },
 ];
+
+/** The whole path: the request claims the post, then the consumer sends it. */
+async function publishShare(
+	d: ShareDeps,
+	actorId: string,
+	share: ShareInput,
+): ReturnType<typeof claimShare> {
+	const claimed = await claimShare(d, actorId, share);
+	if (!claimed.ok) return claimed;
+	const publication = await sendShare(d, shareKey(share));
+	return publication ? { ok: true, publication } : claimed;
+}
+
+describe("the request and the consumer", () => {
+	test("the request only claims: nothing leaves until the consumer runs", async () => {
+		const publisher = publisherOf(published);
+		const d = deps(publisher);
+		const out = await claimShare(d, "a1", input);
+		expect(out).toMatchObject({
+			ok: true,
+			publication: { state: "pending" },
+		});
+		expect(publisher.sent).toBe(0);
+	});
+
+	test("a redelivered event never posts twice", async () => {
+		const publisher = publisherOf(published);
+		const d = deps(publisher);
+		await claimShare(d, "a1", input);
+		const key = shareKey(input);
+		expect((await sendShare(d, key))?.state).toBe("published");
+		expect(await sendShare(d, key)).toBeNull();
+		expect(publisher.sent).toBe(1);
+	});
+
+	test("a delivery after a crash mid-send posts nothing", async () => {
+		const publisher = publisherOf(published);
+		const d = deps(publisher);
+		await claimShare(d, "a1", input);
+		const key = shareKey(input);
+		await d.store.begin(key); // the crash: `sending`, outcome never written
+		expect(await sendShare(d, key)).toBeNull();
+		expect(publisher.sent).toBe(0);
+	});
+
+	test("two deliveries at once post once", async () => {
+		const publisher = publisherOf(published);
+		const d = deps(publisher);
+		await claimShare(d, "a1", input);
+		const key = shareKey(input);
+		await Promise.all([sendShare(d, key), sendShare(d, key)]);
+		expect(publisher.sent).toBe(1);
+	});
+
+	test("content deleted before the send does not leave", async () => {
+		const publisher = publisherOf(published);
+		const d = deps(publisher);
+		await claimShare(d, "a1", input);
+		d.loadTarget = async () => ({ ok: false, reason: "not-found" });
+		const out = await sendShare(d, shareKey(input));
+		expect(out).toMatchObject({ state: "failed", retryable: false });
+		expect(publisher.sent).toBe(0);
+	});
+
+	test("a publisher gone at send time is a retryable failure", async () => {
+		const d = deps(publisherOf(published));
+		await claimShare(d, "a1", input);
+		d.publisher = null;
+		expect(await sendShare(d, shareKey(input))).toMatchObject({
+			state: "failed",
+			retryable: true,
+		});
+	});
+});
 
 describe("publishShare", () => {
 	test("is unavailable without a publisher, a site URL or the platform", async () => {

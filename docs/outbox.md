@@ -68,7 +68,7 @@ Pour le voir : valider une Organisation depuis `/admin/organizations`, attendre 
 | Cloudflare (Worker) | Cron Trigger chaque minute (`scheduled`) : `drainOutbox` | Queue `codesphere-events` (binding `EVENTS`), consommée par le `queue` du même Worker (`apiQueue`), file d'échec `codesphere-events-dlq` |
 | Serveur Bun, développement, tests | `startOutboxRelay` (toutes les 5 s, dans le processus ; `OUTBOX_RELAY=false` à côté du Worker sur la même base) | Locale : les événements vont directement aux consommateurs, mêmes garanties |
 
-À créer une fois côté Cloudflare : `wrangler queues create codesphere-events` et `wrangler queues create codesphere-events-dlq`.
+À créer une fois côté Cloudflare : `wrangler queues create codesphere-events` et `wrangler queues create codesphere-events-dlq`. Staging a les siennes, car une file n'a qu'un Worker consommateur : `codesphere-events-staging` et `codesphere-events-staging-dlq`.
 
 ## Surveiller
 

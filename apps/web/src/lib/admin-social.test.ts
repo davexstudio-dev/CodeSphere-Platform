@@ -90,8 +90,9 @@ describe("publishablePlatforms", () => {
 });
 
 describe("publicationTone", () => {
-	test("only a published post is a success", () => {
+	test("a post published or on its way is fine", () => {
 		expect(publicationTone("published")).toBe("default");
+		expect(publicationTone("pending")).toBe("default");
 	});
 	test("every other state is shown as a problem", () => {
 		expect(publicationTone("failed")).toBe("destructive");

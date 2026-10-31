@@ -293,12 +293,18 @@ export const SocialPublication = z.object({
 	platform: SocialPlatform,
 	type: z.enum(["question", "hackathon"]),
 	id: z.string(),
-	/** `processing` and `unknown` mean the platform may already hold the post: never re-sent blindly. */
-	state: z.enum(["published", "processing", "failed", "unknown"]),
+	/** `pending`: handed to the outbox. `processing` and `unknown` mean the platform may already hold the post: never re-sent blindly. */
+	state: z.enum(["pending", "published", "processing", "failed", "unknown"]),
 	postUrl: z.string().nullable(),
 	message: z.string().nullable(),
 	/** A failed post nothing was sent for: publishing it again is safe. */
 	retryable: z.boolean(),
+});
+
+/** A post in the back-office's follow-up. */
+export const SocialPost = SocialPublication.extend({
+	text: z.string(),
+	updatedAt: Timestamp,
 });
 
 export const SocialOAuthPlatform = z.enum(["linkedin", "x"]);
@@ -396,6 +402,10 @@ export const adminContract = {
 			.errors(socialErrors)
 			.input(SocialPublishInput)
 			.output(SocialPublication),
+		posts: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
+			.input(z.object({}))
+			.output(z.object({ items: z.array(SocialPost) })),
 	},
 	kpi: base
 		.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })

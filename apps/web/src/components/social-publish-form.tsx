@@ -16,7 +16,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@codesphere/ui/components/molecules/select";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -64,7 +64,15 @@ export function SocialPublishForm({ platforms }: { platforms: Platform[] }) {
 		...orpc.hackathons.list.queryOptions({ input: { limit: 50 } }),
 		enabled: type === "hackathon",
 	});
-	const publish = useMutation(orpc.admin.social.publish.mutationOptions());
+	const queryClient = useQueryClient();
+	const publish = useMutation(
+		orpc.admin.social.publish.mutationOptions({
+			onSettled: () =>
+				queryClient.invalidateQueries({
+					queryKey: orpc.admin.social.posts.key(),
+				}),
+		}),
+	);
 
 	const contents =
 		type === "question"
