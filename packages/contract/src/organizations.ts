@@ -238,6 +238,15 @@ export const organizationsAdminContract = {
 		.errors(decisionErrors)
 		.input(Decision)
 		.output(AdminOrganization),
+	/**
+	 * An Admin names the owner of a validated Organization that has none, after its owner deleted
+	 * their account with no editor to take over (#326). The Member becomes the owner, whether or not
+	 * they were an editor. CONFLICT when the Organization already has an owner. Audited.
+	 */
+	assignOwner: base
+		.errors(decisionErrors)
+		.input(z.object({ organizationId: z.uuid(), memberId: z.string().min(1) }))
+		.output(z.object({ assigned: z.literal(true) })),
 	/** An Admin removes an editor from a team, e.g. in a dispute (#326). Audited. */
 	removeMember: base
 		.errors(decisionErrors)

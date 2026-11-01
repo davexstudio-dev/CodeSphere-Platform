@@ -837,7 +837,10 @@
 				"conflict": "This application was already handled. The list is reloaded.",
 				"notFound": "This Organization no longer exists.",
 				"generic": "Something went wrong. Try again."
-			}
+			},
+			"noOwner": "No owner",
+			"assignOwner": "Name an owner",
+			"assignOwnerPlaceholder": "Profile address or Member id"
 		},
 		"jobs": {
 			"title": "Jobs",

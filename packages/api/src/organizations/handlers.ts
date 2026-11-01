@@ -287,6 +287,16 @@ export function createOrganizationsAdminHandlers() {
 		reinstate: impl.admin.organizations.reinstate
 			.use(staffMay({ organization: ["manage"] }))
 			.handler(decide("reinstate")),
+		assignOwner: impl.admin.organizations.assignOwner
+			.use(staffMay({ organization: ["manage"] }))
+			.handler(async ({ context, input, errors }) => {
+				await createTeamService(context.db)
+					.assignOwner(actor(context), input.organizationId, input.memberId)
+					.catch((err) => {
+						throw refuseTeam(err, errors);
+					});
+				return { assigned: true as const };
+			}),
 		removeMember: impl.admin.organizations.removeMember
 			.use(staffMay({ organization: ["manage"] }))
 			.handler(async ({ context, input, errors }) => {

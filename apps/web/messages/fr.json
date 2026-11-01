@@ -837,7 +837,10 @@
 				"conflict": "Cette demande a déjà été traitée. La liste est rechargée.",
 				"notFound": "Cette Organisation n'existe plus.",
 				"generic": "Une erreur est survenue. Réessayez."
-			}
+			},
+			"noOwner": "Sans responsable",
+			"assignOwner": "Désigner un responsable",
+			"assignOwnerPlaceholder": "Adresse du profil ou identifiant du Member"
 		},
 		"jobs": {
 			"title": "Emplois",

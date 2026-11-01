@@ -244,4 +244,28 @@ describe.skipIf(!url)("Organization team on Postgres", () => {
 			.where(eq(organization.id, orgId));
 		expect(row).toEqual({ ownerId: null, status: "validated" });
 	});
+	test("an Admin names an owner for an Organization left without one", async () => {
+		await expect(
+			as(admin, "admin").admin.organizations.assignOwner({
+				organizationId: orgId,
+				memberId: bot,
+			}),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+		await as(admin, "admin").admin.organizations.assignOwner({
+			organizationId: orgId,
+			memberId: dana,
+		});
+		const [row] = await db
+			.select({ ownerId: organization.ownerId })
+			.from(organization)
+			.where(eq(organization.id, orgId));
+		expect(row?.ownerId).toBe(dana);
+		// The seat is taken: a second naming is refused.
+		await expect(
+			as(admin, "admin").admin.organizations.assignOwner({
+				organizationId: orgId,
+				memberId: owner,
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+	});
 });

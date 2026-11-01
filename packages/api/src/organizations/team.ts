@@ -41,6 +41,7 @@ export const TEAM_MESSAGES: Record<string, string> = {
 	editor: "Only an editor can take over the management.",
 	owner: "The owner cannot be removed: hand the management over first.",
 	gone: "This invitation is no longer open.",
+	owned: "This Organization already has an owner.",
 };
 
 const inviter = alias(user, "inviter");
@@ -372,6 +373,66 @@ export function createTeamService(db: Database) {
 			);
 			if (rows.length === 0) {
 				throw new TeamError("NOT_FOUND");
+			}
+		},
+
+		/**
+		 * An Admin names the owner of a validated, non-system Organization that has none. One statement:
+		 * the owner is set only while the seat is empty, and the Member stops being an editor.
+		 */
+		async assignOwner(
+			actorId: string,
+			organizationId: string,
+			memberId: string,
+		) {
+			const org = await orgById(organizationId);
+			if (!org) {
+				throw new TeamError("NOT_FOUND");
+			}
+			if (org.ownerId || org.system || org.status !== "validated") {
+				throw new TeamError("CONFLICT", "owned");
+			}
+			const [target] = await db
+				.select({ id: user.id })
+				.from(user)
+				.where(
+					and(
+						eq(user.id, memberId),
+						eq(user.kind, "human"),
+						sql`${user.suspendedAt} IS NULL`,
+					),
+				);
+			if (!target) {
+				throw new TeamError("NOT_FOUND", "member");
+			}
+			const rows = await withAudit(
+				db,
+				{
+					actorId,
+					action: "organization.owner_assign",
+					targetType: "organization",
+					targetIdColumn: "id",
+					details: { fields: ["owner"] },
+				},
+				db
+					.update(organization)
+					.set({ ownerId: memberId, version: sql`${organization.version} + 1` })
+					.where(
+						and(
+							eq(organization.id, organizationId),
+							sql`${organization.ownerId} IS NULL`,
+							eq(organization.status, "validated"),
+							eq(organization.system, false),
+						),
+					)
+					.returning({ id: organization.id }),
+				[
+					sql`DELETE FROM organization_member
+						WHERE organization_id IN (SELECT id FROM m) AND user_id = ${memberId}`,
+				],
+			);
+			if (rows.length === 0) {
+				throw new TeamError("CONFLICT", "owned");
 			}
 		},
 

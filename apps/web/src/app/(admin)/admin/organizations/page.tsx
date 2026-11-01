@@ -6,12 +6,13 @@ import { Button } from "@codesphere/ui/components/atoms/button";
 import { StatStrip } from "@codesphere/ui/components/organisms/stat-strip";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
-import { useId } from "react";
+import { useId, useState } from "react";
 import { toast } from "sonner";
 
 import { useReasonDecision } from "@/components/admin-decision";
 import AdminFrame from "@/components/admin-frame";
 import { adminErrorKey } from "@/i18n/errors";
+import { memberIdFrom } from "@/lib/organization-team";
 import { orpc } from "@/utils/orpc";
 
 const LIMIT = 50;
@@ -61,6 +62,16 @@ export default function AdminOrganizationsPage() {
 	const reinstate = useMutation(
 		orpc.admin.organizations.reinstate.mutationOptions(options),
 	);
+	const assignOwner = useMutation(
+		orpc.admin.organizations.assignOwner.mutationOptions({
+			...options,
+			onSuccess: () => {
+				setOwnerText("");
+				done();
+			},
+		}),
+	);
+	const [ownerText, setOwnerText] = useState("");
 	const pending = lists.pending.data?.items ?? [];
 	const others = (["validated", "suspended", "rejected"] as const).map(
 		(status) => ({ status, items: lists[status].data?.items ?? [] }),
@@ -176,6 +187,41 @@ export default function AdminOrganizationsPage() {
 												{org.statusReason}
 											</span>
 										)}
+										{org.status === "validated" &&
+											!org.system &&
+											org.ownerName === null && (
+												<form
+													className="flex w-full flex-wrap items-center gap-2"
+													onSubmit={(event) => {
+														event.preventDefault();
+														const memberId = memberIdFrom(ownerText);
+														if (memberId) {
+															assignOwner.mutate({
+																organizationId: org.id,
+																memberId,
+															});
+														}
+													}}
+												>
+													<Badge variant="warning">{t("noOwner")}</Badge>
+													<input
+														value={ownerText}
+														onChange={(e) => setOwnerText(e.target.value)}
+														aria-label={t("assignOwner")}
+														placeholder={t("assignOwnerPlaceholder")}
+														className="min-w-0 flex-[1_1_12rem] rounded-md border bg-background px-2 py-1 text-xs"
+													/>
+													<Button
+														size="sm"
+														type="submit"
+														disabled={
+															!memberIdFrom(ownerText) || assignOwner.isPending
+														}
+													>
+														{t("assignOwner")}
+													</Button>
+												</form>
+											)}
 										{org.status === "validated" && (
 											<Button
 												size="sm"
