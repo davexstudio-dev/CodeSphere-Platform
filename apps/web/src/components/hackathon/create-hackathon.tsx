@@ -33,9 +33,12 @@ const EMPTY = {
 export function CreateHackathon({
 	organizations,
 	onCreated,
+	scope = "admin",
 }: {
 	organizations: readonly { slug: string; name: string }[];
 	onCreated: (slug: string) => void;
+	/** `organization`: an Organization's team creating its own Hackathon (#326). */
+	scope?: "admin" | "organization";
 }) {
 	const t = useTranslations("admin.hackathons");
 	const tc = useTranslations("admin.common");
@@ -43,15 +46,18 @@ export function CreateHackathon({
 	const [form, setForm] = useState(EMPTY);
 	const set = (key: keyof typeof EMPTY, value: string) =>
 		setForm({ ...form, [key]: value });
-	const create = useMutation(
-		orpc.admin.hackathons.create.mutationOptions({
-			onSuccess: (created) => {
-				setOpen(false);
-				setForm(EMPTY);
-				onCreated(created.slug);
-			},
-		}),
+	const onSuccess = (created: { slug: string }) => {
+		setOpen(false);
+		setForm(EMPTY);
+		onCreated(created.slug);
+	};
+	const adminCreate = useMutation(
+		orpc.admin.hackathons.create.mutationOptions({ onSuccess }),
 	);
+	const organizationCreate = useMutation(
+		orpc.organizations.hackathons.create.mutationOptions({ onSuccess }),
+	);
+	const create = scope === "organization" ? organizationCreate : adminCreate;
 	const closes = fromLocalInput(form.submissionClose);
 
 	return (

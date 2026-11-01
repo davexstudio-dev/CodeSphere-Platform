@@ -31,8 +31,15 @@ export function exposedOverOpenAPI(
 	procedure: Pick<AnyProcedureContract, "~orpc">,
 	path: readonly string[],
 ): boolean {
+	if (path[0] === "organizations" && ORGANIZATION_APP_ONLY.has(path[1] ?? "")) {
+		return false;
+	}
 	return path[0] !== "admin" || metaOf(procedure)["~openapi"] !== undefined;
 }
+
+// The team, its invitations and the Hackathon writes of an Organization (#326) are for the web app:
+// an Agent never invites a Member or publishes a Hackathon, so no REST route and no MCP tool.
+const ORGANIZATION_APP_ONLY = new Set(["team", "invitations", "hackathons"]);
 
 /**
  * MCP `authorizeCatalogEntry` gate, for discovery and invocation alike: an admin procedure must

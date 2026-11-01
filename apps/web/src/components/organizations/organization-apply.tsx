@@ -8,8 +8,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
-
 import { CountryPicker } from "@/components/country-picker";
+import { OrganizationInvitations } from "@/components/organizations/organization-manage";
 import SsoLoginDialog from "@/components/sso-login-dialog";
 import { errorCodeOf } from "@/i18n/errors";
 import { authClient } from "@/lib/auth-client";
@@ -129,6 +129,8 @@ export function OrganizationApply() {
 				</Button>
 			</form>
 
+			{session && <OrganizationInvitations />}
+
 			{session && (mine.data?.items.length ?? 0) > 0 && (
 				<section aria-labelledby="mine" className="grid gap-3">
 					<h2 id="mine" className="font-semibold text-xl">
@@ -157,12 +159,20 @@ export function OrganizationApply() {
 									</span>
 								)}
 								{org.status === "validated" && (
-									<a
-										href={`/organizations/${org.slug}`}
-										className="text-sm hover:underline"
-									>
-										{t("viewProfile")}
-									</a>
+									<span className="flex gap-3 text-sm">
+										<a
+											href={`/organizations/${org.slug}`}
+											className="hover:underline"
+										>
+											{t("viewProfile")}
+										</a>
+										<a
+											href={`/organizations/${org.slug}/manage`}
+											className="hover:underline"
+										>
+											{t("manageLink")}
+										</a>
+									</span>
 								)}
 							</li>
 						))}

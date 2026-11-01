@@ -308,9 +308,12 @@ export async function updateHackathon(
 }
 
 /** Every Hackathon for the back-office, drafts included, with its number of Submissions (#325). */
-export async function listAdminHackathons(db: Database) {
+export async function listAdminHackathons(
+	db: Database,
+	organizationId?: string,
+) {
 	const [items, counts] = await Promise.all([
-		loadHackathons(db, { statuses: ALL_STATUSES }, 100),
+		loadHackathons(db, { statuses: ALL_STATUSES, organizationId }, 100),
 		db
 			.select({ slug: hackathon.slug, total: count() })
 			.from(hackathonSubmissions)

@@ -1635,7 +1635,65 @@
 			"domain": "The email must be on the website's domain (no public mailbox).",
 			"forbidden": "Only a Member can apply.",
 			"generic": "The application failed. Try again."
-		}
+		},
+		"manage": {
+			"signIn": "Sign in to manage an Organization.",
+			"signInAction": "Sign in",
+			"notFound": "This Organization does not exist, is not validated, or you are not on its team.",
+			"publicProfile": "View public profile",
+			"role": {
+				"owner": "Owner",
+				"editor": "Editor"
+			},
+			"tabs": {
+				"hackathons": "Hackathons",
+				"members": "Members"
+			},
+			"hackathonsHint": "A draft is never public. Publishing makes it visible straight away, without review: you stay responsible for its content.",
+			"noHackathons": "No Hackathon yet.",
+			"status": {
+				"draft": "Draft",
+				"published": "Published",
+				"ended": "Ended",
+				"archived": "Archived"
+			},
+			"action": {
+				"publish": "Publish",
+				"end": "End",
+				"archive": "Archive"
+			},
+			"rolesHint": "The owner manages the members and the Organization's profile. An editor creates, edits and publishes Hackathons.",
+			"transfer": "Hand over",
+			"transferSent": "Offer sent: the editor has to accept it.",
+			"leave": "Leave",
+			"remove": "Remove",
+			"cancel": "Cancel",
+			"pending": "Pending invitations",
+			"invitationRole": {
+				"editor": "editor",
+				"owner": "ownership"
+			},
+			"inviteLabel": "Invite a Member",
+			"invite": "Invite",
+			"invited": "Invitation sent: the Member has to accept it.",
+			"invitePlaceholder": "Profile address or id",
+			"inviteHint": "Paste the address of their profile (…/members/id). A suspended Member or an Agent cannot be invited.",
+			"invitations": "Invitations received",
+			"invitationText": {
+				"editor": "{organization} invites you to join its team as an editor.",
+				"owner": "{organization} offers you to become its owner."
+			},
+			"accept": "Accept",
+			"decline": "Decline",
+			"accepted": "You are now on the team.",
+			"errors": {
+				"conflict": "Not possible in the current state (already a member, invitation open, team full…).",
+				"forbidden": "Only the owner can do this.",
+				"notFound": "Not found: the invitation or the Member no longer exists.",
+				"generic": "The action failed. Try again."
+			}
+		},
+		"manageLink": "Manage team and Hackathons"
 	},
 	"jobs": {
 		"title": "Jobs",

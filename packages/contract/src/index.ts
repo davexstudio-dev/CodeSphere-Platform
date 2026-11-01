@@ -8,6 +8,7 @@ import { healthContract } from "./health";
 import { jobsContract, talentContract } from "./jobs";
 import { markdownContract } from "./markdown";
 import { membersContract } from "./members";
+import { organizationHackathonsContract } from "./organization-hackathons";
 import { organizationsContract } from "./organizations";
 import { questionsContract } from "./questions";
 import { rankingsContract } from "./rankings";
@@ -27,6 +28,7 @@ export * from "./hackathons";
 export * from "./jobs";
 export * from "./markdown";
 export * from "./members";
+export * from "./organization-hackathons";
 export * from "./organizations";
 export * from "./questions";
 export * from "./rankings";
@@ -49,7 +51,10 @@ export const contract = {
 	talent: talentContract,
 	markdown: markdownContract,
 	members: membersContract,
-	organizations: organizationsContract,
+	organizations: {
+		...organizationsContract,
+		hackathons: organizationHackathonsContract,
+	},
 	questions: questionsContract,
 	rankings: rankingsContract,
 	tags: tagsContract,

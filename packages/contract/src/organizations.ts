@@ -42,6 +42,54 @@ export const OrganizationApplication = z.object({
 
 export const ORGANIZATIONS_PER_MEMBER = 3;
 
+// The team of an Organization (#326): its owner manages members and the profile, an editor runs
+// its Hackathons. Two roles only.
+export const ORGANIZATION_ROLES = ["owner", "editor"] as const;
+export const OrganizationRole = z.enum(ORGANIZATION_ROLES);
+export type OrganizationRole = z.infer<typeof OrganizationRole>;
+export const MAX_ORGANIZATION_EDITORS = 20;
+
+/** An Organization as a member of its team sees it. */
+export const MyOrganization = OwnOrganization.extend({
+	myRole: OrganizationRole,
+});
+
+export const OrganizationTeamMember = z.object({
+	memberId: z.string(),
+	name: z.string(),
+	role: OrganizationRole,
+	since: z.iso.datetime().nullable(),
+});
+
+/** An invitation to join a team (`editor`) or to take over its management (`owner`). */
+export const OrganizationInvitation = z.object({
+	id: z.uuid(),
+	organizationId: z.uuid(),
+	organizationName: z.string(),
+	inviteeId: z.string(),
+	inviteeName: z.string(),
+	invitedByName: z.string().nullable(),
+	role: z.enum(["editor", "owner"]),
+	createdAt: z.iso.datetime(),
+});
+
+export const OrganizationTeam = z.object({
+	organizationId: z.uuid(),
+	myRole: OrganizationRole,
+	/** The owner first, then the editors by seniority. Empty owner slot: the Organization has none. */
+	members: z.array(OrganizationTeamMember),
+	invitations: z.array(OrganizationInvitation),
+});
+
+const teamErrors = {
+	UNAUTHORIZED: {},
+	FORBIDDEN: {},
+	NOT_FOUND: {},
+	CONFLICT: {},
+} as const;
+const OrgId = z.object({ organizationId: z.uuid() });
+const OrgMember = OrgId.extend({ memberId: z.string().min(1).max(128) });
+
 export const organizationsContract = {
 	get: base
 		.errors({ NOT_FOUND: {} })
@@ -103,7 +151,47 @@ export const organizationsContract = {
 			}),
 		)
 		.input(z.object({}))
-		.output(z.object({ items: z.array(OwnOrganization) })),
+		.output(z.object({ items: z.array(MyOrganization) })),
+
+	/** Who works on an Organization (#326). Humans only; none of it is public. */
+	team: {
+		get: base.errors(teamErrors).input(OrgId).output(OrganizationTeam),
+		/** The owner invites a Member (by id, as in their profile address); the invitee must accept. */
+		invite: base
+			.errors(teamErrors)
+			.input(OrgMember)
+			.output(OrganizationInvitation),
+		/** The owner withdraws an invitation that was not answered yet. */
+		cancel: base
+			.errors(teamErrors)
+			.input(z.object({ invitationId: z.uuid() }))
+			.output(z.object({ cancelled: z.literal(true) })),
+		/** The owner removes an editor; an editor can remove themselves. */
+		remove: base
+			.errors(teamErrors)
+			.input(OrgMember)
+			.output(z.object({ removed: z.literal(true) })),
+		/** The owner hands the management to an editor, who must accept. */
+		transfer: base
+			.errors(teamErrors)
+			.input(OrgMember)
+			.output(OrganizationInvitation),
+	},
+
+	invitations: {
+		mine: base
+			.errors({ UNAUTHORIZED: {} })
+			.input(z.object({}))
+			.output(z.object({ items: z.array(OrganizationInvitation) })),
+		accept: base
+			.errors(teamErrors)
+			.input(z.object({ invitationId: z.uuid() }))
+			.output(z.object({ accepted: z.literal(true) })),
+		decline: base
+			.errors(teamErrors)
+			.input(z.object({ invitationId: z.uuid() }))
+			.output(z.object({ declined: z.literal(true) })),
+	},
 };
 
 // Admin side (#257): applications, validation, suspension.
@@ -150,8 +238,16 @@ export const organizationsAdminContract = {
 		.errors(decisionErrors)
 		.input(Decision)
 		.output(AdminOrganization),
+	/** An Admin removes an editor from a team, e.g. in a dispute (#326). Audited. */
+	removeMember: base
+		.errors(decisionErrors)
+		.input(z.object({ organizationId: z.uuid(), memberId: z.string().min(1) }))
+		.output(z.object({ removed: z.literal(true) })),
 };
 
 export type OwnOrganization = z.infer<typeof OwnOrganization>;
 export type OrganizationProfile = z.infer<typeof OrganizationProfile>;
+export type OrganizationTeam = z.infer<typeof OrganizationTeam>;
+export type OrganizationInvitation = z.infer<typeof OrganizationInvitation>;
+export type MyOrganization = z.infer<typeof MyOrganization>;
 export type AdminOrganization = z.infer<typeof AdminOrganization>;

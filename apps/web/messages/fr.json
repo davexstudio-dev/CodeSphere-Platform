@@ -1635,7 +1635,65 @@
 			"domain": "L'adresse e-mail doit être sur le domaine du site web (pas de messagerie publique).",
 			"forbidden": "Seul un Member peut faire une demande.",
 			"generic": "La demande a échoué. Réessayez."
-		}
+		},
+		"manage": {
+			"signIn": "Connectez-vous pour gérer une Organisation.",
+			"signInAction": "Se connecter",
+			"notFound": "Cette Organisation n'existe pas, n'est pas validée, ou vous n'en faites pas partie.",
+			"publicProfile": "Voir le profil public",
+			"role": {
+				"owner": "Responsable",
+				"editor": "Éditeur"
+			},
+			"tabs": {
+				"hackathons": "Hackathons",
+				"members": "Membres"
+			},
+			"hackathonsHint": "Un brouillon n'est jamais public. Publier le rend visible tout de suite, sans relecture : vous restez responsable de son contenu.",
+			"noHackathons": "Aucun Hackathon pour le moment.",
+			"status": {
+				"draft": "Brouillon",
+				"published": "Publié",
+				"ended": "Terminé",
+				"archived": "Archivé"
+			},
+			"action": {
+				"publish": "Publier",
+				"end": "Terminer",
+				"archive": "Archiver"
+			},
+			"rolesHint": "Le responsable gère les membres et la fiche de l'Organisation. Un éditeur crée, modifie et publie les Hackathons.",
+			"transfer": "Passer la main",
+			"transferSent": "Proposition envoyée : l'éditeur doit l'accepter.",
+			"leave": "Quitter",
+			"remove": "Retirer",
+			"cancel": "Annuler",
+			"pending": "Invitations en attente",
+			"invitationRole": {
+				"editor": "éditeur",
+				"owner": "responsabilité"
+			},
+			"inviteLabel": "Inviter un Member",
+			"invite": "Inviter",
+			"invited": "Invitation envoyée : le Member doit l'accepter.",
+			"invitePlaceholder": "Adresse du profil ou identifiant",
+			"inviteHint": "Collez l'adresse de son profil (…/members/identifiant). Un Member suspendu ou un Agent ne peut pas être invité.",
+			"invitations": "Invitations reçues",
+			"invitationText": {
+				"editor": "{organization} vous invite à rejoindre son équipe comme éditeur.",
+				"owner": "{organization} vous propose d'en devenir le responsable."
+			},
+			"accept": "Accepter",
+			"decline": "Refuser",
+			"accepted": "Vous faites maintenant partie de l'équipe.",
+			"errors": {
+				"conflict": "Action impossible dans l'état actuel (déjà membre, invitation en cours, équipe pleine…).",
+				"forbidden": "Seul le responsable peut faire cela.",
+				"notFound": "Introuvable : l'invitation ou le Member n'existe plus.",
+				"generic": "L'action a échoué. Réessayez."
+			}
+		},
+		"manageLink": "Gérer l'équipe et les Hackathons"
 	},
 	"jobs": {
 		"title": "Emplois",
