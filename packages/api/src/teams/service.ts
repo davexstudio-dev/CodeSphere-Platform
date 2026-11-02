@@ -5,13 +5,14 @@ import {
 	hackathon,
 	hackathonMilestone,
 } from "@codesphere/db/schema/hackathons";
+import { organization } from "@codesphere/db/schema/organizations";
 import {
 	hackathonSubmissions,
 	hackathonTeamInvites,
 	hackathonTeamMembers,
 	hackathonTeams,
 } from "@codesphere/db/schema/teams";
-import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, ne, sql } from "drizzle-orm";
 
 import { withAudit } from "../audit";
 import { sanitizeMarkdown } from "../markdown/sanitizer";
@@ -34,6 +35,8 @@ export class TeamError extends Error {
 		super(code);
 	}
 }
+
+type HackathonAccess = { allowSuspended?: boolean };
 
 export class InvalidTeamCursorError extends Error {}
 
@@ -68,13 +71,30 @@ export type TeamDeps = {
 export function createTeamService(db: Database, deps: TeamDeps = {}) {
 	const now = () => (deps.now ?? (() => new Date()))();
 
-	const hackathonBySlug = (slug: string) =>
-		loadHackathon(eq(hackathon.slug, slug));
+	const hackathonBySlug = (slug: string, opts: HackathonAccess = {}) =>
+		loadHackathon(eq(hackathon.slug, slug), opts);
 
-	async function loadHackathon(where: ReturnType<typeof eq>) {
-		const [row] = await db.select().from(hackathon).where(where);
-		// A draft does not exist for a Member (#325).
-		if (!row || row.status === "draft") {
+	/**
+	 * The Hackathon, or NOT_FOUND. A draft does not exist for a Member (#325), nor does the
+	 * Hackathon of an Organization that is not validated (#339), unless the caller is one of the
+	 * few operations that stay open during a suspension (`allowSuspended`).
+	 */
+	async function loadHackathon(
+		where: ReturnType<typeof eq>,
+		{ allowSuspended = false }: HackathonAccess = {},
+	) {
+		const [found] = await db
+			.select({ row: hackathon, orgStatus: organization.status })
+			.from(hackathon)
+			.innerJoin(organization, eq(organization.id, hackathon.organizationId))
+			.where(where);
+		const row = found?.row;
+		if (
+			!found ||
+			!row ||
+			row.status === "draft" ||
+			(!allowSuspended && found.orgStatus !== "validated")
+		) {
 			throw new TeamError("NOT_FOUND");
 		}
 		const milestones = await db
@@ -105,16 +125,20 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 	}
 
 	/** The Hackathon of a Team, with its dates. */
-	async function context(teamId: string) {
+	async function context(teamId: string, opts: HackathonAccess = {}) {
 		const team = await teamRow(teamId);
 		return {
 			team,
-			hackathon: await loadHackathon(eq(hackathon.id, team.hackathonId)),
+			hackathon: await loadHackathon(eq(hackathon.id, team.hackathonId), opts),
 		};
 	}
 
-	async function requireMember(userId: string, teamId: string) {
-		const ctx = await context(teamId);
+	async function requireMember(
+		userId: string,
+		teamId: string,
+		opts: HackathonAccess = {},
+	) {
+		const ctx = await context(teamId, opts);
 		const [member] = await db
 			.select({ userId: hackathonTeamMembers.userId })
 			.from(hackathonTeamMembers)
@@ -225,7 +249,10 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 
 	/** A Team as one of its members sees it. */
 	async function view(teamId: string, viewerId: string): Promise<Team> {
-		const { team, hackathon: h } = await context(teamId);
+		// Read-only: `mine` shows one's own Team during a suspension; writers checked access already.
+		const { team, hackathon: h } = await context(teamId, {
+			allowSuspended: true,
+		});
 		const members = await db
 			.select({ id: user.id, name: user.name })
 			.from(hackathonTeamMembers)
@@ -307,7 +334,7 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 		view,
 
 		async mine(userId: string, slug: string) {
-			const h = await hackathonBySlug(slug);
+			const h = await hackathonBySlug(slug, { allowSuspended: true });
 			const [row] = await db
 				.select({ teamId: hackathonTeamMembers.teamId })
 				.from(hackathonTeamMembers)
@@ -424,7 +451,13 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 				)
 				.innerJoin(hackathon, eq(hackathon.id, hackathonTeams.hackathonId))
 				.innerJoin(user, eq(user.id, hackathonTeamInvites.invitedBy))
-				.where(eq(hackathonTeamInvites.userId, userId));
+				// Listed during a suspension (read-only), but never for a draft (#325).
+				.where(
+					and(
+						eq(hackathonTeamInvites.userId, userId),
+						ne(hackathon.status, "draft"),
+					),
+				);
 			return rows.map((r) => ({
 				teamId: r.teamId,
 				teamName: r.teamName,
@@ -446,6 +479,8 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 			if (!invite) {
 				throw new TeamError("NOT_FOUND");
 			}
+			// A suspended Organization's Hackathon refuses the answer too, a refusal included (#339).
+			const { hackathon: h } = await context(teamId);
 			const forget = () =>
 				db
 					.delete(hackathonTeamInvites)
@@ -459,7 +494,6 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 				await forget();
 				return { team: null };
 			}
-			const { hackathon: h } = await context(teamId);
 			requireRegistrationOpen(h);
 			await addMember(userId, teamId, h.teamMax);
 			await forget();
@@ -467,7 +501,10 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 		},
 
 		async leave(userId: string, teamId: string) {
-			const { team, hackathon: h } = await requireMember(userId, teamId);
+			// Leaving stays possible during a suspension (#339).
+			const { team, hackathon: h } = await requireMember(userId, teamId, {
+				allowSuspended: true,
+			});
 			requireRegistrationOpen(h);
 			if (team.captainId === userId) {
 				// The captain leads until the Team is disbanded: handing over is not offered yet.
@@ -633,7 +670,7 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 			 * is left unchecked, not accused. Audited as one event.
 			 */
 			async checkRepositories(actorId: string, slug: string, check: RepoCheck) {
-				const h = await hackathonBySlug(slug);
+				const h = await hackathonBySlug(slug, { allowSuspended: true });
 				const rows = await db
 					.select({
 						id: hackathonSubmissions.id,
@@ -693,7 +730,7 @@ export function createTeamService(db: Database, deps: TeamDeps = {}) {
 			},
 
 			async flagged(slug: string) {
-				const h = await hackathonBySlug(slug);
+				const h = await hackathonBySlug(slug, { allowSuspended: true });
 				const rows = await db
 					.select({ s: hackathonSubmissions, teamName: hackathonTeams.name })
 					.from(hackathonSubmissions)
