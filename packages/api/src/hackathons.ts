@@ -95,6 +95,8 @@ export async function loadHackathons(
 		slug?: string;
 		statuses?: Status[];
 		organizationId?: string;
+		/** Back-office reads only: a suspended Organization's Hackathons are hidden from the public (#326). */
+		includeSuspended?: boolean;
 	} = {},
 	limit = 20,
 ) {
@@ -114,6 +116,9 @@ export async function loadHackathons(
 				filter.organizationId
 					? eq(hackathon.organizationId, filter.organizationId)
 					: undefined,
+				filter.includeSuspended
+					? undefined
+					: eq(organization.status, "validated"),
 			),
 		)
 		.orderBy(asc(hackathon.createdAt))

@@ -21,7 +21,11 @@ type Update = z.infer<typeof HackathonUpdate>;
 type Current = z.infer<typeof Hackathon>;
 
 const loadAny = (db: Database, slug: string) =>
-	loadHackathons(db, { slug, statuses: ALL_STATUSES }, 1);
+	loadHackathons(
+		db,
+		{ slug, statuses: ALL_STATUSES, includeSuspended: true },
+		1,
+	);
 
 const SCALARS = [
 	"name",
@@ -307,13 +311,76 @@ export async function updateHackathon(
 		: { ok: false, code: "NOT_FOUND" };
 }
 
+/**
+ * An Admin takes a published or ended Hackathon back to a draft, with the reason in the audit log
+ * (#326). The Organization can fix it and publish it again, so a repeat offender is a case for
+ * suspending the Organization. Guarded by the version, audited.
+ */
+export async function unpublishHackathon(
+	db: Database,
+	actorId: string,
+	input: { slug: string; expectedVersion: number; reason: string },
+): Promise<HackathonWriteOutcome> {
+	const [current] = await loadAny(db, input.slug);
+	if (!current) {
+		return { ok: false, code: "NOT_FOUND" };
+	}
+	if (current.version !== input.expectedVersion) {
+		return { ok: false, code: "CONFLICT", version: current.version };
+	}
+	if (current.status !== "published" && current.status !== "ended") {
+		return {
+			ok: false,
+			code: "BAD_REQUEST",
+			path: "status",
+			message: "Only a published or ended Hackathon can be unpublished.",
+		};
+	}
+	const written = await withAudit(
+		db,
+		{
+			actorId,
+			action: "hackathon.unpublish",
+			targetType: "hackathon",
+			targetIdColumn: "id",
+			details: { fields: ["status"], reason: input.reason },
+		},
+		db
+			.update(hackathon)
+			.set({ status: "draft", version: sql`${hackathon.version} + 1` })
+			.where(
+				and(
+					eq(hackathon.slug, input.slug),
+					eq(hackathon.version, input.expectedVersion),
+					sql`${hackathon.status} IN ('published', 'ended')`,
+				),
+			)
+			.returning({ id: hackathon.id }),
+	);
+	const [latest] = await loadAny(db, input.slug);
+	if (!written.length) {
+		return {
+			ok: false,
+			code: "CONFLICT",
+			version: latest?.version ?? current.version,
+		};
+	}
+	return latest
+		? { ok: true, hackathon: latest }
+		: { ok: false, code: "NOT_FOUND" };
+}
+
 /** Every Hackathon for the back-office, drafts included, with its number of Submissions (#325). */
 export async function listAdminHackathons(
 	db: Database,
 	organizationId?: string,
 ) {
 	const [items, counts] = await Promise.all([
-		loadHackathons(db, { statuses: ALL_STATUSES, organizationId }, 100),
+		loadHackathons(
+			db,
+			{ statuses: ALL_STATUSES, organizationId, includeSuspended: true },
+			100,
+		),
 		db
 			.select({ slug: hackathon.slug, total: count() })
 			.from(hackathonSubmissions)

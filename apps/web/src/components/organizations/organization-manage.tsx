@@ -14,7 +14,7 @@ import {
 	TabsTrigger,
 } from "@codesphere/ui/components/molecules/tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -91,9 +91,13 @@ export function OrganizationManage({ slug }: { slug: string }) {
 				<TabsList>
 					<TabsTrigger value="hackathons">{t("tabs.hackathons")}</TabsTrigger>
 					<TabsTrigger value="members">{t("tabs.members")}</TabsTrigger>
+					<TabsTrigger value="terms">{t("tabs.terms")}</TabsTrigger>
 				</TabsList>
 				<TabsContent value="hackathons">
 					<HackathonsTab org={org} />
+				</TabsContent>
+				<TabsContent value="terms">
+					<TermsTab org={org} />
 				</TabsContent>
 				<TabsContent value="members">
 					<MembersTab org={org} selfId={session.user.id} />
@@ -109,9 +113,84 @@ const NEXT_ACTION = {
 	ended: "archive",
 } as const;
 
+/** The terms the Organization accepts before publishing, and who accepted them (#326). */
+function TermsTab({ org }: { org: MyOrganization }) {
+	const t = useTranslations("organizations.manage");
+	const format = useFormatter();
+	const queryClient = useQueryClient();
+	const terms = useQuery(
+		orpc.organizations.hackathons.terms.get.queryOptions({
+			input: { organizationId: org.id },
+		}),
+	);
+	const accept = useMutation(
+		orpc.organizations.hackathons.terms.accept.mutationOptions({
+			onSuccess: () => {
+				toast.success(t("terms.acceptedToast"));
+				void queryClient.invalidateQueries({
+					queryKey: orpc.organizations.hackathons.terms.key(),
+				});
+			},
+			onError: (error) => failure(t, error),
+		}),
+	);
+	const clauses = ["c1", "c2", "c3", "c4", "c5", "c6"] as const;
+
+	return (
+		<section className="grid gap-4" aria-labelledby="org-terms">
+			<h2 id="org-terms" className="font-semibold text-xl">
+				{t("terms.title")}
+			</h2>
+			<p className="rounded-xl border border-dashed p-3 text-muted-foreground text-sm">
+				{t("terms.draftNotice")}
+			</p>
+			<p className="text-sm">{t("terms.intro")}</p>
+			<ol className="grid list-decimal gap-2 pl-5 text-sm">
+				{clauses.map((clause) => (
+					<li key={clause}>{t(`terms.clauses.${clause}`)}</li>
+				))}
+			</ol>
+			{terms.data?.accepted ? (
+				<p className="text-sm">
+					<Badge variant="success">{t("terms.accepted")}</Badge>{" "}
+					{t("terms.acceptedBy", {
+						name: terms.data.acceptedByName ?? "—",
+						date: terms.data.acceptedAt
+							? format.dateTime(new Date(terms.data.acceptedAt), {
+									dateStyle: "medium",
+								})
+							: "—",
+					})}
+				</p>
+			) : org.myRole === "owner" ? (
+				<Button
+					className="w-fit"
+					disabled={!terms.data || accept.isPending}
+					onClick={() =>
+						terms.data &&
+						accept.mutate({
+							organizationId: org.id,
+							version: terms.data.version,
+						})
+					}
+				>
+					{t("terms.accept")}
+				</Button>
+			) : (
+				<p className="text-muted-foreground text-sm">{t("terms.ownerOnly")}</p>
+			)}
+		</section>
+	);
+}
+
 function HackathonsTab({ org }: { org: MyOrganization }) {
 	const t = useTranslations("organizations.manage");
 	const queryClient = useQueryClient();
+	const terms = useQuery(
+		orpc.organizations.hackathons.terms.get.queryOptions({
+			input: { organizationId: org.id },
+		}),
+	);
 	const list = useQuery(
 		orpc.organizations.hackathons.list.queryOptions({
 			input: { organizationId: org.id },
@@ -163,7 +242,15 @@ function HackathonsTab({ org }: { org: MyOrganization }) {
 								<Button
 									size="sm"
 									variant="outline"
-									disabled={advance.isPending}
+									disabled={
+										advance.isPending ||
+										(item.status === "draft" && !terms.data?.accepted)
+									}
+									title={
+										item.status === "draft" && !terms.data?.accepted
+											? t("terms.needed")
+											: undefined
+									}
 									onClick={() =>
 										advance.mutate({
 											slug: item.slug,

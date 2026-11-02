@@ -590,6 +590,17 @@ export const adminContract = {
 			)
 			.input(z.object({ slug: z.string(), expectedVersion: ExpectedVersion }))
 			.output(Hackathon),
+		/** A published or ended Hackathon goes back to a draft, with a reason in the audit log (#326). */
+		unpublish: base
+			.errors(staffErrors)
+			.input(
+				z.object({
+					slug: z.string(),
+					expectedVersion: ExpectedVersion,
+					reason: z.string().trim().min(3).max(300),
+				}),
+			)
+			.output(Hackathon),
 		update: base
 			.errors(staffErrors)
 			.meta(

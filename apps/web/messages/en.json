@@ -471,7 +471,10 @@
 			"sourceUrl": "Organizer's page",
 			"submissionClose": "Submissions close",
 			"createAction": "Create the draft",
-			"createFailed": "Creation failed: check that the address is free, and the Organization."
+			"createFailed": "Creation failed: check that the address is free, and the Organization.",
+			"unpublish": "Unpublish",
+			"unpublishDescription": "The Hackathon goes back to a draft and leaves the public views. The Organization can fix it and publish it again.",
+			"unpublishReason": "Reason (kept in the audit log)"
 		},
 		"tags": {
 			"title": "Tags",
@@ -1650,7 +1653,8 @@
 			},
 			"tabs": {
 				"hackathons": "Hackathons",
-				"members": "Members"
+				"members": "Members",
+				"terms": "Terms"
 			},
 			"hackathonsHint": "A draft is never public. Publishing makes it visible straight away, without review: you stay responsible for its content.",
 			"noHackathons": "No Hackathon yet.",
@@ -1694,6 +1698,25 @@
 				"forbidden": "Only the owner can do this.",
 				"notFound": "Not found: the invitation or the Member no longer exists.",
 				"generic": "The action failed. Try again."
+			},
+			"terms": {
+				"title": "Terms for running Hackathons",
+				"draftNotice": "Provisional text, not yet reviewed by a lawyer. It will be reviewed before Prizes open.",
+				"intro": "By publishing a Hackathon on CodeSphere, the Organization acknowledges that:",
+				"accept": "I accept on behalf of the Organization",
+				"accepted": "Accepted",
+				"acceptedBy": "by {name} on {date}.",
+				"acceptedToast": "Terms accepted: you can publish.",
+				"ownerOnly": "Only the Organization's owner can accept these terms. Ask them before publishing.",
+				"needed": "The owner has to accept the terms first (Terms tab).",
+				"clauses": {
+					"c1": "It alone answers for its Hackathon's rules and for the accuracy of what it publishes (dates, eligibility, Prizes).",
+					"c2": "It alone answers for the taxes and legal duties tied to the Prizes it promises or pays. CodeSphere holds and pays no funds.",
+					"c3": "Winners are chosen on skill criteria announced in advance, never by draw or by chance.",
+					"c4": "It publishes nothing unlawful, misleading or discriminatory, and asks participants for no payment to enter.",
+					"c5": "CodeSphere may unpublish a Hackathon, with a reason, and suspend an Organization that does not follow these terms.",
+					"c6": "The Organization's owner binds it by accepting these terms."
+				}
 			}
 		},
 		"manageLink": "Manage team and Hackathons"

@@ -1,3 +1,4 @@
+import { ORGANIZATION_TERMS_VERSION } from "@codesphere/contract";
 import type { Database } from "@codesphere/db";
 import {
 	organization,
@@ -14,6 +15,7 @@ import {
 } from "../admin-hackathons";
 import { ALL_STATUSES, loadHackathons } from "../hackathons";
 import { impl } from "../index";
+import { acceptTerms, termsOf } from "./terms";
 
 type Sessioned = { session: { user: object } | null };
 
@@ -28,7 +30,11 @@ async function editableOrganization(
 	where: { id: string } | { slug: string },
 ) {
 	const [row] = await db
-		.select({ id: organization.id, slug: organization.slug })
+		.select({
+			id: organization.id,
+			slug: organization.slug,
+			ownerId: organization.ownerId,
+		})
 		.from(organization)
 		.where(
 			and(
@@ -123,6 +129,40 @@ export function createOrganizationHackathonHandlers() {
 				return { items: await listAdminHackathons(context.db, org.id) };
 			},
 		),
+		terms: {
+			get: impl.organizations.hackathons.terms.get.handler(
+				async ({ context, input, errors }) => {
+					const memberId = humanOf(context, errors);
+					if (
+						!(await editableOrganization(context.db, memberId, {
+							id: input.organizationId,
+						}))
+					) {
+						throw errors.NOT_FOUND();
+					}
+					return termsOf(context.db, input.organizationId);
+				},
+			),
+			accept: impl.organizations.hackathons.terms.accept.handler(
+				async ({ context, input, errors }) => {
+					const memberId = humanOf(context, errors);
+					const org = await editableOrganization(context.db, memberId, {
+						id: input.organizationId,
+					});
+					if (!org) {
+						throw errors.NOT_FOUND();
+					}
+					// The owner answers for the Organization: an editor cannot accept in its name.
+					if (org.ownerId !== memberId) {
+						throw errors.FORBIDDEN();
+					}
+					if (input.version !== ORGANIZATION_TERMS_VERSION) {
+						throw errors.CONFLICT({ data: { version: 0 } });
+					}
+					return acceptTerms(context.db, memberId, org.id);
+				},
+			),
+		},
 		create: impl.organizations.hackathons.create.handler(
 			async ({ context, input, errors }) => {
 				const memberId = humanOf(context, errors);
@@ -142,7 +182,21 @@ export function createOrganizationHackathonHandlers() {
 		advance: impl.organizations.hackathons.advance.handler(
 			async ({ context, input, errors }) => {
 				const memberId = humanOf(context, errors);
-				await ownHackathon(context.db, memberId, input.slug, errors);
+				const { current, org } = await ownHackathon(
+					context.db,
+					memberId,
+					input.slug,
+					errors,
+				);
+				// Publishing is free of review, but not of the terms: the Organization answers for it.
+				if (
+					current.status === "draft" &&
+					!(await termsOf(context.db, org.id)).accepted
+				) {
+					throw errors.FORBIDDEN({
+						message: "The Organization has not accepted the terms.",
+					});
+				}
 				return outcomeOr(
 					errors,
 					await advanceHackathon(context.db, memberId, input),

@@ -120,3 +120,22 @@ export const organizationInvitation = pgTable(
 		index("organization_invitation_invitee_idx").on(t.inviteeId),
 	],
 );
+
+// The terms an Organization accepted before publishing a Hackathon (#326): one row per version it
+// accepted, with who accepted and when. A new version of the terms asks again.
+export const organizationTermsAcceptance = pgTable(
+	"organization_terms_acceptance",
+	{
+		organizationId: uuid("organization_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		version: text("version").notNull(),
+		acceptedBy: text("accepted_by")
+			.notNull()
+			.references(() => user.id),
+		acceptedAt: timestamp("accepted_at", { precision: 3 })
+			.defaultNow()
+			.notNull(),
+	},
+	(t) => [primaryKey({ columns: [t.organizationId, t.version] })],
+);

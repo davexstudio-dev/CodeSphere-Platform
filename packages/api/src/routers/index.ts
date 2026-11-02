@@ -17,6 +17,7 @@ import {
 	createHackathon,
 	type HackathonWriteOutcome,
 	listAdminHackathons,
+	unpublishHackathon,
 	updateHackathon,
 } from "../admin-hackathons";
 import { kpiReport } from "../admin-kpi";
@@ -389,6 +390,18 @@ export const appRouter = impl
 						hackathonOr(
 							errors,
 							await advanceHackathon(
+								context.db,
+								actorOf(context.session),
+								input,
+							),
+						),
+					),
+				unpublish: impl.admin.hackathons.unpublish
+					.use(staffMay({ hackathon: ["update"] }))
+					.handler(async ({ context, input, errors }) =>
+						hackathonOr(
+							errors,
+							await unpublishHackathon(
 								context.db,
 								actorOf(context.session),
 								input,
