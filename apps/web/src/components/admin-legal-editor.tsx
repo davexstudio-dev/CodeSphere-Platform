@@ -1,6 +1,10 @@
 "use client";
 
-import { LEGAL_DOCUMENTS, type LegalDocument } from "@codesphere/contract";
+import {
+	LEGAL_DOCUMENTS,
+	type LegalDocument,
+	MARKDOWN_MAX_LENGTH,
+} from "@codesphere/contract";
 import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { Textarea } from "@codesphere/ui/components/atoms/textarea";
@@ -258,7 +262,7 @@ function DocumentPanel({
 										mono
 										className="min-h-80"
 										value={value}
-										maxLength={20_000}
+										maxLength={MARKDOWN_MAX_LENGTH}
 										disabled={draft.isPending}
 										onChange={(event) => setText(event.target.value)}
 									/>
@@ -336,7 +340,7 @@ function DocumentPanel({
 					publish.mutate({
 						document,
 						language,
-						expectedVersion: draft.data?.version ?? 1,
+						expectedVersion: draft.data?.version ?? 0,
 						reason,
 						important,
 					})

@@ -30,6 +30,9 @@ export const bearsConsent = (document: LegalDocument) =>
 /** The documents Members accept at sign-in: an important change of one asks every Member again. */
 export const MEMBER_CONSENT_DOCUMENTS = ["terms", "privacy"] as const;
 
+export const isMemberConsentDocument = (document: LegalDocument) =>
+	(MEMBER_CONSENT_DOCUMENTS as readonly string[]).includes(document);
+
 /** A publication needs a reason, kept in the history and never shown to the public. */
 export const LegalReason = z.string().trim().min(3).max(300);
 

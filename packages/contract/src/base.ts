@@ -38,7 +38,8 @@ export const IdempotencyKey = z.uuid();
 export const ExpectedVersion = z.number().int().min(1);
 
 /** Markdown body with a bounded size. */
-export const Markdown = z.string().min(1).max(20_000);
+export const MARKDOWN_MAX_LENGTH = 20_000;
+export const Markdown = z.string().min(1).max(MARKDOWN_MAX_LENGTH);
 
 export const PageInput = z.object({
 	cursor: z.string().optional(),

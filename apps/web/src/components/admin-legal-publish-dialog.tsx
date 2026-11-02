@@ -1,6 +1,6 @@
 "use client";
 
-import { bearsConsent, MEMBER_CONSENT_DOCUMENTS } from "@codesphere/contract";
+import { bearsConsent, isMemberConsentDocument } from "@codesphere/contract";
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { Checkbox } from "@codesphere/ui/components/atoms/checkbox";
 import {
@@ -43,9 +43,7 @@ export function PublishDialog({
 	const importantId = useId();
 	const { document, language } = selection;
 	const consent = bearsConsent(document);
-	const forMembers = (MEMBER_CONSENT_DOCUMENTS as readonly string[]).includes(
-		document,
-	);
+	const forMembers = isMemberConsentDocument(document);
 	const close = (next: boolean) => {
 		if (!next) {
 			setReason("");

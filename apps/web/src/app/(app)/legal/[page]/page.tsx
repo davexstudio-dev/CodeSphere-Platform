@@ -35,7 +35,7 @@ export async function generateMetadata({
  * The version in force in the reader's language, or null: nothing published in that language, no
  * database in this deployment, or the API cannot answer. The page then shows the text of the repository.
  */
-async function publishedText(page: LegalPage, language: "fr" | "en") {
+async function readPublished(page: LegalPage, language: "fr" | "en") {
 	if (!HAS_DATABASE) return null;
 	try {
 		return await client.legal.get({ document: page, language });
@@ -58,7 +58,7 @@ export default async function Page({
 	const t = await getTranslations("legal");
 	const format = await getFormatter();
 	const locale = await getLocale();
-	const published = await publishedText(page, locale === "en" ? "en" : "fr");
+	const published = await readPublished(page, locale === "en" ? "en" : "fr");
 	// Raw so the bodies are not parsed as ICU messages.
 	const sections = t.raw(`pages.${page}.sections`) as Record<string, Section>;
 	const updatedAt = published
