@@ -347,6 +347,49 @@ function ProfileSwitch({
 	);
 }
 
+/** The language of the emails (#337): two buttons, saved at once like the switches. */
+function EmailLanguage() {
+	const t = useTranslations("settings");
+	const queryClient = useQueryClient();
+	const me = useQuery(orpc.members.me.queryOptions());
+	const save = useMutation(
+		orpc.members.update.mutationOptions({
+			onSuccess: (profile) => {
+				queryClient.setQueryData(orpc.members.me.queryKey(), (current) =>
+					current ? { ...current, ...profile } : undefined,
+				);
+				toast.success(t("applied"));
+			},
+			onError: () => toast.error(t("saveFailed")),
+		}),
+	);
+	return (
+		<SettingRow
+			title={t("preferences.emailLanguage")}
+			description={t("preferences.emailLanguageHint")}
+		>
+			<fieldset className="flex gap-2 border-0 p-0">
+				<legend className="sr-only">{t("preferences.emailLanguage")}</legend>
+				{(["fr", "en"] as const).map((locale) => (
+					<Button
+						key={locale}
+						type="button"
+						size="sm"
+						variant={me.data?.locale === locale ? "default" : "outline"}
+						aria-pressed={me.data?.locale === locale}
+						disabled={!me.data || save.isPending}
+						onClick={() => save.mutate({ locale })}
+					>
+						{locale === "fr"
+							? t("preferences.emailLanguageFr")
+							: t("preferences.emailLanguageEn")}
+					</Button>
+				))}
+			</fieldset>
+		</SettingRow>
+	);
+}
+
 /** Reputation, the strongest Tags and the badges (none earned yet: the model has no badges). */
 function ReputationPanel() {
 	const t = useTranslations("settings.reputation");
@@ -559,6 +602,7 @@ export default function SettingsPage() {
 									title={t("preferences.hideAgentContent")}
 									description={t("preferences.hideAgentContentHint")}
 								/>
+								<EmailLanguage />
 							</SettingsSection>
 						</TabsContent>
 						<TabsContent value="agents">

@@ -33,6 +33,8 @@ export const user = pgTable("user", {
 	// API keys stop being accepted. Set by `admin.members.suspend`, never by the Member.
 	suspendedAt: timestamp("suspended_at", { precision: 3 }),
 	suspensionReason: text("suspension_reason"),
+	// Language of the emails (#337): fr or en. Filled at the first sign-in from Accept-Language, then edited in the settings. Null until then.
+	locale: text("locale", { enum: ["fr", "en"] }),
 	// Region (spec §2): public country (ISO alpha-2 or OTHER); the city stays private by default.
 	country: text("country"),
 	city: text("city"),

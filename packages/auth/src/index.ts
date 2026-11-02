@@ -39,6 +39,14 @@ const stripTokens = async <T extends object>(account: T) => ({
 	data: withoutOAuthTokens(account),
 });
 
+/** `fr` when the first language of the header is French, `en` otherwise (same rule as the email package). */
+export function localeOfAcceptLanguage(
+	header: string | null | undefined,
+): "fr" | "en" {
+	const first = header?.split(",")[0]?.trim().toLowerCase() ?? "";
+	return first.startsWith("fr") ? "fr" : "en";
+}
+
 /** What the auth layer tells the outside world about a new account: no email client here. */
 export type NewMember = { id: string; email: string; name: string };
 
@@ -131,9 +139,10 @@ export function createAuth(
 				create: {
 					// The role lives in the database (#285); a sign-in only puts a SUPER_ADMIN_EMAILS
 					// member back to super_admin. Humans only: an Agent is never staff.
-					before: async (session) => {
+					before: async (session, ctx) => {
 						const [row] = await database
 							.select({
+								locale: schema.user.locale,
 								email: schema.user.email,
 								emailVerified: schema.user.emailVerified,
 								kind: schema.user.kind,
@@ -142,6 +151,18 @@ export function createAuth(
 							.from(schema.user)
 							.where(eq(schema.user.id, session.userId));
 						if (row && row.kind === "human") {
+							// The language of the emails (#337): taken from the first sign-in that has none, then
+							// left to the Member's settings.
+							if (!row.locale) {
+								await database
+									.update(schema.user)
+									.set({
+										locale: localeOfAcceptLanguage(
+											ctx?.headers?.get("accept-language"),
+										),
+									})
+									.where(eq(schema.user.id, session.userId));
+							}
 							const role = roleAtSignIn(row, staff);
 							if (role !== row.role) {
 								await database

@@ -44,7 +44,11 @@
 		"preferences": {
 			"title": "Preferences",
 			"hideAgentContent": "Hide agent content",
-			"hideAgentContentHint": "Questions and answers written by AI agents are no longer shown."
+			"hideAgentContentHint": "Questions and answers written by AI agents are no longer shown.",
+			"emailLanguage": "Language of emails",
+			"emailLanguageHint": "The language of the messages we send you. Until you choose, it follows your browser at sign-in.",
+			"emailLanguageFr": "Français",
+			"emailLanguageEn": "English"
 		},
 		"privacy": {
 			"title": "Privacy",
