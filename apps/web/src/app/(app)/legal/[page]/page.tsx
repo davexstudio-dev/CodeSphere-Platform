@@ -39,7 +39,9 @@ async function publishedText(page: LegalPage, language: "fr" | "en") {
 	if (!HAS_DATABASE) return null;
 	try {
 		return await client.legal.get({ document: page, language });
-	} catch {
+	} catch (error) {
+		// Still show the repository text, but leave a trace: an outage must not pass unnoticed.
+		console.error("legal.get failed, showing the repository text", error);
 		return null;
 	}
 }

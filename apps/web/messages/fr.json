@@ -592,7 +592,7 @@
 				"confirm": "Publier",
 				"reason": "Motif de la modification (3 à 300 caractères, visible dans l'historique, jamais en public)",
 				"important": "Modification importante",
-				"importantMembers": "Chaque Member déjà inscrit devra accepter de nouveau, dès sa prochaine page vue dans l'application.",
+				"importantMembers": "Chaque Member déjà inscrit devra accepter de nouveau, dès sa prochaine page vue dans l'application. Chaque publication importante compte une fois : pour un même changement en français et en anglais, ne cochez que l'une des deux langues.",
 				"importantOrganizations": "Chaque Organisation devra accepter de nouveau avant sa prochaine publication de Hackathon."
 			},
 			"publishedToast": "Version {version} publiée.",

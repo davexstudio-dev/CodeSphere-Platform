@@ -592,7 +592,7 @@
 				"confirm": "Publish",
 				"reason": "Reason for the change (3 to 300 characters, shown in the history, never public)",
 				"important": "Important change",
-				"importantMembers": "Every existing Member will have to accept again, on their next page view in the app.",
+				"importantMembers": "Every existing Member will have to accept again, on their next page view in the app. Each important publication counts once: for the same change in French and English, tick only one of the two languages.",
 				"importantOrganizations": "Every Organization will have to accept again before its next Hackathon publication."
 			},
 			"publishedToast": "Version {version} published.",
