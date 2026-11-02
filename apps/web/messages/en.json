@@ -550,6 +550,70 @@
 			"reservedHint": "A reserved Tag is kept as is: it can be neither renamed nor deleted, even with no Question. Members can still use it.",
 			"systemHint": "Used by the platform itself: always reserved."
 		},
+		"legal": {
+			"title": "Legal documents",
+			"description": "Write, publish and review the legal texts without touching the code. Every publication is logged.",
+			"list": "Documents",
+			"unavailable": "Documents unavailable",
+			"retry": "Retry",
+			"loading": "Loading…",
+			"pick": "Pick a document in the list.",
+			"documents": {
+				"terms": "Terms of use",
+				"privacy": "Privacy policy",
+				"notice": "Legal notice",
+				"contact": "Contact",
+				"organization_terms": "Organization terms"
+			},
+			"languages": {
+				"fr": "Français",
+				"en": "English"
+			},
+			"published": "Version {version} published on {date}",
+			"notPublished": "Nothing is published in this language: the public page shows the text of the repository.",
+			"fromRepository": "First draft: it starts from the text of the repository. Nothing is public until you publish.",
+			"draftBy": "Draft saved by {name} on {date}.",
+			"tabs": {
+				"edit": "Editing",
+				"history": "History"
+			},
+			"editor": {
+				"label": "Text (Markdown)",
+				"hint": "No HTML: Markdown headings, lists, links and emphasis only. Bracketed placeholders still have to be filled in.",
+				"preview": "Preview"
+			},
+			"saveDraft": "Save draft",
+			"saved": "Draft saved.",
+			"publish": "Publish…",
+			"needsSave": "Save the draft to be able to publish it.",
+			"publishDialog": {
+				"title": "Publish: {document} ({language})",
+				"description": "Version {version} of the draft becomes the public text of this document in this language. The other language is not touched. A published version can be neither edited nor deleted.",
+				"confirm": "Publish",
+				"reason": "Reason for the change (3 to 300 characters, shown in the history, never public)",
+				"important": "Important change",
+				"importantMembers": "Every existing Member will have to accept again, on their next page view in the app.",
+				"importantOrganizations": "Every Organization will have to accept again before its next Hackathon publication."
+			},
+			"publishedToast": "Version {version} published.",
+			"history": {
+				"empty": "No version published in this language.",
+				"version": "Version {version}",
+				"by": "by {name} on {date}",
+				"reason": "Reason: {reason}",
+				"important": "Important",
+				"read": "Read",
+				"close": "Close",
+				"copy": "Copy into the draft",
+				"copied": "Version {version} copied into the draft: save it to keep it."
+			},
+			"errors": {
+				"forbidden": "Your role cannot edit the legal documents.",
+				"conflict": "Someone else changed this draft meanwhile. The text was reloaded: review it, then try again.",
+				"notFound": "There is no draft to publish.",
+				"generic": "Something went wrong. Try again."
+			}
+		},
 		"social": {
 			"title": "Social accounts",
 			"description": "Connect CodeSphere's official X and LinkedIn accounts. Tokens are stored encrypted and renewed before they expire.",
@@ -1298,6 +1362,15 @@
 	"member": {
 		"unnamed": "Member",
 		"reputation": "Reputation {count, number}"
+	},
+	"consent": {
+		"title": "Our terms have changed",
+		"description": "To keep using CodeSphere, read and accept the terms of use and the privacy policy (version {version}). You can also sign out, download your data or delete your account.",
+		"readTerms": "Read the terms of use",
+		"readPrivacy": "Read the privacy policy",
+		"accept": "I accept",
+		"signOut": "Sign out",
+		"otherOptions": "Other options"
 	},
 	"legal": {
 		"nav": "Legal information",

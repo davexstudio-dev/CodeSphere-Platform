@@ -550,6 +550,70 @@
 			"reservedHint": "Un Tag réservé est conservé tel quel : il ne peut être ni renommé ni supprimé, même sans Question. Les Members peuvent toujours l'utiliser.",
 			"systemHint": "Tag utilisé par la plateforme : toujours réservé."
 		},
+		"legal": {
+			"title": "Documents légaux",
+			"description": "Rédigez, publiez et relisez les textes légaux sans passer par le code. Chaque publication est journalisée.",
+			"list": "Documents",
+			"unavailable": "Documents indisponibles",
+			"retry": "Réessayer",
+			"loading": "Chargement…",
+			"pick": "Choisissez un document dans la liste.",
+			"documents": {
+				"terms": "Conditions d'utilisation",
+				"privacy": "Politique de confidentialité",
+				"notice": "Mentions légales",
+				"contact": "Contact",
+				"organization_terms": "Conditions des Organisations"
+			},
+			"languages": {
+				"fr": "Français",
+				"en": "English"
+			},
+			"published": "Version {version} publiée le {date}",
+			"notPublished": "Rien n'est publié dans cette langue : la page publique affiche le texte du dépôt.",
+			"fromRepository": "Premier brouillon : il reprend le texte du dépôt. Rien n'est public tant que vous n'avez pas publié.",
+			"draftBy": "Brouillon enregistré par {name} le {date}.",
+			"tabs": {
+				"edit": "Rédaction",
+				"history": "Historique"
+			},
+			"editor": {
+				"label": "Texte (Markdown)",
+				"hint": "Pas de HTML : titres, listes, liens et mise en forme Markdown uniquement. Les mentions entre crochets restent à compléter.",
+				"preview": "Aperçu"
+			},
+			"saveDraft": "Enregistrer le brouillon",
+			"saved": "Brouillon enregistré.",
+			"publish": "Publier…",
+			"needsSave": "Enregistrez le brouillon pour pouvoir le publier.",
+			"publishDialog": {
+				"title": "Publier : {document} ({language})",
+				"description": "La version {version} du brouillon devient le texte public de ce document dans cette langue. L'autre langue n'est pas modifiée. Une version publiée ne peut ni être modifiée ni être supprimée.",
+				"confirm": "Publier",
+				"reason": "Motif de la modification (3 à 300 caractères, visible dans l'historique, jamais en public)",
+				"important": "Modification importante",
+				"importantMembers": "Chaque Member déjà inscrit devra accepter de nouveau, dès sa prochaine page vue dans l'application.",
+				"importantOrganizations": "Chaque Organisation devra accepter de nouveau avant sa prochaine publication de Hackathon."
+			},
+			"publishedToast": "Version {version} publiée.",
+			"history": {
+				"empty": "Aucune version publiée dans cette langue.",
+				"version": "Version {version}",
+				"by": "par {name} le {date}",
+				"reason": "Motif : {reason}",
+				"important": "Importante",
+				"read": "Lire",
+				"close": "Fermer",
+				"copy": "Reprendre dans le brouillon",
+				"copied": "Version {version} reprise dans le brouillon : enregistrez-la pour la garder."
+			},
+			"errors": {
+				"forbidden": "Votre rôle ne permet pas de modifier les documents légaux.",
+				"conflict": "Quelqu'un a modifié ce brouillon entre-temps. Le texte a été rechargé : relisez-le puis recommencez.",
+				"notFound": "Il n'y a pas de brouillon à publier.",
+				"generic": "Une erreur est survenue. Réessayez."
+			}
+		},
 		"social": {
 			"title": "Comptes sociaux",
 			"description": "Connectez les comptes officiels X et LinkedIn de CodeSphere. Les jetons sont chiffrés et renouvelés avant leur expiration.",
@@ -1298,6 +1362,15 @@
 	"member": {
 		"unnamed": "Membre",
 		"reputation": "Réputation {count, number}"
+	},
+	"consent": {
+		"title": "Nos conditions ont changé",
+		"description": "Pour continuer à utiliser CodeSphere, lisez puis acceptez les conditions d'utilisation et la politique de confidentialité (version {version}). Vous pouvez aussi vous déconnecter, télécharger vos données ou supprimer votre compte.",
+		"readTerms": "Lire les conditions d'utilisation",
+		"readPrivacy": "Lire la politique de confidentialité",
+		"accept": "J'accepte",
+		"signOut": "Me déconnecter",
+		"otherOptions": "Autres options"
 	},
 	"legal": {
 		"nav": "Informations légales",
