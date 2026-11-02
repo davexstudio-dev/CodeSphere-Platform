@@ -165,9 +165,6 @@ function TermsTab({ org }: { org: MyOrganization }) {
 				<RenderedMarkdown html={published.data.html} />
 			) : (
 				<>
-					<p className="rounded-xl border border-dashed p-3 text-muted-foreground text-sm">
-						{t("terms.draftNotice")}
-					</p>
 					<p className="text-sm">{t("terms.intro")}</p>
 					<ol className="grid list-decimal gap-2 pl-5 text-sm">
 						{clauses.map((clause) => (
