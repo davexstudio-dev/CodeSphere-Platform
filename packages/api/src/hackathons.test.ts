@@ -16,6 +16,7 @@ const row = {
 	teamMax: 5,
 	sourceUrl: "https://systalink.com/fr/coupe-afrique-des-developpeurs-cadev",
 	sourceNote: "Calendrier communiqué par les organisateurs.",
+	unpublishedReason: null,
 	verifiedAt: new Date("2026-10-11T00:00:00Z"),
 	version: 3,
 	createdAt: new Date(),

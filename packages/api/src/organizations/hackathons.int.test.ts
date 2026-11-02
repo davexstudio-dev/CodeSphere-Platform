@@ -12,7 +12,7 @@ import {
 	organizationMember,
 } from "@codesphere/db/schema/organizations";
 import { createRouterClient } from "@orpc/server";
-import { eq, inArray, like } from "drizzle-orm";
+import { and, eq, inArray, like } from "drizzle-orm";
 
 import { appRouter } from "../routers";
 import { testContext } from "../test-context";
@@ -26,17 +26,20 @@ describe.skipIf(!url)("Organization Hackathons on Postgres", () => {
 	const editor = `it-oh-editor-${run}`;
 	const stranger = `it-oh-stranger-${run}`;
 	const bot = `it-oh-bot-${run}`;
-	const ids = [owner, editor, stranger, bot];
-	const as = (id: string, kind = "human") =>
+	const admin = `it-oh-admin-${run}`;
+	const ids = [owner, editor, stranger, bot, admin];
+	const as = (id: string, kind = "human", role = "member") =>
 		createRouterClient(appRouter, {
 			context: testContext({
 				db,
 				session: {
-					user: { id, role: "member", kind },
+					user: { id, role, kind },
 					session: { id: "s" },
 				} as unknown as Session,
 			}),
 		});
+	const visitor = () =>
+		createRouterClient(appRouter, { context: testContext({ db }) });
 	const orgSlug = `oh-org-${run}`;
 	const slug = `oh-hack-${run}`;
 	let orgId = "";
@@ -60,6 +63,12 @@ describe.skipIf(!url)("Organization Hackathons on Postgres", () => {
 			{ id: editor, name: "Editor", email: `${editor}@example.com` },
 			{ id: stranger, name: "Stranger", email: `${stranger}@example.com` },
 			{ id: bot, name: "Bot", email: `${bot}@example.com`, kind: "agent" },
+			{
+				id: admin,
+				name: "Admin",
+				email: `${admin}@example.com`,
+				role: "admin",
+			},
 		]);
 		const base = {
 			website: `https://www.${run}.example.org`,
@@ -97,13 +106,57 @@ describe.skipIf(!url)("Organization Hackathons on Postgres", () => {
 		await db.delete(user).where(inArray(user.id, ids));
 	});
 
-	test("an editor creates a draft and publishes it without an Admin", async () => {
+	test("publishing needs the terms, which only the owner accepts", async () => {
 		const created = await as(editor).organizations.hackathons.create(input());
 		expect(created.status).toBe("draft");
-		const published = await as(editor).organizations.hackathons.advance({
-			slug,
-			expectedVersion: created.version,
+		const advance = () =>
+			as(editor).organizations.hackathons.advance({
+				slug,
+				expectedVersion: created.version,
+			});
+		await expect(advance()).rejects.toMatchObject({ code: "FORBIDDEN" });
+		const terms = await as(editor).organizations.hackathons.terms.get({
+			organizationId: orgId,
 		});
+		expect(terms.accepted).toBe(false);
+		await expect(
+			as(editor).organizations.hackathons.terms.accept({
+				organizationId: orgId,
+				version: terms.version,
+			}),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+		await expect(
+			as(owner).organizations.hackathons.terms.accept({
+				organizationId: orgId,
+				version: "an-older-version",
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+
+		const accepted = await as(owner).organizations.hackathons.terms.accept({
+			organizationId: orgId,
+			version: terms.version,
+		});
+		expect(accepted).toMatchObject({
+			accepted: true,
+			acceptedByName: "Owner",
+		});
+		// A second acceptance changes nothing and writes no second event.
+		await as(owner).organizations.hackathons.terms.accept({
+			organizationId: orgId,
+			version: terms.version,
+		});
+		const events = await db
+			.select({ id: auditLog.id })
+			.from(auditLog)
+			.where(
+				and(
+					eq(auditLog.action, "organization.terms_accept"),
+					eq(auditLog.targetId, orgId),
+				),
+			);
+		expect(events).toHaveLength(1);
+
+		const published = await advance();
 		expect(published.status).toBe("published");
 		const actions = (
 			await db
@@ -158,6 +211,97 @@ describe.skipIf(!url)("Organization Hackathons on Postgres", () => {
 				organizationSlug: otherOrgSlug,
 			}),
 		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+	});
+
+	test("the Hackathons of a suspended Organization leave the public views", async () => {
+		const listed = async () =>
+			(await visitor().hackathons.list({})).items.map((h) => h.slug);
+		expect(await listed()).toContain(slug);
+		await db
+			.update(organization)
+			.set({ status: "suspended" })
+			.where(eq(organization.id, orgId));
+		expect(await listed()).not.toContain(slug);
+		await expect(visitor().hackathons.get({ slug })).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
+		// An Admin still sees it.
+		const { items } = await as(admin, "human", "admin").admin.hackathons.list(
+			{},
+		);
+		expect(items.map((h) => h.slug)).toContain(slug);
+		await db
+			.update(organization)
+			.set({ status: "validated" })
+			.where(eq(organization.id, orgId));
+		expect(await listed()).toContain(slug);
+	});
+
+	test("an Admin takes a published Hackathon back to a draft, with a reason", async () => {
+		const staff = as(admin, "human", "admin");
+		const [current] = await db
+			.select({ version: hackathon.version })
+			.from(hackathon)
+			.where(eq(hackathon.slug, slug));
+		await expect(
+			staff.admin.hackathons.unpublish({
+				slug,
+				expectedVersion: (current?.version ?? 1) + 5,
+				reason: "Contenu trompeur",
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+		const draft = await staff.admin.hackathons.unpublish({
+			slug,
+			expectedVersion: current?.version ?? 1,
+			reason: "Contenu trompeur",
+		});
+		expect(draft.status).toBe("draft");
+		await expect(visitor().hackathons.get({ slug })).rejects.toMatchObject({
+			code: "NOT_FOUND",
+		});
+		const [event] = await db
+			.select({ details: auditLog.details })
+			.from(auditLog)
+			.where(eq(auditLog.action, "hackathon.unpublish"));
+		expect(event?.details).toMatchObject({ reason: "Contenu trompeur" });
+		await expect(
+			staff.admin.hackathons.unpublish({
+				slug,
+				expectedVersion: draft.version,
+				reason: "Encore",
+			}),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+		// The unpublication holds: the Organization sees why and cannot publish again by itself.
+		const { items } = await as(owner).organizations.hackathons.list({
+			organizationId: orgId,
+		});
+		expect(items.find((h) => h.slug === slug)?.unpublishedReason).toBe(
+			"Contenu trompeur",
+		);
+		await expect(
+			as(editor).organizations.hackathons.advance({
+				slug,
+				expectedVersion: draft.version,
+			}),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+		// An Admin lifts the lock once the content is fixed; the terms stay accepted.
+		const cleared = await staff.admin.hackathons.allowRepublication({
+			slug,
+			expectedVersion: draft.version,
+		});
+		expect(cleared.status).toBe("draft");
+		await expect(
+			staff.admin.hackathons.allowRepublication({
+				slug,
+				expectedVersion: cleared.version,
+			}),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+		const again = await as(editor).organizations.hackathons.advance({
+			slug,
+			expectedVersion: cleared.version,
+		});
+		expect(again.status).toBe("published");
 	});
 
 	test("the CADEV's Organization, created by the platform, stays with the Admins", async () => {

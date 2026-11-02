@@ -25,6 +25,7 @@ import { AlertCircleIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { useReasonDecision } from "@/components/admin-decision";
 import AdminFrame from "@/components/admin-frame";
 import { CreateHackathon } from "@/components/hackathon/create-hackathon";
 import {
@@ -69,6 +70,7 @@ export default function AdminHackathonsPage() {
 		timeStyle: "short",
 	});
 	const queryClient = useQueryClient();
+	const { ask, dialog } = useReasonDecision();
 	const query = useQuery(
 		orpc.admin.hackathons.list.queryOptions({ input: {} }),
 	);
@@ -118,6 +120,30 @@ export default function AdminHackathonsPage() {
 		void queryClient.invalidateQueries({ queryKey: orpc.hackathons.key() });
 		void queryClient.invalidateQueries({ queryKey: orpc.admin.auditLog.key() });
 	};
+	const allow = useMutation(
+		orpc.admin.hackathons.allowRepublication.mutationOptions({
+			onSuccess: () => {
+				refresh();
+				setFailure(null);
+			},
+			onError: () => {
+				refresh();
+				setFailure("advance");
+			},
+		}),
+	);
+	const unpublish = useMutation(
+		orpc.admin.hackathons.unpublish.mutationOptions({
+			onSuccess: () => {
+				refresh();
+				setFailure(null);
+			},
+			onError: () => {
+				refresh();
+				setFailure("advance");
+			},
+		}),
+	);
 	const advance = useMutation(
 		orpc.admin.hackathons.advance.mutationOptions({
 			onSuccess: () => {
@@ -288,6 +314,52 @@ export default function AdminHackathonsPage() {
 									<p className="text-muted-foreground text-xs">
 										{t(`advanceNote.${hackathon.status}`)}
 									</p>
+									{hackathon.status === "draft" &&
+										hackathon.unpublishedReason && (
+											<div className="grid gap-1">
+												<p className="text-destructive text-xs">
+													{t("unpublishedBy", {
+														reason: hackathon.unpublishedReason,
+													})}
+												</p>
+												<Button
+													size="sm"
+													variant="outline"
+													disabled={allow.isPending}
+													onClick={() =>
+														allow.mutate({
+															slug,
+															expectedVersion: hackathon.version,
+														})
+													}
+												>
+													{t("allowRepublication")}
+												</Button>
+											</div>
+										)}
+									{(hackathon.status === "published" ||
+										hackathon.status === "ended") && (
+										<Button
+											size="sm"
+											variant="destructive"
+											onClick={() =>
+												ask({
+													title: hackathon.name,
+													description: t("unpublishDescription"),
+													confirmLabel: t("unpublish"),
+													reasonLabel: t("unpublishReason"),
+													onSubmit: (reason) =>
+														unpublish.mutate({
+															slug,
+															expectedVersion: hackathon.version,
+															reason,
+														}),
+												})
+											}
+										>
+											{t("unpublish")}
+										</Button>
+									)}
 								</div>
 							)}
 							<RecordSheet
@@ -645,6 +717,7 @@ export default function AdminHackathonsPage() {
 					)
 				}
 			/>
+			{dialog}
 		</AdminFrame>
 	);
 }

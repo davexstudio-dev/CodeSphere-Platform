@@ -14,9 +14,11 @@ import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import {
 	advanceHackathon,
+	allowRepublication,
 	createHackathon,
 	type HackathonWriteOutcome,
 	listAdminHackathons,
+	unpublishHackathon,
 	updateHackathon,
 } from "../admin-hackathons";
 import { kpiReport } from "../admin-kpi";
@@ -389,6 +391,30 @@ export const appRouter = impl
 						hackathonOr(
 							errors,
 							await advanceHackathon(
+								context.db,
+								actorOf(context.session),
+								input,
+							),
+						),
+					),
+				allowRepublication: impl.admin.hackathons.allowRepublication
+					.use(staffMay({ hackathon: ["update"] }))
+					.handler(async ({ context, input, errors }) =>
+						hackathonOr(
+							errors,
+							await allowRepublication(
+								context.db,
+								actorOf(context.session),
+								input,
+							),
+						),
+					),
+				unpublish: impl.admin.hackathons.unpublish
+					.use(staffMay({ hackathon: ["update"] }))
+					.handler(async ({ context, input, errors }) =>
+						hackathonOr(
+							errors,
+							await unpublishHackathon(
 								context.db,
 								actorOf(context.session),
 								input,
