@@ -24,6 +24,7 @@ const matrix: [Record<string, string[]>, string[]][] = [
 	[{ team: ["manage"] }, ["admin", "super_admin"]],
 	[{ watch: ["manage"] }, ["admin", "super_admin"]],
 	[{ social: ["manage"] }, ["admin", "super_admin"]],
+	[{ legal: ["manage"] }, ["admin", "super_admin"]],
 	[{ kpi: ["read"] }, ["admin", "super_admin"]],
 	[
 		{ staff: ["list", "invite", "set-role", "deactivate", "revoke-sessions"] },

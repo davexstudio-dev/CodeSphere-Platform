@@ -15,6 +15,9 @@ export type AuditDetails = {
 	reason?: string;
 	from?: string;
 	to?: string;
+	/** A legal document publication (#341): which text, never the text itself. */
+	document?: string;
+	language?: string;
 };
 
 // Admin audit log (spec §2): one row per sensitive admin action. Written by admin

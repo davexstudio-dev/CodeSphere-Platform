@@ -1,6 +1,6 @@
 import type { OrganizationTerms } from "@codesphere/contract";
-import { ORGANIZATION_TERMS_VERSION } from "@codesphere/contract";
 import type { Database } from "@codesphere/db";
+import { currentLegalVersions } from "@codesphere/db/legal";
 import { user } from "@codesphere/db/schema/auth";
 import { organizationTermsAcceptance } from "@codesphere/db/schema/organizations";
 import { and, eq } from "drizzle-orm";
@@ -12,6 +12,7 @@ export async function termsOf(
 	db: Database,
 	organizationId: string,
 ): Promise<OrganizationTerms> {
+	const { organizationTerms: version } = await currentLegalVersions(db);
 	const [row] = await db
 		.select({
 			acceptedAt: organizationTermsAcceptance.acceptedAt,
@@ -22,11 +23,11 @@ export async function termsOf(
 		.where(
 			and(
 				eq(organizationTermsAcceptance.organizationId, organizationId),
-				eq(organizationTermsAcceptance.version, ORGANIZATION_TERMS_VERSION),
+				eq(organizationTermsAcceptance.version, version),
 			),
 		);
 	return {
-		version: ORGANIZATION_TERMS_VERSION,
+		version,
 		accepted: Boolean(row),
 		acceptedAt: row ? row.acceptedAt.toISOString() : null,
 		acceptedByName: row?.acceptedByName ?? null,
@@ -42,6 +43,7 @@ export async function acceptTerms(
 	actorId: string,
 	organizationId: string,
 ) {
+	const { organizationTerms: version } = await currentLegalVersions(db);
 	await withAudit(
 		db,
 		{
@@ -49,13 +51,13 @@ export async function acceptTerms(
 			action: "organization.terms_accept",
 			targetType: "organization",
 			targetIdColumn: "organization_id",
-			details: { to: ORGANIZATION_TERMS_VERSION },
+			details: { to: version },
 		},
 		db
 			.insert(organizationTermsAcceptance)
 			.values({
 				organizationId,
-				version: ORGANIZATION_TERMS_VERSION,
+				version,
 				acceptedBy: actorId,
 			})
 			.onConflictDoNothing()

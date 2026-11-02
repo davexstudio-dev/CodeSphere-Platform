@@ -5,6 +5,7 @@ export * from "./community";
 export * from "./feed";
 export * from "./hackathons";
 export * from "./jobs";
+export * from "./legal";
 export * from "./organizations";
 export * from "./outbox";
 export * from "./questions";
