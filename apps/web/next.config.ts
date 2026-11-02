@@ -29,6 +29,17 @@ const nextConfig: NextConfig = {
 	transpilePackages: ["@codesphere/ui", "@codesphere/contract"],
 	// Next would otherwise generate apps/web/AGENTS.md on every dev start.
 	agentRules: false,
+	// The legal pages read the latest published version per request (#341). There is no incremental
+	// cache nor revalidation: a browser may keep a page for five minutes (LEGAL_PAGE_MAX_AGE_SECONDS).
+	// `private`: the language comes from a cookie, so a shared cache must not serve one to the other.
+	async headers() {
+		return [
+			{
+				source: "/legal/:page",
+				headers: [{ key: "Cache-Control", value: "private, max-age=300" }],
+			},
+		];
+	},
 	env: {
 		// `||`, not `??`: an empty build arg from docker-compose means "not set".
 		APP_VERSION: process.env.APP_VERSION || version,
