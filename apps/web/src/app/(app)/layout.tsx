@@ -1,6 +1,7 @@
 import { AppFooter } from "@codesphere/ui/components/organisms/app-footer";
 import { getTranslations } from "next-intl/server";
 
+import { ConsentGate } from "@/components/consent-gate";
 import { DataSaverToggle } from "@/components/data-saver";
 import { NetworkBanner } from "@/components/network-banner";
 import SiteHeader from "@/components/site-header";
@@ -21,6 +22,8 @@ export default async function AppLayout({
 			<div className="min-h-svh">
 				<SiteHeader />
 				<NetworkBanner />
+				{/* A new consent version blocks the next page view of a signed-in Member (#341). */}
+				<ConsentGate />
 				{children}
 			</div>
 			{/* The data saver switch (#250) of the visitor pages; the back-office has it in « Mon compte ». */}
