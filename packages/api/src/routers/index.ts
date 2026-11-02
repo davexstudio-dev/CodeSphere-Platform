@@ -3,6 +3,7 @@ import {
 	type contract,
 	MEMBER_SUSPENDED_MESSAGE,
 } from "@codesphere/contract";
+import { currentLegalVersions } from "@codesphere/db/legal";
 import { auditLog } from "@codesphere/db/schema/audit";
 import { user } from "@codesphere/db/schema/auth";
 import { questions } from "@codesphere/db/schema/questions";
@@ -64,6 +65,10 @@ import {
 	createJobsHandlers,
 	createTalentHandlers,
 } from "../jobs/handlers";
+import {
+	createLegalAdminHandlers,
+	createLegalHandlers,
+} from "../legal-handlers";
 import { sanitizeMarkdown } from "../markdown/sanitizer";
 import { memberActivity } from "../members-activity";
 import { deleteMember } from "../members-delete";
@@ -288,6 +293,52 @@ export const appRouter = impl
 						throw errors.UNAUTHORIZED();
 					}
 					return ownProfile(row, await reputationOf(context.db, row));
+				},
+			),
+			// Whether the Member has to accept the current terms and privacy policy again (#341). A
+			// Member with no recorded consent (seeded data) is not asked: sign-in records it.
+			consent: impl.members.consent.handler(async ({ context, errors }) => {
+				const me = context.session?.user as
+					| { id: string; kind?: string }
+					| undefined;
+				if (!me) {
+					throw errors.UNAUTHORIZED();
+				}
+				if (me.kind !== "human") {
+					throw errors.FORBIDDEN();
+				}
+				const [row] = await context.db
+					.select({ consentVersion: user.consentVersion })
+					.from(user)
+					.where(eq(user.id, me.id));
+				const { consent: current } = await currentLegalVersions(context.db);
+				return {
+					current,
+					required:
+						row?.consentVersion != null && row.consentVersion !== current,
+				};
+			}),
+			acceptConsent: impl.members.acceptConsent.handler(
+				async ({ context, input, errors }) => {
+					const me = context.session?.user as
+						| { id: string; kind?: string }
+						| undefined;
+					if (!me) {
+						throw errors.UNAUTHORIZED();
+					}
+					if (me.kind !== "human") {
+						throw errors.FORBIDDEN();
+					}
+					const { consent: current } = await currentLegalVersions(context.db);
+					// The Member saw an older text than the one in force: show the new one first.
+					if (input.version !== current) {
+						throw errors.CONFLICT();
+					}
+					await context.db
+						.update(user)
+						.set({ consentVersion: current, consentAcceptedAt: new Date() })
+						.where(eq(user.id, me.id));
+					return { success: true };
 				},
 			),
 			activity: impl.members.activity.handler(async ({ context, errors }) => {
@@ -812,6 +863,7 @@ export const appRouter = impl
 					}),
 			},
 			watch: createWatchAdminHandlers(),
+			legal: createLegalAdminHandlers(),
 			organizations: createOrganizationsAdminHandlers(),
 			jobs: createJobsAdminHandlers(),
 			teams: createTeamsAdminHandlers(),
@@ -1046,6 +1098,7 @@ export const appRouter = impl
 		feed: { ...createFeedHandlers(), ...createMixedFeedHandlers() },
 		rankings: createRankingsHandlers(),
 		watch: createWatchHandlers(),
+		legal: createLegalHandlers(),
 		organizations: createOrganizationsHandlers(),
 		jobs: createJobsHandlers(),
 		teams: createTeamsHandlers(),

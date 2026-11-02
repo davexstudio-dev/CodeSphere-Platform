@@ -21,6 +21,7 @@ export const statement = {
 	team: ["manage"],
 	watch: ["manage"],
 	social: ["manage"],
+	legal: ["manage"],
 	kpi: ["read"],
 	staff: ["list", "invite", "set-role", "deactivate", "revoke-sessions"],
 } as const;
@@ -47,6 +48,7 @@ const admin = {
 	team: ["manage"],
 	watch: ["manage"],
 	social: ["manage"],
+	legal: ["manage"],
 	kpi: ["read"],
 	staff: ["list", "invite", "set-role", "deactivate", "revoke-sessions"],
 } as const;

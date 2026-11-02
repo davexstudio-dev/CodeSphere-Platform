@@ -40,6 +40,15 @@ describe("exposedOverOpenAPI", () => {
 	});
 });
 
+describe("the legal documents (#341)", () => {
+	test("are read by the web app only, never over REST", () => {
+		expect(exposedOverOpenAPI(bare, ["legal", "get"])).toBe(false);
+		expect(exposedOverOpenAPI(bare, ["members", "consent"])).toBe(false);
+		expect(exposedOverOpenAPI(bare, ["members", "acceptConsent"])).toBe(false);
+		expect(exposedOverOpenAPI(bare, ["admin", "legal", "publish"])).toBe(false);
+	});
+});
+
 describe("the served router", () => {
 	test("the OpenAPI spec documents the admin writes for staff", async () => {
 		const spec = await new OpenAPIGenerator({

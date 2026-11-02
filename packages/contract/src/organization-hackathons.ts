@@ -4,14 +4,8 @@ import { AdminHackathon, HackathonCreate, HackathonUpdate } from "./admin";
 import { base, ExpectedVersion } from "./base";
 import { Hackathon } from "./hackathons";
 
-/**
- * The version of the terms an Organization accepts before publishing a Hackathon (#326). Bump it
- * when the text changes: every Organization is then asked again, before its next publication.
- */
-export const ORGANIZATION_TERMS_VERSION = "2026-11-02";
-
 export const OrganizationTerms = z.object({
-	/** The version in force; the text itself is displayed by the app. */
+	/** The version in force (#341): a counter raised by an important change of the text. */
 	version: z.string(),
 	/** Whether this Organization accepted that version. */
 	accepted: z.boolean(),

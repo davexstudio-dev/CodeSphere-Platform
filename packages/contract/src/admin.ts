@@ -11,6 +11,7 @@ import {
 	Prize,
 } from "./hackathons";
 import { jobsAdminContract } from "./jobs";
+import { legalAdminContract } from "./legal";
 import { MemberSummary } from "./members";
 import { organizationsAdminContract } from "./organizations";
 import { ROLES } from "./roles";
@@ -32,6 +33,9 @@ export const AuditEvent = z.object({
 			/** A role change (#285): the role before and after. */
 			from: z.string().optional(),
 			to: z.string().optional(),
+			/** A legal document publication (#341): which text, never the text itself. */
+			document: z.string().optional(),
+			language: z.string().optional(),
 		})
 		.nullable(),
 	createdAt: Timestamp,
@@ -368,6 +372,8 @@ const tagErrors = {
 };
 
 export const adminContract = {
+	/** The legal documents editor (#341): back-office only, never REST or MCP. */
+	legal: legalAdminContract,
 	tags: {
 		list: base
 			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })

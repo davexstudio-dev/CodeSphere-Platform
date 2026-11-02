@@ -20,12 +20,13 @@ import {
 	TabsTrigger,
 } from "@codesphere/ui/components/molecules/tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { CreateHackathon } from "@/components/hackathon/create-hackathon";
 import { HackathonRecord } from "@/components/hackathon/edit-hackathon";
+import { RenderedMarkdown } from "@/components/rendered-markdown";
 import SsoLoginDialog from "@/components/sso-login-dialog";
 import { errorCodeOf } from "@/i18n/errors";
 import { authClient } from "@/lib/auth-client";
@@ -130,6 +131,18 @@ function TermsTab({ org }: { org: MyOrganization }) {
 			input: { organizationId: org.id },
 		}),
 	);
+	// The text in force, written in the back-office (#341); the repository's stands in until one is
+	// published in the reader's language.
+	const locale = useLocale();
+	const published = useQuery({
+		...orpc.legal.get.queryOptions({
+			input: {
+				document: "organization_terms",
+				language: locale === "en" ? "en" : "fr",
+			},
+		}),
+		meta: { silent: true },
+	});
 	const accept = useMutation(
 		orpc.organizations.hackathons.terms.accept.mutationOptions({
 			onSuccess: () => {
@@ -148,15 +161,21 @@ function TermsTab({ org }: { org: MyOrganization }) {
 			<h2 id="org-terms" className="font-semibold text-xl">
 				{t("terms.title")}
 			</h2>
-			<p className="rounded-xl border border-dashed p-3 text-muted-foreground text-sm">
-				{t("terms.draftNotice")}
-			</p>
-			<p className="text-sm">{t("terms.intro")}</p>
-			<ol className="grid list-decimal gap-2 pl-5 text-sm">
-				{clauses.map((clause) => (
-					<li key={clause}>{t(`terms.clauses.${clause}`)}</li>
-				))}
-			</ol>
+			{published.data ? (
+				<RenderedMarkdown html={published.data.html} />
+			) : (
+				<>
+					<p className="rounded-xl border border-dashed p-3 text-muted-foreground text-sm">
+						{t("terms.draftNotice")}
+					</p>
+					<p className="text-sm">{t("terms.intro")}</p>
+					<ol className="grid list-decimal gap-2 pl-5 text-sm">
+						{clauses.map((clause) => (
+							<li key={clause}>{t(`terms.clauses.${clause}`)}</li>
+						))}
+					</ol>
+				</>
+			)}
 			{terms.data?.accepted ? (
 				<p className="text-sm">
 					<Badge variant="success">{t("terms.accepted")}</Badge>{" "}

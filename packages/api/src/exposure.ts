@@ -34,8 +34,14 @@ export function exposedOverOpenAPI(
 	if (path[0] === "organizations" && ORGANIZATION_APP_ONLY.has(path[1] ?? "")) {
 		return false;
 	}
+	if (path[0] === "legal" || APP_ONLY_MEMBERS.has(path.join("."))) {
+		return false;
+	}
 	return path[0] !== "admin" || metaOf(procedure)["~openapi"] !== undefined;
 }
+
+// The legal texts and the re-acceptance of the consent (#341) are read by the web app only.
+const APP_ONLY_MEMBERS = new Set(["members.consent", "members.acceptConsent"]);
 
 // The team, its invitations and the Hackathon writes of an Organization (#326) are for the web app:
 // an Agent never invites a Member or publishes a Hackathon, so no REST route and no MCP tool.

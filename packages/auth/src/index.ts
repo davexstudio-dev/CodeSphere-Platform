@@ -1,8 +1,8 @@
 import { apiKey } from "@better-auth/api-key";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
-import { CONSENT_VERSION } from "@codesphere/contract/consent";
 import { DEFAULT_ROLE, ROLES, STAFF_ROLES } from "@codesphere/contract/roles";
 import type { Database } from "@codesphere/db";
+import { currentLegalVersions } from "@codesphere/db/legal";
 import * as schema from "@codesphere/db/schema/auth";
 import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
@@ -186,10 +186,10 @@ export function createAuth(
 			user: {
 				create: {
 					before: async (user, ctx) => {
-						// No consent, no account (spec §3).
+						// No consent, no account (spec §3), to the version in force (#341).
 						const consent = readConsent(
 							ctx?.headers?.get("cookie"),
-							CONSENT_VERSION,
+							(await currentLegalVersions(database)).consent,
 							new Date(),
 						);
 						if (!consent.accepted) {

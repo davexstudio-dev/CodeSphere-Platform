@@ -1,5 +1,5 @@
-import { ORGANIZATION_TERMS_VERSION } from "@codesphere/contract";
 import type { Database } from "@codesphere/db";
+import { currentLegalVersions } from "@codesphere/db/legal";
 import { hackathon } from "@codesphere/db/schema/hackathons";
 import {
 	organization,
@@ -159,7 +159,11 @@ export function createOrganizationHackathonHandlers() {
 					if (org.ownerId !== memberId) {
 						throw errors.FORBIDDEN();
 					}
-					if (input.version !== ORGANIZATION_TERMS_VERSION) {
+					// The text changed since the Organization read it: it must read the new one first.
+					if (
+						input.version !==
+						(await currentLegalVersions(context.db)).organizationTerms
+					) {
 						throw errors.CONFLICT({ data: { version: 0 } });
 					}
 					return acceptTerms(context.db, memberId, org.id);

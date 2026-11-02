@@ -12,6 +12,7 @@ import {
 	BarChart3Icon,
 	BriefcaseIcon,
 	BuildingIcon,
+	FileTextIcon,
 	GaugeIcon,
 	RssIcon,
 	ScaleIcon,
@@ -113,6 +114,13 @@ const NAV: {
 		href: "/admin/staff",
 		icon: UsersIcon,
 		can: { staff: ["list"] },
+	},
+	{
+		group: "team",
+		key: "legal.title",
+		href: "/admin/legal",
+		icon: FileTextIcon,
+		can: { legal: ["manage"] },
 	},
 	{
 		group: "team",

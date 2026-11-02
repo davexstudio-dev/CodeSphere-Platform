@@ -1,8 +1,8 @@
 "use client";
 
-import { CONSENT_VERSION } from "@codesphere/contract/consent";
 import { LoginDialog } from "@codesphere/ui/components/organisms/login-dialog";
 
+import { useConsentVersion } from "@/lib/use-consent-version";
 import { useSsoSignIn } from "@/lib/use-sso-sign-in";
 
 /**
@@ -19,13 +19,14 @@ export default function SsoLoginDialog({
 	onOpenChange?: (open: boolean) => void;
 }) {
 	const { pending, error, onProviderSelect, emailSignIn } = useSsoSignIn();
+	const consentVersion = useConsentVersion();
 	return (
 		<LoginDialog
 			trigger={trigger}
 			open={open}
 			onOpenChange={onOpenChange}
 			withoutTrigger={open !== undefined && !trigger}
-			consentVersion={CONSENT_VERSION}
+			consentVersion={consentVersion}
 			pendingProvider={pending}
 			error={error}
 			onProviderSelect={onProviderSelect}

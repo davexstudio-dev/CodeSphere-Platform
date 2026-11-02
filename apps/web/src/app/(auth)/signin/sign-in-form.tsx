@@ -1,6 +1,5 @@
 "use client";
 
-import { CONSENT_VERSION } from "@codesphere/contract/consent";
 import { LoginPage } from "@codesphere/ui/components/organisms/login-page";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
@@ -10,7 +9,12 @@ import { signInErrorKey } from "@/lib/sign-in-error";
 import { useSsoSignIn } from "@/lib/use-sso-sign-in";
 
 // SSO sign-in form (spec §3: GitHub, GitLab, Google; consent unchecked at first sign-in).
-export default function SignInForm() {
+// `consentVersion` is the counter in force (#341), read from the database by the page.
+export default function SignInForm({
+	consentVersion,
+}: {
+	consentVersion: string;
+}) {
 	const t = useTranslations("signin");
 	const tHeader = useTranslations("header");
 	const { pending, error, setError, onProviderSelect, emailSignIn } =
@@ -31,7 +35,7 @@ export default function SignInForm() {
 			LinkComponent={Link}
 			homeLabel={tHeader("home")}
 			card={{
-				consentVersion: CONSENT_VERSION,
+				consentVersion,
 				pendingProvider: pending,
 				error,
 				onProviderSelect,

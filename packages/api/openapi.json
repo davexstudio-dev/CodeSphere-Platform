@@ -1115,6 +1115,12 @@
 																	},
 																	"to": {
 																		"type": "string"
+																	},
+																	"document": {
+																		"type": "string"
+																	},
+																	"language": {
+																		"type": "string"
 																	}
 																},
 																"additionalProperties": false

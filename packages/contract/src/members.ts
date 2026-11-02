@@ -245,6 +245,16 @@ export const membersContract = {
 		)
 		.input(z.object({ deleteContent: z.boolean().default(false) }))
 		.output(z.object({ success: z.boolean() })),
+	/** Whether the Member has to accept the current terms and privacy policy again (#341). */
+	consent: base
+		.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
+		.input(z.object({}))
+		.output(z.object({ required: z.boolean(), current: z.string() })),
+	/** Records the acceptance of the current version. Humans only. */
+	acceptConsent: base
+		.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, CONFLICT: {} })
+		.input(z.object({ version: z.string() }))
+		.output(z.object({ success: z.boolean() })),
 	get: base
 		.errors({ NOT_FOUND: {} })
 		.meta(
