@@ -8,6 +8,12 @@ import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { Input } from "@codesphere/ui/components/atoms/input";
 import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@codesphere/ui/components/molecules/dialog";
+import {
 	Tabs,
 	TabsContent,
 	TabsList,
@@ -19,6 +25,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { CreateHackathon } from "@/components/hackathon/create-hackathon";
+import { HackathonRecord } from "@/components/hackathon/edit-hackathon";
 import SsoLoginDialog from "@/components/sso-login-dialog";
 import { errorCodeOf } from "@/i18n/errors";
 import { authClient } from "@/lib/auth-client";
@@ -208,6 +215,9 @@ function HackathonsTab({ org }: { org: MyOrganization }) {
 			onError: (error) => failure(t, error),
 		}),
 	);
+	// The Hackathon being edited, by slug (#338).
+	const [editing, setEditing] = useState<string | null>(null);
+	const edited = list.data?.items.find((item) => item.slug === editing);
 
 	return (
 		<section className="grid gap-3" aria-labelledby="org-hackathons">
@@ -243,37 +253,80 @@ function HackathonsTab({ org }: { org: MyOrganization }) {
 									{t("unpublished", { reason: item.unpublishedReason })}
 								</p>
 							)}
-							{next && (
+							<span className="flex flex-wrap items-center gap-2">
 								<Button
 									size="sm"
 									variant="outline"
-									disabled={
-										advance.isPending ||
-										(item.status === "draft" &&
-											(!terms.data?.accepted ||
-												Boolean(item.unpublishedReason)))
-									}
+									disabled={item.status === "archived"}
 									title={
-										item.status === "draft" && item.unpublishedReason
-											? t("unpublishedTitle")
-											: item.status === "draft" && !terms.data?.accepted
-												? t("terms.needed")
-												: undefined
+										item.status === "archived"
+											? t("archivedReadOnly")
+											: undefined
 									}
-									onClick={() =>
-										advance.mutate({
-											slug: item.slug,
-											expectedVersion: item.version,
-										})
-									}
+									onClick={() => setEditing(item.slug)}
 								>
-									{t(`action.${next}`)}
+									{t("edit")}
 								</Button>
-							)}
+								{next && (
+									<Button
+										size="sm"
+										variant="outline"
+										disabled={
+											advance.isPending ||
+											(item.status === "draft" &&
+												(!terms.data?.accepted ||
+													Boolean(item.unpublishedReason)))
+										}
+										title={
+											item.status === "draft" && item.unpublishedReason
+												? t("unpublishedTitle")
+												: item.status === "draft" && !terms.data?.accepted
+													? t("terms.needed")
+													: undefined
+										}
+										onClick={() =>
+											advance.mutate({
+												slug: item.slug,
+												expectedVersion: item.version,
+											})
+										}
+									>
+										{t(`action.${next}`)}
+									</Button>
+								)}
+							</span>
 						</li>
 					);
 				})}
 			</ul>
+			<Dialog
+				open={Boolean(edited)}
+				onOpenChange={(open) => {
+					if (!open) {
+						setEditing(null);
+					}
+				}}
+			>
+				<DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+					<DialogHeader>
+						<DialogTitle>{t("edit")}</DialogTitle>
+					</DialogHeader>
+					{edited && (
+						<HackathonRecord
+							key={`${edited.slug}-${edited.version}`}
+							scope="organization"
+							startEditing
+							hackathon={edited}
+							onSaved={() => {
+								refresh();
+								setEditing(null);
+							}}
+							onReload={() => list.refetch()}
+							onDiscard={() => setEditing(null)}
+						/>
+					)}
+				</DialogContent>
+			</Dialog>
 		</section>
 	);
 }

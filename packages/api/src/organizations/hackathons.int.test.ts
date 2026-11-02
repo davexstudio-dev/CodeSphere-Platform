@@ -11,6 +11,7 @@ import {
 	organization,
 	organizationMember,
 } from "@codesphere/db/schema/organizations";
+import { hackathonTeams } from "@codesphere/db/schema/teams";
 import { createRouterClient } from "@orpc/server";
 import { and, eq, inArray, like } from "drizzle-orm";
 
@@ -302,6 +303,147 @@ describe.skipIf(!url)("Organization Hackathons on Postgres", () => {
 			expectedVersion: cleared.version,
 		});
 		expect(again.status).toBe("published");
+	});
+
+	describe("editing from the Organization space (#338)", () => {
+		const editSlug = `oh-edit-${run}`;
+		const versionOf = async () =>
+			(
+				await db
+					.select({ version: hackathon.version })
+					.from(hackathon)
+					.where(eq(hackathon.slug, editSlug))
+			)[0]?.version ?? 1;
+
+		test("an editor sets the prizes, and the check date moves to now", async () => {
+			const created = await as(editor).organizations.hackathons.create({
+				...input(),
+				slug: editSlug,
+			});
+			const before = Date.now();
+			const updated = await as(editor).organizations.hackathons.update({
+				slug: editSlug,
+				expectedVersion: created.version,
+				name: `Edited ${run}`,
+				prizes: [
+					{ label: "First", amount: "1000 EUR", conditions: null },
+					{ label: "Second", amount: null, conditions: "Present on stage" },
+				],
+				verifiedAt: "2020-01-01T00:00:00.000Z",
+			});
+			expect(updated.name).toBe(`Edited ${run}`);
+			expect(updated.prizes.map((p) => p.label)).toEqual(["First", "Second"]);
+			// Whatever the Organization sends, the check date is the moment of its edit.
+			expect(new Date(updated.verifiedAt).getTime()).toBeGreaterThanOrEqual(
+				before - 1000,
+			);
+			await expect(
+				as(editor).organizations.hackathons.update({
+					slug: editSlug,
+					expectedVersion: created.version,
+					name: "Stale",
+				}),
+			).rejects.toMatchObject({ code: "CONFLICT" });
+		});
+
+		test("teams already formed hold teamsEnabled and teamMax in place", async () => {
+			const [row] = await db
+				.select({ id: hackathon.id })
+				.from(hackathon)
+				.where(eq(hackathon.slug, editSlug));
+			const [team] = await db
+				.insert(hackathonTeams)
+				.values({
+					hackathonId: row?.id ?? "",
+					name: `Team ${run}`,
+					captainId: owner,
+					inviteToken: `tok-${run}`,
+					memberCount: 3,
+				})
+				.returning({ id: hackathonTeams.id });
+			await expect(
+				as(editor).organizations.hackathons.update({
+					slug: editSlug,
+					expectedVersion: await versionOf(),
+					teamsEnabled: false,
+				}),
+			).rejects.toMatchObject({
+				code: "BAD_REQUEST",
+				data: { issues: [{ path: ["teamsEnabled"] }] },
+			});
+			await expect(
+				as(editor).organizations.hackathons.update({
+					slug: editSlug,
+					expectedVersion: await versionOf(),
+					teamMax: 2,
+				}),
+			).rejects.toMatchObject({
+				code: "BAD_REQUEST",
+				data: { issues: [{ path: ["teamMax"] }] },
+			});
+			// Room for the largest team is fine, and the Admin has no such limit.
+			const kept = await as(editor).organizations.hackathons.update({
+				slug: editSlug,
+				expectedVersion: await versionOf(),
+				teamMax: 3,
+			});
+			expect(kept.teamMax).toBe(3);
+			const freed = await as(admin, "human", "admin").admin.hackathons.update({
+				slug: editSlug,
+				expectedVersion: await versionOf(),
+				teamsEnabled: false,
+			});
+			expect(freed.teamsEnabled).toBe(false);
+			await db
+				.delete(hackathonTeams)
+				.where(eq(hackathonTeams.id, team?.id ?? ""));
+		});
+
+		test("an archived Hackathon is read-only for the Organization, not for an Admin", async () => {
+			await db
+				.update(hackathon)
+				.set({ status: "archived" })
+				.where(eq(hackathon.slug, editSlug));
+			await expect(
+				as(editor).organizations.hackathons.update({
+					slug: editSlug,
+					expectedVersion: await versionOf(),
+					name: "Nope",
+				}),
+			).rejects.toMatchObject({ code: "FORBIDDEN" });
+			const fixed = await as(admin, "human", "admin").admin.hackathons.update({
+				slug: editSlug,
+				expectedVersion: await versionOf(),
+				name: `Fixed ${run}`,
+			});
+			expect(fixed.name).toBe(`Fixed ${run}`);
+		});
+
+		test("a Hackathon an Admin unpublished stays editable while locked", async () => {
+			await db
+				.update(hackathon)
+				.set({ status: "published" })
+				.where(eq(hackathon.slug, editSlug));
+			const staff = as(admin, "human", "admin");
+			const draft = await staff.admin.hackathons.unpublish({
+				slug: editSlug,
+				expectedVersion: await versionOf(),
+				reason: "A corriger",
+			});
+			const { items } = await as(owner).organizations.hackathons.list({
+				organizationId: orgId,
+			});
+			expect(items.find((h) => h.slug === editSlug)?.unpublishedReason).toBe(
+				"A corriger",
+			);
+			const edited = await as(editor).organizations.hackathons.update({
+				slug: editSlug,
+				expectedVersion: draft.version,
+				summary: "Corrected by the Organization.",
+			});
+			expect(edited.summary).toBe("Corrected by the Organization.");
+			expect(edited.status).toBe("draft");
+		});
 	});
 
 	test("the CADEV's Organization, created by the platform, stays with the Admins", async () => {
