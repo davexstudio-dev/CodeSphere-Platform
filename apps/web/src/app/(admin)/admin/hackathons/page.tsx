@@ -132,6 +132,22 @@ export default function AdminHackathonsPage() {
 			},
 		}),
 	);
+	const reports = useQuery(
+		orpc.admin.hackathons.reports.queryOptions({ input: {} }),
+	);
+	const reported = reports.data?.items ?? [];
+	const openReports = reported.find((r) => r.slug === slug)?.reports ?? [];
+	const dismiss = useMutation(
+		orpc.admin.hackathons.dismissReports.mutationOptions({
+			onSuccess: () => {
+				refresh();
+				void queryClient.invalidateQueries({
+					queryKey: orpc.admin.hackathons.reports.key(),
+				});
+			},
+			onError: () => setFailure("advance"),
+		}),
+	);
 	const unpublish = useMutation(
 		orpc.admin.hackathons.unpublish.mutationOptions({
 			onSuccess: () => {
@@ -239,6 +255,29 @@ export default function AdminHackathonsPage() {
 					</AlertDescription>
 				</Alert>
 			)}
+			{reported.length > 0 && (
+				<Alert variant="destructive">
+					<AlertCircleIcon />
+					<AlertTitle>
+						{t("reportedTitle", { count: reported.length })}
+					</AlertTitle>
+					<AlertDescription className="flex flex-wrap gap-2">
+						{reported.map((item) => (
+							<Button
+								key={item.slug}
+								size="sm"
+								variant="outline"
+								onClick={() => {
+									setSelected(item.slug);
+									setDraft(null);
+								}}
+							>
+								{item.name} ({item.reports.length})
+							</Button>
+						))}
+					</AlertDescription>
+				</Alert>
+			)}
 			<AdminMasterDetail
 				list={
 					<GroupedList
@@ -314,6 +353,33 @@ export default function AdminHackathonsPage() {
 									<p className="text-muted-foreground text-xs">
 										{t(`advanceNote.${hackathon.status}`)}
 									</p>
+									{openReports.length > 0 && (
+										<div className="grid gap-1 rounded-xl border border-destructive/40 p-3">
+											<p className="font-medium text-sm">
+												{t("reports", { count: openReports.length })}
+											</p>
+											<ul className="grid gap-1 text-sm">
+												{openReports.map((r, index) => (
+													<li key={`${r.reason}-${index}`}>
+														{t(`reportReasons.${r.reason}`)}
+														{r.comment ? ` : ${r.comment}` : ""}
+													</li>
+												))}
+											</ul>
+											<Button
+												size="sm"
+												variant="outline"
+												className="w-fit"
+												disabled={dismiss.isPending}
+												onClick={() => dismiss.mutate({ slug })}
+											>
+												{t("dismissReports")}
+											</Button>
+											<p className="text-muted-foreground text-xs">
+												{t("reportsHint")}
+											</p>
+										</div>
+									)}
 									{hackathon.status === "draft" &&
 										hackathon.unpublishedReason && (
 											<div className="grid gap-1">

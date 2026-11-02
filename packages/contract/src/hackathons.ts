@@ -58,6 +58,15 @@ export const Hackathon = z.object({
 	version: z.number().int().min(1),
 });
 
+export const HACKATHON_REPORT_REASONS = [
+	"misleading",
+	"scam",
+	"unlawful",
+	"spam",
+	"other",
+] as const;
+export const HackathonReportReason = z.enum(HACKATHON_REPORT_REASONS);
+
 export const hackathonsContract = {
 	list: base
 		.meta(
@@ -99,4 +108,15 @@ export const hackathonsContract = {
 		)
 		.input(z.object({ slug: z.string() }))
 		.output(Hackathon),
+	/** A signed-in Member tells the Admins a published Hackathon is wrong (#326). Humans only. */
+	report: base
+		.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {} })
+		.input(
+			z.object({
+				slug: z.string(),
+				reason: HackathonReportReason,
+				comment: z.string().trim().max(300).optional(),
+			}),
+		)
+		.output(z.object({ success: z.boolean() })),
 };

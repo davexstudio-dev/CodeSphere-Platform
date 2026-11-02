@@ -3,12 +3,14 @@ import {
 	index,
 	integer,
 	pgTable,
+	primaryKey,
 	text,
 	timestamp,
 	unique,
 	uuid,
 } from "drizzle-orm/pg-core";
 
+import { user } from "./auth";
 import { organization } from "./organizations";
 
 // Hackathon (spec §2): informational only, the MVP lists the CADEV 2026. Seeded with its
@@ -99,4 +101,35 @@ export const hackathonCriterion = pgTable(
 		position: integer("position").notNull(),
 	},
 	(table) => [index("hackathon_criterion_hackathon_idx").on(table.hackathonId)],
+);
+
+export const HACKATHON_REPORT_REASONS = [
+	"misleading",
+	"scam",
+	"unlawful",
+	"spam",
+	"other",
+] as const;
+
+// A Member's report on a published Hackathon (#326): one per Member and Hackathon, handled by an
+// Admin. The outcome stays null while it waits; `upheld` when the Hackathon was unpublished,
+// `dismissed` when the Admin kept it.
+export const hackathonReport = pgTable(
+	"hackathon_report",
+	{
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		hackathonId: uuid("hackathon_id")
+			.notNull()
+			.references(() => hackathon.id, { onDelete: "cascade" }),
+		reason: text("reason", { enum: HACKATHON_REPORT_REASONS }).notNull(),
+		comment: text("comment"),
+		outcome: text("outcome", { enum: ["upheld", "dismissed"] }),
+		createdAt: timestamp("created_at", { precision: 3 }).defaultNow().notNull(),
+	},
+	(t) => [
+		primaryKey({ columns: [t.userId, t.hackathonId] }),
+		index("hackathon_report_open_idx").on(t.hackathonId),
+	],
 );

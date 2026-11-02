@@ -476,7 +476,18 @@
 			"unpublishDescription": "Le Hackathon repasse en brouillon et disparaît du public. L'Organisation peut le corriger et le publier de nouveau.",
 			"unpublishReason": "Motif (conservé dans le journal d'audit)",
 			"unpublishedBy": "Dépublié : {reason}. Son Organisation ne peut pas le publier avant votre feu vert.",
-			"allowRepublication": "Autoriser la republication"
+			"allowRepublication": "Autoriser la republication",
+			"reportedTitle": "{count, plural, one {# Hackathon signalé} other {# Hackathons signalés}}",
+			"reports": "{count, plural, one {# signalement en attente} other {# signalements en attente}}",
+			"reportReasons": {
+				"misleading": "Informations trompeuses",
+				"scam": "Arnaque ou frais cachés",
+				"unlawful": "Contenu illicite",
+				"spam": "Spam",
+				"other": "Autre"
+			},
+			"dismissReports": "Classer sans suite",
+			"reportsHint": "Classer garde le Hackathon publié. Pour donner suite, dépubliez-le : les signalements sont alors considérés comme fondés."
 		},
 		"tags": {
 			"title": "Tags",
@@ -1519,6 +1530,22 @@
 			"demo": "Démo",
 			"video": "Vidéo",
 			"more": "Voir plus"
+		},
+		"report": {
+			"button": "Signaler",
+			"why": "Pourquoi signalez-vous ce Hackathon ?",
+			"reasons": {
+				"misleading": "Informations trompeuses",
+				"scam": "Arnaque ou frais cachés",
+				"unlawful": "Contenu illicite",
+				"spam": "Spam",
+				"other": "Autre"
+			},
+			"comment": "Précisions (facultatif)",
+			"send": "Envoyer le signalement",
+			"sent": "Merci : les Admins vont examiner ce Hackathon.",
+			"forbidden": "Seul un Member peut signaler.",
+			"failed": "Le signalement a échoué. Réessayez."
 		}
 	},
 	"tagInput": {

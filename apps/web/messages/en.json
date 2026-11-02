@@ -476,7 +476,18 @@
 			"unpublishDescription": "The Hackathon goes back to a draft and leaves the public views. The Organization can fix it and publish it again.",
 			"unpublishReason": "Reason (kept in the audit log)",
 			"unpublishedBy": "Unpublished: {reason}. Its Organization cannot publish it again before your go-ahead.",
-			"allowRepublication": "Allow republication"
+			"allowRepublication": "Allow republication",
+			"reportedTitle": "{count, plural, one {# Hackathon reported} other {# Hackathons reported}}",
+			"reports": "{count, plural, one {# report waiting} other {# reports waiting}}",
+			"reportReasons": {
+				"misleading": "Misleading information",
+				"scam": "Scam or hidden fees",
+				"unlawful": "Unlawful content",
+				"spam": "Spam",
+				"other": "Other"
+			},
+			"dismissReports": "Dismiss",
+			"reportsHint": "Dismissing keeps the Hackathon published. To act on them, unpublish it: the reports then count as founded."
 		},
 		"tags": {
 			"title": "Tags",
@@ -1519,6 +1530,22 @@
 			"demo": "Demo",
 			"video": "Video",
 			"more": "Show more"
+		},
+		"report": {
+			"button": "Report",
+			"why": "Why are you reporting this Hackathon?",
+			"reasons": {
+				"misleading": "Misleading information",
+				"scam": "Scam or hidden fees",
+				"unlawful": "Unlawful content",
+				"spam": "Spam",
+				"other": "Other"
+			},
+			"comment": "Details (optional)",
+			"send": "Send report",
+			"sent": "Thanks: the Admins will look at this Hackathon.",
+			"forbidden": "Only a Member can report.",
+			"failed": "The report failed. Try again."
 		}
 	},
 	"tagInput": {
