@@ -91,7 +91,11 @@ export const ALL_STATUSES: Status[] = ["draft", ...PUBLIC_STATUSES];
  */
 export async function loadHackathons(
 	db: Database,
-	filter: { slug?: string; statuses?: Status[] } = {},
+	filter: {
+		slug?: string;
+		statuses?: Status[];
+		organizationId?: string;
+	} = {},
 	limit = 20,
 ) {
 	const joined = await db
@@ -107,6 +111,9 @@ export async function loadHackathons(
 			and(
 				inArray(hackathon.status, filter.statuses ?? PUBLIC_STATUSES),
 				filter.slug ? eq(hackathon.slug, filter.slug) : undefined,
+				filter.organizationId
+					? eq(hackathon.organizationId, filter.organizationId)
+					: undefined,
 			),
 		)
 		.orderBy(asc(hackathon.createdAt))

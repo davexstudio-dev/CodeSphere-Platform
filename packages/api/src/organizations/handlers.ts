@@ -2,12 +2,14 @@ import { ORPCError } from "@orpc/server";
 
 import { impl } from "../index";
 import { staffMay } from "../staff-guard";
+import { createOrganizationHackathonHandlers } from "./hackathon-handlers";
 import {
 	createOrganizationService,
 	type Decision,
 	InvalidOrganizationCursorError,
 	OrganizationError,
 } from "./service";
+import { createTeamService, TEAM_MESSAGES, TeamError } from "./team";
 
 type Errors = {
 	UNAUTHORIZED?: () => Error;
@@ -57,6 +59,27 @@ const refuse = (err: unknown, errors: Errors) => {
 	return err;
 };
 
+type TeamErrors = {
+	UNAUTHORIZED: () => Error;
+	FORBIDDEN: () => Error;
+	NOT_FOUND: () => Error;
+	CONFLICT: (options?: { message?: string }) => Error;
+};
+
+// The typed refusal of the team service.
+const refuseTeam = (err: unknown, errors: TeamErrors) => {
+	if (err instanceof TeamError) {
+		if (err.code === "FORBIDDEN") {
+			return errors.FORBIDDEN();
+		}
+		if (err.code === "NOT_FOUND") {
+			return errors.NOT_FOUND();
+		}
+		return errors.CONFLICT({ message: TEAM_MESSAGES[err.path ?? ""] });
+	}
+	return err;
+};
+
 type Sessioned = { session: { user: object } | null };
 
 // An Organization is requested by a human Member: an Agent never applies on anyone's behalf.
@@ -78,6 +101,7 @@ function humanOf(
 
 export function createOrganizationsHandlers() {
 	return {
+		hackathons: createOrganizationHackathonHandlers(),
 		get: impl.organizations.get.handler(async ({ context, input, errors }) => {
 			try {
 				return await createOrganizationService(context.db).profile(input.slug);
@@ -107,6 +131,96 @@ export function createOrganizationsHandlers() {
 				}
 			},
 		),
+		team: {
+			get: impl.organizations.team.get.handler(
+				async ({ context, input, errors }) => {
+					const userId = humanOf(context, errors);
+					return createTeamService(context.db)
+						.get(userId, input.organizationId)
+						.catch((err) => {
+							throw refuseTeam(err, errors);
+						});
+				},
+			),
+			invite: impl.organizations.team.invite.handler(
+				async ({ context, input, errors }) => {
+					const userId = humanOf(context, errors);
+					return createTeamService(context.db)
+						.invite(userId, input.organizationId, input.memberId)
+						.catch((err) => {
+							throw refuseTeam(err, errors);
+						});
+				},
+			),
+			cancel: impl.organizations.team.cancel.handler(
+				async ({ context, input, errors }) => {
+					const userId = humanOf(context, errors);
+					await createTeamService(context.db)
+						.cancel(userId, input.invitationId)
+						.catch((err) => {
+							throw refuseTeam(err, errors);
+						});
+					return { cancelled: true as const };
+				},
+			),
+			remove: impl.organizations.team.remove.handler(
+				async ({ context, input, errors }) => {
+					const userId = humanOf(context, errors);
+					await createTeamService(context.db)
+						.remove(userId, input.organizationId, input.memberId)
+						.catch((err) => {
+							throw refuseTeam(err, errors);
+						});
+					return { removed: true as const };
+				},
+			),
+			transfer: impl.organizations.team.transfer.handler(
+				async ({ context, input, errors }) => {
+					const userId = humanOf(context, errors);
+					return createTeamService(context.db)
+						.transfer(userId, input.organizationId, input.memberId)
+						.catch((err) => {
+							throw refuseTeam(err, errors);
+						});
+				},
+			),
+		},
+		invitations: {
+			mine: impl.organizations.invitations.mine.handler(
+				async ({ context, errors }) => {
+					if (!context.session) {
+						throw errors.UNAUTHORIZED();
+					}
+					return {
+						items: await createTeamService(context.db).mineInvitations(
+							context.session.user.id,
+						),
+					};
+				},
+			),
+			accept: impl.organizations.invitations.accept.handler(
+				async ({ context, input, errors }) => {
+					const userId = humanOf(context, errors);
+					await createTeamService(context.db)
+						.accept(userId, input.invitationId)
+						.catch((err) => {
+							throw refuseTeam(err, errors);
+						});
+					return { accepted: true as const };
+				},
+			),
+			decline: impl.organizations.invitations.decline.handler(
+				async ({ context, input, errors }) => {
+					const userId = humanOf(context, errors);
+					await createTeamService(context.db)
+						.decline(userId, input.invitationId)
+						.catch((err) => {
+							throw refuseTeam(err, errors);
+						});
+					return { declined: true as const };
+				},
+			),
+		},
 		mine: impl.organizations.mine.handler(async ({ context, errors }) => {
 			if (!context.session) {
 				throw errors.UNAUTHORIZED();
@@ -173,5 +287,25 @@ export function createOrganizationsAdminHandlers() {
 		reinstate: impl.admin.organizations.reinstate
 			.use(staffMay({ organization: ["manage"] }))
 			.handler(decide("reinstate")),
+		assignOwner: impl.admin.organizations.assignOwner
+			.use(staffMay({ organization: ["manage"] }))
+			.handler(async ({ context, input, errors }) => {
+				await createTeamService(context.db)
+					.assignOwner(actor(context), input.organizationId, input.memberId)
+					.catch((err) => {
+						throw refuseTeam(err, errors);
+					});
+				return { assigned: true as const };
+			}),
+		removeMember: impl.admin.organizations.removeMember
+			.use(staffMay({ organization: ["manage"] }))
+			.handler(async ({ context, input, errors }) => {
+				await createTeamService(context.db)
+					.remove(actor(context), input.organizationId, input.memberId, true)
+					.catch((err) => {
+						throw refuseTeam(err, errors);
+					});
+				return { removed: true as const };
+			}),
 	};
 }

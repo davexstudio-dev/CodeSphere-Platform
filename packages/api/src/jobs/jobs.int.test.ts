@@ -437,10 +437,8 @@ describe.skipIf(!url)("jobs on Postgres", () => {
 				.select()
 				.from(organization)
 				.where(eq(organization.id, org?.id ?? ""));
-			expect(after).toMatchObject({
-				status: "suspended",
-				statusReason: "owner deleted",
-			});
+			// No editor to take over (#326): the Organization is left without an owner, not suspended.
+			expect(after).toMatchObject({ status: "validated", ownerId: null });
 		} finally {
 			await db
 				.delete(jobPostings)

@@ -34,12 +34,29 @@ export async function deleteMember(
 		sql`DELETE FROM talent_cards WHERE user_id IN (${mine})`,
 		sql`DELETE FROM job_applications WHERE user_id IN (${mine})`,
 		sql`DELETE FROM job_reports WHERE user_id IN (${mine})`,
-		// The Organizations the Member owned lose their postings and are suspended: nobody is left
-		// to close or answer them.
+		// The Organizations the Member owned (#326): the longest-standing editor takes over the
+		// management. Without an editor nobody is left to close or answer the postings: they are
+		// removed and the Organization has no owner, so its Hackathons stay listed but nobody edits
+		// them until an Admin names one. The steps read one snapshot, so each recomputes the successor.
 		sql`UPDATE job_postings SET status = 'removed', removed_reason = 'owner deleted'
-			WHERE status = 'published' AND organization_id IN (SELECT id FROM organization WHERE owner_id IN (${mine}))`,
-		sql`UPDATE organization SET status = 'suspended', status_reason = 'owner deleted'
-			WHERE owner_id IN (${mine}) AND status IN ('pending', 'validated')`,
+			WHERE status = 'published' AND organization_id IN (
+				SELECT o.id FROM organization o WHERE o.owner_id IN (${mine})
+				AND NOT EXISTS (SELECT 1 FROM organization_member om
+					WHERE om.organization_id = o.id AND om.user_id NOT IN (${mine})))`,
+		sql`UPDATE organization o SET version = o.version + 1,
+			owner_id = (SELECT om.user_id FROM organization_member om
+				WHERE om.organization_id = o.id AND om.user_id NOT IN (${mine})
+				ORDER BY om.created_at, om.user_id LIMIT 1)
+			WHERE o.owner_id IN (${mine})`,
+		sql`DELETE FROM organization_member om
+			WHERE om.user_id IN (${mine})
+			OR (om.organization_id, om.user_id) IN (
+				SELECT o.id, (SELECT om2.user_id FROM organization_member om2
+					WHERE om2.organization_id = o.id AND om2.user_id NOT IN (${mine})
+					ORDER BY om2.created_at, om2.user_id LIMIT 1)
+				FROM organization o WHERE o.owner_id IN (${mine}))`,
+		sql`UPDATE organization_invitation SET status = 'cancelled', decided_at = now()
+			WHERE status = 'pending' AND (invitee_id IN (${mine}) OR invited_by IN (${mine}))`,
 		sql`DELETE FROM account WHERE user_id IN (${mine})`,
 		sql`DELETE FROM apikey WHERE reference_id IN (${mine})
 			OR reference_id IN (SELECT id FROM "user" WHERE owner_id IN (${mine}))`,

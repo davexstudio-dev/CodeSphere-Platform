@@ -1,14 +1,18 @@
 import type {
 	AdminOrganization,
+	MyOrganization,
 	OrganizationStatus,
 	OwnOrganization,
 } from "@codesphere/contract";
 import { ORGANIZATIONS_PER_MEMBER } from "@codesphere/contract";
 import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
-import { organization } from "@codesphere/db/schema/organizations";
+import {
+	organization,
+	organizationMember,
+} from "@codesphere/db/schema/organizations";
 import { slugify } from "@codesphere/db/slug";
-import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
 
 import { withAudit } from "../audit";
 import { outboxInsert } from "../outbox/events";
@@ -215,13 +219,29 @@ export function createOrganizationService(db: Database) {
 			};
 		},
 
-		async mine(ownerId: string) {
+		/** The Organizations the Member owns or edits (#326), with their role. */
+		async mine(memberId: string): Promise<MyOrganization[]> {
 			const rows = await db
 				.select()
 				.from(organization)
-				.where(eq(organization.ownerId, ownerId))
+				.where(
+					or(
+						eq(organization.ownerId, memberId),
+						inArray(
+							organization.id,
+							db
+								.select({ id: organizationMember.organizationId })
+								.from(organizationMember)
+								.where(eq(organizationMember.userId, memberId)),
+						),
+					),
+				)
 				.orderBy(asc(organization.createdAt));
-			return rows.map(ownOf);
+			return rows.map((row) => ({
+				...ownOf(row),
+				myRole:
+					row.ownerId === memberId ? ("owner" as const) : ("editor" as const),
+			}));
 		},
 
 		admin: {
