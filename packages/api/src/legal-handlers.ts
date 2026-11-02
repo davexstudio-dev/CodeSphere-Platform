@@ -31,16 +31,18 @@ export const createLegalHandlers = () => ({
 	),
 });
 
+const manageLegal = staffMay({ legal: ["manage"] });
+
 /** The editor of the legal documents: Admin and super admin only (a Moderator is FORBIDDEN). */
 export const createLegalAdminHandlers = () => ({
 	list: impl.admin.legal.list
-		.use(staffMay({ legal: ["manage"] }))
+		.use(manageLegal)
 		.handler(async ({ context }) => ({ items: await overview(context.db) })),
 	draft: impl.admin.legal.draft
-		.use(staffMay({ legal: ["manage"] }))
+		.use(manageLegal)
 		.handler(({ context, input }) => getDraft(context.db, input)),
 	saveDraft: impl.admin.legal.saveDraft
-		.use(staffMay({ legal: ["manage"] }))
+		.use(manageLegal)
 		.handler(async ({ context, input, errors }) => {
 			const outcome = await saveDraft(
 				context.db,
@@ -53,7 +55,7 @@ export const createLegalAdminHandlers = () => ({
 			return outcome.draft;
 		}),
 	publish: impl.admin.legal.publish
-		.use(staffMay({ legal: ["manage"] }))
+		.use(manageLegal)
 		.handler(async ({ context, input, errors }) => {
 			const outcome = await publishDraft(
 				context.db,
@@ -68,12 +70,12 @@ export const createLegalAdminHandlers = () => ({
 			return outcome.version;
 		}),
 	history: impl.admin.legal.history
-		.use(staffMay({ legal: ["manage"] }))
+		.use(manageLegal)
 		.handler(async ({ context, input }) => ({
 			items: await history(context.db, input),
 		})),
 	version: impl.admin.legal.version
-		.use(staffMay({ legal: ["manage"] }))
+		.use(manageLegal)
 		.handler(async ({ context, input, errors }) => {
 			const found = await getVersion(context.db, input);
 			if (!found) {

@@ -1,33 +1,15 @@
 "use client";
 
-import {
-	bearsConsent,
-	LEGAL_DOCUMENTS,
-	type LegalDocument,
-	MEMBER_CONSENT_DOCUMENTS,
-} from "@codesphere/contract";
+import { LEGAL_DOCUMENTS, type LegalDocument } from "@codesphere/contract";
 import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
-import { Checkbox } from "@codesphere/ui/components/atoms/checkbox";
 import { Textarea } from "@codesphere/ui/components/atoms/textarea";
 import {
 	Alert,
 	AlertDescription,
 	AlertTitle,
 } from "@codesphere/ui/components/molecules/alert";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@codesphere/ui/components/molecules/dialog";
 import { GroupedList } from "@codesphere/ui/components/molecules/grouped-list";
-import {
-	isReasonValid,
-	ReasonField,
-} from "@codesphere/ui/components/molecules/reason-field";
 import {
 	Tabs,
 	TabsContent,
@@ -42,17 +24,20 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { useId, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import AdminFrame from "@/components/admin-frame";
+import { History } from "@/components/admin-legal-history";
+import { PublishDialog } from "@/components/admin-legal-publish-dialog";
+import {
+	LANGUAGES,
+	type Language,
+	type Selection,
+} from "@/components/admin-legal-shared";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import { adminErrorKey } from "@/i18n/errors";
 import { orpc } from "@/utils/orpc";
-
-const LANGUAGES = ["fr", "en"] as const;
-type Language = (typeof LANGUAGES)[number];
-type Selection = { document: LegalDocument; language: Language };
 
 /** The text of the repository per document and language: the first draft of each. */
 export type RepositoryTexts = Record<LegalDocument, Record<Language, string>>;
@@ -358,179 +343,5 @@ function DocumentPanel({
 				}
 			/>
 		</RecordSheet>
-	);
-}
-
-function PublishDialog({
-	open,
-	onOpenChange,
-	selection,
-	version,
-	pending,
-	onSubmit,
-}: {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-	selection: Selection;
-	version: number;
-	pending: boolean;
-	onSubmit: (reason: string, important: boolean) => void;
-}) {
-	const t = useTranslations("admin.legal");
-	const tc = useTranslations("admin.common");
-	const [reason, setReason] = useState("");
-	const [important, setImportant] = useState(false);
-	const reasonId = useId();
-	const importantId = useId();
-	const { document, language } = selection;
-	const consent = bearsConsent(document);
-	const forMembers = (MEMBER_CONSENT_DOCUMENTS as readonly string[]).includes(
-		document,
-	);
-	const close = (next: boolean) => {
-		if (!next) {
-			setReason("");
-			setImportant(false);
-		}
-		onOpenChange(next);
-	};
-
-	return (
-		<Dialog open={open} onOpenChange={close}>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>
-						{t("publishDialog.title", {
-							document: t(`documents.${document}`),
-							language: t(`languages.${language}`),
-						})}
-					</DialogTitle>
-					<DialogDescription>
-						{t("publishDialog.description", { version })}
-					</DialogDescription>
-				</DialogHeader>
-				<ReasonField
-					id={reasonId}
-					value={reason}
-					onValueChange={setReason}
-					label={t("publishDialog.reason")}
-				/>
-				{consent && (
-					<div className="grid gap-1.5">
-						<div className="flex items-center gap-2">
-							<Checkbox
-								id={importantId}
-								checked={important}
-								onCheckedChange={(checked) => setImportant(checked === true)}
-							/>
-							<label htmlFor={importantId} className="font-medium text-sm">
-								{t("publishDialog.important")}
-							</label>
-						</div>
-						<p className="text-muted-foreground text-xs">
-							{forMembers
-								? t("publishDialog.importantMembers")
-								: t("publishDialog.importantOrganizations")}
-						</p>
-					</div>
-				)}
-				<DialogFooter>
-					<Button variant="outline" onClick={() => close(false)}>
-						{tc("cancel")}
-					</Button>
-					<Button
-						disabled={!isReasonValid(reason) || pending}
-						onClick={() => onSubmit(reason.trim(), consent && important)}
-					>
-						{t("publishDialog.confirm")}
-					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
-	);
-}
-
-function History({
-	selection,
-	onCopy,
-}: {
-	selection: Selection;
-	onCopy: (content: string, version: number) => void;
-}) {
-	const t = useTranslations("admin.legal");
-	const format = useFormatter();
-	const [reading, setReading] = useState<number | null>(null);
-	const history = useQuery(
-		orpc.admin.legal.history.queryOptions({ input: selection }),
-	);
-	const detail = useQuery({
-		...orpc.admin.legal.version.queryOptions({
-			input: { ...selection, version: reading ?? 1 },
-		}),
-		enabled: reading !== null,
-	});
-	const items = history.data?.items ?? [];
-
-	if (history.isPending) {
-		return <p className="text-muted-foreground text-sm">{t("loading")}</p>;
-	}
-	if (items.length === 0) {
-		return (
-			<p className="text-muted-foreground text-sm">{t("history.empty")}</p>
-		);
-	}
-	return (
-		<ol className="grid gap-3">
-			{items.map((item) => (
-				<li key={item.version} className="grid gap-2 rounded-md border p-3">
-					<div className="flex flex-wrap items-center gap-2">
-						<span className="font-medium text-sm">
-							{t("history.version", { version: item.version })}
-						</span>
-						{item.important && (
-							<Badge variant="outline">{t("history.important")}</Badge>
-						)}
-						<span className="text-muted-foreground text-xs">
-							{t("history.by", {
-								name: item.publishedByName ?? "—",
-								date: format.dateTime(new Date(item.publishedAt), {
-									dateStyle: "long",
-								}),
-							})}
-						</span>
-					</div>
-					<p className="text-sm">
-						{t("history.reason", { reason: item.reason })}
-					</p>
-					<div className="flex flex-wrap gap-2">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() =>
-								setReading(reading === item.version ? null : item.version)
-							}
-						>
-							{reading === item.version
-								? t("history.close")
-								: t("history.read")}
-						</Button>
-						{reading === item.version && detail.data && (
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => onCopy(detail.data.content, item.version)}
-							>
-								{t("history.copy")}
-							</Button>
-						)}
-					</div>
-					{reading === item.version && detail.data && (
-						<div className="rounded-md border bg-muted/30 p-3">
-							<MarkdownPreview body={detail.data.content} />
-						</div>
-					)}
-				</li>
-			))}
-		</ol>
 	);
 }

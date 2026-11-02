@@ -1,4 +1,5 @@
 import { LEGAL_DOCUMENTS, type LegalDocument } from "@codesphere/contract";
+import { LEGAL_LANGUAGES } from "@codesphere/db/schema/legal";
 import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
 import {
@@ -17,10 +18,24 @@ import { sanitizeMarkdown } from "./markdown/sanitizer";
  * publication is a CONFLICT.
  */
 
-type Language = "fr" | "en";
+type Language = (typeof LEGAL_LANGUAGES)[number];
 type Key = { document: LegalDocument; language: Language };
 
 const iso = (value: Date | string) => new Date(value).toISOString();
+
+/** The rows of a document and language, in the versions or in the drafts. */
+const forKey = (
+	table: typeof legalDocumentVersion | typeof legalDocumentDraft,
+	key: Key,
+) => and(eq(table.document, key.document), eq(table.language, key.language));
+
+/** A save or a publication that lost against another Admin: where the draft stands now. */
+const conflictOf = async (db: Database, key: Key) =>
+	({
+		ok: false,
+		code: "CONFLICT",
+		version: (await getDraft(db, key)).version,
+	}) as const;
 
 const isUniqueViolation = (error: unknown): boolean => {
 	const { code, cause } = (error ?? {}) as { code?: unknown; cause?: unknown };
@@ -36,12 +51,7 @@ export async function publishedText(db: Database, key: Key) {
 			content: legalDocumentVersion.content,
 		})
 		.from(legalDocumentVersion)
-		.where(
-			and(
-				eq(legalDocumentVersion.document, key.document),
-				eq(legalDocumentVersion.language, key.language),
-			),
-		)
+		.where(forKey(legalDocumentVersion, key))
 		.orderBy(desc(legalDocumentVersion.version))
 		.limit(1);
 	return row
@@ -63,12 +73,7 @@ export async function getDraft(db: Database, key: Key) {
 		})
 		.from(legalDocumentDraft)
 		.innerJoin(user, eq(user.id, legalDocumentDraft.updatedBy))
-		.where(
-			and(
-				eq(legalDocumentDraft.document, key.document),
-				eq(legalDocumentDraft.language, key.language),
-			),
-		);
+		.where(forKey(legalDocumentDraft, key));
 	return {
 		...key,
 		content: row?.content ?? null,
@@ -113,11 +118,7 @@ export async function saveDraft(
 					)
 					.returning({ version: legalDocumentDraft.version });
 	if (written.length === 0) {
-		return {
-			ok: false,
-			code: "CONFLICT",
-			version: (await getDraft(db, { document, language })).version,
-		};
+		return conflictOf(db, { document, language });
 	}
 	return { ok: true, draft: await getDraft(db, { document, language }) };
 }
@@ -165,18 +166,12 @@ export async function publishDraft(
 		if (!isUniqueViolation(error)) {
 			throw error;
 		}
-		return {
-			ok: false,
-			code: "CONFLICT",
-			version: (await getDraft(db, { document, language })).version,
-		};
+		return conflictOf(db, { document, language });
 	}
 	const created = rows[0];
 	if (!created) {
-		const draft = await getDraft(db, { document, language });
-		return draft.version === 0
-			? { ok: false, code: "NOT_FOUND" }
-			: { ok: false, code: "CONFLICT", version: draft.version };
+		const conflict = await conflictOf(db, { document, language });
+		return conflict.version === 0 ? { ok: false, code: "NOT_FOUND" } : conflict;
 	}
 	const version = await getVersion(db, {
 		document,
@@ -197,16 +192,10 @@ const versionColumns = {
 	publishedByName: user.name,
 };
 
-const detailOf = (row: {
-	document: LegalDocument;
-	language: Language;
-	version: number;
-	content: string;
-	reason: string;
-	important: boolean;
-	publishedAt: Date;
-	publishedByName: string | null;
-}) => ({ ...row, publishedAt: iso(row.publishedAt) });
+const withIsoDate = <T extends { publishedAt: Date }>(row: T) => ({
+	...row,
+	publishedAt: iso(row.publishedAt),
+});
 
 /** One published version, with its text. */
 export async function getVersion(
@@ -219,12 +208,11 @@ export async function getVersion(
 		.leftJoin(user, eq(user.id, legalDocumentVersion.publishedBy))
 		.where(
 			and(
-				eq(legalDocumentVersion.document, input.document),
-				eq(legalDocumentVersion.language, input.language),
+				forKey(legalDocumentVersion, input),
 				eq(legalDocumentVersion.version, input.version),
 			),
 		);
-	return row ? detailOf(row) : null;
+	return row ? withIsoDate(row) : null;
 }
 
 /** Every publication of a document and language, newest first, without the texts. */
@@ -239,14 +227,9 @@ export async function history(db: Database, key: Key) {
 		.select(columns)
 		.from(legalDocumentVersion)
 		.leftJoin(user, eq(user.id, legalDocumentVersion.publishedBy))
-		.where(
-			and(
-				eq(legalDocumentVersion.document, key.document),
-				eq(legalDocumentVersion.language, key.language),
-			),
-		)
+		.where(forKey(legalDocumentVersion, key))
 		.orderBy(desc(legalDocumentVersion.version));
-	return rows.map((row) => ({ ...row, publishedAt: iso(row.publishedAt) }));
+	return rows.map(withIsoDate);
 }
 
 /** Where each document and language stand: the version in force and the state of the draft. */
@@ -275,7 +258,7 @@ export async function overview(db: Database) {
 			.from(legalDocumentDraft),
 	]);
 	const keys = LEGAL_DOCUMENTS.flatMap((document) =>
-		(["fr", "en"] as const).map((language) => ({ document, language })),
+		LEGAL_LANGUAGES.map((language) => ({ document, language })),
 	);
 	return keys.map((key) => {
 		const row = published.find(
