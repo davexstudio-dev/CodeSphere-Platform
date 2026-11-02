@@ -360,6 +360,11 @@ export async function unpublishHackathon(
 				),
 			)
 			.returning({ id: hackathon.id }),
+		// The reports waiting on it are founded (#326).
+		[
+			sql`UPDATE hackathon_report SET outcome = 'upheld'
+				WHERE hackathon_id IN (SELECT id FROM m) AND outcome IS NULL`,
+		],
 	);
 	const [latest] = await loadAny(db, input.slug);
 	if (!written.length) {

@@ -3,7 +3,13 @@ import { mcp } from "orpc-mcp";
 import * as z from "zod";
 
 import { base, ExpectedVersion, Id, Page, PageInput, Timestamp } from "./base";
-import { Hackathon, JudgingCriterion, Milestone, Prize } from "./hackathons";
+import {
+	Hackathon,
+	HackathonReportReason,
+	JudgingCriterion,
+	Milestone,
+	Prize,
+} from "./hackathons";
 import { jobsAdminContract } from "./jobs";
 import { MemberSummary } from "./members";
 import { organizationsAdminContract } from "./organizations";
@@ -92,6 +98,18 @@ export const HackathonCreate = z.object({
 	sourceUrl: z.url(),
 	teamsEnabled: z.boolean(),
 	submissionClose: Timestamp,
+});
+
+/** A published Hackathon with reports waiting for an Admin (#326). */
+export const ReportedHackathon = z.object({
+	slug: z.string(),
+	name: z.string(),
+	organizationName: z.string().nullable(),
+	status: z.enum(["draft", "published", "ended", "archived"]),
+	version: z.number().int().min(1),
+	reports: z.array(
+		z.object({ reason: HackathonReportReason, comment: z.string().nullable() }),
+	),
 });
 
 /** A Hackathon as the back-office lists it, drafts included. */
@@ -592,6 +610,16 @@ export const adminContract = {
 			)
 			.input(z.object({ slug: z.string(), expectedVersion: ExpectedVersion }))
 			.output(Hackathon),
+		/** Hackathons with reports waiting for a decision, oldest report first (#326). */
+		reports: base
+			.errors(staffErrors)
+			.input(z.object({}))
+			.output(z.object({ items: z.array(ReportedHackathon) })),
+		/** The reports are not founded: they are closed and the Hackathon stays published (#326). Audited. */
+		dismissReports: base
+			.errors(staffErrors)
+			.input(z.object({ slug: z.string() }))
+			.output(z.object({ success: z.boolean() })),
 		/** Lifts the lock an unpublication put on a draft: its Organization may publish it again (#326). */
 		allowRepublication: base
 			.errors(staffErrors)

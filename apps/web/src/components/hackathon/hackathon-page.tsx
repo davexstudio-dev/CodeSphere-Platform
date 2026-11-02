@@ -32,6 +32,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import type { z } from "zod";
 import { GalleryTab } from "@/components/hackathon/gallery-tab";
+import { HackathonReport } from "@/components/hackathon/hackathon-report";
 import { TeamTab } from "@/components/hackathon/team-tab";
 import { FeedSkeleton, HomeFeed } from "@/components/home-feed";
 import Link from "@/components/link";
@@ -228,6 +229,7 @@ function Header({ hackathon }: { hackathon: HackathonData }) {
 						{t("ask")}
 					</Button>
 					<ShareMenu title={hackathon.name} />
+					<HackathonReport slug={hackathon.slug} />
 				</div>
 			</div>
 			{closesAt && (

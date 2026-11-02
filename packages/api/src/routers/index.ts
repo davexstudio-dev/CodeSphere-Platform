@@ -52,6 +52,11 @@ import { decodeCursor, encodeCursor } from "../cursor";
 import { unexpectedErrors } from "../errors";
 import { isRead, isWatchSubmission } from "../exposure";
 import { createMixedFeedHandlers } from "../feed-mixed/handlers";
+import {
+	dismissHackathonReports,
+	listReportedHackathons,
+	reportHackathon,
+} from "../hackathon-reports";
 import { LISTED_STATUSES, loadHackathons } from "../hackathons";
 import { impl } from "../index";
 import {
@@ -360,6 +365,32 @@ export const appRouter = impl
 				}
 				return found;
 			}),
+			report: impl.hackathons.report.handler(
+				async ({ context, input, errors }) => {
+					const viewer = context.session?.user as
+						| { id: string; kind?: string }
+						| undefined;
+					if (!viewer) {
+						throw errors.UNAUTHORIZED();
+					}
+					// A report is a Member's word: an Agent never files one.
+					if (viewer.kind === "agent") {
+						throw errors.FORBIDDEN();
+					}
+					if (
+						!(await reportHackathon(
+							context.db,
+							viewer.id,
+							input.slug,
+							input.reason,
+							input.comment,
+						))
+					) {
+						throw errors.NOT_FOUND();
+					}
+					return { success: true };
+				},
+			),
 		},
 		admin: {
 			kpi: impl.admin.kpi
@@ -397,6 +428,25 @@ export const appRouter = impl
 							),
 						),
 					),
+				reports: impl.admin.hackathons.reports
+					.use(staffMay({ hackathon: ["update"] }))
+					.handler(async ({ context }) => ({
+						items: await listReportedHackathons(context.db),
+					})),
+				dismissReports: impl.admin.hackathons.dismissReports
+					.use(staffMay({ hackathon: ["update"] }))
+					.handler(async ({ context, input, errors }) => {
+						if (
+							!(await dismissHackathonReports(
+								context.db,
+								actorOf(context.session),
+								input.slug,
+							))
+						) {
+							throw errors.NOT_FOUND();
+						}
+						return { success: true };
+					}),
 				allowRepublication: impl.admin.hackathons.allowRepublication
 					.use(staffMay({ hackathon: ["update"] }))
 					.handler(async ({ context, input, errors }) =>
