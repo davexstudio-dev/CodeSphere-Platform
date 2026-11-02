@@ -436,7 +436,9 @@
 			"failure": {
 				"forbidden": "Staff only.",
 				"failed": "Saving failed. Try again.",
-				"advance": "The status change failed: check the Milestones and the criteria total."
+				"advance": "The status change failed: check the Milestones and the criteria total.",
+				"teamsLocked": "Teams already exist: you cannot turn them off, nor set a maximum below the largest team.",
+				"archivedLocked": "An archived Hackathon can only be edited by an Admin."
 			},
 			"teamsEnabled": "Teams on CodeSphere",
 			"teamsEnabledHint": "On: Members create their team and submit their project here. Off: registration is on the organiser's site, the team tab is hidden and a link to its page is shown.",
@@ -491,7 +493,17 @@
 				"other": "Other"
 			},
 			"dismissReports": "Dismiss",
-			"reportsHint": "Dismissing keeps the Hackathon published. To act on them, unpublish it: the reports then count as founded."
+			"reportsHint": "Dismissing keeps the Hackathon published. To act on them, unpublish it: the reports then count as founded.",
+			"organizerLocked": "Only an Admin can change the organizer.",
+			"prizes": "Prizes",
+			"noPrizes": "No Prize.",
+			"addPrize": "Add a Prize",
+			"prizeAmount": "Amount",
+			"prizeConditions": "Conditions",
+			"prizeUp": "Move up",
+			"prizeDown": "Move down",
+			"prizeRemove": "Remove this Prize",
+			"prizeLabelRequired": "Each Prize needs a label."
 		},
 		"tags": {
 			"title": "Tags",
@@ -1691,6 +1703,8 @@
 			},
 			"hackathonsHint": "A draft is never public. Publishing makes it visible straight away, without review: you stay responsible for its content.",
 			"noHackathons": "No Hackathon yet.",
+			"edit": "Edit",
+			"archivedReadOnly": "An archived Hackathon is read-only: ask an Admin.",
 			"status": {
 				"draft": "Draft",
 				"published": "Published",

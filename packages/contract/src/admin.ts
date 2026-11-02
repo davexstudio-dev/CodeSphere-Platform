@@ -119,6 +119,8 @@ export const AdminHackathon = Hackathon.extend({
 	unpublishedReason: z.string().nullable(),
 });
 
+export type AdminHackathon = z.infer<typeof AdminHackathon>;
+
 export const HackathonUpdate = z
 	.object({
 		slug: z.string(),

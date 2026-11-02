@@ -440,4 +440,114 @@ describe.skipIf(!url)("teams on Postgres", () => {
 			.where(eq(hackathon.id, off?.id ?? ""));
 		await as(ben).teams.create({ slug: slug3, name: `Delta ${run}` });
 	});
+
+	test("a suspended Organization's Teams are frozen but readable, and everything comes back on reinstatement (#339)", async () => {
+		const slug4 = `it-team4-${run}`;
+		const orgName = `Team Org ${run} suspended`;
+		await seedHackathon(db, {
+			...cadev2026,
+			slug: slug4,
+			organizer: orgName,
+			teamsEnabled: true,
+			teamMin: 1,
+			teamMax: 3,
+			milestones: [
+				{
+					key: "submission_close",
+					label: "Clôture",
+					startsAt: CLOSE,
+					endsAt: null,
+				},
+			],
+		});
+		const [h4] = await db
+			.select({ organizationId: hackathon.organizationId })
+			.from(hackathon)
+			.where(eq(hackathon.slug, slug4));
+		const orgId = h4?.organizationId ?? "";
+		const setOrgStatus = (status: "validated" | "suspended") =>
+			db.update(organization).set({ status }).where(eq(organization.id, orgId));
+		await setOrgStatus("validated");
+
+		// Before the suspension: a Team with a Submission, a member, a pending invitation.
+		const created = await as(ben).teams.create({
+			slug: slug4,
+			name: `Sus ${run}`,
+		});
+		const token = (await teamOf(ben, slug4)).inviteToken ?? "";
+		await as(cai).teams.joinByLink({ token });
+		await as(ben).teams.saveSubmission(submission(created.id));
+		await as(ben).teams.invite({
+			teamId: created.id,
+			name: `Member Dee ${run}`,
+		});
+
+		await setOrgStatus("suspended");
+		const notFound = { code: "NOT_FOUND" };
+
+		// Read-only: the enrolled participant still sees the Team and its Submission.
+		const mine = await as(cai).teams.mine({ slug: slug4 });
+		expect(mine?.id).toBe(created.id);
+		expect(mine?.submission?.title).toBe(`Projet ${run}`);
+		// The invitations already received are listed, but cannot be answered.
+		const invitations = await as(dee).teams.invitations({});
+		expect(invitations.items.map((i) => i.teamId)).toContain(created.id);
+		await expect(
+			as(dee).teams.respond({ teamId: created.id, accept: true }),
+		).rejects.toMatchObject(notFound);
+		await expect(
+			as(dee).teams.respond({ teamId: created.id, accept: false }),
+		).rejects.toMatchObject(notFound);
+
+		// Nothing evolves.
+		await expect(
+			as(eli).teams.create({ slug: slug4, name: `Other ${run}` }),
+		).rejects.toMatchObject(notFound);
+		await expect(as(eli).teams.joinByLink({ token })).rejects.toMatchObject(
+			notFound,
+		);
+		await expect(
+			as(ben).teams.invite({ teamId: created.id, name: `Member Ana ${run}` }),
+		).rejects.toMatchObject(notFound);
+		await expect(
+			as(ben).teams.saveSubmission(
+				submission(created.id, { title: "Changed", expectedVersion: 1 }),
+			),
+		).rejects.toMatchObject(notFound);
+		await expect(
+			as(ben).teams.rotateLink({ teamId: created.id }),
+		).rejects.toMatchObject(notFound);
+		await expect(
+			as(ben).teams.removeMember({ teamId: created.id, memberId: cai }),
+		).rejects.toMatchObject(notFound);
+		await expect(
+			as(ben).teams.disband({ teamId: created.id }),
+		).rejects.toMatchObject(notFound);
+
+		// The gallery is closed to a visitor and to a Member alike, even after the deadline.
+		const before = now;
+		now = new Date("2099-07-15T00:00:00Z");
+		await expect(
+			anonymous().teams.gallery({ slug: slug4, limit: 20 }),
+		).rejects.toMatchObject(notFound);
+		await expect(
+			as(eli).teams.gallery({ slug: slug4, limit: 20 }),
+		).rejects.toMatchObject(notFound);
+		now = before;
+
+		// Leaving stays possible.
+		await as(cai).teams.leave({ teamId: created.id });
+		expect(await as(cai).teams.mine({ slug: slug4 })).toBeNull();
+
+		// Reinstated: everything works again with no other action.
+		await setOrgStatus("validated");
+		await as(cai).teams.joinByLink({ token });
+		await as(ben).teams.saveSubmission(
+			submission(created.id, { title: "Changed", expectedVersion: 1 }),
+		);
+		now = new Date("2099-07-15T00:00:00Z");
+		const gallery = await anonymous().teams.gallery({ slug: slug4, limit: 20 });
+		now = before;
+		expect(gallery.items.map((s) => s.title)).toContain("Changed");
+	});
 });
