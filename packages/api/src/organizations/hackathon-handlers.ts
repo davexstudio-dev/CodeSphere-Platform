@@ -1,9 +1,11 @@
 import { ORGANIZATION_TERMS_VERSION } from "@codesphere/contract";
 import type { Database } from "@codesphere/db";
+import { hackathon } from "@codesphere/db/schema/hackathons";
 import {
 	organization,
 	organizationMember,
 } from "@codesphere/db/schema/organizations";
+import { hackathonTeams } from "@codesphere/db/schema/teams";
 import { and, eq, or, sql } from "drizzle-orm";
 
 import {
@@ -239,9 +241,57 @@ export function createOrganizationHackathonHandlers() {
 						},
 					});
 				}
+				// An archived Hackathon is closed for good: only an Admin can still touch it (#338).
+				if (current.status === "archived") {
+					throw errors.FORBIDDEN({
+						message: "An archived Hackathon can only be edited by an Admin.",
+					});
+				}
+				// Teams already formed must still fit: the Organization cannot pull the rug (#338).
+				if (input.teamsEnabled === false || input.teamMax !== undefined) {
+					const [teams] = await context.db
+						.select({
+							count: sql<number>`count(*)::int`,
+							largest: sql<number>`coalesce(max(${hackathonTeams.memberCount}), 0)::int`,
+						})
+						.from(hackathonTeams)
+						.innerJoin(hackathon, eq(hackathon.id, hackathonTeams.hackathonId))
+						.where(eq(hackathon.slug, input.slug));
+					if (teams && teams.count > 0) {
+						if (input.teamsEnabled === false && current.teamsEnabled) {
+							throw errors.BAD_REQUEST({
+								data: {
+									issues: [
+										{
+											path: ["teamsEnabled"],
+											message:
+												"Teams already exist: they cannot be turned off.",
+										},
+									],
+								},
+							});
+						}
+						if (input.teamMax !== undefined && input.teamMax < teams.largest) {
+							throw errors.BAD_REQUEST({
+								data: {
+									issues: [
+										{
+											path: ["teamMax"],
+											message: `A team already has ${teams.largest} members: teamMax cannot be lower.`,
+										},
+									],
+								},
+							});
+						}
+					}
+				}
+				// The Organization vouches for what it edits: the check date moves to now.
 				return outcomeOr(
 					errors,
-					await updateHackathon(context.db, memberId, input),
+					await updateHackathon(context.db, memberId, {
+						...input,
+						verifiedAt: new Date().toISOString(),
+					}),
 				);
 			},
 		),

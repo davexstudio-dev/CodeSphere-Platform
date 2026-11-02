@@ -432,7 +432,9 @@
 			"failure": {
 				"forbidden": "Action réservée au staff.",
 				"failed": "L'enregistrement a échoué. Réessayez.",
-				"advance": "Le changement d'état a échoué : vérifiez les Milestones et le total des critères."
+				"advance": "Le changement d'état a échoué : vérifiez les Milestones et le total des critères.",
+				"teamsLocked": "Des équipes existent déjà : vous ne pouvez ni les désactiver, ni fixer un maximum inférieur à la plus grande équipe.",
+				"archivedLocked": "Un Hackathon archivé ne peut être modifié que par un Admin."
 			},
 			"teamsEnabled": "Équipes sur CodeSphere",
 			"teamsEnabledHint": "Activé : les Members créent leur équipe et déposent leur projet ici. Désactivé : l'inscription se fait chez l'organisateur, l'onglet équipe est masqué et un lien vers sa page est affiché.",
@@ -487,7 +489,17 @@
 				"other": "Autre"
 			},
 			"dismissReports": "Classer sans suite",
-			"reportsHint": "Classer garde le Hackathon publié. Pour donner suite, dépubliez-le : les signalements sont alors considérés comme fondés."
+			"reportsHint": "Classer garde le Hackathon publié. Pour donner suite, dépubliez-le : les signalements sont alors considérés comme fondés.",
+			"organizerLocked": "Seul un Admin peut changer l'organisateur.",
+			"prizes": "Prizes",
+			"noPrizes": "Aucun Prize.",
+			"addPrize": "Ajouter un Prize",
+			"prizeAmount": "Montant",
+			"prizeConditions": "Conditions",
+			"prizeUp": "Monter",
+			"prizeDown": "Descendre",
+			"prizeRemove": "Retirer ce Prize",
+			"prizeLabelRequired": "Chaque Prize a besoin d'un libellé."
 		},
 		"tags": {
 			"title": "Tags",
@@ -1687,6 +1699,8 @@
 			},
 			"hackathonsHint": "Un brouillon n'est jamais public. Publier le rend visible tout de suite, sans relecture : vous restez responsable de son contenu.",
 			"noHackathons": "Aucun Hackathon pour le moment.",
+			"edit": "Modifier",
+			"archivedReadOnly": "Un Hackathon archivé est en lecture seule : demandez à un Admin.",
 			"status": {
 				"draft": "Brouillon",
 				"published": "Publié",
