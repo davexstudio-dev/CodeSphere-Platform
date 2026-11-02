@@ -18,6 +18,11 @@ import {
 	type ApiKeyCreatedProps,
 } from "./templates/api-key-created";
 import {
+	HACKATHON_UNPUBLISHED_SUBJECTS,
+	HackathonUnpublished,
+	type HackathonUnpublishedProps,
+} from "./templates/hackathon-unpublished";
+import {
 	MEMBER_REACTIVATED_SUBJECTS,
 	MemberReactivated,
 	type MemberReactivatedProps,
@@ -27,6 +32,16 @@ import {
 	MemberSuspended,
 	type MemberSuspendedProps,
 } from "./templates/member-suspended";
+import {
+	ORGANIZATION_INVITATION_SUBJECTS,
+	OrganizationInvitation,
+	type OrganizationInvitationProps,
+} from "./templates/organization-invitation";
+import {
+	ORGANIZATION_SUSPENDED_SUBJECTS,
+	OrganizationSuspended,
+	type OrganizationSuspendedProps,
+} from "./templates/organization-suspended";
 import {
 	SIGN_IN_CODE_SUBJECTS,
 	SignInCode,
@@ -52,7 +67,10 @@ export type EmailMessage =
 	| { kind: "api-key-created"; props: ApiKeyCreatedProps }
 	| { kind: "agent-paused"; props: AgentPausedProps }
 	| { kind: "sign-in-code"; props: SignInCodeProps }
-	| { kind: "staff-invitation"; props: StaffInvitationProps };
+	| { kind: "staff-invitation"; props: StaffInvitationProps }
+	| { kind: "organization-invitation"; props: OrganizationInvitationProps }
+	| { kind: "hackathon-unpublished"; props: HackathonUnpublishedProps }
+	| { kind: "organization-suspended"; props: OrganizationSuspendedProps };
 
 /** The subject and the body of a message, in the language of its props. */
 export function composeEmail(message: EmailMessage): {
@@ -100,6 +118,21 @@ export function composeEmail(message: EmailMessage): {
 			return {
 				subject: STAFF_INVITATION_SUBJECTS[locale],
 				template: <StaffInvitation {...message.props} />,
+			};
+		case "organization-invitation":
+			return {
+				subject: ORGANIZATION_INVITATION_SUBJECTS[locale],
+				template: <OrganizationInvitation {...message.props} />,
+			};
+		case "hackathon-unpublished":
+			return {
+				subject: HACKATHON_UNPUBLISHED_SUBJECTS[locale],
+				template: <HackathonUnpublished {...message.props} />,
+			};
+		case "organization-suspended":
+			return {
+				subject: ORGANIZATION_SUSPENDED_SUBJECTS[locale],
+				template: <OrganizationSuspended {...message.props} />,
 			};
 	}
 }

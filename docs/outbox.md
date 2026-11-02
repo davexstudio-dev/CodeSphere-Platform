@@ -32,7 +32,7 @@ await withAudit(db, auditEvent, mutation /* ...returning({ id }) */, [
 
 Sans changement associé : `publishEvent(db, { type, aggregateType, aggregateId, dedupeKey })`. Avec une `dedupeKey`, émettre deux fois écrit une fois (une requête rejouée ne double pas l'événement).
 
-Aujourd'hui émis : `organization.applied|validated|rejected|suspended|reinstated`, `job.removed`.
+Aujourd'hui émis : `organization.applied|validated|rejected|suspended|reinstated|invited`, `hackathon.unpublished`, `job.removed`. Le consommateur `org-mail` (#337) envoie par e-mail `organization.invited`, `hackathon.unpublished` et `organization.suspended` : il relit l'état à l'envoi, n'écrit qu'aux comptes vérifiés et non suspendus, et utilise une clé d'idempotence par événement et destinataire.
 
 ## Écrire un consommateur
 

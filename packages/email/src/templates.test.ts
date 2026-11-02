@@ -16,6 +16,30 @@ const messages = (locale: "fr" | "en"): EmailMessage[] => [
 		kind: "staff-invitation",
 		props: { invitedBy: "Ada", role: "admin", days: 7, locale },
 	},
+	{
+		kind: "organization-invitation",
+		props: {
+			name: "Ada",
+			invitedBy: "Ada",
+			organizationName: "Acme",
+			role: "editor",
+			locale,
+		},
+	},
+	{
+		kind: "hackathon-unpublished",
+		props: {
+			name: "Ada",
+			hackathonName: "Hack",
+			organizationName: "Acme",
+			reason: "Not a hackathon",
+			locale,
+		},
+	},
+	{
+		kind: "organization-suspended",
+		props: { name: "Ada", organizationName: "Acme", reason: "Spam", locale },
+	},
 ];
 
 describe("every message renders in French and English", () => {
@@ -72,5 +96,51 @@ describe("localeFromAcceptLanguage", () => {
 		expect(localeFromAcceptLanguage("en-US,en;q=0.9")).toBe("en");
 		expect(localeFromAcceptLanguage("sw")).toBe("en");
 		expect(localeFromAcceptLanguage(null)).toBe("en");
+	});
+});
+
+describe("organization messages", () => {
+	test("the invitation tells the role and links to the invitations", async () => {
+		const owner = composeEmail({
+			kind: "organization-invitation",
+			props: {
+				name: "Ada",
+				invitedBy: null,
+				organizationName: "Acme",
+				role: "owner",
+				url: "https://site.test/organizations/new",
+				locale: "fr",
+			},
+		});
+		const html = await render(owner.template);
+		expect(html).toContain("responsable de Acme");
+		expect(html).toContain('href="https://site.test/organizations/new"');
+	});
+
+	test("the suspension shows the contact line only when configured", async () => {
+		const html = (contactEmail?: string) =>
+			render(
+				composeEmail({
+					kind: "organization-suspended",
+					props: { name: "Ada", organizationName: "Acme", contactEmail },
+				}).template,
+			);
+		expect(await html("help@site.test")).toContain("help@site.test");
+		expect(await html()).not.toContain("mailto:");
+	});
+
+	test("the unpublication repeats the reason, escaped", async () => {
+		const html = await render(
+			composeEmail({
+				kind: "hackathon-unpublished",
+				props: {
+					name: "Ada",
+					hackathonName: "Hack",
+					organizationName: "Acme",
+					reason: "Missing <rules>",
+				},
+			}).template,
+		);
+		expect(html).toContain("Missing &lt;rules&gt;");
 	});
 });

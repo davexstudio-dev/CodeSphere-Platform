@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 
 import { type Consumer, effectOnce } from "./consumer";
+import { type OrgMailConfig, orgMailConsumer } from "./org-mail-consumer";
 import { socialConsumer } from "./social-consumer";
 
 /**
@@ -27,7 +28,12 @@ export const statsConsumer: Consumer = {
 /** Every consumer the platform runs. Search index sync, notifications and payment reconciliation join here. */
 export const consumers: readonly Consumer[] = [statsConsumer];
 
-/** The consumers with what the deployment configured: the official social accounts. */
+/** The consumers with what the deployment configured: the social accounts and the service emails. */
 export const consumersWith = (
 	social?: Parameters<typeof socialConsumer>[0],
-): readonly Consumer[] => [...consumers, socialConsumer(social)];
+	mail?: OrgMailConfig,
+): readonly Consumer[] => [
+	...consumers,
+	socialConsumer(social),
+	orgMailConsumer(mail),
+];

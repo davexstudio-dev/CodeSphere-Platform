@@ -9,6 +9,7 @@ import { parseAdminEmails } from "@codesphere/auth/admin";
 
 import { createApp } from "./app";
 import { ENV } from "./env.server";
+import { orgMailFromEnv } from "./mail";
 import { createSentryReporter } from "./sentry";
 import { auth, db, logger, notifications, social } from "./services";
 import { startTelemetry } from "./telemetry";
@@ -51,7 +52,7 @@ const app = createApp({
 // process, with the same guarantees (docs/outbox.md). Off with OUTBOX_RELAY=false.
 if (ENV.OUTBOX_RELAY) {
 	startOutboxRelay(db, {
-		consumers: consumersWith(social),
+		consumers: consumersWith(social, orgMailFromEnv(ENV)),
 		onError: (error) => logger.warn({ err: error }, "outbox relay failed"),
 	});
 }
