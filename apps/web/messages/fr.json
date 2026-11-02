@@ -474,7 +474,9 @@
 			"createFailed": "La création a échoué : vérifiez l'adresse, qui doit être libre, et l'Organisation.",
 			"unpublish": "Dépublier",
 			"unpublishDescription": "Le Hackathon repasse en brouillon et disparaît du public. L'Organisation peut le corriger et le publier de nouveau.",
-			"unpublishReason": "Motif (conservé dans le journal d'audit)"
+			"unpublishReason": "Motif (conservé dans le journal d'audit)",
+			"unpublishedBy": "Dépublié : {reason}. Son Organisation ne peut pas le publier avant votre feu vert.",
+			"allowRepublication": "Autoriser la republication"
 		},
 		"tags": {
 			"title": "Tags",
@@ -1717,7 +1719,9 @@
 					"c5": "CodeSphere peut dépublier un Hackathon, avec un motif, et suspendre une Organisation qui ne respecte pas ces conditions.",
 					"c6": "Le responsable de l'Organisation engage celle-ci en acceptant ces conditions."
 				}
-			}
+			},
+			"unpublished": "Dépublié par l'équipe CodeSphere : {reason}. Corrigez-le, puis demandez la levée du blocage pour le publier de nouveau.",
+			"unpublishedTitle": "Dépublié par l'équipe CodeSphere : un Admin doit lever le blocage."
 		},
 		"manageLink": "Gérer l'équipe et les Hackathons"
 	},

@@ -120,6 +120,18 @@ export default function AdminHackathonsPage() {
 		void queryClient.invalidateQueries({ queryKey: orpc.hackathons.key() });
 		void queryClient.invalidateQueries({ queryKey: orpc.admin.auditLog.key() });
 	};
+	const allow = useMutation(
+		orpc.admin.hackathons.allowRepublication.mutationOptions({
+			onSuccess: () => {
+				refresh();
+				setFailure(null);
+			},
+			onError: () => {
+				refresh();
+				setFailure("advance");
+			},
+		}),
+	);
 	const unpublish = useMutation(
 		orpc.admin.hackathons.unpublish.mutationOptions({
 			onSuccess: () => {
@@ -302,6 +314,29 @@ export default function AdminHackathonsPage() {
 									<p className="text-muted-foreground text-xs">
 										{t(`advanceNote.${hackathon.status}`)}
 									</p>
+									{hackathon.status === "draft" &&
+										hackathon.unpublishedReason && (
+											<div className="grid gap-1">
+												<p className="text-destructive text-xs">
+													{t("unpublishedBy", {
+														reason: hackathon.unpublishedReason,
+													})}
+												</p>
+												<Button
+													size="sm"
+													variant="outline"
+													disabled={allow.isPending}
+													onClick={() =>
+														allow.mutate({
+															slug,
+															expectedVersion: hackathon.version,
+														})
+													}
+												>
+													{t("allowRepublication")}
+												</Button>
+											</div>
+										)}
 									{(hackathon.status === "published" ||
 										hackathon.status === "ended") && (
 										<Button

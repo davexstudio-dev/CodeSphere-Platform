@@ -474,7 +474,9 @@
 			"createFailed": "Creation failed: check that the address is free, and the Organization.",
 			"unpublish": "Unpublish",
 			"unpublishDescription": "The Hackathon goes back to a draft and leaves the public views. The Organization can fix it and publish it again.",
-			"unpublishReason": "Reason (kept in the audit log)"
+			"unpublishReason": "Reason (kept in the audit log)",
+			"unpublishedBy": "Unpublished: {reason}. Its Organization cannot publish it again before your go-ahead.",
+			"allowRepublication": "Allow republication"
 		},
 		"tags": {
 			"title": "Tags",
@@ -1717,7 +1719,9 @@
 					"c5": "CodeSphere may unpublish a Hackathon, with a reason, and suspend an Organization that does not follow these terms.",
 					"c6": "The Organization's owner binds it by accepting these terms."
 				}
-			}
+			},
+			"unpublished": "Unpublished by the CodeSphere team: {reason}. Fix it, then ask for the block to be lifted so you can publish it again.",
+			"unpublishedTitle": "Unpublished by the CodeSphere team: an Admin has to lift the block."
 		},
 		"manageLink": "Manage team and Hackathons"
 	},

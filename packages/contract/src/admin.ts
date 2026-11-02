@@ -97,6 +97,8 @@ export const HackathonCreate = z.object({
 /** A Hackathon as the back-office lists it, drafts included. */
 export const AdminHackathon = Hackathon.extend({
 	submissionCount: z.number().int().min(0),
+	/** Why an Admin unpublished it; while set, its Organization cannot publish it again (#326). */
+	unpublishedReason: z.string().nullable(),
 });
 
 export const HackathonUpdate = z
@@ -588,6 +590,11 @@ export const adminContract = {
 						"draft to published, published to ended, ended to archived; never back. Publishing needs a milestone and criteria totalling 100. expectedVersion must match (409 CONFLICT otherwise). Requires a staff role. Audited.",
 				}),
 			)
+			.input(z.object({ slug: z.string(), expectedVersion: ExpectedVersion }))
+			.output(Hackathon),
+		/** Lifts the lock an unpublication put on a draft: its Organization may publish it again (#326). */
+		allowRepublication: base
+			.errors(staffErrors)
 			.input(z.object({ slug: z.string(), expectedVersion: ExpectedVersion }))
 			.output(Hackathon),
 		/** A published or ended Hackathon goes back to a draft, with a reason in the audit log (#326). */

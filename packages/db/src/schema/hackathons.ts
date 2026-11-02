@@ -28,6 +28,9 @@ export const hackathon = pgTable("hackathon", {
 		.$type<"draft" | "published" | "ended" | "archived">()
 		.default("published")
 		.notNull(),
+	// Why an Admin took it back to a draft (#326). While set, its Organization cannot publish it
+	// again: an Admin lifts the lock once the content is fixed. Null when nothing is pending.
+	unpublishedReason: text("unpublished_reason"),
 	// When the Hackathon opens (#261): a repository whose first commit is older is flagged.
 	opensAt: timestamp("opens_at"),
 	// Teams and submissions are run on CodeSphere (#261). Off for an event whose registration and

@@ -271,10 +271,35 @@ describe.skipIf(!url)("Organization Hackathons on Postgres", () => {
 				reason: "Encore",
 			}),
 		).rejects.toMatchObject({ code: "BAD_REQUEST" });
-		// The Organization fixes it and publishes again: the terms stay accepted.
-		const again = await as(editor).organizations.hackathons.advance({
+		// The unpublication holds: the Organization sees why and cannot publish again by itself.
+		const { items } = await as(owner).organizations.hackathons.list({
+			organizationId: orgId,
+		});
+		expect(items.find((h) => h.slug === slug)?.unpublishedReason).toBe(
+			"Contenu trompeur",
+		);
+		await expect(
+			as(editor).organizations.hackathons.advance({
+				slug,
+				expectedVersion: draft.version,
+			}),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+		// An Admin lifts the lock once the content is fixed; the terms stay accepted.
+		const cleared = await staff.admin.hackathons.allowRepublication({
 			slug,
 			expectedVersion: draft.version,
+		});
+		expect(cleared.status).toBe("draft");
+		await expect(
+			staff.admin.hackathons.allowRepublication({
+				slug,
+				expectedVersion: cleared.version,
+			}),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+		const again = await as(editor).organizations.hackathons.advance({
+			slug,
+			expectedVersion: cleared.version,
 		});
 		expect(again.status).toBe("published");
 	});

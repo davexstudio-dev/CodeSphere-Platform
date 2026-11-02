@@ -238,18 +238,27 @@ function HackathonsTab({ org }: { org: MyOrganization }) {
 								<span className="font-medium">{item.name}</span>
 								<Badge variant="outline">{t(`status.${item.status}`)}</Badge>
 							</span>
+							{item.status === "draft" && item.unpublishedReason && (
+								<p className="w-full text-destructive text-sm">
+									{t("unpublished", { reason: item.unpublishedReason })}
+								</p>
+							)}
 							{next && (
 								<Button
 									size="sm"
 									variant="outline"
 									disabled={
 										advance.isPending ||
-										(item.status === "draft" && !terms.data?.accepted)
+										(item.status === "draft" &&
+											(!terms.data?.accepted ||
+												Boolean(item.unpublishedReason)))
 									}
 									title={
-										item.status === "draft" && !terms.data?.accepted
-											? t("terms.needed")
-											: undefined
+										item.status === "draft" && item.unpublishedReason
+											? t("unpublishedTitle")
+											: item.status === "draft" && !terms.data?.accepted
+												? t("terms.needed")
+												: undefined
 									}
 									onClick={() =>
 										advance.mutate({

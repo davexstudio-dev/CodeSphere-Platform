@@ -11,6 +11,7 @@ import {
 	createHackathon,
 	type HackathonWriteOutcome,
 	listAdminHackathons,
+	unpublishedReasons,
 	updateHackathon,
 } from "../admin-hackathons";
 import { ALL_STATUSES, loadHackathons } from "../hackathons";
@@ -188,6 +189,16 @@ export function createOrganizationHackathonHandlers() {
 					input.slug,
 					errors,
 				);
+				// An Admin's unpublication holds until an Admin lifts it.
+				if (
+					current.status === "draft" &&
+					(await unpublishedReasons(context.db, org.id)).has(current.slug)
+				) {
+					throw errors.FORBIDDEN({
+						message:
+							"An Admin unpublished this Hackathon and has not cleared it.",
+					});
+				}
 				// Publishing is free of review, but not of the terms: the Organization answers for it.
 				if (
 					current.status === "draft" &&

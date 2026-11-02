@@ -1,0 +1,1 @@
+ALTER TABLE "hackathon" ADD COLUMN "unpublished_reason" text;
