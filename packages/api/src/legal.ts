@@ -1,8 +1,8 @@
 import { LEGAL_DOCUMENTS, type LegalDocument } from "@codesphere/contract";
-import { LEGAL_LANGUAGES } from "@codesphere/db/schema/legal";
 import type { Database } from "@codesphere/db";
 import { user } from "@codesphere/db/schema/auth";
 import {
+	LEGAL_LANGUAGES,
 	legalDocumentDraft,
 	legalDocumentVersion,
 } from "@codesphere/db/schema/legal";
