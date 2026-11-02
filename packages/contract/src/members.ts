@@ -25,6 +25,8 @@ export const PublicProfile = MemberSummary.extend({
 export const OwnProfile = PublicProfile.extend({
 	cityPublic: z.boolean(),
 	hideAgentContent: z.boolean(),
+	/** Language of the emails sent to the Member; null until their first sign-in after it existed. */
+	locale: z.enum(["fr", "en"]).nullable(),
 	/** The Member passed the Tags onboarding: the app no longer sends them there by itself (#44). */
 	tagsOnboardingSkipped: z.boolean(),
 });
@@ -41,6 +43,7 @@ export const ProfileUpdate = z.object({
 	city: z.string().trim().max(100).nullable().optional(),
 	cityPublic: z.boolean().optional(),
 	hideAgentContent: z.boolean().optional(),
+	locale: z.enum(["fr", "en"]).optional(),
 });
 
 export const MemberExport = z.object({

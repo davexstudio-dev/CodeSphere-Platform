@@ -24,7 +24,12 @@ import { createLogger } from "@codesphere/logger";
 import type { ExecutionContext, Hono } from "hono";
 
 import { type AppDeps, createApp } from "./app";
-import { createMailHooks, createNotifications } from "./mail";
+import {
+	createMailHooks,
+	createNotifications,
+	type OrgMailEnv,
+	orgMailFromEnv,
+} from "./mail";
 import { type SocialDepsEnv, socialFromEnv } from "./social";
 
 /**
@@ -34,44 +39,45 @@ import { type SocialDepsEnv, socialFromEnv } from "./social";
  * Worker bindings (`wrangler preview --var` and `--secrets-file`), the database is reached
  * over HTTP, and logs are JSON lines on the console that Workers Logs collects.
  */
-export type WorkerEnv = SocialDepsEnv & {
-	/** Absent on a preview without a database (map #86, #150): the API then answers 503 on readiness. */
-	DATABASE_URL?: string;
-	BETTER_AUTH_SECRET: string;
-	BETTER_AUTH_URL: string;
-	CORS_ORIGIN: string;
-	SUPER_ADMIN_EMAILS?: string;
-	ADMIN_EMAILS?: string;
-	MODERATOR_EMAILS?: string;
-	RESEND_API_KEY?: string;
-	EMAIL_FROM?: string;
-	RESEND_WEBHOOK_SECRET?: string;
-	GITHUB_CLIENT_ID?: string;
-	GITHUB_CLIENT_SECRET?: string;
-	GITLAB_CLIENT_ID?: string;
-	GITLAB_CLIENT_SECRET?: string;
-	GOOGLE_CLIENT_ID?: string;
-	GOOGLE_CLIENT_SECRET?: string;
-	OAUTH_PROXY_SECRET?: string;
-	OAUTH_PROXY_PRODUCTION_URL?: string;
-	LOG_LEVEL?:
-		| "fatal"
-		| "error"
-		| "warn"
-		| "info"
-		| "debug"
-		| "trace"
-		| "silent";
-	PRIVILEGE_THRESHOLDS?: string;
-	AGENT_RULES?: string;
-	FARMING_LIMITS?: string;
-	FEED_RANKING?: string;
-	HACKATHON_REQUIRE_GITHUB?: string;
-	/** Cloudflare Queues producer of the events (#259); without it the Worker has no queue to drain into. */
-	EVENTS?: QueueBinding;
-	APP_VERSION?: string;
-	GIT_SHA?: string;
-};
+export type WorkerEnv = SocialDepsEnv &
+	OrgMailEnv & {
+		/** Absent on a preview without a database (map #86, #150): the API then answers 503 on readiness. */
+		DATABASE_URL?: string;
+		BETTER_AUTH_SECRET: string;
+		BETTER_AUTH_URL: string;
+		CORS_ORIGIN: string;
+		SUPER_ADMIN_EMAILS?: string;
+		ADMIN_EMAILS?: string;
+		MODERATOR_EMAILS?: string;
+		RESEND_API_KEY?: string;
+		EMAIL_FROM?: string;
+		RESEND_WEBHOOK_SECRET?: string;
+		GITHUB_CLIENT_ID?: string;
+		GITHUB_CLIENT_SECRET?: string;
+		GITLAB_CLIENT_ID?: string;
+		GITLAB_CLIENT_SECRET?: string;
+		GOOGLE_CLIENT_ID?: string;
+		GOOGLE_CLIENT_SECRET?: string;
+		OAUTH_PROXY_SECRET?: string;
+		OAUTH_PROXY_PRODUCTION_URL?: string;
+		LOG_LEVEL?:
+			| "fatal"
+			| "error"
+			| "warn"
+			| "info"
+			| "debug"
+			| "trace"
+			| "silent";
+		PRIVILEGE_THRESHOLDS?: string;
+		AGENT_RULES?: string;
+		FARMING_LIMITS?: string;
+		FEED_RANKING?: string;
+		HACKATHON_REQUIRE_GITHUB?: string;
+		/** Cloudflare Queues producer of the events (#259); without it the Worker has no queue to drain into. */
+		EVENTS?: QueueBinding;
+		APP_VERSION?: string;
+		GIT_SHA?: string;
+	};
 
 const REQUIRED = [
 	"BETTER_AUTH_SECRET",
@@ -234,7 +240,7 @@ export async function apiQueue(
 			JSON.stringify({ msg: "social accounts disabled", error: String(error) }),
 		);
 	}
-	const consumers = consumersWith(social);
+	const consumers = consumersWith(social, orgMailFromEnv(env));
 	for (const message of batch.messages) {
 		try {
 			await deliver(db, consumers, message.body);

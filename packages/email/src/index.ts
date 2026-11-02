@@ -24,6 +24,11 @@ export {
 	type ApiKeyCreatedProps,
 } from "./templates/api-key-created";
 export {
+	HACKATHON_UNPUBLISHED_SUBJECTS,
+	HackathonUnpublished,
+	type HackathonUnpublishedProps,
+} from "./templates/hackathon-unpublished";
+export {
 	MEMBER_REACTIVATED_SUBJECTS,
 	MemberReactivated,
 	type MemberReactivatedProps,
@@ -33,6 +38,16 @@ export {
 	MemberSuspended,
 	type MemberSuspendedProps,
 } from "./templates/member-suspended";
+export {
+	ORGANIZATION_INVITATION_SUBJECTS,
+	OrganizationInvitation,
+	type OrganizationInvitationProps,
+} from "./templates/organization-invitation";
+export {
+	ORGANIZATION_SUSPENDED_SUBJECTS,
+	OrganizationSuspended,
+	type OrganizationSuspendedProps,
+} from "./templates/organization-suspended";
 export {
 	SIGN_IN_CODE_SUBJECTS,
 	SignInCode,

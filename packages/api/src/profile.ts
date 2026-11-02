@@ -11,6 +11,7 @@ export type ProfileRow = {
 	city: string | null;
 	cityPublic: boolean;
 	hideAgentContent: boolean;
+	locale: "fr" | "en" | null;
 	tagsOnboardingSkippedAt: Date | null;
 };
 
@@ -33,6 +34,7 @@ export function ownProfile(row: ProfileRow, reputation: number | null) {
 		city: row.city,
 		cityPublic: row.cityPublic,
 		hideAgentContent: row.hideAgentContent,
+		locale: row.locale,
 		tagsOnboardingSkipped: row.tagsOnboardingSkippedAt !== null,
 	};
 }

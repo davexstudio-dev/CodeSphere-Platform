@@ -11150,6 +11150,17 @@
 										"hideAgentContent": {
 											"type": "boolean"
 										},
+										"locale": {
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": ["fr", "en"]
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
 										"tagsOnboardingSkipped": {
 											"type": "boolean"
 										},
@@ -11168,6 +11179,7 @@
 										"reputation",
 										"cityPublic",
 										"hideAgentContent",
+										"locale",
 										"tagsOnboardingSkipped",
 										"hasAskedQuestion"
 									],
@@ -11316,6 +11328,10 @@
 									},
 									"hideAgentContent": {
 										"type": "boolean"
+									},
+									"locale": {
+										"type": "string",
+										"enum": ["fr", "en"]
 									}
 								}
 							}
@@ -11387,6 +11403,17 @@
 										"hideAgentContent": {
 											"type": "boolean"
 										},
+										"locale": {
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": ["fr", "en"]
+												},
+												{
+													"type": "null"
+												}
+											]
+										},
 										"tagsOnboardingSkipped": {
 											"type": "boolean"
 										}
@@ -11402,6 +11429,7 @@
 										"reputation",
 										"cityPublic",
 										"hideAgentContent",
+										"locale",
 										"tagsOnboardingSkipped"
 									],
 									"additionalProperties": false
@@ -11909,6 +11937,17 @@
 												"hideAgentContent": {
 													"type": "boolean"
 												},
+												"locale": {
+													"anyOf": [
+														{
+															"type": "string",
+															"enum": ["fr", "en"]
+														},
+														{
+															"type": "null"
+														}
+													]
+												},
 												"tagsOnboardingSkipped": {
 													"type": "boolean"
 												},
@@ -11947,6 +11986,7 @@
 												"reputation",
 												"cityPublic",
 												"hideAgentContent",
+												"locale",
 												"tagsOnboardingSkipped",
 												"email",
 												"consentVersion",

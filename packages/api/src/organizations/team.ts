@@ -15,6 +15,7 @@ import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { withAudit } from "../audit";
+import { outboxInsert } from "../outbox/events";
 
 /**
  * The team of an Organization (#326). The owner (`organization.owner_id`) manages the members and
@@ -171,6 +172,15 @@ export function createTeamService(db: Database) {
 					id: organizationInvitation.id,
 					organization_id: organizationInvitation.organizationId,
 				}),
+			// The mail goes out from the outbox, once, if the invitation is still open (#337).
+			[
+				outboxInsert({
+					type: "organization.invited",
+					aggregateType: "organization_invitation",
+					aggregateIdColumn: "id",
+					payload: { role },
+				}),
+			],
 		);
 		const id = rows[0]?.id as string | undefined;
 		if (!id) {

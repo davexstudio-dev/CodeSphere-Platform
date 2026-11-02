@@ -16,6 +16,7 @@ import type * as z from "zod";
 
 import { type AuditEvent, withAudit } from "./audit";
 import { ALL_STATUSES, loadHackathons } from "./hackathons";
+import { outboxInsert } from "./outbox/events";
 
 type Update = z.infer<typeof HackathonUpdate>;
 type Current = z.infer<typeof Hackathon>;
@@ -364,6 +365,12 @@ export async function unpublishHackathon(
 		[
 			sql`UPDATE hackathon_report SET outcome = 'upheld'
 				WHERE hackathon_id IN (SELECT id FROM m) AND outcome IS NULL`,
+			// The owner and the editors are mailed from the outbox (#337).
+			outboxInsert({
+				type: "hackathon.unpublished",
+				aggregateType: "hackathon",
+				aggregateIdColumn: "id",
+			}),
 		],
 	);
 	const [latest] = await loadAny(db, input.slug);

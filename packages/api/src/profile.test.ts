@@ -13,6 +13,7 @@ const row: ProfileRow & { email: string } = {
 	city: "Ouagadougou",
 	cityPublic: false,
 	hideAgentContent: false,
+	locale: null,
 	tagsOnboardingSkippedAt: null,
 	email: "ada@example.com",
 };
