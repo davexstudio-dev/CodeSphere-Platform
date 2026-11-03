@@ -312,11 +312,9 @@ export const appRouter = impl
 					.from(user)
 					.where(eq(user.id, me.id));
 				const { consent: current } = await currentLegalVersions(context.db);
-				return {
-					current,
-					required:
-						row?.consentVersion != null && row.consentVersion !== current,
-				};
+				// A human account with no consent recorded (seed, staff invitation) is asked too: it has
+				// not accepted any version of the texts yet.
+				return { current, required: row?.consentVersion !== current };
 			}),
 			acceptConsent: impl.members.acceptConsent.handler(
 				async ({ context, input, errors }) => {

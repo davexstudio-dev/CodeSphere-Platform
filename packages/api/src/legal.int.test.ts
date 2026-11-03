@@ -329,6 +329,23 @@ describe.skipIf(!url)("legal documents on Postgres (#341)", () => {
 		expect(row?.at).not.toBeNull();
 	});
 
+	test("a Member with no consent recorded is asked, and is not once they accept", async () => {
+		await db
+			.update(user)
+			.set({ consentVersion: null, consentAcceptedAt: null })
+			.where(eq(user.id, member));
+		const { consent: current } = await visitor().legal.versions({});
+		expect(await as(member, "member").members.consent({})).toEqual({
+			required: true,
+			current,
+		});
+		await as(member, "member").members.acceptConsent({ version: current });
+		expect(await as(member, "member").members.consent({})).toEqual({
+			required: false,
+			current,
+		});
+	});
+
 	test("the acceptances recorded before the editor count for version 1; an important change asks again", async () => {
 		const terms = () =>
 			as(owner, "member").organizations.hackathons.terms.get({
