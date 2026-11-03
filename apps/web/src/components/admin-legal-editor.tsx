@@ -46,6 +46,21 @@ import { orpc } from "@/utils/orpc";
 /** The text of the repository per document and language: the first draft of each. */
 export type RepositoryTexts = Record<LegalDocument, Record<Language, string>>;
 
+const EDITOR_ID = "legal-editor";
+
+/**
+ * On a narrow screen the list and the editor stack, and the editor opens below the fold: bring it
+ * into view. Side by side, the editor is already near the top and nothing moves.
+ */
+const revealEditor = () => {
+	requestAnimationFrame(() => {
+		const editor = document.getElementById(EDITOR_ID);
+		if (editor && editor.getBoundingClientRect().top > window.innerHeight / 2) {
+			editor.scrollIntoView({ behavior: "smooth", block: "start" });
+		}
+	});
+};
+
 const idOf = (key: Selection) => `${key.document}:${key.language}`;
 
 /**
@@ -115,18 +130,21 @@ export default function AdminLegalEditor({
 							label: t(`documents.${key}`),
 						}))}
 						selectedId={idOf(selected)}
-						onSelect={(item) =>
-							setSelected({ document: item.document, language: item.language })
-						}
+						onSelect={(item) => {
+							setSelected({ document: item.document, language: item.language });
+							revealEditor();
+						}}
 						items={items}
 					/>
 				}
 				detail={
-					<DocumentPanel
-						selection={selected}
-						repository={repository[selected.document][selected.language]}
-						published={current?.published ?? null}
-					/>
+					<div id={EDITOR_ID} className="scroll-mt-28">
+						<DocumentPanel
+							selection={selected}
+							repository={repository[selected.document][selected.language]}
+							published={current?.published ?? null}
+						/>
+					</div>
 				}
 			/>
 		</AdminFrame>

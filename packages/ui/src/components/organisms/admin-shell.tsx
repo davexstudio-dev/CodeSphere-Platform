@@ -3,6 +3,11 @@
 import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { Logo } from "@codesphere/ui/components/atoms/logo";
+import {
+	Collapsible,
+	CollapsiblePanel,
+	CollapsibleTrigger,
+} from "@codesphere/ui/components/molecules/collapsible";
 import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import {
 	Sheet,
@@ -13,8 +18,15 @@ import {
 } from "@codesphere/ui/components/molecules/sheet";
 import { ThemeToggle } from "@codesphere/ui/components/molecules/theme-toggle";
 import { cn } from "@codesphere/ui/lib/utils";
-import { MenuIcon, PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react";
-import { useState } from "react";
+import {
+	ChevronRightIcon,
+	MenuIcon,
+	PanelLeftCloseIcon,
+	PanelLeftOpenIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+
+const OPEN_GROUPS_KEY = "admin-nav-open-groups";
 
 type AdminNavItem = {
 	label: string;
@@ -77,24 +89,48 @@ function AdminShell({
 	const [open, setOpen] = useState(false);
 	const ToggleIcon = collapsed ? PanelLeftOpenIcon : PanelLeftCloseIcon;
 	const groups = groupsOf(nav);
+	// The groups that are open: the one of the current screen, plus those the user opened. Every
+	// screen mounts its own shell, so the choice is kept for the session.
+	const [openGroups, setOpenGroups] = useState<ReadonlySet<string>>(
+		() =>
+			new Set(
+				groups.flatMap((group) =>
+					group.name && group.items.some((item) => item.active)
+						? [group.name]
+						: [],
+				),
+			),
+	);
+	useEffect(() => {
+		try {
+			const stored = JSON.parse(
+				sessionStorage.getItem(OPEN_GROUPS_KEY) ?? "[]",
+			) as string[];
+			setOpenGroups((previous) => new Set([...previous, ...stored]));
+		} catch {
+			// No storage (private mode): the groups simply start folded.
+		}
+	}, []);
+	const toggleGroup = (name: string, open: boolean) =>
+		setOpenGroups((previous) => {
+			const next = new Set(previous);
+			if (open) {
+				next.add(name);
+			} else {
+				next.delete(name);
+			}
+			try {
+				sessionStorage.setItem(OPEN_GROUPS_KEY, JSON.stringify([...next]));
+			} catch {
+				// Not kept: the choice only lasts for this screen.
+			}
+			return next;
+		});
 
 	const navList = (compact: boolean, onNavigate?: () => void) => (
 		<div className="flex flex-col gap-4">
-			{groups.map((group) => (
-				<div
-					key={group.name ?? group.items[0]?.href}
-					className="flex flex-col gap-1"
-				>
-					{group.name && (
-						<p
-							className={cn(
-								"px-3 font-medium text-2xs text-muted-foreground uppercase tracking-widest",
-								compact && "sr-only",
-							)}
-						>
-							{group.name}
-						</p>
-					)}
+			{groups.map((group) => {
+				const items = (
 					<ul className="flex flex-col gap-0.5">
 						{group.items.map(({ label, href, icon: Icon, active }) => (
 							<li key={href}>
@@ -116,8 +152,36 @@ function AdminShell({
 							</li>
 						))}
 					</ul>
-				</div>
-			))}
+				);
+				const key = group.name ?? group.items[0]?.href;
+				// Icons only, or no heading: nothing to fold.
+				if (compact || !group.name) {
+					return (
+						<div key={key} className="flex flex-col gap-1">
+							{group.name && <p className="sr-only">{group.name}</p>}
+							{items}
+						</div>
+					);
+				}
+				const name = group.name;
+				return (
+					<Collapsible
+						key={key}
+						open={openGroups.has(name)}
+						onOpenChange={(open) => toggleGroup(name, open)}
+						className="flex flex-col gap-1"
+					>
+						<CollapsibleTrigger className="group/trigger flex w-full items-center justify-between rounded-md px-3 py-1 text-2xs text-muted-foreground uppercase tracking-widest hover:text-foreground">
+							{name}
+							<ChevronRightIcon
+								aria-hidden="true"
+								className="size-3 transition-transform group-data-[panel-open]/trigger:rotate-90"
+							/>
+						</CollapsibleTrigger>
+						<CollapsiblePanel>{items}</CollapsiblePanel>
+					</Collapsible>
+				);
+			})}
 		</div>
 	);
 
