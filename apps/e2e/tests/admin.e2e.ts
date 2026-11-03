@@ -717,6 +717,19 @@ test.describe("responsive", () => {
 		expect(record?.width ?? 0).toBeGreaterThan(200);
 	});
 
+	test("folded to icons, a group opens its entries in a menu", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		await page.setViewportSize({ width: 1280, height: 800 });
+		await page.goto("/admin");
+		await page.getByRole("button", { name: "Réduire le menu" }).click();
+		await sidebar(page).getByRole("button", { name: "Contenu" }).click();
+		await page.getByRole("menuitem", { name: "Tags" }).click();
+		await expect(page).toHaveURL(/\/admin\/tags$/);
+	});
+
 	test("on a phone the menu opens in a sheet, closes on a link, and the logo stays round", async ({
 		browser,
 		baseURL,

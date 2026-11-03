@@ -8,6 +8,12 @@ import {
 	CollapsiblePanel,
 	CollapsibleTrigger,
 } from "@codesphere/ui/components/molecules/collapsible";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@codesphere/ui/components/molecules/dropdown-menu";
 import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import {
 	Sheet,
@@ -50,6 +56,11 @@ type AdminShellProps = Omit<React.ComponentProps<"div">, "title"> & {
 	userMenu?: (state: { collapsed: boolean }) => React.ReactNode;
 	/** Page-level actions, rendered next to the title. */
 	actions?: React.ReactNode;
+	/**
+	 * The icon of a group, by its `group` name, shown when the sidebar is folded to icons: one icon per
+	 * group that opens its entries in a menu. Defaults to the icon of the group's first entry.
+	 */
+	groupIcons?: Record<string, React.ComponentType<{ className?: string }>>;
 	/** Accessible name of the phone's menu button and title of its panel. */
 	menuLabel?: string;
 };
@@ -79,6 +90,7 @@ function AdminShell({
 	LinkComponent = "a",
 	userMenu,
 	actions,
+	groupIcons,
 	menuLabel = "Menu",
 	children,
 	className,
@@ -154,11 +166,49 @@ function AdminShell({
 					</ul>
 				);
 				const key = group.name ?? group.items[0]?.href;
-				// Icons only, or no heading: nothing to fold.
-				if (compact || !group.name) {
+				// Icons only: one icon per group, its entries in a menu beside it.
+				if (compact && group.name) {
+					const GroupIcon = groupIcons?.[group.name] ?? group.items[0]?.icon;
+					const here = group.items.some((item) => item.active);
+					return (
+						<DropdownMenu key={key}>
+							<DropdownMenuTrigger
+								aria-label={group.name}
+								title={group.name}
+								className={cn(
+									"flex w-full items-center justify-center rounded-md py-2 text-sm outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/50",
+									here && "bg-sidebar-accent text-sidebar-accent-foreground",
+								)}
+							>
+								{GroupIcon && <GroupIcon className="size-4 shrink-0" />}
+							</DropdownMenuTrigger>
+							<DropdownMenuContent side="right" align="start" className="w-52">
+								{group.items.map(({ label, href, icon: Icon, active }) => (
+									<DropdownMenuItem
+										key={href}
+										render={
+											<Link
+												href={href}
+												aria-current={active ? "page" : undefined}
+											/>
+										}
+										className={cn(
+											"gap-2.5 py-2 text-sm",
+											active && "bg-accent font-medium",
+										)}
+									>
+										<Icon className="size-4 shrink-0" />
+										{label}
+									</DropdownMenuItem>
+								))}
+							</DropdownMenuContent>
+						</DropdownMenu>
+					);
+				}
+				// No heading: nothing to fold.
+				if (!group.name) {
 					return (
 						<div key={key} className="flex flex-col gap-1">
-							{group.name && <p className="sr-only">{group.name}</p>}
 							{items}
 						</div>
 					);

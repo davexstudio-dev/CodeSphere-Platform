@@ -14,6 +14,7 @@ import {
 	BuildingIcon,
 	FileTextIcon,
 	GaugeIcon,
+	LayoutDashboardIcon,
 	RssIcon,
 	ScaleIcon,
 	ScrollTextIcon,
@@ -161,6 +162,14 @@ export default function AdminFrame({
 	const screen = screenOf(pathname);
 	const allowed = !screen || roleCan(identity?.role, screen.can);
 
+	// One icon per group, for the sidebar folded to icons (keyed by the heading shown).
+	const groupIcons = {
+		[t("navGroups.pilot")]: LayoutDashboardIcon,
+		[t("navGroups.content")]: FileTextIcon,
+		[t("navGroups.community")]: UsersIcon,
+		[t("navGroups.team")]: ShieldIcon,
+	};
+
 	return (
 		<AdminShell
 			title={title}
@@ -175,6 +184,7 @@ export default function AdminFrame({
 					active: pathname === item.href,
 				}),
 			)}
+			groupIcons={groupIcons}
 			actions={actions}
 			menuLabel={t("navGroups.menu")}
 		>
