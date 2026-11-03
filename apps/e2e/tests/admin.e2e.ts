@@ -3,6 +3,7 @@ import {
 	type Browser,
 	type BrowserContext,
 	expect,
+	type Locator,
 	type Page,
 	test,
 } from "@playwright/test";
@@ -71,6 +72,14 @@ test.beforeEach(({ browser: _browser }, info) => info.setTimeout(120_000));
 
 const sidebar = (page: Page) =>
 	page.getByRole("navigation", { name: "Administration" });
+// The groups of the sidebar start folded but the one of the current screen: open them all before
+// reaching for a link.
+const expandGroups = async (nav: Locator) => {
+	const folded = nav.locator("button[aria-expanded=false]");
+	while ((await folded.count()) > 0) {
+		await folded.first().click();
+	}
+};
 // The staff badge at the top left of the sidebar (#286) and its menu.
 const accountMenu = (page: Page) =>
 	page.getByRole("button", { name: "Menu du compte" });
@@ -120,9 +129,11 @@ test.describe("menus", () => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
 		await page.goto("/admin");
 		for (const { name, path } of MENUS) {
+			await expandGroups(sidebar(page));
 			await sidebar(page).getByRole("link", { name }).click();
 			await expect(page).toHaveURL(new RegExp(`${path}$`));
 			await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
+			await expandGroups(sidebar(page));
 			await expect(sidebar(page).getByRole("link", { name })).toHaveAttribute(
 				"aria-current",
 				"page",
@@ -716,6 +727,9 @@ test.describe("responsive", () => {
 		await page.getByRole("button", { name: "Menu", exact: true }).click();
 		const sheet = page.getByRole("dialog");
 		await expect(sheet.getByText("Contenu", { exact: true })).toBeVisible();
+		await expandGroups(
+			sheet.getByRole("navigation", { name: "Administration" }),
+		);
 		await sheet.getByRole("link", { name: "Tags" }).click();
 		await expect(page).toHaveURL(/\/admin\/tags$/);
 		await expect(sheet).toBeHidden();
