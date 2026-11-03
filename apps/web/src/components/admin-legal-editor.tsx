@@ -106,6 +106,7 @@ export default function AdminLegalEditor({
 				detailKey={idOf(selected)}
 				list={
 					<GroupedList
+						collapsible
 						label={t("list")}
 						searchLabel={t("list")}
 						emptyText={overview.isPending ? t("loading") : t("pick")}
