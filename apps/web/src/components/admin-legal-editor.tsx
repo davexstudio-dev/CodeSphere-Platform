@@ -87,6 +87,8 @@ export default function AdminLegalEditor({
 				id: idOf({ document, language }),
 				name: t(`languages.${language}`),
 				group: document,
+				// The search also finds a document by its title, not only by its language.
+				keywords: t(`documents.${document}`),
 				meta: row?.published ? `v${row.published.version}` : "—",
 				document,
 				language,
