@@ -228,7 +228,7 @@ function AdminShell({
 								className="size-3 transition-transform group-data-[panel-open]/trigger:rotate-90"
 							/>
 						</CollapsibleTrigger>
-						<CollapsiblePanel>{items}</CollapsiblePanel>
+						<CollapsiblePanel className="t-collapse">{items}</CollapsiblePanel>
 					</Collapsible>
 				);
 			})}

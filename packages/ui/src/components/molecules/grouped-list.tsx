@@ -203,7 +203,9 @@ function GroupedList<T extends GroupedListItem>({
 										<span className="tabular-nums">{section.items.length}</span>
 									</CollapsibleTrigger>
 								</h3>
-								<CollapsiblePanel>{rows}</CollapsiblePanel>
+								<CollapsiblePanel className="t-collapse">
+									{rows}
+								</CollapsiblePanel>
 							</Collapsible>
 						);
 					})}

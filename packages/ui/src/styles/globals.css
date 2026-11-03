@@ -6,6 +6,7 @@
 @import "./transitions/tabs-sliding.css";
 @import "./transitions/texts-reveal.css";
 @import "./transitions/panel-reveal.css";
+@import "./transitions/collapse.css";
 @import "./transitions/skeleton-reveal.css";
 @import "./transitions/toast.css";
 @import "./transitions/success-check.css";
