@@ -1,0 +1,24 @@
+/* Collapse: a folded group grows to its height and fades in, and folds back faster. Driven by Base UI's
+   Collapsible: it measures the panel into --collapsible-panel-height and sets data-starting-style
+   when opening and data-ending-style when closing. */
+.t-collapse {
+	height: var(--collapsible-panel-height);
+	opacity: 1;
+	transition:
+		height var(--collapse-open-dur) var(--collapse-ease),
+		opacity var(--collapse-open-dur) var(--collapse-ease);
+}
+.t-collapse[data-starting-style],
+.t-collapse[data-ending-style] {
+	height: 0;
+	opacity: 0;
+}
+.t-collapse[data-ending-style] {
+	transition-duration: var(--collapse-close-dur);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-collapse {
+		transition: none !important;
+	}
+}

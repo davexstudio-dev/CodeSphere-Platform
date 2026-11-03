@@ -3,6 +3,17 @@
 import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { Logo } from "@codesphere/ui/components/atoms/logo";
+import {
+	Collapsible,
+	CollapsiblePanel,
+	CollapsibleTrigger,
+} from "@codesphere/ui/components/molecules/collapsible";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@codesphere/ui/components/molecules/dropdown-menu";
 import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import {
 	Sheet,
@@ -13,8 +24,15 @@ import {
 } from "@codesphere/ui/components/molecules/sheet";
 import { ThemeToggle } from "@codesphere/ui/components/molecules/theme-toggle";
 import { cn } from "@codesphere/ui/lib/utils";
-import { MenuIcon, PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react";
-import { useState } from "react";
+import {
+	ChevronRightIcon,
+	MenuIcon,
+	PanelLeftCloseIcon,
+	PanelLeftOpenIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+
+const OPEN_GROUPS_KEY = "admin-nav-open-groups";
 
 type AdminNavItem = {
 	label: string;
@@ -38,6 +56,11 @@ type AdminShellProps = Omit<React.ComponentProps<"div">, "title"> & {
 	userMenu?: (state: { collapsed: boolean }) => React.ReactNode;
 	/** Page-level actions, rendered next to the title. */
 	actions?: React.ReactNode;
+	/**
+	 * The icon of a group, by its `group` name, shown when the sidebar is folded to icons: one icon per
+	 * group that opens its entries in a menu. Defaults to the icon of the group's first entry.
+	 */
+	groupIcons?: Record<string, React.ComponentType<{ className?: string }>>;
 	/** Accessible name of the phone's menu button and title of its panel. */
 	menuLabel?: string;
 };
@@ -67,6 +90,7 @@ function AdminShell({
 	LinkComponent = "a",
 	userMenu,
 	actions,
+	groupIcons,
 	menuLabel = "Menu",
 	children,
 	className,
@@ -77,24 +101,48 @@ function AdminShell({
 	const [open, setOpen] = useState(false);
 	const ToggleIcon = collapsed ? PanelLeftOpenIcon : PanelLeftCloseIcon;
 	const groups = groupsOf(nav);
+	// The groups that are open: the one of the current screen, plus those the user opened. Every
+	// screen mounts its own shell, so the choice is kept for the session.
+	const [openGroups, setOpenGroups] = useState<ReadonlySet<string>>(
+		() =>
+			new Set(
+				groups.flatMap((group) =>
+					group.name && group.items.some((item) => item.active)
+						? [group.name]
+						: [],
+				),
+			),
+	);
+	useEffect(() => {
+		try {
+			const stored = JSON.parse(
+				sessionStorage.getItem(OPEN_GROUPS_KEY) ?? "[]",
+			) as string[];
+			setOpenGroups((previous) => new Set([...previous, ...stored]));
+		} catch {
+			// No storage (private mode): the groups simply start folded.
+		}
+	}, []);
+	const toggleGroup = (name: string, open: boolean) =>
+		setOpenGroups((previous) => {
+			const next = new Set(previous);
+			if (open) {
+				next.add(name);
+			} else {
+				next.delete(name);
+			}
+			try {
+				sessionStorage.setItem(OPEN_GROUPS_KEY, JSON.stringify([...next]));
+			} catch {
+				// Not kept: the choice only lasts for this screen.
+			}
+			return next;
+		});
 
 	const navList = (compact: boolean, onNavigate?: () => void) => (
 		<div className="flex flex-col gap-4">
-			{groups.map((group) => (
-				<div
-					key={group.name ?? group.items[0]?.href}
-					className="flex flex-col gap-1"
-				>
-					{group.name && (
-						<p
-							className={cn(
-								"px-3 font-medium text-2xs text-muted-foreground uppercase tracking-widest",
-								compact && "sr-only",
-							)}
-						>
-							{group.name}
-						</p>
-					)}
+			{groups.map((group) => {
+				const items = (
 					<ul className="flex flex-col gap-0.5">
 						{group.items.map(({ label, href, icon: Icon, active }) => (
 							<li key={href}>
@@ -116,8 +164,74 @@ function AdminShell({
 							</li>
 						))}
 					</ul>
-				</div>
-			))}
+				);
+				const key = group.name ?? group.items[0]?.href;
+				// Icons only: one icon per group, its entries in a menu beside it.
+				if (compact && group.name) {
+					const GroupIcon = groupIcons?.[group.name] ?? group.items[0]?.icon;
+					const here = group.items.some((item) => item.active);
+					return (
+						<DropdownMenu key={key}>
+							<DropdownMenuTrigger
+								aria-label={group.name}
+								title={group.name}
+								className={cn(
+									"flex w-full items-center justify-center rounded-md py-2 text-sm outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/50",
+									here && "bg-sidebar-accent text-sidebar-accent-foreground",
+								)}
+							>
+								{GroupIcon && <GroupIcon className="size-4 shrink-0" />}
+							</DropdownMenuTrigger>
+							<DropdownMenuContent side="right" align="start" className="w-52">
+								{group.items.map(({ label, href, icon: Icon, active }) => (
+									<DropdownMenuItem
+										key={href}
+										render={
+											<Link
+												href={href}
+												aria-current={active ? "page" : undefined}
+											/>
+										}
+										className={cn(
+											"gap-2.5 py-2 text-sm",
+											active && "bg-accent font-medium",
+										)}
+									>
+										<Icon className="size-4 shrink-0" />
+										{label}
+									</DropdownMenuItem>
+								))}
+							</DropdownMenuContent>
+						</DropdownMenu>
+					);
+				}
+				// No heading: nothing to fold.
+				if (!group.name) {
+					return (
+						<div key={key} className="flex flex-col gap-1">
+							{items}
+						</div>
+					);
+				}
+				const name = group.name;
+				return (
+					<Collapsible
+						key={key}
+						open={openGroups.has(name)}
+						onOpenChange={(open) => toggleGroup(name, open)}
+						className="flex flex-col gap-1"
+					>
+						<CollapsibleTrigger className="group/trigger flex w-full items-center justify-between rounded-md px-3 py-1 text-2xs text-muted-foreground uppercase tracking-widest hover:text-foreground">
+							{name}
+							<ChevronRightIcon
+								aria-hidden="true"
+								className="size-3 transition-transform group-data-[panel-open]/trigger:rotate-90"
+							/>
+						</CollapsibleTrigger>
+						<CollapsiblePanel className="t-collapse">{items}</CollapsiblePanel>
+					</Collapsible>
+				);
+			})}
 		</div>
 	);
 
