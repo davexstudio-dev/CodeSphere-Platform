@@ -220,8 +220,10 @@ function ModerationTable({
 									</div>
 								</TableCell>
 								<TableCell>{row.author}</TableCell>
-								<TableCell className="whitespace-nowrap text-muted-foreground">
-									{row.reportedAgo}
+								<TableCell className="whitespace-nowrap">
+									<span className="text-muted-foreground">
+										{row.reportedAgo}
+									</span>
 								</TableCell>
 								<TableCell>
 									<Badge variant={status.variant}>{status.label}</Badge>

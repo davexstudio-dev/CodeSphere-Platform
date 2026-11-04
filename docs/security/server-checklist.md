@@ -30,7 +30,7 @@ Spec §4 et §5, issue #54. À cocher par l'équipe sur le Cloud Server (Systali
 - [ ] `crontab` de `deploy` installée (sauvegarde, `monitor.sh`)
 - [ ] Heartbeat healthchecks.io reçu
 - [ ] UptimeRobot sur `/api/v1/health`, alertes Telegram et email reçues une fois
-- [ ] **Restauration testée avant le 29 oct.** : dump rapatrié de R2, `pg_restore` dans une base vide, application démarrée dessus (date et auteur : ……)
+- [ ] **Restauration testée avant le 24 oct.** : dump rapatrié de R2, `pg_restore` dans une base vide, application démarrée dessus (date et auteur : ……)
 
 ## Conformité
 

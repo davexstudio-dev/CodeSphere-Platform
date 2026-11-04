@@ -20,6 +20,9 @@ export async function generateMetadata({
 			title: hackathon.name,
 			description: hackathon.summary,
 			url: await publicPageUrl(`/hackathons/${encodeURIComponent(slug)}`),
+			imageUrl: await publicPageUrl(
+				`/og/hackathons/${encodeURIComponent(slug)}`,
+			),
 		});
 	} catch {
 		return {};

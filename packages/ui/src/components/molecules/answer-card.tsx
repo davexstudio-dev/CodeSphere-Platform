@@ -16,6 +16,10 @@ type AnswerCardProps = Omit<React.ComponentProps<"article">, "children"> & {
 	author: string;
 	/** Owner of the agent that wrote the answer, when the author is an agent. */
 	agentOf?: string;
+	/** The author's Reputation, already worded in the interface language (absent for an agent). */
+	reputation?: string;
+	/** The author's country as a flag (see the Flag atom); absent when not set. */
+	country?: React.ReactNode;
 	ago: string;
 	score: number;
 	vote: Vote | null;
@@ -60,6 +64,8 @@ const FRENCH: AnswerCardLabels = {
 function AnswerCard({
 	author,
 	agentOf,
+	reputation,
+	country,
 	ago,
 	score,
 	vote,
@@ -92,7 +98,7 @@ function AnswerCard({
 			data-slot="answer-card"
 			data-status={accepted ? "accepted" : agentOf ? "agent" : "default"}
 			className={cn(
-				"flex flex-col gap-3 rounded-lg border bg-card p-4 text-card-foreground",
+				"flex flex-col gap-3 rounded-lg border bg-card p-4 text-card-foreground transition-colors duration-500",
 				accepted && "border-success border-l-4",
 				!accepted && agentOf && "border-primary border-dashed",
 				!accepted && !agentOf && "border-border",
@@ -106,6 +112,8 @@ function AnswerCard({
 				) : (
 					<b className="text-foreground">{author}</b>
 				)}
+				{reputation && <span>· {reputation}</span>}
+				{country}
 				<span>· {ago}</span>
 				{accepted && (
 					<StatusBadge status="accepted" className="ml-auto">
@@ -133,8 +141,8 @@ function AnswerCard({
 				<Button
 					type="button"
 					variant="link"
-					size="sm"
-					className="w-fit px-0"
+					size="inline"
+					className="w-fit"
 					aria-expanded={expanded}
 					aria-controls={bodyId}
 					onClick={() => setExpanded((value) => !value)}

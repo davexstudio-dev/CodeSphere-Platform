@@ -3,8 +3,21 @@ import { mcp } from "orpc-mcp";
 import * as z from "zod";
 
 import { base, ExpectedVersion, Id, Page, PageInput, Timestamp } from "./base";
-import { Hackathon, JudgingCriterion, Milestone, Prize } from "./hackathons";
+import {
+	Hackathon,
+	HackathonReportReason,
+	JudgingCriterion,
+	Milestone,
+	Prize,
+} from "./hackathons";
+import { jobsAdminContract } from "./jobs";
+import { legalAdminContract } from "./legal";
 import { MemberSummary } from "./members";
+import { organizationsAdminContract } from "./organizations";
+import { ROLES } from "./roles";
+import { teamsAdminContract } from "./teams";
+import { vitalsAdminContract } from "./vitals";
+import { watchAdminContract } from "./watch";
 
 export const AuditEvent = z.object({
 	id: z.string(),
@@ -17,9 +30,36 @@ export const AuditEvent = z.object({
 		.object({
 			fields: z.array(z.string()).optional(),
 			reason: z.string().max(500).optional(),
+			/** A role change (#285): the role before and after. */
+			from: z.string().optional(),
+			to: z.string().optional(),
+			/** A legal document publication (#341): which text, never the text itself. */
+			document: z.string().optional(),
+			language: z.string().optional(),
 		})
 		.nullable(),
 	createdAt: Timestamp,
+});
+
+/** A Reputation event the anti-farming rules cancelled (#241), with who gave it to whom. */
+export const ReputationFlag = z.object({
+	id: z.string(),
+	reason: z.enum(["new_account", "repeat_voter", "daily_cap"]),
+	/** A vote, or an acceptance (whose "voter" is then the Question's author). */
+	cause: z.enum(["vote", "accept"]),
+	/** The points that were not counted. */
+	points: z.number().int(),
+	kind: z.string(),
+	voter: z.object({ id: z.string(), name: z.string() }),
+	author: z.object({ id: z.string(), name: z.string() }),
+	targetType: z.enum(["question", "answer"]),
+	targetId: z.string(),
+	createdAt: Timestamp,
+});
+
+export const ReputationFlagFilter = PageInput.extend({
+	/** Defaults to `repeat_voter`, the case reported to the Admins; the others are automatic. */
+	reason: z.enum(["new_account", "repeat_voter", "daily_cap"]).optional(),
 });
 
 export const AuditLogFilter = PageInput.extend({
@@ -27,25 +67,79 @@ export const AuditLogFilter = PageInput.extend({
 	action: z.string().min(1).max(64).optional(),
 	actorId: z.string().min(1).optional(),
 	targetType: z.string().min(1).max(64).optional(),
+	/** One target of that type: « filter by this target » of the row menu (#287). */
+	targetId: z.string().min(1).max(128).optional(),
 });
+
+/** The filters of the journal, without paging: the CSV export takes the whole filtered set. */
+export const AuditLogExportFilter = AuditLogFilter.omit({
+	cursor: true,
+	limit: true,
+});
+
+/** The most rows one export holds; past it `truncated` is set and the file ends there. */
+export const AUDIT_EXPORT_LIMIT = 5000;
 
 /**
  * An Admin edit of a Hackathon (#124): every field is optional, a list given replaces the
  * stored one. Milestones keep their keys (the countdowns hang on them): only their label and
  * dates change. A stale `expectedVersion` gets CONFLICT.
  */
+/** A new Hackathon, always a draft (#325): one Milestone and the usual criteria to edit before publishing. */
+export const HackathonCreate = z.object({
+	name: z.string().trim().min(1).max(120),
+	slug: z
+		.string()
+		.trim()
+		.min(3)
+		.max(80)
+		.regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+	/** Slug of a validated Organization (#257). */
+	organizationSlug: z.string().trim().min(1).max(120),
+	summary: z.string().trim().min(1).max(2000),
+	teamMin: z.number().int().min(1).max(50),
+	teamMax: z.number().int().min(1).max(50),
+	sourceUrl: z.url(),
+	teamsEnabled: z.boolean(),
+	submissionClose: Timestamp,
+});
+
+/** A published Hackathon with reports waiting for an Admin (#326). */
+export const ReportedHackathon = z.object({
+	slug: z.string(),
+	name: z.string(),
+	organizationName: z.string().nullable(),
+	status: z.enum(["draft", "published", "ended", "archived"]),
+	version: z.number().int().min(1),
+	reports: z.array(
+		z.object({ reason: HackathonReportReason, comment: z.string().nullable() }),
+	),
+});
+
+/** A Hackathon as the back-office lists it, drafts included. */
+export const AdminHackathon = Hackathon.extend({
+	submissionCount: z.number().int().min(0),
+	/** Why an Admin unpublished it; while set, its Organization cannot publish it again (#326). */
+	unpublishedReason: z.string().nullable(),
+});
+
+export type AdminHackathon = z.infer<typeof AdminHackathon>;
+
 export const HackathonUpdate = z
 	.object({
 		slug: z.string(),
 		expectedVersion: ExpectedVersion,
 		name: z.string().trim().min(1).max(120).optional(),
-		organizer: z.string().trim().min(1).max(120).optional(),
+		/** Slug of a validated Organization (#257). */
+		organizationSlug: z.string().trim().min(1).max(120).optional(),
 		summary: z.string().trim().min(1).max(2000).optional(),
 		teamMin: z.number().int().min(1).max(50).optional(),
 		teamMax: z.number().int().min(1).max(50).optional(),
 		sourceUrl: z.url().optional(),
 		sourceNote: z.string().trim().max(500).nullable().optional(),
 		verifiedAt: Timestamp.optional(),
+		opensAt: Timestamp.nullable().optional(),
+		teamsEnabled: z.boolean().optional(),
 		milestones: z
 			.array(Milestone.extend({ label: z.string().trim().min(1).max(160) }))
 			.max(20)
@@ -110,6 +204,45 @@ export const AdminMember = MemberSummary.extend({
 	suspensionReason: z.string().nullable(),
 });
 
+/**
+ * The roles an invitation can offer (#286). Super admin is not one of them: it stays reserved to the
+ * SUPER_ADMIN_EMAILS list (ADR 0003), so the back-office never mints the top role.
+ */
+export const INVITABLE_ROLES = ["moderator", "admin"] as const;
+
+/** Most emails one invitation form takes. */
+export const STAFF_INVITE_MAX_EMAILS = 20;
+
+/** An open offer of a staff role to an email address (#286). */
+export const StaffInvitation = z.object({
+	id: Id,
+	email: z.string(),
+	role: z.enum(INVITABLE_ROLES),
+	/** Name of the Admin who invited; null once that account is gone. */
+	invitedBy: z.string().nullable(),
+	createdAt: Timestamp,
+	expiresAt: Timestamp,
+});
+
+/** What happened to one email of an invitation form. */
+export const StaffInviteResult = z.object({
+	email: z.string(),
+	status: z.enum([
+		/** An open offer now waits for the first verified sign-in with this email. */
+		"invited",
+		/** The email already belonged to a Member, who got the role at once. */
+		"promoted",
+		/** That Member already holds this role or a higher one. */
+		"already_staff",
+		/** The rules refuse it: an Agent, a rank above the Admin's. */
+		"refused",
+	]),
+	/** The invitation id when an offer was created. */
+	invitationId: Id.nullable(),
+	/** Whether the invitation email left: false when no mail service is configured. */
+	emailSent: z.boolean(),
+});
+
 export const AdminMemberFilter = PageInput.extend({
 	status: z.enum(["active", "suspended"]).optional(),
 	/** Matches the name or the email, case-insensitively. */
@@ -128,6 +261,10 @@ export const AdminTag = z.object({
 	questionCount: z.number().int().min(0),
 	/** Slug of the Hackathon that owns the Tag, which then cannot be renamed or deleted. */
 	ownerHackathon: z.string().nullable(),
+	/** Reserved by an Admin: it can be neither renamed nor deleted. */
+	reserved: z.boolean(),
+	/** Relied on by the product itself: always reserved, the reservation cannot be lifted. */
+	system: z.boolean(),
 });
 
 /** Name of a Tag: normalized (trimmed, lowercase) like the Tags of a Question. */
@@ -182,12 +319,18 @@ export const SocialPublication = z.object({
 	platform: SocialPlatform,
 	type: z.enum(["question", "hackathon"]),
 	id: z.string(),
-	/** `processing` and `unknown` mean the platform may already hold the post: never re-sent blindly. */
-	state: z.enum(["published", "processing", "failed", "unknown"]),
+	/** `pending`: handed to the outbox. `processing` and `unknown` mean the platform may already hold the post: never re-sent blindly. */
+	state: z.enum(["pending", "published", "processing", "failed", "unknown"]),
 	postUrl: z.string().nullable(),
 	message: z.string().nullable(),
 	/** A failed post nothing was sent for: publishing it again is safe. */
 	retryable: z.boolean(),
+});
+
+/** A post in the back-office's follow-up. */
+export const SocialPost = SocialPublication.extend({
+	text: z.string(),
+	updatedAt: Timestamp,
 });
 
 export const SocialOAuthPlatform = z.enum(["linkedin", "x"]);
@@ -229,6 +372,8 @@ const tagErrors = {
 };
 
 export const adminContract = {
+	/** The legal documents editor (#341): back-office only, never REST or MCP. */
+	legal: legalAdminContract,
 	tags: {
 		list: base
 			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
@@ -236,7 +381,18 @@ export const adminContract = {
 			.output(z.object({ items: z.array(AdminTag) })),
 		create: base
 			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, CONFLICT: {} })
-			.input(z.object({ name: TagName }))
+			.input(z.object({ name: TagName, reserved: z.boolean().default(false) }))
+			.output(AdminTag),
+		/** Reserves a Tag (kept as is) or lifts the reservation; a system Tag stays reserved. */
+		setReserved: base
+			.errors(tagErrors)
+			.input(
+				z.object({
+					id: Id,
+					reserved: z.boolean(),
+					expectedVersion: ExpectedVersion,
+				}),
+			)
 			.output(AdminTag),
 		rename: base
 			.errors(tagErrors)
@@ -274,6 +430,10 @@ export const adminContract = {
 			.errors(socialErrors)
 			.input(SocialPublishInput)
 			.output(SocialPublication),
+		posts: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
+			.input(z.object({}))
+			.output(z.object({ items: z.array(SocialPost) })),
 	},
 	kpi: base
 		.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
@@ -304,6 +464,63 @@ export const adminContract = {
 			.input(z.object({ id: z.string() }))
 			.output(AdminMember),
 	},
+	/** Staff accounts (#285): roles and sessions, audited. Back-office only, never REST or MCP. */
+	staff: {
+		setRole: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {}, CONFLICT: {} })
+			.input(
+				z.object({
+					id: z.string(),
+					role: z.enum(ROLES),
+					reason: SuspensionReason,
+				}),
+			)
+			.output(AdminMember),
+		revokeSessions: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {} })
+			.input(z.object({ id: z.string() }))
+			.output(AdminMember),
+		/** The staff accounts and the open invitations (#286). */
+		list: base.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} }).output(
+			z.object({
+				members: z.array(AdminMember),
+				invitations: z.array(StaffInvitation),
+			}),
+		),
+		/**
+		 * Offers a staff role to up to 20 emails at once (#286). An email that already belongs to a
+		 * Member promotes them at once; any other gets an open offer for seven days, applied at the
+		 * first verified sign-in. One result per email: a refusal for one does not stop the others.
+		 */
+		invite: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
+			.input(
+				z.object({
+					emails: z
+						.array(z.string().trim().toLowerCase().pipe(z.email()))
+						.min(1)
+						.max(STAFF_INVITE_MAX_EMAILS),
+					role: z.enum(INVITABLE_ROLES),
+				}),
+			)
+			.output(z.object({ results: z.array(StaffInviteResult) })),
+		revokeInvitation: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {} })
+			.input(z.object({ id: Id }))
+			.output(z.object({ id: Id })),
+		/** Opens the offer for seven more days, from now, and sends the email again. */
+		resendInvitation: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {} })
+			.input(z.object({ id: Id }))
+			.output(
+				z.object({ invitation: StaffInvitation, emailSent: z.boolean() }),
+			),
+	},
+	jobs: jobsAdminContract,
+	organizations: organizationsAdminContract,
+	teams: teamsAdminContract,
+	webVitals: vitalsAdminContract,
+	watch: watchAdminContract,
 	auditLog: {
 		list: base
 			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
@@ -326,8 +543,107 @@ export const adminContract = {
 			)
 			.input(AuditLogFilter)
 			.output(Page(AuditEvent)),
+		/**
+		 * CSV of the filtered journal (#287), newest first. Admin and Super admin only (`audit:export`):
+		 * a Moderator reads the journal but gets FORBIDDEN here. Not exposed over OpenAPI or MCP: the
+		 * back-office downloads it.
+		 */
+		export: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
+			.input(AuditLogExportFilter)
+			.output(
+				z.object({
+					csv: z.string(),
+					rows: z.number().int(),
+					truncated: z.boolean(),
+				}),
+			),
+	},
+	reputationFlags: {
+		list: base
+			.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
+			.meta(
+				openapi({
+					method: "GET",
+					path: "/admin/reputation-flags",
+					tags: ["admin"],
+					summary: "List cancelled Reputation events",
+					description:
+						"Reputation events the anti-farming rules cancelled, newest first: by default the repeated votes of one voter on one author (repeat_voter). They stay in the journal, voided, and count for nothing. Requires a staff role.",
+				}),
+			)
+			.input(ReputationFlagFilter)
+			.output(Page(ReputationFlag)),
 	},
 	hackathons: {
+		list: base
+			.errors(staffErrors)
+			.meta(
+				openapi({
+					method: "GET",
+					path: "/admin/hackathons",
+					tags: ["admin"],
+					summary: "List every hackathon",
+					description:
+						"Every hackathon whatever its status, drafts included, with its number of submissions. Requires a staff role.",
+				}),
+			)
+			.input(z.object({}))
+			.output(z.object({ items: z.array(AdminHackathon) })),
+		create: base
+			.errors(staffErrors)
+			.meta(
+				openapi({
+					method: "POST",
+					path: "/admin/hackathons",
+					tags: ["admin"],
+					summary: "Create a hackathon",
+					description:
+						"Creates a draft listed by a validated Organization. A slug already taken or an Organization that is not validated answers 400. Requires a staff role. Audited.",
+				}),
+			)
+			.input(HackathonCreate)
+			.output(Hackathon),
+		advance: base
+			.errors(staffErrors)
+			.meta(
+				openapi({
+					method: "POST",
+					path: "/admin/hackathons/{slug}/advance",
+					tags: ["admin"],
+					summary: "Move a hackathon to its next status",
+					description:
+						"draft to published, published to ended, ended to archived; never back. Publishing needs a milestone and criteria totalling 100. expectedVersion must match (409 CONFLICT otherwise). Requires a staff role. Audited.",
+				}),
+			)
+			.input(z.object({ slug: z.string(), expectedVersion: ExpectedVersion }))
+			.output(Hackathon),
+		/** Hackathons with reports waiting for a decision, oldest report first (#326). */
+		reports: base
+			.errors(staffErrors)
+			.input(z.object({}))
+			.output(z.object({ items: z.array(ReportedHackathon) })),
+		/** The reports are not founded: they are closed and the Hackathon stays published (#326). Audited. */
+		dismissReports: base
+			.errors(staffErrors)
+			.input(z.object({ slug: z.string() }))
+			.output(z.object({ success: z.boolean() })),
+		/** Lifts the lock an unpublication put on a draft: its Organization may publish it again (#326). */
+		allowRepublication: base
+			.errors(staffErrors)
+			.input(z.object({ slug: z.string(), expectedVersion: ExpectedVersion }))
+			.output(Hackathon),
+		/** A published or ended Hackathon goes back to a draft, with a reason in the audit log (#326). */
+		unpublish: base
+			.errors(staffErrors)
+			.input(
+				z.object({
+					slug: z.string(),
+					expectedVersion: ExpectedVersion,
+					reason: z.string().trim().min(3).max(300),
+				}),
+			)
+			.output(Hackathon),
 		update: base
 			.errors(staffErrors)
 			.meta(
@@ -342,6 +658,22 @@ export const adminContract = {
 			)
 			.input(HackathonUpdate)
 			.output(Hackathon),
+	},
+	agents: {
+		reactivate: base
+			.errors(staffErrors)
+			.meta(
+				openapi({
+					method: "POST",
+					path: "/admin/agents/{id}/reactivate",
+					tags: ["admin"],
+					summary: "Bring back a paused agent",
+					description:
+						"Enables the Agent's key again and ends its pause, however many times it was paused (the Owner can lift only the first pause). Requires a staff role. Audited.",
+				}),
+			)
+			.input(z.object({ id: z.string().min(1) }))
+			.output(z.object({ success: z.boolean() })),
 	},
 	questions: {
 		remove: base

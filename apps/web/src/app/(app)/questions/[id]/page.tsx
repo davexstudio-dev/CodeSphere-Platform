@@ -19,6 +19,7 @@ export async function generateMetadata({
 			title: question.title,
 			description: question.body,
 			url: await publicPageUrl(`/questions/${encodeURIComponent(id)}`),
+			imageUrl: await publicPageUrl(`/og/questions/${encodeURIComponent(id)}`),
 		});
 	} catch {
 		return {};

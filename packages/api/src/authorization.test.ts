@@ -3,7 +3,7 @@
 import { describe, expect, test } from "bun:test";
 import type { Session } from "@codesphere/auth";
 
-import { requireAdmin } from "./authorization";
+import { requireAdmin, requirePermission } from "./authorization";
 
 function sessionWith(role?: string, kind = "human"): Session {
 	return {
@@ -65,6 +65,36 @@ describe("requireAdmin", () => {
 
 	test("rejects an Agent even with the admin role forced in the database (#122)", () => {
 		expect(requireAdmin(sessionWith("admin", "agent"))).toEqual({
+			ok: false,
+			code: "FORBIDDEN",
+		});
+	});
+});
+
+describe("requirePermission (#285)", () => {
+	test("admits a role holding the permission", () => {
+		expect(
+			requirePermission(sessionWith("moderator"), { tag: ["create"] }),
+		).toEqual({ ok: true, role: "moderator" });
+	});
+
+	test("refuses a staff role lacking it", () => {
+		expect(
+			requirePermission(sessionWith("moderator"), { kpi: ["read"] }),
+		).toEqual({ ok: false, code: "FORBIDDEN" });
+	});
+
+	test("still requires a session", () => {
+		expect(requirePermission(null, { tag: ["list"] })).toEqual({
+			ok: false,
+			code: "UNAUTHORIZED",
+		});
+	});
+
+	test("refuses a deactivated staff member", () => {
+		const session = sessionWith("admin");
+		(session.user as { suspendedAt?: Date }).suspendedAt = new Date();
+		expect(requirePermission(session, { tag: ["list"] })).toEqual({
 			ok: false,
 			code: "FORBIDDEN",
 		});

@@ -1,24 +1,43 @@
-import type { Hackathon, HackathonUpdate } from "@codesphere/contract";
+import type {
+	Hackathon,
+	HackathonCreate,
+	HackathonUpdate,
+} from "@codesphere/contract";
 import type { Database } from "@codesphere/db";
-import { hackathon } from "@codesphere/db/schema/hackathons";
-import { and, eq, type SQL, sql } from "drizzle-orm";
+import {
+	hackathon,
+	hackathonCriterion,
+	hackathonMilestone,
+} from "@codesphere/db/schema/hackathons";
+import { organization } from "@codesphere/db/schema/organizations";
+import { hackathonSubmissions } from "@codesphere/db/schema/teams";
+import { and, count, eq, type SQL, sql } from "drizzle-orm";
 import type * as z from "zod";
 
 import { type AuditEvent, withAudit } from "./audit";
-import { loadHackathons } from "./hackathons";
+import { ALL_STATUSES, loadHackathons } from "./hackathons";
+import { outboxInsert } from "./outbox/events";
 
 type Update = z.infer<typeof HackathonUpdate>;
 type Current = z.infer<typeof Hackathon>;
 
+const loadAny = (db: Database, slug: string) =>
+	loadHackathons(
+		db,
+		{ slug, statuses: ALL_STATUSES, includeSuspended: true },
+		1,
+	);
+
 const SCALARS = [
 	"name",
-	"organizer",
 	"summary",
 	"teamMin",
 	"teamMax",
 	"sourceUrl",
 	"sourceNote",
 	"verifiedAt",
+	"opensAt",
+	"teamsEnabled",
 ] as const;
 
 const same = (a: unknown, b: unknown) =>
@@ -43,7 +62,7 @@ export async function updateHackathon(
 	actorId: string,
 	input: Update,
 ): Promise<HackathonUpdateOutcome> {
-	const [current] = await loadHackathons(db, { slug: input.slug }, 1);
+	const [current] = await loadAny(db, input.slug);
 	if (!current) {
 		return { ok: false, code: "NOT_FOUND" };
 	}
@@ -62,20 +81,56 @@ export async function updateHackathon(
 		};
 	}
 
+	// The organizer is an Organization an Admin has validated (#257).
+	let organizationId: string | undefined;
+	if (
+		input.organizationSlug !== undefined &&
+		input.organizationSlug !== current.organizationSlug
+	) {
+		const [org] = await db
+			.select({ id: organization.id })
+			.from(organization)
+			.where(
+				and(
+					eq(organization.slug, input.organizationSlug),
+					eq(organization.status, "validated"),
+				),
+			)
+			.limit(1);
+		if (!org) {
+			return {
+				ok: false,
+				code: "BAD_REQUEST",
+				path: "organizationSlug",
+				message: "The organizer must be a validated Organization.",
+			};
+		}
+		organizationId = org.id;
+	}
+
 	const next = {
 		...input,
 		verifiedAt: input.verifiedAt && iso(input.verifiedAt),
+		// null clears the opening; undefined leaves it.
+		opensAt: input.opensAt ? iso(input.opensAt) : input.opensAt,
 	};
 	const fields: string[] = SCALARS.filter(
 		(field) => next[field] !== undefined && !same(next[field], current[field]),
 	);
+	if (organizationId) fields.push("organization");
 
 	const milestones = input.milestones?.map((m) => ({
 		...m,
 		startsAt: iso(m.startsAt),
 		endsAt: isoOrNull(m.endsAt),
 	}));
-	if (milestones) {
+	const isDraft = current.status === "draft";
+	const replaceMilestones =
+		isDraft && milestones && !same(milestones, current.milestones)
+			? milestones
+			: null;
+	if (replaceMilestones) fields.push("milestones");
+	if (milestones && !isDraft) {
 		const keys = (list: { key: string }[]) =>
 			list
 				.map((m) => m.key)
@@ -93,17 +148,25 @@ export async function updateHackathon(
 			};
 		}
 	}
-	const changedMilestones = (milestones ?? []).flatMap((m, position) => {
-		const index = current.milestones.findIndex((c) => c.key === m.key);
-		const before = current.milestones[index];
-		const changed = (["label", "startsAt", "endsAt"] as const).filter(
-			(field) => !same(m[field], before?.[field]),
-		);
-		const moved = index !== position;
-		return changed.length || moved
-			? [{ ...m, position, fields: moved ? [...changed, "position"] : changed }]
-			: [];
-	});
+	const changedMilestones = (isDraft ? [] : (milestones ?? [])).flatMap(
+		(m, position) => {
+			const index = current.milestones.findIndex((c) => c.key === m.key);
+			const before = current.milestones[index];
+			const changed = (["label", "startsAt", "endsAt"] as const).filter(
+				(field) => !same(m[field], before?.[field]),
+			);
+			const moved = index !== position;
+			return changed.length || moved
+				? [
+						{
+							...m,
+							position,
+							fields: moved ? [...changed, "position"] : changed,
+						},
+					]
+				: [];
+		},
+	);
 
 	const prizesChanged = input.prizes && !same(input.prizes, current.prizes);
 	const criteriaChanged =
@@ -115,14 +178,20 @@ export async function updateHackathon(
 		return { ok: true, hackathon: current };
 	}
 
-	const set: Partial<typeof hackathon.$inferInsert> = {};
+	const set: Partial<typeof hackathon.$inferInsert> = organizationId
+		? { organizationId }
+		: {};
 	for (const field of SCALARS) {
 		if (fields.includes(field)) {
 			Object.assign(set, {
 				[field]:
 					field === "verifiedAt"
 						? new Date(next.verifiedAt ?? "")
-						: next[field],
+						: field === "opensAt"
+							? next.opensAt
+								? new Date(next.opensAt)
+								: null
+							: next[field],
 			});
 		}
 	}
@@ -138,6 +207,29 @@ export async function updateHackathon(
 		.returning({ id: hackathon.id });
 
 	const steps: SQL[] = [];
+	if (replaceMilestones) {
+		// One statement sees one snapshot: a DELETE then INSERT of the same key would break the
+		// unique constraint, so the kept keys are upserted and only the others deleted.
+		const keys = replaceMilestones.map((m) => sql`${m.key}::text`);
+		steps.push(
+			replaceMilestones.length
+				? sql`DELETE FROM hackathon_milestone WHERE hackathon_id IN (SELECT id FROM m) AND key NOT IN (${sql.join(keys, sql`, `)})`
+				: sql`DELETE FROM hackathon_milestone WHERE hackathon_id IN (SELECT id FROM m)`,
+		);
+		if (replaceMilestones.length) {
+			const rows = replaceMilestones.map(
+				(m, position) =>
+					sql`(${m.key}::text, ${m.label}::text, ${m.startsAt}::timestamp, ${m.endsAt}::timestamp, ${position}::int)`,
+			);
+			steps.push(sql`
+				INSERT INTO hackathon_milestone (hackathon_id, key, label, starts_at, ends_at, position)
+				SELECT m.id, v.key, v.label, v.starts_at, v.ends_at, v.position
+				FROM m CROSS JOIN (VALUES ${sql.join(rows, sql`, `)}) AS v(key, label, starts_at, ends_at, position)
+				ON CONFLICT (hackathon_id, key) DO UPDATE
+				SET label = EXCLUDED.label, starts_at = EXCLUDED.starts_at, ends_at = EXCLUDED.ends_at, position = EXCLUDED.position
+			`);
+		}
+	}
 	if (changedMilestones.length) {
 		const rows = changedMilestones.map(
 			(m) =>
@@ -207,15 +299,358 @@ export async function updateHackathon(
 	const written = await withAudit(db, events, mutation, steps);
 	if (!written.length) {
 		// Edited between our read and our write: the version guard matched nothing.
-		const [latest] = await loadHackathons(db, { slug: input.slug }, 1);
+		const [latest] = await loadAny(db, input.slug);
 		return {
 			ok: false,
 			code: "CONFLICT",
 			version: latest?.version ?? current.version,
 		};
 	}
-	const [updated] = await loadHackathons(db, { slug: input.slug }, 1);
+	const [updated] = await loadAny(db, input.slug);
 	return updated
 		? { ok: true, hackathon: updated }
+		: { ok: false, code: "NOT_FOUND" };
+}
+
+/**
+ * An Admin takes a published or ended Hackathon back to a draft, with the reason in the audit log
+ * (#326). The Organization can fix it and publish it again, so a repeat offender is a case for
+ * suspending the Organization. Guarded by the version, audited.
+ */
+export async function unpublishHackathon(
+	db: Database,
+	actorId: string,
+	input: { slug: string; expectedVersion: number; reason: string },
+): Promise<HackathonWriteOutcome> {
+	const [current] = await loadAny(db, input.slug);
+	if (!current) {
+		return { ok: false, code: "NOT_FOUND" };
+	}
+	if (current.version !== input.expectedVersion) {
+		return { ok: false, code: "CONFLICT", version: current.version };
+	}
+	if (current.status !== "published" && current.status !== "ended") {
+		return {
+			ok: false,
+			code: "BAD_REQUEST",
+			path: "status",
+			message: "Only a published or ended Hackathon can be unpublished.",
+		};
+	}
+	const written = await withAudit(
+		db,
+		{
+			actorId,
+			action: "hackathon.unpublish",
+			targetType: "hackathon",
+			targetIdColumn: "id",
+			details: { fields: ["status"], reason: input.reason },
+		},
+		db
+			.update(hackathon)
+			.set({
+				status: "draft",
+				unpublishedReason: input.reason,
+				version: sql`${hackathon.version} + 1`,
+			})
+			.where(
+				and(
+					eq(hackathon.slug, input.slug),
+					eq(hackathon.version, input.expectedVersion),
+					sql`${hackathon.status} IN ('published', 'ended')`,
+				),
+			)
+			.returning({ id: hackathon.id }),
+		// The reports waiting on it are founded (#326).
+		[
+			sql`UPDATE hackathon_report SET outcome = 'upheld'
+				WHERE hackathon_id IN (SELECT id FROM m) AND outcome IS NULL`,
+			// The owner and the editors are mailed from the outbox (#337).
+			outboxInsert({
+				type: "hackathon.unpublished",
+				aggregateType: "hackathon",
+				aggregateIdColumn: "id",
+			}),
+		],
+	);
+	const [latest] = await loadAny(db, input.slug);
+	if (!written.length) {
+		return {
+			ok: false,
+			code: "CONFLICT",
+			version: latest?.version ?? current.version,
+		};
+	}
+	return latest
+		? { ok: true, hackathon: latest }
+		: { ok: false, code: "NOT_FOUND" };
+}
+
+/**
+ * An Admin lets an unpublished Hackathon be published again (#326), once its content is fixed. The
+ * Hackathon stays a draft: its Organization publishes it. Guarded by the version, audited.
+ */
+export async function allowRepublication(
+	db: Database,
+	actorId: string,
+	input: { slug: string; expectedVersion: number },
+): Promise<HackathonWriteOutcome> {
+	const [current] = await loadAny(db, input.slug);
+	if (!current) {
+		return { ok: false, code: "NOT_FOUND" };
+	}
+	if (current.version !== input.expectedVersion) {
+		return { ok: false, code: "CONFLICT", version: current.version };
+	}
+	const written = await withAudit(
+		db,
+		{
+			actorId,
+			action: "hackathon.republish_allow",
+			targetType: "hackathon",
+			targetIdColumn: "id",
+			details: { fields: ["status"] },
+		},
+		db
+			.update(hackathon)
+			.set({ unpublishedReason: null, version: sql`${hackathon.version} + 1` })
+			.where(
+				and(
+					eq(hackathon.slug, input.slug),
+					eq(hackathon.version, input.expectedVersion),
+					eq(hackathon.status, "draft"),
+					sql`${hackathon.unpublishedReason} IS NOT NULL`,
+				),
+			)
+			.returning({ id: hackathon.id }),
+	);
+	const [latest] = await loadAny(db, input.slug);
+	if (!written.length) {
+		return {
+			ok: false,
+			code: "BAD_REQUEST",
+			path: "status",
+			message: "This Hackathon is not waiting for an Admin's go-ahead.",
+		};
+	}
+	return latest
+		? { ok: true, hackathon: latest }
+		: { ok: false, code: "NOT_FOUND" };
+}
+
+/** The reasons of the pending unpublications, by slug (#326): what keeps a draft from being published. */
+export async function unpublishedReasons(
+	db: Database,
+	organizationId?: string,
+) {
+	const rows = await db
+		.select({ slug: hackathon.slug, reason: hackathon.unpublishedReason })
+		.from(hackathon)
+		.where(
+			and(
+				sql`${hackathon.unpublishedReason} IS NOT NULL`,
+				organizationId
+					? eq(hackathon.organizationId, organizationId)
+					: undefined,
+			),
+		);
+	return new Map(rows.map((r) => [r.slug, r.reason]));
+}
+
+/** Every Hackathon for the back-office, drafts included, with its number of Submissions (#325). */
+export async function listAdminHackathons(
+	db: Database,
+	organizationId?: string,
+) {
+	const [items, counts] = await Promise.all([
+		loadHackathons(
+			db,
+			{ statuses: ALL_STATUSES, organizationId, includeSuspended: true },
+			100,
+		),
+		db
+			.select({ slug: hackathon.slug, total: count() })
+			.from(hackathonSubmissions)
+			.innerJoin(hackathon, eq(hackathon.id, hackathonSubmissions.hackathonId))
+			.groupBy(hackathon.slug),
+	]);
+	const bySlug = new Map(counts.map((c) => [c.slug, c.total]));
+	const locked = await unpublishedReasons(db, organizationId);
+	return items.map((item) => ({
+		...item,
+		unpublishedReason: locked.get(item.slug) ?? null,
+		submissionCount: bySlug.get(item.slug) ?? 0,
+	}));
+}
+
+/** What a new Hackathon starts from: the usual weights, to adjust before publishing. */
+const DEFAULT_CRITERIA = [
+	{ label: "Pertinence", weight: 25, scoredBy: "jury" },
+	{ label: "Qualité technique", weight: 30, scoredBy: "jury" },
+	{ label: "Expérience utilisateur", weight: 20, scoredBy: "jury" },
+	{ label: "Innovation", weight: 15, scoredBy: "jury" },
+	{ label: "Vote du public", weight: 10, scoredBy: "public" },
+];
+
+export type HackathonWriteOutcome =
+	| { ok: true; hackathon: Current }
+	| { ok: false; code: "NOT_FOUND" }
+	| { ok: false; code: "CONFLICT"; version: number }
+	| { ok: false; code: "BAD_REQUEST"; path: string; message: string };
+
+/** Creates a draft (#325) and its starting children in one audited statement. */
+export async function createHackathon(
+	db: Database,
+	actorId: string,
+	input: z.infer<typeof HackathonCreate>,
+): Promise<HackathonWriteOutcome> {
+	const refuse = (path: string, message: string) => ({
+		ok: false as const,
+		code: "BAD_REQUEST" as const,
+		path,
+		message,
+	});
+	if (input.teamMin > input.teamMax) {
+		return refuse("teamMin", "teamMin cannot exceed teamMax.");
+	}
+	const [org] = await db
+		.select({ id: organization.id })
+		.from(organization)
+		.where(
+			and(
+				eq(organization.slug, input.organizationSlug),
+				eq(organization.status, "validated"),
+			),
+		)
+		.limit(1);
+	if (!org) {
+		return refuse(
+			"organizationSlug",
+			"The organizer must be a validated Organization.",
+		);
+	}
+	const closes = iso(input.submissionClose);
+	const criteria = DEFAULT_CRITERIA.map(
+		(c, position) =>
+			sql`(${c.label}::text, ${c.weight}::int, ${c.scoredBy}::text, ${position}::int)`,
+	);
+	const written = await withAudit(
+		db,
+		{
+			actorId,
+			action: "hackathon.create",
+			targetType: "hackathon",
+			targetIdColumn: "id",
+		},
+		db
+			.insert(hackathon)
+			.values({
+				slug: input.slug,
+				name: input.name,
+				organizationId: org.id,
+				summary: input.summary,
+				status: "draft",
+				teamMin: input.teamMin,
+				teamMax: input.teamMax,
+				sourceUrl: input.sourceUrl,
+				teamsEnabled: input.teamsEnabled,
+				verifiedAt: new Date(),
+			})
+			.onConflictDoNothing({ target: hackathon.slug })
+			.returning({ id: hackathon.id }),
+		[
+			sql`
+				INSERT INTO ${hackathonMilestone} (hackathon_id, key, label, starts_at, position)
+				SELECT m.id, 'submission_close', 'Clôture des soumissions', ${closes}::timestamp, 0 FROM m
+			`,
+			sql`
+				INSERT INTO ${hackathonCriterion} (hackathon_id, label, weight, scored_by, position)
+				SELECT m.id, v.label, v.weight, v.scored_by, v.position
+				FROM m CROSS JOIN (VALUES ${sql.join(criteria, sql`, `)}) AS v(label, weight, scored_by, position)
+			`,
+		],
+	);
+	if (!written.length) {
+		return refuse("slug", "This slug is already taken.");
+	}
+	const [created] = await loadAny(db, input.slug);
+	return created
+		? { ok: true, hackathon: created }
+		: { ok: false, code: "NOT_FOUND" };
+}
+
+const NEXT_STATUS = {
+	draft: "published",
+	published: "ended",
+	ended: "archived",
+} as const;
+
+/** Moves a Hackathon one status forward, never back (#325). Guarded by its version, audited. */
+export async function advanceHackathon(
+	db: Database,
+	actorId: string,
+	input: { slug: string; expectedVersion: number },
+): Promise<HackathonWriteOutcome> {
+	const [current] = await loadAny(db, input.slug);
+	if (!current) {
+		return { ok: false, code: "NOT_FOUND" };
+	}
+	if (current.version !== input.expectedVersion) {
+		return { ok: false, code: "CONFLICT", version: current.version };
+	}
+	if (current.status === "archived") {
+		return {
+			ok: false,
+			code: "BAD_REQUEST",
+			path: "status",
+			message: "An archived Hackathon has no next status.",
+		};
+	}
+	if (current.status === "draft") {
+		const total = current.criteria.reduce((sum, c) => sum + c.weight, 0);
+		if (current.milestones.length === 0 || total !== 100) {
+			return {
+				ok: false,
+				code: "BAD_REQUEST",
+				path: current.milestones.length === 0 ? "milestones" : "criteria",
+				message: "Publishing needs a Milestone and criteria that total 100.",
+			};
+		}
+	}
+	const written = await withAudit(
+		db,
+		{
+			actorId,
+			action: "hackathon.status",
+			targetType: "hackathon",
+			targetIdColumn: "id",
+			details: { fields: ["status"] },
+		},
+		db
+			.update(hackathon)
+			.set({
+				status: NEXT_STATUS[current.status],
+				// Publishing again ends any pending unpublication (#326).
+				unpublishedReason: null,
+				version: sql`${hackathon.version} + 1`,
+			})
+			.where(
+				and(
+					eq(hackathon.slug, input.slug),
+					eq(hackathon.version, input.expectedVersion),
+				),
+			)
+			.returning({ id: hackathon.id }),
+	);
+	const [latest] = await loadAny(db, input.slug);
+	if (!written.length) {
+		return {
+			ok: false,
+			code: "CONFLICT",
+			version: latest?.version ?? current.version,
+		};
+	}
+	return latest
+		? { ok: true, hackathon: latest }
 		: { ok: false, code: "NOT_FOUND" };
 }

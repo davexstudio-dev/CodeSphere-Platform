@@ -35,12 +35,14 @@ function Stepper({ steps, current, className, ...props }: StepperProps) {
 						>
 							{done ? <CheckIcon className="size-3.5" /> : index + 1}
 						</span>
+						{/* On a phone only the current step is named: the others would be cut to « Dé… ».
+							They stay readable by screen readers. */}
 						<span
 							className={cn(
 								"truncate text-xs",
 								active
 									? "font-medium text-foreground"
-									: "text-muted-foreground",
+									: "sr-only text-muted-foreground sm:not-sr-only",
 							)}
 						>
 							{step}

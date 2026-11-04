@@ -85,7 +85,8 @@ jobs:
           NEXT_PUBLIC_SERVER_URL: ${{ env.ORIGIN }}
           # Inlined at build time; must match EMAIL_OTP_SIGNIN on the Worker (set at deploy below).
           NEXT_PUBLIC_EMAIL_OTP_SIGNIN: "true"
-        run: bunx opennextjs-cloudflare build
+        # cf:build compiles the service worker (public/sw.js, #249) before OpenNext bundles the assets.
+        run: bun run cf:build
       - uses: actions/upload-artifact@v4
         with:
           name: staging-worker
@@ -233,6 +234,11 @@ jobs:
           LINKEDIN_AUTHOR: ${{ vars.LINKEDIN_AUTHOR }}
           BLUESKY_IDENTIFIER: ${{ vars.BLUESKY_IDENTIFIER }}
           BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          # Staff roles (#120): comma-separated verified emails, re-read at every sign-in. Without
+          # them every account is demoted to Member at its next sign-in.
+          SUPER_ADMIN_EMAILS: ${{ secrets.SUPER_ADMIN_EMAILS }}
+          ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
+          MODERATOR_EMAILS: ${{ secrets.MODERATOR_EMAILS }}
         run: |
           # Secrets go through a file, never the command line; removed right after.
           umask 077
@@ -267,4 +273,25 @@ jobs:
             sleep 10
           done
           echo "::error::$ORIGIN/api/v1/health did not answer 200 within 5 minutes (last status: ${status:-none})"
+          exit 1
+
+      # The health check above only reaches the API. A page of the web app can fail on its own: a
+      # Next.js bump the OpenNext adapter did not support made every page answer 500 (Worker error
+      # 1101) while /api/v1/health stayed green. A public page must answer 200 too.
+      - name: Check a page of the web app
+        run: |
+          for attempt in $(seq 1 12); do
+            headers=$(curl -sS -m 15 -o /dev/null -D - "$ORIGIN/roadmap" || true)
+            status=$(printf '%s' "$headers" | awk 'toupper($1) ~ /^HTTP/ {code=$2} END {print code}')
+            if [ "$status" = "200" ]; then
+              echo "the web app answers after $attempt attempt(s)"
+              exit 0
+            fi
+            if [ "$status" = "403" ] && printf '%s' "$headers" | grep -qi '^cf-mitigated: *challenge'; then
+              echo "::warning::web app not checked: Cloudflare challenged the runner (see docs/staging.md)"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::$ORIGIN/roadmap did not answer 200 within 2 minutes (last status: ${status:-none})"
           exit 1

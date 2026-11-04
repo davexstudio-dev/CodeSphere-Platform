@@ -1,6 +1,6 @@
 import { isStaffRole, outranks, rolesBelow } from "@codesphere/contract";
 import type { Database } from "@codesphere/db";
-import { user } from "@codesphere/db/schema/auth";
+import { session, user } from "@codesphere/db/schema/auth";
 import {
 	and,
 	desc,
@@ -117,7 +117,7 @@ export async function setSuspension(
 				.where(
 					and(eq(user.id, targetId), isNull(user.suspendedAt), withinReach),
 				)
-				.returning({ id: user.id })
+				.returning({ id: user.id, role: user.role })
 		: db
 				.update(user)
 				.set({ suspendedAt: null, suspensionReason: null })
@@ -135,6 +135,13 @@ export async function setSuspension(
 			details: change.suspend ? { reason: change.reason } : undefined,
 		},
 		mutation,
+		// A deactivated staff member loses the back-office at once (#285): their sessions go with the
+		// suspension. A plain Member keeps reading (#123), so their sessions stay.
+		change.suspend
+			? [
+					sql`DELETE FROM ${session} WHERE ${session.userId} IN (SELECT id FROM m WHERE role <> 'member')`,
+				]
+			: [],
 	);
 	const [row] = await db.select().from(user).where(eq(user.id, targetId));
 	if (!row) {

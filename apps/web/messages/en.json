@@ -1,6 +1,10 @@
 {
 	"footer": {
-		"build": "CodeSphere Platform v{version} · {sha}"
+		"build": "CodeSphere Platform v{version} · {sha}",
+		"nav": "Footer links",
+		"watch": "Watch",
+		"organizations": "Organizations",
+		"jobs": "Jobs"
 	},
 	"language": {
 		"label": "Language",
@@ -10,6 +14,8 @@
 	"errors": {
 		"UNAUTHORIZED": "You must be signed in to do this.",
 		"FORBIDDEN": "You are not allowed to do this.",
+		"PRIVILEGE_REQUIRED": "You need more Reputation to do this.",
+		"AGENT_CREATION_BLOCKED": "Too many of your agents were paused recently: you cannot create another one for now.",
 		"NOT_FOUND": "Item not found.",
 		"CONFLICT": "This item already exists or was changed in the meantime.",
 		"BAD_REQUEST": "Some information is invalid.",
@@ -29,14 +35,20 @@
 			"description": "What other members see of you. Your email is never shown.",
 			"name": "Name",
 			"country": "Country",
-			"countryHint": "Two-letter ISO code (BF, SN, CI…) or OTHER for the diaspora.",
+			"countryHint": "Your country is shown, with its flag, next to your questions and answers. “Other country” for the diaspora.",
 			"city": "City",
-			"cityHint": "Private by default: see Privacy."
+			"cityHint": "Private by default: see Privacy.",
+			"reputation": "Reputation",
+			"reputationHint": "Earned when other members vote up your questions and answers, or accept your answer. Shown next to your name on your questions and answers."
 		},
 		"preferences": {
 			"title": "Preferences",
 			"hideAgentContent": "Hide agent content",
-			"hideAgentContentHint": "Questions and answers written by AI agents are no longer shown."
+			"hideAgentContentHint": "Questions and answers written by AI agents are no longer shown.",
+			"emailLanguage": "Language of emails",
+			"emailLanguageHint": "The language of the messages we send you. Until you choose, it follows your browser at sign-in.",
+			"emailLanguageFr": "Français",
+			"emailLanguageEn": "English"
 		},
 		"privacy": {
 			"title": "Privacy",
@@ -82,11 +94,13 @@
 			"preset": "Rights",
 			"presets": {
 				"read": "Read only",
-				"contribute": "Contribute"
+				"contribute": "Contribute",
+				"curate": "Curate"
 			},
 			"presetHints": {
 				"read": "Reads questions and answers, writes nothing.",
-				"contribute": "May also ask questions and answer."
+				"contribute": "May also ask questions and answer.",
+				"curate": "Reads and proposes links to the watch feed, nothing else."
 			},
 			"full": "You have 3 agents: delete one to create another.",
 			"keyOnce": "The cs_live_ key is shown only once.",
@@ -94,17 +108,148 @@
 			"usage": "Usage: Authorization: Bearer cs_live_… (or x-api-key) header on /api/v1 and /mcp. 120 requests per minute per key.",
 			"enabled": "Active",
 			"disabled": "Disabled",
+			"paused": "Paused",
+			"pausedHint": "Too many of its answers were rejected. You can bring it back once with a new key.",
+			"adminOnly": "Paused again: only an administrator can bring it back.",
+			"publicPage": "Public page",
 			"createdAt": "Created on {date}",
 			"rotate": "Rotate the key",
 			"enable": "Re-enable with a new key",
 			"disable": "Disable",
-			"delete": "Delete the agent"
+			"delete": "Delete the agent",
+			"history": "History",
+			"hideHistory": "Hide history"
 		},
 		"tabs": {
 			"profile": "Profile",
-			"tags": "Tags",
+			"reputation": "Reputation and badges",
+			"activity": "Activity",
+			"tags": "Interests",
 			"agents": "Agents",
-			"data": "Your data"
+			"data": "Privacy and data"
+		},
+		"feed": {
+			"title": "« For you » feed",
+			"description": "Questions and watch links ranked for you.",
+			"personalization": "Personalise my feed",
+			"personalizationHint": "Off, the feed shows the most popular on the Tags you follow only, with no bonus and no learning.",
+			"language": "Favoured language",
+			"languageHint": "Content in this language rises a little.",
+			"languageAuto": "Auto",
+			"muted": "Hidden with « Less like this »",
+			"mutedNone": "Nothing is hidden.",
+			"kind": {
+				"tag": "Tag",
+				"source": "Source"
+			},
+			"unmute": "Stop hiding {name}",
+			"error": "Something went wrong. Try again."
+		},
+		"talent": {
+			"title": "Talent card",
+			"description": "An optional profile for recruiters (Reputation, strongest Tags, country, link to your code). Off by default.",
+			"enabled": "Turn on my Talent card",
+			"enabledHint": "Off, nobody sees it, except an Organization you share it with when applying.",
+			"openToContact": "Open to contact",
+			"openToContactHint": "Validated Organizations can find and contact you. Without it, an Organization does not contact you.",
+			"headline": "Headline (140 characters)",
+			"codeUrl": "Link to your code (GitHub, portfolio)",
+			"contactEmail": "Contact email for recruiters (optional)",
+			"save": "Save",
+			"preview": "What a recruiter sees",
+			"previewLine": "Reputation {reputation} · Strongest Tags: {tags} · Country: {country}",
+			"error": "Saving failed."
+		},
+		"unsaved": "Unsaved changes.",
+		"applied": "Preference saved.",
+		"header": {
+			"reputation": "{value} reputation"
+		},
+		"reputation": {
+			"rankings": "See the rankings",
+			"strongest": "Your strongest Tags",
+			"strongestNone": "No Tag where you stand out yet: answer on your Tags to see some here.",
+			"badges": "Badges",
+			"badgesNone": "No badge yet."
+		},
+		"activity": {
+			"title": "My activity",
+			"questions": "My questions",
+			"answers": "My answers",
+			"noQuestions": "You have not asked a question yet.",
+			"noAnswers": "You have not answered yet.",
+			"loading": "Loading…",
+			"error": "Activity unavailable for now.",
+			"answersCount": "{count, plural, =0 {no answers} one {# answer} other {# answers}}",
+			"score": "{score, plural, one {# vote} other {# votes}}",
+			"accepted": "Accepted",
+			"status": {
+				"open": "Open",
+				"answered": "Solved",
+				"closed": "Closed"
+			}
+		},
+		"sections": {
+			"back": "Settings",
+			"profile": "Name, country, city and talent card",
+			"reputation": "Points, strongest Tags and badges",
+			"activity": "My questions and answers",
+			"tags": "Followed Tags and feed tuning",
+			"agents": "Agents and API keys",
+			"data": "Privacy, export and deletion"
+		}
+	},
+	"agentProfile": {
+		"agentOf": "Agent of {owner}",
+		"status": {
+			"active": "Active",
+			"paused": "Paused",
+			"disabled": "Disabled",
+			"retired": "Retired"
+		},
+		"rates": "How its answers fared",
+		"answers": "Answers",
+		"validated": "Validated",
+		"rejected": "Rejected",
+		"recent": "Recent answers",
+		"none": "No answer yet.",
+		"outcome": {
+			"validated": "Validated",
+			"rejected": "Rejected",
+			"pending": "Pending"
+		},
+		"notFound": "Agent not found",
+		"notFoundHint": "This page only exists for agents.",
+		"errorTitle": "Agent unavailable",
+		"error": "Something went wrong. Try again in a moment."
+	},
+	"rankings": {
+		"title": "Reputation rankings",
+		"byCountry": "By country",
+		"noCountry": "No country has enough members to be shown yet.",
+		"members": "{count, plural, one {# member} other {# members}}",
+		"byTag": "By Tag",
+		"tagLabel": "Tag",
+		"show": "Show",
+		"ranking": "Ranking",
+		"empty": "Nobody to show.",
+		"error": "The ranking is unavailable. Try again in a moment.",
+		"reputation": "{count, number} reputation",
+		"tagPlaceholder": "sql",
+		"retry": "Retry",
+		"more": "Show more"
+	},
+	"dataSaver": {
+		"label": "Data saver",
+		"options": {
+			"auto": "Auto",
+			"on": "On",
+			"off": "Off"
+		},
+		"hint": {
+			"auto": "Data saver follows your browser's setting.",
+			"on": "Data saver is on: no images, no animations, no prefetching, shorter lists.",
+			"off": "Data saver is off."
 		}
 	},
 	"signin": {
@@ -123,7 +268,8 @@
 		"toggleTheme": "Switch theme",
 		"menu": "Menu",
 		"language": "Language",
-		"home": "CodeSphere home"
+		"home": "CodeSphere home",
+		"roadmap": "Roadmap"
 	},
 	"home": {
 		"tabs": {
@@ -169,7 +315,8 @@
 			"closes": "Submissions close on {date}",
 			"timeline": "Hackathon calendar",
 			"see": "See the Hackathon",
-			"daysShort": "d"
+			"daysShort": "d",
+			"all": "All hackathons"
 		},
 		"loadError": "Could not load the Hackathon.",
 		"feed": {
@@ -183,6 +330,18 @@
 			"diaspora": "Diaspora / other",
 			"language": "Language",
 			"country": "Country"
+		},
+		"why": {
+			"because": "Why:",
+			"reason": {
+				"followed_tag": "you follow {tag}",
+				"learned_tag": "you like {tag}",
+				"language": "in your language",
+				"african": "African source or author",
+				"trending": "trending now"
+			},
+			"lessTag": "Less about {tag}",
+			"lessSource": "Less from {source}"
 		}
 	},
 	"admin": {
@@ -234,11 +393,12 @@
 			"reactivate": "Reactivate",
 			"suspend": "Suspend this Member",
 			"reasonLabel": "Reason (required)",
-			"reasonTooShort": "At least 3 characters."
+			"reasonTooShort": "At least 3 characters.",
+			"agentHistory": "Agent history"
 		},
 		"hackathons": {
 			"title": "Hackathon",
-			"description": "The CADEV, its Milestones and judging criteria.",
+			"description": "Hackathons, their Milestones and judging criteria.",
 			"list": "Hackathons",
 			"group": "Hackathon",
 			"loading": "Loading…",
@@ -275,8 +435,75 @@
 			"reload": "Reload",
 			"failure": {
 				"forbidden": "Staff only.",
-				"failed": "Saving failed. Try again."
-			}
+				"failed": "Saving failed. Try again.",
+				"advance": "The status change failed: check the Milestones and the criteria total.",
+				"teamsLocked": "Teams already exist: you cannot turn them off, nor set a maximum below the largest team.",
+				"archivedLocked": "An archived Hackathon can only be edited by an Admin."
+			},
+			"teamsEnabled": "Teams on CodeSphere",
+			"teamsEnabledHint": "On: Members create their team and submit their project here. Off: registration is on the organiser's site, the team tab is hidden and a link to its page is shown.",
+			"yes": "Yes",
+			"no": "No",
+			"statusGroup": {
+				"published": "Published",
+				"draft": "Drafts",
+				"ended": "Ended",
+				"archived": "Archived"
+			},
+			"status": {
+				"draft": "Draft",
+				"published": "Published",
+				"ended": "Ended",
+				"archived": "Archived"
+			},
+			"advance": {
+				"draft": "Publish",
+				"published": "End",
+				"ended": "Archive"
+			},
+			"advanceNote": {
+				"draft": "The Hackathon goes public. It needs a Milestone and criteria totalling 100%. No way back.",
+				"published": "The Hackathon moves to ended. No way back.",
+				"ended": "The Hackathon leaves the public lists and keeps its page. No way back."
+			},
+			"newMilestone": "New step",
+			"addMilestone": "Add a step",
+			"submissions": "Submissions",
+			"submissionsElsewhere": "On the organizer's site",
+			"new": "New Hackathon",
+			"createDescription": "It starts as a draft, hidden from the public, with the usual criteria to adjust.",
+			"slug": "Address (slug)",
+			"slugHint": "Lowercase letters, digits and hyphens: /hackathons/my-hackathon.",
+			"sourceUrl": "Organizer's page",
+			"submissionClose": "Submissions close",
+			"createAction": "Create the draft",
+			"createFailed": "Creation failed: check that the address is free, and the Organization.",
+			"unpublish": "Unpublish",
+			"unpublishDescription": "The Hackathon goes back to a draft and leaves the public views. The Organization can fix it and publish it again.",
+			"unpublishReason": "Reason (kept in the audit log)",
+			"unpublishedBy": "Unpublished: {reason}. Its Organization cannot publish it again before your go-ahead.",
+			"allowRepublication": "Allow republication",
+			"reportedTitle": "{count, plural, one {# Hackathon reported} other {# Hackathons reported}}",
+			"reports": "{count, plural, one {# report waiting} other {# reports waiting}}",
+			"reportReasons": {
+				"misleading": "Misleading information",
+				"scam": "Scam or hidden fees",
+				"unlawful": "Unlawful content",
+				"spam": "Spam",
+				"other": "Other"
+			},
+			"dismissReports": "Dismiss",
+			"reportsHint": "Dismissing keeps the Hackathon published. To act on them, unpublish it: the reports then count as founded.",
+			"organizerLocked": "Only an Admin can change the organizer.",
+			"prizes": "Prizes",
+			"noPrizes": "No Prize.",
+			"addPrize": "Add a Prize",
+			"prizeAmount": "Amount",
+			"prizeConditions": "Conditions",
+			"prizeUp": "Move up",
+			"prizeDown": "Move down",
+			"prizeRemove": "Remove this Prize",
+			"prizeLabelRequired": "Each Prize needs a label."
 		},
 		"tags": {
 			"title": "Tags",
@@ -307,18 +534,97 @@
 			"pick": "Pick a Tag, or create one with “+”.",
 			"blocked": {
 				"owned": "Protected: owned by the Hackathon {slug}",
-				"used": "Used by {count, plural, one {# Question} other {# Questions}}"
+				"used": "Used by {count, plural, one {# Question} other {# Questions}}",
+				"reserved": "Reserved: lift the reservation to change or delete it",
+				"system": "Used by the platform itself: it can be neither changed nor deleted"
 			},
 			"errors": {
 				"conflict": "This name is already taken (same normalized form), or the Tag changed in the meantime.",
 				"forbidden": "Staff only.",
 				"notFound": "This Tag no longer exists.",
 				"generic": "Something went wrong. Try again."
+			},
+			"reserved": "Reserved",
+			"reservation": "Reservation",
+			"reserveNew": "Reserve this Tag",
+			"reservedHint": "A reserved Tag is kept as is: it can be neither renamed nor deleted, even with no Question. Members can still use it.",
+			"systemHint": "Used by the platform itself: always reserved."
+		},
+		"legal": {
+			"title": "Legal documents",
+			"description": "Write, publish and review the legal texts without touching the code. Every publication is logged.",
+			"list": "Documents",
+			"unavailable": "Documents unavailable",
+			"retry": "Retry",
+			"loading": "Loading…",
+			"pick": "Pick a document in the list.",
+			"documents": {
+				"terms": "Terms of use",
+				"privacy": "Privacy policy",
+				"notice": "Legal notice",
+				"contact": "Contact",
+				"organization_terms": "Organization terms"
+			},
+			"languages": {
+				"fr": "Français",
+				"en": "English"
+			},
+			"published": "Version {version} published on {date}",
+			"notPublished": "Nothing is published in this language: the public page shows the text of the repository.",
+			"fromRepository": "First draft: it starts from the text of the repository. Nothing is public until you publish.",
+			"draftBy": "Draft saved by {name} on {date}.",
+			"tabs": {
+				"edit": "Editing",
+				"history": "History"
+			},
+			"editor": {
+				"label": "Text (Markdown)",
+				"hint": "No HTML: Markdown headings, lists, links and emphasis only. Bracketed placeholders still have to be filled in.",
+				"preview": "Preview"
+			},
+			"saveDraft": "Save draft",
+			"saved": "Draft saved.",
+			"publish": "Publish…",
+			"needsSave": "Save the draft to be able to publish it.",
+			"publishDialog": {
+				"title": "Publish: {document} ({language})",
+				"description": "Version {version} of the draft becomes the public text of this document in this language. The other language is not touched. A published version can be neither edited nor deleted.",
+				"confirm": "Publish",
+				"reason": "Reason for the change (3 to 300 characters, shown in the history, never public)",
+				"important": "Important change",
+				"importantMembers": "Every existing Member will have to accept again, on their next page view in the app. Each important publication counts once: for the same change in French and English, tick only one of the two languages.",
+				"importantOrganizations": "Every Organization will have to accept again before its next Hackathon publication."
+			},
+			"publishedToast": "Version {version} published.",
+			"history": {
+				"empty": "No version published in this language.",
+				"version": "Version {version}",
+				"by": "by {name} on {date}",
+				"reason": "Reason: {reason}",
+				"important": "Important",
+				"read": "Read",
+				"close": "Close",
+				"copy": "Copy into the draft",
+				"copied": "Version {version} copied into the draft: save it to keep it."
+			},
+			"errors": {
+				"forbidden": "Your role cannot edit the legal documents.",
+				"conflict": "Someone else changed this draft meanwhile. The text was reloaded: review it, then try again.",
+				"notFound": "There is no draft to publish.",
+				"generic": "Something went wrong. Try again."
 			}
 		},
 		"social": {
 			"title": "Social accounts",
 			"description": "Connect CodeSphere's official X and LinkedIn accounts. Tokens are stored encrypted and renewed before they expire.",
+			"table": {
+				"account": "Account",
+				"state": "State",
+				"details": "Details",
+				"actions": "Actions"
+			},
+			"bySecret": "By secret",
+			"bySecretHint": "Publishes with the deployment's secrets: nothing to connect.",
 			"callbackDescription": "Finishing the connection…",
 			"finishing": "Finishing the connection…",
 			"back": "Back to social accounts",
@@ -327,7 +633,8 @@
 			"notSetUp": "No OAuth application is set up on this deployment (see SOCIAL_CREDENTIALS_SECRET, X_CLIENT_ID, LINKEDIN_CLIENT_ID).",
 			"platforms": {
 				"x": "X",
-				"linkedin": "LinkedIn"
+				"linkedin": "LinkedIn",
+				"bluesky": "Bluesky"
 			},
 			"state": {
 				"not-configured": "Not set up",
@@ -349,9 +656,82 @@
 			"reconnect": "Reconnect",
 			"disconnect": "Disconnect",
 			"connectedNow": "{platform} connected.",
-			"error": "The connection failed. Try again."
+			"error": "The connection failed. Try again.",
+			"publish": {
+				"title": "Publish to an official account",
+				"description": "Share a public Question or Hackathon, with its link.",
+				"type": "Content type",
+				"types": {
+					"question": "Question",
+					"hackathon": "Hackathon"
+				},
+				"platform": "Account",
+				"choosePlatform": "Choose an account",
+				"search": "Search for a Question",
+				"content": "Content",
+				"chooseContent": "Choose content",
+				"text": "Text before the link",
+				"textHint": "{max} characters at most. Empty: the content's title.",
+				"once": "Content goes out once per account, and cannot be taken back from here.",
+				"submit": "Publish",
+				"viewPost": "View the post",
+				"states": {
+					"published": "Published.",
+					"processing": "The platform is still processing it. Check the account before publishing again.",
+					"failed": "The post failed.",
+					"unknown": "Unknown result. Check the account before publishing again.",
+					"pending": "On its way. Follow it in the recent posts."
+				},
+				"errors": {
+					"conflict": "Refused: an Agent's content, a post in progress or an unknown result. Check the account.",
+					"notFound": "This content is no longer public.",
+					"unavailable": "Publishing is not set up for this account.",
+					"rateLimited": "Too many posts. Try again later.",
+					"generic": "The post failed. Check the account before trying again."
+				}
+			},
+			"posts": {
+				"title": "Recent posts",
+				"states": {
+					"pending": "In progress",
+					"published": "Published",
+					"processing": "Processing",
+					"failed": "Failed",
+					"unknown": "Unknown"
+				}
+			}
 		},
 		"kpi": "KPIs",
+		"vitals": {
+			"title": "Web Vitals",
+			"description": "Speed measured in real visitors' browsers, by country. No cookie and no personal data: each report only increments a counter.",
+			"lastDays": "Last {count, plural, one {# day} other {# days}}",
+			"country": "Country",
+			"unknown": "Unknown",
+			"samples": "{count, plural, one {# report} other {# reports}}",
+			"note": "Each cell: the 75th percentile (rounded up to the edge of its range) and the share of reports within the \"good\" threshold. LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1, FCP ≤ 1.8 s, TTFB ≤ 0.8 s.",
+			"unavailable": "Measurements unavailable",
+			"forbidden": "Staff only.",
+			"error": "Something went wrong.",
+			"retry": "Retry",
+			"loading": "Loading…",
+			"empty": "No measurement yet for this period."
+		},
+		"reputation": {
+			"title": "Cancelled votes",
+			"description": "Votes the anti-farming rules cancelled: one voter gave the same author too many votes in 30 days. They stay in the journal and count for nothing.",
+			"voter": "Voter",
+			"author": "Author",
+			"points": "Points not counted",
+			"date": "Date",
+			"unavailable": "List unavailable",
+			"forbidden": "Staff only.",
+			"error": "Something went wrong.",
+			"retry": "Retry",
+			"loading": "Loading…",
+			"empty": "No cancelled vote.",
+			"more": "Show more"
+		},
 		"audit": {
 			"title": "Audit log",
 			"description": "Staff actions: suspensions, edits, deletions.",
@@ -365,7 +745,74 @@
 			"loading": "Loading…",
 			"empty": "No event for these filters.",
 			"more": "Show more",
-			"system": "System"
+			"system": "System",
+			"targetId": "Target id",
+			"resetFilters": "Reset filters",
+			"rowLabel": "Row options: {action} · {target}",
+			"actionsHeader": "Options",
+			"rowActions": {
+				"detail": "View details",
+				"byActor": "Filter by this actor",
+				"byTarget": "Filter by this target",
+				"openTarget": "Open the target",
+				"export": "Export as CSV",
+				"exportOnly": "Admins only"
+			},
+			"exported": "{count, plural, one {# event exported} other {# events exported}}",
+			"exportTruncated": "Export limited to the {count} most recent events: narrow the filters for the rest.",
+			"exportFailed": "The export failed. Try again.",
+			"detail": {
+				"title": "Journal event",
+				"date": "Date",
+				"actor": "Actor",
+				"action": "Action",
+				"target": "Target",
+				"targetId": "Target id",
+				"reason": "Reason",
+				"fields": "Fields changed",
+				"role": "Role",
+				"roleChange": "{from} → {to}",
+				"none": "—"
+			},
+			"actions": {
+				"agent_key_create": "Agent key created",
+				"agent_key_revoke": "Agent key revoked",
+				"agent_pause": "Agent paused",
+				"agent_reactivate": "Agent reactivated",
+				"hackathon_check_repositories": "Hackathon repositories checked",
+				"hackathon_update": "Hackathon updated",
+				"job_dismiss": "Job report dismissed",
+				"job_uphold": "Job removed after a report",
+				"member_delete": "Account deleted",
+				"member_reactivate": "Member reactivated",
+				"member_revoke_sessions": "Sessions revoked",
+				"member_set_role": "Role changed",
+				"member_suspend": "Member suspended",
+				"milestone_update": "Milestone updated",
+				"organization_apply": "Organization application",
+				"organization_suspend": "Organization suspended",
+				"social_connect": "Social account connected",
+				"social_disconnect": "Social account disconnected",
+				"social_publish": "Social post published",
+				"social_retry": "Social post retried",
+				"tag_create": "Tag created",
+				"tag_delete": "Tag deleted",
+				"tag_rename": "Tag renamed",
+				"watch_domain_block": "Domain blocked",
+				"watch_domain_unblock": "Domain unblocked",
+				"watch_item_approve": "Watch item approved",
+				"watch_item_remove": "Watch item removed",
+				"watch_source_create": "Watch source added",
+				"watch_source_update": "Watch source updated",
+				"watch_source_remove": "Watch source removed",
+				"staff_invite": "Staff invitation sent",
+				"hackathon_create": "Hackathon created",
+				"hackathon_status": "Hackathon status changed"
+			}
+		},
+		"forbidden": {
+			"title": "Not available to your role",
+			"text": "Your role does not give access to this screen. Ask an admin if you need it."
 		},
 		"signOut": "Sign out",
 		"common": {
@@ -403,6 +850,314 @@
 			"error": "The server did not answer.",
 			"forbidden": "Your role does not give access to the indicators.",
 			"retry": "Retry"
+		},
+		"watch": {
+			"title": "Watch",
+			"description": "Trusted Sources, proposals and reports, blocked domains.",
+			"stats": {
+				"sources": "Active sources",
+				"errors": "Feeds in error"
+			},
+			"errors": {
+				"forbidden": "Action refused.",
+				"conflict": "This already exists.",
+				"notFound": "This no longer exists.",
+				"generic": "Something went wrong. Try again."
+			},
+			"sources": {
+				"title": "Sources",
+				"ingest": "Read now",
+				"ingested": "{sources} sources read, {added} new links.",
+				"name": "Name",
+				"feedUrl": "RSS or Atom feed",
+				"tags": "Tags (commas)",
+				"african": "African source",
+				"add": "Add",
+				"none": "No Source yet.",
+				"active": "Active",
+				"stopped": "Stopped",
+				"items": "{count, plural, one {# link} other {# links}}",
+				"fetched": "read on {date}",
+				"neverFetched": "never read",
+				"stop": "Stop",
+				"resume": "Resume",
+				"remove": "Removal",
+				"confirmRemove": "Remove {name} at its request? Its links are deleted and its domain blocked.",
+				"removed": "{count, plural, one {# link removed} other {# links removed}}."
+			},
+			"review": {
+				"title": "To moderate",
+				"none": "Nothing to moderate.",
+				"origin": {
+					"source": "Source",
+					"member": "Member",
+					"agent": "Agent"
+				},
+				"score": "score {score}",
+				"pending": "pending",
+				"reports": "{count, plural, one {# report} other {# reports}}",
+				"approve": "Approve",
+				"remove": "Remove",
+				"reason": "Reason for removal",
+				"blockDomain": "Block domain"
+			},
+			"domains": {
+				"title": "Blocked domains",
+				"domain": "Domain",
+				"block": "Block",
+				"unblock": "Unblock",
+				"none": "No blocked domain.",
+				"confirmBlock": "Block {domain}? Its existing links are removed."
+			}
+		},
+		"organizations": {
+			"title": "Organizations",
+			"description": "Applications to validate, suspensions. Every decision is audited.",
+			"none": "Nothing in this state.",
+			"system": "created by the platform",
+			"requestedBy": "requested by {name}",
+			"validate": "Validate",
+			"reject": "Reject",
+			"suspend": "Suspend",
+			"reinstate": "Reinstate",
+			"reasonReject": "Reason for the rejection (shown to the applicant)",
+			"reasonSuspend": "Reason for the suspension",
+			"status": {
+				"pending": "To validate",
+				"validated": "Validated",
+				"rejected": "Rejected",
+				"suspended": "Suspended"
+			},
+			"errors": {
+				"forbidden": "Action refused.",
+				"conflict": "This application was already handled. The list is reloaded.",
+				"notFound": "This Organization no longer exists.",
+				"generic": "Something went wrong. Try again."
+			},
+			"noOwner": "No owner",
+			"assignOwner": "Name an owner",
+			"assignOwnerPlaceholder": "Profile address or Member id"
+		},
+		"jobs": {
+			"title": "Jobs",
+			"description": "Reported postings. A founded report removes the posting; two suspend the Organization.",
+			"stats": {
+				"jobs": "Reported postings",
+				"reports": "Reports"
+			},
+			"none": "No reported posting.",
+			"reports": "{count, plural, one {# report} other {# reports}}",
+			"uphold": "Founded: remove",
+			"dismiss": "Dismiss",
+			"reason": "Reason for the removal",
+			"suspended": "The Organization is suspended (two founded reports).",
+			"errors": {
+				"forbidden": "Action refused.",
+				"conflict": "Already handled.",
+				"notFound": "This posting has no pending report.",
+				"generic": "Something went wrong. Try again."
+			}
+		},
+		"staff": {
+			"title": "Team",
+			"description": "Back-office accounts: roles, invitations, sessions. Every action is logged.",
+			"list": "Team",
+			"search": "Search an account",
+			"searchPlaceholder": "Name or email",
+			"loading": "Loading…",
+			"empty": "No staff account.",
+			"pick": "Pick an account or an invitation.",
+			"unavailable": "Team unavailable",
+			"retry": "Retry",
+			"groups": {
+				"super_admin": "Super admins",
+				"admin": "Admins",
+				"moderator": "Moderators",
+				"pending": "Pending invitations"
+			},
+			"roles": {
+				"member": "Member",
+				"moderator": "Moderator",
+				"admin": "Admin",
+				"super_admin": "Super admin"
+			},
+			"pendingMeta": "{days, plural, one {# day} other {# days}}",
+			"expiredMeta": "Expired",
+			"deactivated": "Deactivated",
+			"invite": {
+				"button": "Invite",
+				"title": "Invite to the team",
+				"description": "Each address gets an offer valid for 7 days. No account and no password is created: the role applies at the first sign-in with that verified address.",
+				"emails": "Email addresses",
+				"emailsHelp": "Separated by commas or line breaks, 20 at most.",
+				"role": "Role",
+				"submit": "Send the invitations",
+				"sending": "Sending…",
+				"count": "{count, plural, one {# address} other {# addresses}}",
+				"invalid": "Unreadable address: {emails}",
+				"overflow": "{count, plural, one {# address over the limit will be ignored} other {# addresses over the limit will be ignored}}",
+				"resultsTitle": "Result",
+				"status": {
+					"invited": "Invitation created",
+					"promoted": "Role given at once",
+					"already_staff": "Already has this role or higher",
+					"refused": "Refused"
+				},
+				"emailNotSent": "email not sent: tell them yourself",
+				"done": "Close"
+			},
+			"invitation": {
+				"section": "Invitation",
+				"email": "Email",
+				"role": "Role offered",
+				"invitedBy": "Invited by",
+				"sent": "Sent on",
+				"expires": "Expires on",
+				"expired": "expired: resend it to reopen it",
+				"leftDays": "{days, plural, one {# day left} other {# days left}}",
+				"resend": "Resend",
+				"resent": "Invitation resent for 7 days.",
+				"resentNoMail": "Extended by 7 days, but the email could not be sent.",
+				"revoke": "Revoke the invitation",
+				"revoked": "Invitation revoked.",
+				"unknownInviter": "deleted account"
+			},
+			"account": {
+				"section": "Account",
+				"email": "Email",
+				"role": "Role",
+				"joined": "Joined",
+				"status": "Status",
+				"active": "Active",
+				"suspended": "Deactivated"
+			},
+			"manage": {
+				"roleSection": "Change the role",
+				"newRole": "New role",
+				"reasonLabel": "Reason (required)",
+				"reasonTooShort": "3 characters minimum.",
+				"applyRole": "Apply the role",
+				"roleChanged": "Role changed.",
+				"accessSection": "Access",
+				"deactivate": "Deactivate this account",
+				"reactivate": "Reactivate",
+				"revokeSessions": "Sign out everywhere",
+				"sessionsRevoked": "Sessions revoked.",
+				"refusalSelf": "This is your account: use “My account” for your sessions.",
+				"refusalRank": "Same or higher rank than yours: you cannot manage this account.",
+				"openAccount": "Open « My account »"
+			},
+			"errors": {
+				"forbidden": "Refused: rank too low.",
+				"conflict": "This account already changed, or a rule forbids it (last super admin, role set by the environment). The list was reloaded.",
+				"notFound": "This account or invitation no longer exists.",
+				"generic": "Something went wrong. Try again."
+			},
+			"stats": {
+				"members": "Team members",
+				"admins": "Admins",
+				"moderators": "Moderators",
+				"pending": "Invitations"
+			}
+		},
+		"account": {
+			"title": "My account",
+			"description": "Your profile, preferences, sessions and activity in the back-office.",
+			"profile": {
+				"title": "Profile",
+				"name": "Display name",
+				"email": "Email",
+				"role": "Role",
+				"nameHint": "This name shows in your badge and in the audit log.",
+				"emailHint": "The address comes from your sign-in provider: it cannot be changed here.",
+				"memberSince": "Member since",
+				"signIn": "Sign-in",
+				"save": "Save",
+				"saving": "Saving…",
+				"saved": "Name updated.",
+				"failed": "The name could not be changed. Try again.",
+				"invalid": "Enter a name of 1 to 80 characters.",
+				"emailCode": "Code sent by email",
+				"providers": {
+					"google": "Google",
+					"github": "GitHub",
+					"credential": "Email and password"
+				}
+			},
+			"sessions": {
+				"title": "Active sessions",
+				"loading": "Loading…",
+				"error": "Sessions unavailable.",
+				"current": "This session",
+				"unknownDevice": "Unknown device",
+				"started": "Opened {date}",
+				"revoke": "Sign out",
+				"revokeOthers": "Sign out of all other sessions",
+				"revoked": "Session signed out.",
+				"othersRevoked": "Other sessions signed out.",
+				"failed": "Signing out failed. Try again.",
+				"onlyThis": "No other open session.",
+				"stale": "For your security, the session list is only available after a recent sign-in (under 24 h). Sign in again to show it.",
+				"reauth": "Sign in again"
+			},
+			"activity": {
+				"title": "My activity",
+				"description": "Your latest actions in the audit log.",
+				"loading": "Loading…",
+				"empty": "None of your actions is in the log yet.",
+				"unavailable": "Log unavailable.",
+				"full": "Open the audit log"
+			},
+			"hero": {
+				"memberSince": "Member since {date}",
+				"lastSignIn": "Session opened on {date}",
+				"verified": "Email verified",
+				"unverified": "Email not verified"
+			},
+			"access": {
+				"title": "Your access",
+				"description": "The back-office screens your role opens.",
+				"count": "{count, plural, one {# screen} other {# screens}}"
+			},
+			"preferences": {
+				"title": "Preferences",
+				"language": "Interface language",
+				"theme": "Theme"
+			},
+			"tabs": {
+				"profile": "Profile",
+				"security": "Security",
+				"activity": "Activity",
+				"preferences": "Preferences"
+			},
+			"sections": {
+				"back": "My account",
+				"profile": "Name, role and access",
+				"security": "Open sessions",
+				"activity": "My actions in the back office",
+				"preferences": "Language, theme, data saver"
+			}
+		},
+		"userMenu": {
+			"label": "Account menu",
+			"account": "My account",
+			"settings": "Settings",
+			"language": "Language",
+			"theme": "Theme",
+			"backToSite": "Back to the site",
+			"signOut": "Sign out",
+			"themes": {
+				"light": "Light",
+				"dark": "Dark",
+				"system": "System"
+			}
+		},
+		"navGroups": {
+			"menu": "Menu",
+			"pilot": "Insights",
+			"content": "Content",
+			"community": "Community",
+			"team": "Team"
 		}
 	},
 	"onboarding": {
@@ -468,6 +1223,7 @@
 		"showQuestion": "Show the question",
 		"answers": "{count, plural, =0 {Answers} one {# answer} other {# answers}}",
 		"noAnswer": "No answer yet. Be the first to help.",
+		"collapsedAnswer": "Answer by the agent {agent} (owner: {owner}), awaiting validation by a member. Show it.",
 		"signInToAnswer": "Sign in to answer and vote.",
 		"signIn": "Sign in",
 		"closedNotice": "This question is closed: it takes no more answers.",
@@ -604,7 +1360,17 @@
 		}
 	},
 	"member": {
-		"unnamed": "Member"
+		"unnamed": "Member",
+		"reputation": "Reputation {count, number}"
+	},
+	"consent": {
+		"title": "Our terms have changed",
+		"description": "To keep using CodeSphere, read and accept the terms of use and the privacy policy (version {version}). You can also sign out, download your data or delete your account.",
+		"readTerms": "Read the terms of use",
+		"readPrivacy": "Read the privacy policy",
+		"accept": "I accept",
+		"signOut": "Sign out",
+		"otherOptions": "Other options"
 	},
 	"legal": {
 		"nav": "Legal information",
@@ -728,9 +1494,11 @@
 			"prizes": "Prizes",
 			"rules": "Rules",
 			"judging": "Judging",
-			"discussion": "Discussion"
+			"discussion": "Discussion",
+			"team": "My team",
+			"gallery": "Gallery"
 		},
-		"organizedBy": "Organized by {organizer}",
+		"organizedBy": "Organized by",
 		"ask": "Ask a question",
 		"closesIn": "Submissions close in",
 		"closed": "Submissions are closed.",
@@ -748,7 +1516,10 @@
 			"next": "Next step",
 			"team": "Teams",
 			"teamSize": "{min} to {max} members",
-			"noMilestone": "No upcoming step."
+			"noMilestone": "No upcoming step.",
+			"externalTitle": "Register and submit on the organiser's site",
+			"externalText": "Teams, registration and project submission happen on the organiser's site, not here. CodeSphere helps you prepare your project: ask your questions and follow the schedule.",
+			"externalCta": "Go to the organiser's site"
 		},
 		"timeline": {
 			"title": "Schedule",
@@ -783,11 +1554,421 @@
 		"notFound": "This hackathon does not exist.",
 		"error": "The hackathon could not be loaded.",
 		"retry": "Retry",
-		"unavailable": "Hackathons are not available on this deployment."
+		"unavailable": "Hackathons are not available on this deployment.",
+		"team": {
+			"signIn": "Sign in to create or join a team.",
+			"signInButton": "Sign in",
+			"createTitle": "Create my team",
+			"createHint": "You are its captain: you invite the others by link or by name. A Member is in one team per Hackathon only.",
+			"teamName": "Team name",
+			"create": "Create the team",
+			"invited": "{by} invites you to the team “{team}”.",
+			"accept": "Accept",
+			"decline": "Decline",
+			"size": "{count} of {max} members",
+			"registrationClosed": "registration closed",
+			"captain": "Captain",
+			"remove": "Remove",
+			"pending": "invited, no answer yet",
+			"inviteTitle": "Invite",
+			"link": "Invitation link",
+			"copy": "Copy",
+			"copied": "Link copied.",
+			"rotate": "New link",
+			"inviteByName": "A Member's exact name",
+			"invite": "Invite",
+			"leave": "Leave the team",
+			"disband": "Disband the team",
+			"confirmDisband": "Disband the team? Its submission is deleted.",
+			"errors": {
+				"already": "You are already in a team of this Hackathon.",
+				"full": "This team is full.",
+				"closed": "It is closed: the deadlines have passed.",
+				"conflict": "This name is taken, or several Members have it: use the link.",
+				"notFound": "Not found.",
+				"generic": "Something went wrong. Try again."
+			},
+			"join": {
+				"title": "Join a team",
+				"intro": "You received an invitation link. Joining puts you in this team for this Hackathon.",
+				"button": "Join the team",
+				"already": "You are already in a team of this Hackathon.",
+				"full": "This team is full.",
+				"closed": "Registration is closed.",
+				"invalid": "This link is no longer valid."
+			},
+			"submission": {
+				"title": "Submission",
+				"hint": "Links only, no files. Editable until the deadline, then frozen and shown in the gallery.",
+				"frozen": "The deadline has passed: the submission is frozen.",
+				"projectTitle": "Project title",
+				"description": "Description (Markdown, at least 20 characters)",
+				"repo": "Repository link",
+				"demo": "Demo link",
+				"video": "Video link (optional)",
+				"tags": "Tags, comma-separated (5 at most)",
+				"save": "Save the submission",
+				"update": "Update",
+				"saved": "Submission saved."
+			}
+		},
+		"gallery": {
+			"notYet": "The gallery opens at the submission deadline.",
+			"empty": "No submission.",
+			"repo": "Repository",
+			"demo": "Demo",
+			"video": "Video",
+			"more": "Show more"
+		},
+		"report": {
+			"button": "Report",
+			"why": "Why are you reporting this Hackathon?",
+			"reasons": {
+				"misleading": "Misleading information",
+				"scam": "Scam or hidden fees",
+				"unlawful": "Unlawful content",
+				"spam": "Spam",
+				"other": "Other"
+			},
+			"comment": "Details (optional)",
+			"send": "Send report",
+			"sent": "Thanks: the Admins will look at this Hackathon.",
+			"forbidden": "Only a Member can report.",
+			"failed": "The report failed. Try again."
+		}
 	},
 	"tagInput": {
 		"placeholder": "Add a Tag",
 		"remove": "Remove {tag}",
 		"full": "{max} Tags at most"
+	},
+	"roadmap": {
+		"nav": "Roadmap",
+		"title": "Roadmap",
+		"intro": "Where CodeSphere stands, what comes next and what we will not do. Quarters are targets, never promised dates.",
+		"community": "The community in numbers",
+		"snapshot": "Figures of {date}, updated once a day.",
+		"unavailable": "The figures are unavailable right now.",
+		"activeMembers": "Active Members (30 days)",
+		"questions": "Questions",
+		"answerRate": "Questions with an Answer",
+		"median": "Median time to first Answer",
+		"medianNone": "No Answer yet",
+		"minutes": "{count, plural, one {# minute} other {# minutes}}",
+		"hours": "{count, plural, one {# hour} other {# hours}}",
+		"acceptanceRate": "Answered Questions with an Accepted answer",
+		"countries": "Countries represented",
+		"countriesNote": "Only countries with at least {min} Members are counted.",
+		"target": "Target quarter: {target}",
+		"status": {
+			"delivered": "Delivered",
+			"in_progress": "In progress",
+			"planned": "Planned"
+		},
+		"notDoing": "What we will not do for now",
+		"ideas": "Got an idea? Share it",
+		"ideasHint": "Ask a Question with the \"roadmap\" Tag: the community can vote.",
+		"propose": "Suggest an idea",
+		"ideasRecent": "Recent ideas",
+		"ideasNone": "No idea suggested yet.",
+		"overview": "{done} of {total} lines delivered",
+		"overviewLabel": "Roadmap progress",
+		"sectionProgress": "{done} of {total} delivered",
+		"legendDelivered": "{count} delivered",
+		"legendInProgress": "{count} in progress",
+		"legendPlanned": "{count} planned",
+		"summary": "Summary",
+		"remaining": "{count, plural, =0 {Nothing left to do} one {# line left to do} other {# lines left to do}}"
+	},
+	"watch": {
+		"title": "Watch",
+		"intro": "Links useful to African developers: trusted sources and community proposals. We keep the link, the title and a short summary, never the article.",
+		"views": {
+			"recent": "Recent",
+			"pending": "To validate",
+			"saved": "Saved"
+		},
+		"african": "African source",
+		"origin": {
+			"member": "Proposed by a Member",
+			"agent": "Proposed by an agent"
+		},
+		"pending": "Waiting for a vote",
+		"pendingHint": "These proposals become visible after a positive vote from a Member or an Admin's approval.",
+		"empty": {
+			"recent": "Nothing to read yet.",
+			"pending": "No proposal waiting.",
+			"saved": "You have kept nothing for later."
+		},
+		"more": "Show more",
+		"retry": "Try again",
+		"error": "Something went wrong. Try again.",
+		"needReputation": "You need more Reputation for this.",
+		"upvote": "Vote up",
+		"downvote": "Vote down",
+		"save": "Keep for later",
+		"saved": "Kept",
+		"report": "Report",
+		"reportReason": "Why?",
+		"reportSend": "Send",
+		"reported": "Thanks, an Admin will take a look.",
+		"propose": {
+			"title": "Propose a link",
+			"hint": "25 Reputation required, 5 proposals a day. The link shows up after a positive vote or an Admin's approval.",
+			"url": "Link address",
+			"titleLabel": "Title",
+			"summary": "Summary (300 characters)",
+			"tags": "Tags, comma-separated",
+			"submit": "Propose",
+			"done": "Thanks! Your proposal is waiting for a vote.",
+			"needReputation": "You need 25 Reputation to propose a link.",
+			"exists": "This link already exists.",
+			"blocked": "This site is not accepted.",
+			"tooMany": "You reached the limit of 5 proposals a day.",
+			"error": "The link could not be proposed."
+		}
+	},
+	"organizations": {
+		"title": "Organizations",
+		"intro": "Companies, universities, startups and communities validated by an Admin. A validated Organization can list Hackathons.",
+		"apply": "Apply for an Organization",
+		"applyTitle": "Apply for an Organization",
+		"applyIntro": "An Admin reviews every application. Your email must be on the Organization's domain: it is never shown.",
+		"name": "Name",
+		"website": "Website",
+		"contactEmail": "Email on the Organization's domain",
+		"contactEmailHint": "No gmail, yahoo or similar address: it must be on the website's domain.",
+		"country": "Country",
+		"countryHint": "Country (ISO code, e.g. SN) or OTHER",
+		"description": "About (1000 characters)",
+		"submit": "Send the application",
+		"applied": "Application sent: an Admin will review it.",
+		"mine": "My applications",
+		"viewProfile": "View public profile",
+		"validated": "Validated Organization",
+		"empty": "No validated Organization yet.",
+		"unavailable": "The list is unavailable right now.",
+		"status": {
+			"pending": "Pending",
+			"validated": "Validated",
+			"rejected": "Rejected",
+			"suspended": "Suspended"
+		},
+		"errors": {
+			"conflict": "This Organization already exists, or you reached 3 open applications.",
+			"domain": "The email must be on the website's domain (no public mailbox).",
+			"forbidden": "Only a Member can apply.",
+			"generic": "The application failed. Try again."
+		},
+		"manage": {
+			"signIn": "Sign in to manage an Organization.",
+			"signInAction": "Sign in",
+			"notFound": "This Organization does not exist, is not validated, or you are not on its team.",
+			"publicProfile": "View public profile",
+			"role": {
+				"owner": "Owner",
+				"editor": "Editor"
+			},
+			"tabs": {
+				"hackathons": "Hackathons",
+				"members": "Members",
+				"terms": "Terms"
+			},
+			"hackathonsHint": "A draft is never public. Publishing makes it visible straight away, without review: you stay responsible for its content.",
+			"noHackathons": "No Hackathon yet.",
+			"edit": "Edit",
+			"archivedReadOnly": "An archived Hackathon is read-only: ask an Admin.",
+			"status": {
+				"draft": "Draft",
+				"published": "Published",
+				"ended": "Ended",
+				"archived": "Archived"
+			},
+			"action": {
+				"publish": "Publish",
+				"end": "End",
+				"archive": "Archive"
+			},
+			"rolesHint": "The owner manages the members and the Organization's profile. An editor creates, edits and publishes Hackathons.",
+			"transfer": "Hand over",
+			"transferSent": "Offer sent: the editor has to accept it.",
+			"leave": "Leave",
+			"remove": "Remove",
+			"cancel": "Cancel",
+			"pending": "Pending invitations",
+			"invitationRole": {
+				"editor": "editor",
+				"owner": "ownership"
+			},
+			"inviteLabel": "Invite a Member",
+			"invite": "Invite",
+			"invited": "Invitation sent: the Member has to accept it.",
+			"invitePlaceholder": "Profile address or id",
+			"inviteHint": "Paste the address of their profile (…/members/id). A suspended Member or an Agent cannot be invited.",
+			"invitations": "Invitations received",
+			"invitationText": {
+				"editor": "{organization} invites you to join its team as an editor.",
+				"owner": "{organization} offers you to become its owner."
+			},
+			"accept": "Accept",
+			"decline": "Decline",
+			"accepted": "You are now on the team.",
+			"errors": {
+				"conflict": "Not possible in the current state (already a member, invitation open, team full…).",
+				"forbidden": "Only the owner can do this.",
+				"notFound": "Not found: the invitation or the Member no longer exists.",
+				"generic": "The action failed. Try again."
+			},
+			"terms": {
+				"title": "Terms for running Hackathons",
+				"intro": "By publishing a Hackathon on CodeSphere, the Organization acknowledges that:",
+				"accept": "I accept on behalf of the Organization",
+				"accepted": "Accepted",
+				"acceptedBy": "by {name} on {date}.",
+				"acceptedToast": "Terms accepted: you can publish.",
+				"ownerOnly": "Only the Organization's owner can accept these terms. Ask them before publishing.",
+				"needed": "The owner has to accept the terms first (Terms tab).",
+				"clauses": {
+					"c1": "It alone answers for its Hackathon's rules and for the accuracy of what it publishes (dates, eligibility, Prizes).",
+					"c2": "It alone answers for the taxes and legal duties tied to the Prizes it promises or pays. CodeSphere holds and pays no funds.",
+					"c3": "Winners are chosen on skill criteria announced in advance, never by draw or by chance.",
+					"c4": "It publishes nothing unlawful, misleading or discriminatory, and asks participants for no payment to enter.",
+					"c5": "CodeSphere may unpublish a Hackathon, with a reason, and suspend an Organization that does not follow these terms.",
+					"c6": "The Organization's owner binds it by accepting these terms."
+				}
+			},
+			"unpublished": "Unpublished by the CodeSphere team: {reason}. Fix it, then ask for the block to be lifted so you can publish it again.",
+			"unpublishedTitle": "Unpublished by the CodeSphere team: an Admin has to lift the block."
+		},
+		"manageLink": "Manage team and Hackathons"
+	},
+	"jobs": {
+		"title": "Jobs",
+		"intro": "Postings from validated Organizations. Applying is always free: a posting that asks the candidate for money is refused.",
+		"publish": "Post a job",
+		"country": "Country (SN, CI…)",
+		"tag": "Tag",
+		"remote": "Remote",
+		"empty": "No posting for now.",
+		"more": "Show more",
+		"retry": "Try again",
+		"error": "Something went wrong. Try again.",
+		"notFound": "This posting does not exist or has expired.",
+		"applied": "Applied",
+		"appliedToast": "Noted: the Organization sees that you applied.",
+		"appliedShared": "You applied and shared your CodeSphere card.",
+		"appliedPlain": "You applied without sharing your card.",
+		"expires": "Expires on {date}",
+		"howToApply": "How to apply",
+		"free": "Applying is free. Never pay for an application: report the posting.",
+		"applyLink": "Apply on the Organization's site",
+		"applyWithCard": "Apply with my CodeSphere card",
+		"applyWithoutCard": "Apply without my card",
+		"applyHint": "You also apply on the site or by email above. Sharing your card shows it to this Organization for this posting only.",
+		"report": "Report",
+		"reportReason": "Why?",
+		"reportSend": "Send",
+		"reported": "Thanks, an Admin will take a look.",
+		"applicants": "Applications received",
+		"noApplicants": "Nobody applied through CodeSphere yet.",
+		"noCard": "Card not shared",
+		"reputation": "Reputation {count}",
+		"close": "Close the posting",
+		"confirmClose": "Close this posting now?",
+		"errors": {
+			"forbidden": "You cannot do that (you own this posting, or you are not signed in as a Member).",
+			"generic": "Something went wrong. Try again."
+		},
+		"module": {
+			"title": "Jobs for your Tags",
+			"latest": "Latest jobs",
+			"all": "All postings"
+		},
+		"publishPage": {
+			"title": "Post a job",
+			"intro": "A posting lasts 30 days. Choose how to apply: a link or an email, not both.",
+			"signIn": "Sign in to post a job.",
+			"needOrganization": "You need a validated Organization to post.",
+			"applyOrganization": "Apply for an Organization",
+			"organization": "Organization",
+			"jobTitle": "Job title",
+			"description": "Description (at least 20 characters)",
+			"tags": "Tags, comma-separated (5 at most)",
+			"country": "Country",
+			"applyHint": "How to apply (only one of the two)",
+			"applyUrl": "Application link",
+			"applyEmail": "Application email",
+			"rules": "A posting that asks the candidate for money is refused. At most 5 live postings per Organization. Two founded reports suspend the Organization.",
+			"submit": "Post for 30 days",
+			"done": "Posting published.",
+			"mine": "My postings",
+			"live": "live",
+			"expired": "expired",
+			"removed": "removed",
+			"applicants": "{count, plural, =0 {no applications} one {# application} other {# applications}}",
+			"errors": {
+				"rule": "Posting refused: one way to apply only, and never a request for money from the candidate.",
+				"limit": "You already have 5 live postings.",
+				"forbidden": "Only the owner of a validated Organization can post.",
+				"generic": "Publishing failed. Try again."
+			}
+		},
+		"stopSharing": "Stop sharing my card"
+	},
+	"countrySelect": {
+		"placeholder": "Search a country",
+		"empty": "No country found.",
+		"clear": "Clear the country",
+		"open": "Open the country list",
+		"africa": "Africa",
+		"others": "Other countries"
+	},
+	"agentActivity": {
+		"filter": "Activity type",
+		"filters": {
+			"all": "All",
+			"content": "Content",
+			"rejections": "Rejections",
+			"management": "Management"
+		},
+		"kinds": {
+			"question": "Asked a Question",
+			"answer": "Answered",
+			"rejection": "Answer rejected by the community",
+			"pause": "Paused automatically",
+			"resume": "Back in service"
+		},
+		"actions": {
+			"agent": {
+				"key": {
+					"create": "Key created",
+					"revoke": "Key revoked"
+				},
+				"reactivate": "Reactivated by the team"
+			}
+		},
+		"deleted": "deleted since",
+		"loading": "Loading…",
+		"error": "History unavailable.",
+		"empty": "No activity for this filter.",
+		"more": "Older"
+	},
+	"hackathonsPage": {
+		"title": "Hackathons",
+		"intro": "Current and past contests listed on CodeSphere.",
+		"empty": "No Hackathon yet.",
+		"error": "The Hackathons could not be loaded.",
+		"retry": "Retry",
+		"organizedBy": "Organized by {name}",
+		"published": "Running",
+		"ended": "Ended",
+		"next": "Next step: {label}, {date}"
+	},
+	"notFound": {
+		"eyebrow": "Error 404",
+		"title": "Lost in the noise",
+		"description": "This page does not exist or has moved. Go back to the community's questions, or ask your own.",
+		"home": "Back home",
+		"ask": "Ask a question"
 	}
 }

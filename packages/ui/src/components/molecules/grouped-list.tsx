@@ -1,8 +1,14 @@
 "use client";
 
 import { Input } from "@codesphere/ui/components/atoms/input";
+import {
+	Collapsible,
+	CollapsiblePanel,
+	CollapsibleTrigger,
+} from "@codesphere/ui/components/molecules/collapsible";
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { cn } from "@codesphere/ui/lib/utils";
-import { SearchIcon } from "lucide-react";
+import { ChevronRightIcon, SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 type GroupedListItem = {
@@ -30,6 +36,11 @@ type GroupedListProps<T extends GroupedListItem> = {
 	searchLabel?: string;
 	searchPlaceholder?: string;
 	emptyText?: string;
+	/**
+	 * Groups fold: only the title and the count show until a group is opened. The group of the
+	 * selected row starts open, and a search opens every group that has a match.
+	 */
+	collapsible?: boolean;
 	/** Next to the search, e.g. the « + » that creates a Tag. */
 	actions?: React.ReactNode;
 	className?: string;
@@ -55,8 +66,7 @@ function ListRow({
 			onClick={onClick}
 			className={cn(
 				"flex w-full items-center justify-between gap-3 border-border border-b px-3 py-2 text-left text-sm outline-none transition-colors hover:bg-accent focus-visible:bg-accent",
-				selected &&
-					"bg-accent font-medium shadow-[inset_3px_0_0_var(--primary)]",
+				selected && "bg-accent font-medium shadow-selected",
 			)}
 		>
 			<span className="min-w-0 truncate">{name}</span>
@@ -85,9 +95,28 @@ function GroupedList<T extends GroupedListItem>({
 	searchPlaceholder = "Filtrer",
 	emptyText = "Aucun résultat.",
 	actions,
+	collapsible = false,
 	className,
 }: GroupedListProps<T>) {
 	const [query, setQuery] = useState("");
+	const [opened, setOpened] = useState<ReadonlySet<string>>(
+		() =>
+			new Set(
+				items
+					.filter((item) => item.id === selectedId)
+					.map((item) => item.group),
+			),
+	);
+	const toggle = (key: string, open: boolean) =>
+		setOpened((previous) => {
+			const next = new Set(previous);
+			if (open) {
+				next.add(key);
+			} else {
+				next.delete(key);
+			}
+			return next;
+		});
 	const sections = useMemo(() => {
 		const needle = query.trim().toLocaleLowerCase();
 		const matching = items.filter(
@@ -124,25 +153,18 @@ function GroupedList<T extends GroupedListItem>({
 						placeholder={searchPlaceholder}
 						value={query}
 						onChange={(event) => setQuery(event.target.value)}
-						className="pl-8"
+						inset="icon"
 					/>
 				</div>
 				{actions}
 			</div>
-			<nav
-				aria-label={label}
-				className="min-h-0 flex-1 overflow-y-auto rounded-md border border-border"
-			>
-				{sections.length === 0 && (
-					<p className="p-3 text-muted-foreground text-sm">{emptyText}</p>
-				)}
-				{sections.map((section) => (
-					<section key={section.key} aria-label={section.label}>
-						<h3 className="sticky top-0 z-[1] flex justify-between bg-background px-3 pt-2 pb-1 font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
-							{section.label}
-							<span className="tabular-nums">{section.items.length}</span>
-						</h3>
-						{section.items.map((item) => (
+			<ScrollArea className="min-h-0 flex-1 rounded-md border border-border">
+				<nav aria-label={label}>
+					{sections.length === 0 && (
+						<p className="p-3 text-muted-foreground text-sm">{emptyText}</p>
+					)}
+					{sections.map((section) => {
+						const rows = section.items.map((item) => (
 							<ListRow
 								key={item.id}
 								name={item.name}
@@ -150,10 +172,45 @@ function GroupedList<T extends GroupedListItem>({
 								selected={item.id === selectedId}
 								onClick={() => onSelect(item)}
 							/>
-						))}
-					</section>
-				))}
-			</nav>
+						));
+						if (!collapsible) {
+							return (
+								<section key={section.key} aria-label={section.label}>
+									<h3 className="sticky top-0 z-[1] flex justify-between bg-background px-3 pt-2 pb-1 font-medium text-2xs text-muted-foreground uppercase tracking-widest">
+										{section.label}
+										<span className="tabular-nums">{section.items.length}</span>
+									</h3>
+									{rows}
+								</section>
+							);
+						}
+						return (
+							<Collapsible
+								key={section.key}
+								render={<section aria-label={section.label} />}
+								open={query.trim() !== "" || opened.has(section.key)}
+								onOpenChange={(open) => toggle(section.key, open)}
+							>
+								<h3 className="sticky top-0 z-[1] bg-background font-medium text-2xs text-muted-foreground uppercase tracking-widest">
+									<CollapsibleTrigger className="group/trigger flex w-full items-center justify-between gap-2 px-3 pt-2 pb-1 text-2xs uppercase tracking-widest">
+										<span className="flex items-center gap-1.5">
+											<ChevronRightIcon
+												aria-hidden="true"
+												className="size-3 transition-transform motion-reduce:transition-none group-data-[panel-open]/trigger:rotate-90"
+											/>
+											{section.label}
+										</span>
+										<span className="tabular-nums">{section.items.length}</span>
+									</CollapsibleTrigger>
+								</h3>
+								<CollapsiblePanel className="t-collapse">
+									{rows}
+								</CollapsiblePanel>
+							</Collapsible>
+						);
+					})}
+				</nav>
+			</ScrollArea>
 		</div>
 	);
 }

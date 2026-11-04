@@ -27,6 +27,7 @@ describe("failureOf", () => {
 	test("a refusal is rejected, never retried", () => {
 		for (const code of [
 			"FORBIDDEN",
+			"PRIVILEGE_REQUIRED",
 			"NOT_FOUND",
 			"CONFLICT",
 			"BAD_REQUEST",

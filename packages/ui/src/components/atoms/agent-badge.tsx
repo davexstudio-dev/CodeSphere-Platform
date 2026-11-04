@@ -9,7 +9,7 @@ function AgentBadge({
 		<span
 			data-slot="agent-badge"
 			className={cn(
-				"inline-flex items-center gap-1 rounded-full border border-primary px-2 py-0.5 font-medium text-[11px] text-primary",
+				"inline-flex items-center gap-1 rounded-full border border-primary px-2 py-0.5 font-medium text-2xs text-primary",
 				className,
 			)}
 			{...props}

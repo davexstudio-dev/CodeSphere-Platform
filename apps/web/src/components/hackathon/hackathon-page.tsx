@@ -17,17 +17,28 @@ import {
 	TabsTrigger,
 } from "@codesphere/ui/components/molecules/tabs";
 import { Timeline } from "@codesphere/ui/components/molecules/timeline";
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
+import { cn } from "@codesphere/ui/lib/utils";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { AlertCircleIcon, ExternalLinkIcon } from "lucide-react";
+import {
+	AlertCircleIcon,
+	ArrowUpRightIcon,
+	CalendarClockIcon,
+	ExternalLinkIcon,
+	UsersIcon,
+} from "lucide-react";
 import type { Route } from "next";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import type { z } from "zod";
-
+import { GalleryTab } from "@/components/hackathon/gallery-tab";
+import { HackathonReport } from "@/components/hackathon/hackathon-report";
+import { TeamTab } from "@/components/hackathon/team-tab";
 import { FeedSkeleton, HomeFeed } from "@/components/home-feed";
+import Link from "@/components/link";
 import { ShareMenu } from "@/components/share-menu";
 import { errorCodeOf } from "@/i18n/errors";
+import { pageSizeFor } from "@/lib/data-saver";
 import { HAS_DATABASE } from "@/lib/deployment";
 import {
 	HACKATHON_TABS,
@@ -36,7 +47,7 @@ import {
 	milestoneStates,
 	sortedMilestones,
 } from "@/lib/hackathon";
-import { submissionClose } from "@/lib/home";
+import { submissionClose, toMixed } from "@/lib/home";
 import { useMounted } from "@/lib/use-mounted";
 import { orpc } from "@/utils/orpc";
 
@@ -120,8 +131,15 @@ function HackathonView({ hackathon }: { hackathon: HackathonData }) {
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
+	// Where teams run elsewhere (the Admin turned them off), their tabs are not offered.
+	const tabs = HACKATHON_TABS.filter(
+		(key) => hackathon.teamsEnabled || (key !== "team" && key !== "gallery"),
+	);
 	const requested = searchParams.get("tab");
-	const tab: HackathonTab = isHackathonTab(requested) ? requested : "overview";
+	const tab: HackathonTab =
+		isHackathonTab(requested) && tabs.includes(requested)
+			? requested
+			: "overview";
 	const setTab = (next: HackathonTab) =>
 		router.replace(`${pathname}?tab=${next}` as Route, { scroll: false });
 
@@ -130,18 +148,21 @@ function HackathonView({ hackathon }: { hackathon: HackathonData }) {
 			<Header hackathon={hackathon} />
 			<Tabs
 				value={tab}
-				onValueChange={(value) => isHackathonTab(value) && setTab(value)}
+				onValueChange={(value) =>
+					isHackathonTab(value) && tabs.includes(value) && setTab(value)
+				}
 			>
-				{/* Six tabs scroll sideways on a phone rather than wrap. */}
-				<div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-					<TabsList>
-						{HACKATHON_TABS.map((key) => (
-							<TabsTrigger key={key} value={key}>
-								{t(`tabs.${key}`)}
-							</TabsTrigger>
-						))}
-					</TabsList>
-				</div>
+				{/* On a phone, the tabs sit in rows of three (two with four): all visible, none hidden off screen. */}
+				<TabsList
+					layout="grid"
+					className={tabs.length > 4 ? "grid-cols-3" : "grid-cols-2"}
+				>
+					{tabs.map((key) => (
+						<TabsTrigger key={key} value={key} layout="grid">
+							{t(`tabs.${key}`)}
+						</TabsTrigger>
+					))}
+				</TabsList>
 				<TabsContent value="overview" className="pt-4">
 					<Overview hackathon={hackathon} />
 				</TabsContent>
@@ -160,6 +181,16 @@ function HackathonView({ hackathon }: { hackathon: HackathonData }) {
 				<TabsContent value="discussion" className="pt-4">
 					{tab === "discussion" && <Discussion slug={hackathon.slug} />}
 				</TabsContent>
+				{hackathon.teamsEnabled && (
+					<>
+						<TabsContent value="team" className="pt-4">
+							{tab === "team" && <TeamTab slug={hackathon.slug} />}
+						</TabsContent>
+						<TabsContent value="gallery" className="pt-4">
+							{tab === "gallery" && <GalleryTab slug={hackathon.slug} />}
+						</TabsContent>
+					</>
+				)}
 			</Tabs>
 		</Shell>
 	);
@@ -174,7 +205,13 @@ function Header({ hackathon }: { hackathon: HackathonData }) {
 		<header className="grid gap-5 rounded-3xl border border-border bg-card p-5 md:grid-cols-[1fr_auto] md:items-end md:p-8">
 			<div className="grid gap-2">
 				<p className="text-muted-foreground text-sm">
-					{t("organizedBy", { organizer: hackathon.organizer })}
+					{t("organizedBy")}{" "}
+					<Link
+						href={`/organizations/${hackathon.organizationSlug}` as Route}
+						className="font-medium text-foreground hover:underline"
+					>
+						{hackathon.organizer}
+					</Link>
 				</p>
 				<h1 className="font-bold text-3xl tracking-tight md:text-4xl">
 					{hackathon.name}
@@ -192,6 +229,7 @@ function Header({ hackathon }: { hackathon: HackathonData }) {
 						{t("ask")}
 					</Button>
 					<ShareMenu title={hackathon.name} />
+					<HackathonReport slug={hackathon.slug} />
 				</div>
 			</div>
 			{closesAt && (
@@ -230,9 +268,46 @@ function Overview({ hackathon }: { hackathon: HackathonData }) {
 	const milestones = sortedMilestones(hackathon.milestones);
 	const states = milestoneStates(milestones, new Date());
 	const next = milestones[states.indexOf("current")];
+	const external = !hackathon.teamsEnabled;
+	// Bento: the organiser card is the large tile (two columns, two rows), the next milestone and
+	// the team size stack beside it. Without it, the two small tiles share the row.
 	return (
-		<div className="grid gap-4 md:grid-cols-2">
-			<section className="grid gap-1 rounded-2xl border border-border p-5">
+		<div
+			className={cn(
+				"grid gap-4",
+				external ? "md:grid-cols-3 md:grid-rows-2" : "md:grid-cols-2",
+			)}
+		>
+			{external && (
+				<section className="flex flex-col justify-between gap-4 rounded-2xl border border-primary/40 bg-linear-to-br from-primary/10 via-card to-card p-6 md:col-span-2 md:row-span-2">
+					<div className="grid gap-2">
+						<ExternalLinkIcon
+							aria-hidden="true"
+							className="size-5 text-primary"
+						/>
+						<h2 className="font-semibold text-xl">
+							{t("overview.externalTitle")}
+						</h2>
+						<p className="max-w-prose text-muted-foreground text-sm leading-relaxed">
+							{t("overview.externalText")}
+						</p>
+					</div>
+					<a
+						href={hackathon.sourceUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90"
+					>
+						{t("overview.externalCta")}
+						<ArrowUpRightIcon aria-hidden="true" className="size-4" />
+					</a>
+				</section>
+			)}
+			<section className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-5">
+				<CalendarClockIcon
+					aria-hidden="true"
+					className="mb-1 size-4 text-muted-foreground"
+				/>
 				<h2 className="font-medium text-muted-foreground text-sm">
 					{t("overview.next")}
 				</h2>
@@ -247,7 +322,11 @@ function Overview({ hackathon }: { hackathon: HackathonData }) {
 					<p className="text-muted-foreground">{t("overview.noMilestone")}</p>
 				)}
 			</section>
-			<section className="grid gap-1 rounded-2xl border border-border p-5">
+			<section className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-5">
+				<UsersIcon
+					aria-hidden="true"
+					className="mb-1 size-4 text-muted-foreground"
+				/>
 				<h2 className="font-medium text-muted-foreground text-sm">
 					{t("overview.team")}
 				</h2>
@@ -373,8 +452,12 @@ function Judging({ hackathon }: { hackathon: HackathonData }) {
 							role="presentation"
 						>
 							<div
-								className="h-full rounded-full bg-primary"
-								style={{ width: `${criterion.weight}%` }}
+								className="h-full w-(--progress) rounded-full bg-primary"
+								style={
+									{
+										"--progress": `${criterion.weight}%`,
+									} as React.CSSProperties
+								}
 							/>
 						</div>
 					</li>
@@ -387,11 +470,12 @@ function Judging({ hackathon }: { hackathon: HackathonData }) {
 function Discussion({ slug }: { slug: string }) {
 	const t = useTranslations("hackathon.discussion");
 	const mounted = useMounted();
+	const pageSize = pageSizeFor(20, useDataSaver());
 	const questions = useInfiniteQuery(
 		orpc.questions.list.infiniteOptions({
 			input: (cursor: string | undefined) => ({
 				cursor,
-				limit: 20,
+				limit: pageSize,
 				tags: [slug],
 				sort: "recent" as const,
 			}),
@@ -414,7 +498,7 @@ function Discussion({ slug }: { slug: string }) {
 				<p className="text-muted-foreground">{t("empty")}</p>
 			) : (
 				<HomeFeed
-					items={items}
+					items={items.map(toMixed)}
 					hasNextPage={questions.hasNextPage}
 					isFetchingNextPage={questions.isFetchingNextPage}
 					fetchNextPage={questions.fetchNextPage}

@@ -17,12 +17,16 @@ export const PublicProfile = MemberSummary.extend({
 	image: z.string().nullable(),
 	country: Region.shape.country.nullable(),
 	city: z.string().nullable(),
+	/** The sum of the Member's Reputation journal (#239). Null for an Agent, which earns none. */
+	reputation: z.number().int().nullable(),
 });
 
 /** What a Member sees of themself, including the private settings. */
 export const OwnProfile = PublicProfile.extend({
 	cityPublic: z.boolean(),
 	hideAgentContent: z.boolean(),
+	/** Language of the emails sent to the Member; null until their first sign-in after it existed. */
+	locale: z.enum(["fr", "en"]).nullable(),
 	/** The Member passed the Tags onboarding: the app no longer sends them there by itself (#44). */
 	tagsOnboardingSkipped: z.boolean(),
 });
@@ -39,6 +43,7 @@ export const ProfileUpdate = z.object({
 	city: z.string().trim().max(100).nullable().optional(),
 	cityPublic: z.boolean().optional(),
 	hideAgentContent: z.boolean().optional(),
+	locale: z.enum(["fr", "en"]).optional(),
 });
 
 export const MemberExport = z.object({
@@ -80,11 +85,86 @@ export const MemberExport = z.object({
 			createdAt: z.string().datetime(),
 		}),
 	),
+	reputationJournal: z.array(
+		z.object({
+			kind: z.enum([
+				"upvote_received",
+				"downvote_received",
+				"downvote_cast",
+				"answer_accepted",
+				"accept_given",
+			]),
+			points: z.number().int(),
+			cause: z.enum(["vote", "accept"]),
+			targetType: z.enum(["question", "answer"]),
+			targetId: z.string(),
+			/** Set when an anti-farming rule cancelled the event: its points count for nothing. */
+			voidedReason: z
+				.enum(["new_account", "repeat_voter", "daily_cap"])
+				.nullable(),
+			createdAt: z.string().datetime(),
+		}),
+	),
 	followedTags: z.array(z.string()),
+	/** What shapes the « Pour toi » feed (#256): the choices made and the weights learned. */
+	feedProfile: z.object({
+		personalization: z.boolean(),
+		language: z.enum(["fr", "en"]).nullable(),
+		muted: z.array(
+			z.object({ kind: z.enum(["tag", "source"]), key: z.string() }),
+		),
+		affinity: z.array(z.object({ tag: z.string(), weight: z.number() })),
+	}),
+	/** The optional profile for recruiters (#258), when the Member ever set one. */
+	talentCard: z
+		.object({
+			enabled: z.boolean(),
+			openToContact: z.boolean(),
+			headline: z.string().nullable(),
+			codeUrl: z.string().nullable(),
+			contactEmail: z.string().nullable(),
+		})
+		.nullable(),
+	/** Job postings the Member applied to through CodeSphere. */
+	jobApplications: z.array(
+		z.object({
+			jobId: z.string(),
+			sharedCard: z.boolean(),
+			createdAt: z.string().datetime(),
+		}),
+	),
+	/** Watch items the Member kept for later. */
+	keptItems: z.array(
+		z.object({ itemId: z.string(), url: z.string(), title: z.string() }),
+	),
 	agents: z.array(
 		z.object({
 			id: z.string(),
 			name: z.string(),
+			createdAt: z.string().datetime(),
+		}),
+	),
+});
+
+/** The « Activité » tab of the settings (#293). */
+export const MemberActivity = z.object({
+	questions: z.array(
+		z.object({
+			id: z.string(),
+			title: z.string(),
+			status: z.enum(["open", "answered", "closed"]),
+			score: z.number().int(),
+			answerCount: z.number().int(),
+			createdAt: z.string().datetime(),
+		}),
+	),
+	answers: z.array(
+		z.object({
+			id: z.string(),
+			questionId: z.string(),
+			questionTitle: z.string(),
+			score: z.number().int(),
+			accepted: z.boolean(),
 			createdAt: z.string().datetime(),
 		}),
 	),
@@ -125,6 +205,19 @@ export const membersContract = {
 		)
 		.input(ProfileUpdate)
 		.output(OwnProfile),
+	activity: base
+		.errors({ UNAUTHORIZED: {} })
+		.meta(
+			openapi({
+				method: "GET",
+				path: "/me/activity",
+				tags: ["members"],
+				summary: "My recent Questions and Answers",
+				description:
+					"The caller's 10 latest Questions and 10 latest Answers (deleted ones left out), newest first. Requires a session or an API key.",
+			}),
+		)
+		.output(MemberActivity),
 	export: base
 		.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
 		.meta(
@@ -151,6 +244,16 @@ export const membersContract = {
 			}),
 		)
 		.input(z.object({ deleteContent: z.boolean().default(false) }))
+		.output(z.object({ success: z.boolean() })),
+	/** Whether the Member has to accept the current terms and privacy policy again (#341). */
+	consent: base
+		.errors({ UNAUTHORIZED: {}, FORBIDDEN: {} })
+		.input(z.object({}))
+		.output(z.object({ required: z.boolean(), current: z.string() })),
+	/** Records the acceptance of the current version. Humans only. */
+	acceptConsent: base
+		.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, CONFLICT: {} })
+		.input(z.object({ version: z.string() }))
 		.output(z.object({ success: z.boolean() })),
 	get: base
 		.errors({ NOT_FOUND: {} })

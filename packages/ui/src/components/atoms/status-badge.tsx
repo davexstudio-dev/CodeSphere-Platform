@@ -2,7 +2,7 @@ import { cn } from "@codesphere/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const statusBadgeVariants = cva(
-	"inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 font-medium text-[11px]",
+	"inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 font-medium text-2xs",
 	{
 		variants: {
 			status: {

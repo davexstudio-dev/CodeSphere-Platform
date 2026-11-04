@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+	canChangeRole,
 	DEFAULT_ROLE,
+	grantableRoles,
 	isStaffRole,
 	outranks,
 	ROLES,
@@ -69,5 +71,38 @@ describe("staff rank", () => {
 			}
 			expect(isStaffRole(actor)).toBe(true);
 		}
+	});
+});
+
+describe("grantableRoles", () => {
+	test("a super_admin gives any role, an admin up to admin, the others none", () => {
+		expect(grantableRoles("super_admin")).toEqual([...ROLES]);
+		expect(grantableRoles("admin")).toEqual(["member", "moderator", "admin"]);
+		expect(grantableRoles("moderator")).toEqual([]);
+		expect(grantableRoles("member")).toEqual([]);
+	});
+});
+
+describe("canChangeRole", () => {
+	test("an admin promotes and demotes below their rank", () => {
+		expect(canChangeRole("admin", "member", "moderator")).toBe(true);
+		expect(canChangeRole("admin", "moderator", "admin")).toBe(true);
+		expect(canChangeRole("admin", "moderator", "member")).toBe(true);
+	});
+
+	test("an admin never reaches a peer or gives super_admin", () => {
+		expect(canChangeRole("admin", "admin", "member")).toBe(false);
+		expect(canChangeRole("admin", "super_admin", "admin")).toBe(false);
+		expect(canChangeRole("admin", "member", "super_admin")).toBe(false);
+	});
+
+	test("a super_admin reaches every role, other super_admins included", () => {
+		expect(canChangeRole("super_admin", "super_admin", "admin")).toBe(true);
+		expect(canChangeRole("super_admin", "member", "super_admin")).toBe(true);
+	});
+
+	test("a moderator changes nothing, and nothing changes to the same role", () => {
+		expect(canChangeRole("moderator", "member", "moderator")).toBe(false);
+		expect(canChangeRole("super_admin", "admin", "admin")).toBe(false);
 	});
 });

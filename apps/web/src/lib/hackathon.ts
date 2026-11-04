@@ -10,6 +10,8 @@ export const HACKATHON_TABS = [
 	"rules",
 	"judging",
 	"discussion",
+	"team",
+	"gallery",
 ] as const;
 export type HackathonTab = (typeof HACKATHON_TABS)[number];
 

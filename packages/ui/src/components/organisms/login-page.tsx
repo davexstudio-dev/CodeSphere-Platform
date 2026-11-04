@@ -64,7 +64,7 @@ function LoginPage({
 				/>
 				{/* Only the round mark is inverted: the name keeps the panel's colours. */}
 				<Link href={homeHref} aria-label={homeLabel} className={HOME_LINK}>
-					<Logo className="text-lg [&>span:first-child]:bg-primary-foreground [&>span:first-child]:text-primary" />
+					<Logo size="lg" inverted />
 				</Link>
 				<div className="relative flex flex-col gap-8">
 					<h1 className="max-w-md font-bold text-4xl leading-tight tracking-tight">
@@ -93,7 +93,7 @@ function LoginPage({
 					aria-label={homeLabel}
 					className={cn(HOME_LINK, "lg:hidden")}
 				>
-					<Logo className="text-lg" />
+					<Logo size="lg" />
 				</Link>
 				<div className="w-full max-w-sm">
 					<LoginCard {...card} />

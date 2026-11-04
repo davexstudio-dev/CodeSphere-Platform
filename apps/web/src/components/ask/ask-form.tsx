@@ -22,10 +22,10 @@ import {
 } from "@codesphere/ui/components/molecules/tabs";
 import { TagInput } from "@codesphere/ui/components/molecules/tag-input";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import Link from "@/components/link";
 
 import { MarkdownPreview } from "@/components/markdown-preview";
 import { useOutbox, useOutboxEntry } from "@/components/outbox-provider";
@@ -74,6 +74,8 @@ export function AskForm() {
 	// The Tag of the page that opened the form, once the stored Draft is known.
 	const tag = params.get("tag");
 	const { ready, setValue } = draft;
+	// Only when the Draft is first ready: the Member may remove the Tag afterwards.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: runs once the Draft is ready, on purpose
 	useEffect(() => {
 		if (ready && tag) {
 			const next = prefilled(draft.value, tag);
@@ -81,7 +83,6 @@ export function AskForm() {
 				setValue(next);
 			}
 		}
-		// Only when the Draft is first ready: the Member may remove the Tag afterwards.
 	}, [ready, tag]);
 
 	// Published: open the Question, and the Draft is done with. The form shows « published »
@@ -176,7 +177,7 @@ export function AskForm() {
 	}
 
 	return (
-		<div className="grid gap-6">
+		<div className="grid grid-cols-1 gap-6">
 			<Stepper steps={steps} current={step} />
 
 			{/* Phone: the steps already answered, as a conversation. */}
@@ -194,8 +195,8 @@ export function AskForm() {
 								<BubbleContent>{t("prompts.details")}</BubbleContent>
 							</Bubble>
 							<Bubble align="end">
-								<BubbleContent className="line-clamp-3">
-									{value.body}
+								<BubbleContent>
+									<span className="line-clamp-3">{value.body}</span>
 								</BubbleContent>
 							</Bubble>
 						</>
@@ -215,85 +216,89 @@ export function AskForm() {
 					}
 				}}
 			>
-				{step === 0 && (
-					<TitleStep
-						value={value.title}
-						onChange={(v) => set("title", v)}
-						error={errorText("title")}
-					/>
-				)}
-				{step === 1 && (
-					<Field
-						id="ask-body"
-						label={t("fields.body")}
-						description={t("fields.bodyHint")}
-						error={errorText("body")}
-						required
-					>
-						<Tabs defaultValue="write">
-							<TabsList>
-								<TabsTrigger value="write">{t("write")}</TabsTrigger>
-								<TabsTrigger value="preview">{t("preview")}</TabsTrigger>
-							</TabsList>
-							<TabsContent value="write">
-								<Textarea
-									id="ask-body"
-									className="min-h-64 font-mono"
-									value={value.body}
-									maxLength={20_000}
-									aria-invalid={Boolean(errors.body)}
-									onChange={(event) => set("body", event.target.value)}
-								/>
-							</TabsContent>
-							<TabsContent value="preview">
-								<div className="min-h-64 rounded-md border border-border p-3">
-									{value.body.trim() ? (
-										<MarkdownPreview body={value.body} />
-									) : (
-										<p className="text-muted-foreground text-sm">
-											{t("nothingToPreview")}
-										</p>
-									)}
-								</div>
-							</TabsContent>
-						</Tabs>
-					</Field>
-				)}
-				{step === 2 && (
-					<div className="grid gap-5">
+				{/* One keyed wrapper: each step fades in as the previous one leaves. */}
+				<div key={step} className="motion-rise grid gap-5">
+					{step === 0 && (
+						<TitleStep
+							value={value.title}
+							onChange={(v) => set("title", v)}
+							error={errorText("title")}
+						/>
+					)}
+					{step === 1 && (
 						<Field
-							id="ask-tags"
-							label={t("fields.tags")}
-							description={t("fields.tagsHint")}
-							error={errorText("tags")}
+							id="ask-body"
+							label={t("fields.body")}
+							description={t("fields.bodyHint")}
+							error={errorText("body")}
 							required
 						>
-							<TagInput
-								{...tagInputLabels}
-								inputId="ask-tags"
-								value={value.tags}
-								onValueChange={(tags) => set("tags", tags)}
-								max={5}
-								invalid={Boolean(errors.tags)}
-							/>
+							<Tabs defaultValue="write">
+								<TabsList>
+									<TabsTrigger value="write">{t("write")}</TabsTrigger>
+									<TabsTrigger value="preview">{t("preview")}</TabsTrigger>
+								</TabsList>
+								<TabsContent value="write">
+									<Textarea
+										id="ask-body"
+										mono
+										className="min-h-64"
+										value={value.body}
+										maxLength={20_000}
+										aria-invalid={Boolean(errors.body)}
+										onChange={(event) => set("body", event.target.value)}
+									/>
+								</TabsContent>
+								<TabsContent value="preview">
+									<div className="min-h-64 rounded-md border border-border p-3">
+										{value.body.trim() ? (
+											<MarkdownPreview body={value.body} />
+										) : (
+											<p className="text-muted-foreground text-sm">
+												{t("nothingToPreview")}
+											</p>
+										)}
+									</div>
+								</TabsContent>
+							</Tabs>
 						</Field>
-						<div className="grid gap-2">
-							<p className="font-medium text-sm">{t("fields.language")}</p>
-							<SegmentedControl
-								options={LANGUAGES.map((l) => t(`languages.${l}`))}
-								value={t(`languages.${value.language}`)}
-								onValueChange={(label) =>
-									set(
-										"language",
-										LANGUAGES.find((l) => t(`languages.${l}`) === label) ??
-											value.language,
-									)
-								}
-							/>
+					)}
+					{step === 2 && (
+						<div className="grid gap-5">
+							<Field
+								id="ask-tags"
+								label={t("fields.tags")}
+								description={t("fields.tagsHint")}
+								error={errorText("tags")}
+								required
+							>
+								<TagInput
+									{...tagInputLabels}
+									inputId="ask-tags"
+									value={value.tags}
+									onValueChange={(tags) => set("tags", tags)}
+									max={5}
+									invalid={Boolean(errors.tags)}
+								/>
+							</Field>
+							<div className="grid gap-2">
+								<p className="font-medium text-sm">{t("fields.language")}</p>
+								<SegmentedControl
+									options={LANGUAGES.map((l) => t(`languages.${l}`))}
+									value={t(`languages.${value.language}`)}
+									onValueChange={(label) =>
+										set(
+											"language",
+											LANGUAGES.find((l) => t(`languages.${l}`) === label) ??
+												value.language,
+										)
+									}
+								/>
+							</div>
 						</div>
-					</div>
-				)}
-				{step === 3 && <Review draft={value} />}
+					)}
+					{step === 3 && <Review draft={value} />}
+				</div>
 
 				{entry?.state === "rejected" && (
 					<p role="alert" className="text-destructive text-sm">
@@ -350,10 +355,11 @@ function TitleStep({
 		const timer = setTimeout(() => setDebounced(value.trim()), 350);
 		return () => clearTimeout(timer);
 	}, [value]);
+	// Near-duplicates of the title being typed (#247): trigram similarity, accents and typos
+	// forgiven. A query for an older title is replaced by the one for the current title, and a
+	// failure is silent: the Member can always go on and submit.
 	const related = useQuery({
-		...orpc.questions.list.queryOptions({
-			input: { q: debounced, sort: "hot", limit: 5 },
-		}),
+		...orpc.questions.similar.queryOptions({ input: { title: debounced } }),
 		enabled: debounced.length >= 8,
 		meta: { silent: true },
 	});

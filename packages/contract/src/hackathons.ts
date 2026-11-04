@@ -24,11 +24,23 @@ export const JudgingCriterion = z.object({
 	scoredBy: z.enum(["jury", "public", "peers"]),
 });
 
+/** One way, by hand (#325): a draft is never public; an archived Hackathon leaves the lists. */
+export const HackathonStatus = z.enum([
+	"draft",
+	"published",
+	"ended",
+	"archived",
+]);
+
 export const Hackathon = z.object({
 	slug: z.string(),
 	name: z.string(),
+	/** Name of the Organization that lists it. */
 	organizer: z.string(),
+	/** Slug of that Organization's public profile; null while it is not public (suspended). */
+	organizationSlug: z.string().nullable(),
 	summary: z.string(),
+	status: HackathonStatus,
 	teamMin: z.number().int(),
 	teamMax: z.number().int(),
 	milestones: z.array(Milestone),
@@ -37,10 +49,23 @@ export const Hackathon = z.object({
 	sourceUrl: z.url(),
 	/** Where non-public information came from, shown next to « vérifié le ». */
 	sourceNote: z.string().nullable(),
+	/** When the Hackathon opens; null when unknown (no repository check then). */
+	opensAt: Timestamp.nullable(),
+	/** Teams and submissions run on CodeSphere; false when the event registers elsewhere (sourceUrl). */
+	teamsEnabled: z.boolean(),
 	verifiedAt: Timestamp,
 	/** Increments on every edit; an Admin update with a stale version gets CONFLICT. */
 	version: z.number().int().min(1),
 });
+
+export const HACKATHON_REPORT_REASONS = [
+	"misleading",
+	"scam",
+	"unlawful",
+	"spam",
+	"other",
+] as const;
+export const HackathonReportReason = z.enum(HACKATHON_REPORT_REASONS);
 
 export const hackathonsContract = {
 	list: base
@@ -83,4 +108,15 @@ export const hackathonsContract = {
 		)
 		.input(z.object({ slug: z.string() }))
 		.output(Hackathon),
+	/** A signed-in Member tells the Admins a published Hackathon is wrong (#326). Humans only. */
+	report: base
+		.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {} })
+		.input(
+			z.object({
+				slug: z.string(),
+				reason: HackathonReportReason,
+				comment: z.string().trim().max(300).optional(),
+			}),
+		)
+		.output(z.object({ success: z.boolean() })),
 };

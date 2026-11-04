@@ -7,8 +7,9 @@ import { createDb } from "@codesphere/db";
 import { auditLog } from "@codesphere/db/schema/audit";
 import { user } from "@codesphere/db/schema/auth";
 import { answers, questions, votes } from "@codesphere/db/schema/questions";
+import { reputationEvents } from "@codesphere/db/schema/reputation";
 import { createRouterClient } from "@orpc/server";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, or } from "drizzle-orm";
 
 import { appRouter } from "../routers";
 import { testContext } from "../test-context";
@@ -99,6 +100,14 @@ describe.skipIf(!url)("answers, votes and limits on Postgres", () => {
 			.from(questions)
 			.where(inArray(questions.authorId, ids));
 		const questionIds = owned.map((q) => q.id);
+		await db
+			.delete(reputationEvents)
+			.where(
+				or(
+					inArray(reputationEvents.userId, ids),
+					inArray(reputationEvents.actorId, ids),
+				),
+			);
 		await db.delete(votes).where(inArray(votes.userId, ids));
 		await db.delete(answers).where(inArray(answers.authorId, ids));
 		await db.delete(auditLog).where(inArray(auditLog.actorId, ids));

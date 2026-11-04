@@ -241,8 +241,7 @@ function LoginCard({
 							<Button
 								type="button"
 								variant="link"
-								size="sm"
-								className="h-auto px-0"
+								size="inline"
 								onClick={resendCode}
 								disabled={busy || resendIn > 0}
 							>
@@ -252,9 +251,8 @@ function LoginCard({
 							</Button>
 							<Button
 								type="button"
-								variant="link"
-								size="sm"
-								className="h-auto px-0 text-muted-foreground"
+								variant="link-muted"
+								size="inline"
 								onClick={changeEmail}
 								disabled={busy}
 							>
@@ -272,11 +270,8 @@ function LoginCard({
 					onCheckedChange={(checked) => setAccepted(checked === true)}
 					className="mt-0.5"
 				/>
-				<Label
-					htmlFor={consentId}
-					className="font-normal text-muted-foreground text-xs leading-relaxed"
-				>
-					<span>
+				<Label htmlFor={consentId}>
+					<span className="font-normal text-muted-foreground text-xs leading-relaxed">
 						J'accepte les{" "}
 						<a
 							href={termsHref}

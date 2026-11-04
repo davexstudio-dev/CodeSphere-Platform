@@ -33,6 +33,8 @@ type ReasonDialogProps = {
 	reasonRequired?: boolean;
 	reasonLabel?: string;
 	cancelLabel?: string;
+	/** Armed button text of a rejection, given the seconds left. */
+	countdownLabel?: (seconds: number) => string;
 	/** Called once, with the trimmed reason (« » when the reason is optional and left empty). */
 	onSubmit: (reason: string) => void;
 	/** The API's refusal, shown under the reason. */
@@ -53,6 +55,7 @@ function ReasonDialog({
 	reasonRequired = true,
 	reasonLabel,
 	cancelLabel = "Annuler",
+	countdownLabel,
 	onSubmit,
 	error,
 }: ReasonDialogProps) {
@@ -104,6 +107,7 @@ function ReasonDialog({
 					{tone === "reject" ? (
 						<ConfirmTwoStep
 							label={confirmLabel}
+							{...(countdownLabel ? { confirmLabel: countdownLabel } : {})}
 							disabled={!valid}
 							onConfirm={submit}
 							onArmedChange={setArmed}

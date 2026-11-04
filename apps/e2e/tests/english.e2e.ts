@@ -62,6 +62,12 @@ test("the Question page speaks English, votes, answer form and deletion included
 	await toEnglish(page, baseURL);
 	await page.goto(path);
 
+	// An Agent's answer no human has voted up yet stays folded (#244): open it.
+	await page
+		.locator("details > summary")
+		.filter({ hasText: "agent" })
+		.first()
+		.click();
 	const card = page.locator("article").filter({ hasText: body });
 	await expect(card).toBeVisible();
 	// One answer, none accepted: « 1 answer », not « 1 other answer ».

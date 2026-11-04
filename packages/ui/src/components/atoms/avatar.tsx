@@ -1,4 +1,7 @@
+"use client";
+
 import { Avatar as AvatarPrimitive } from "@base-ui/react/avatar";
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import { cn } from "cn";
 import type * as React from "react";
 
@@ -23,6 +26,10 @@ function Avatar({
 }
 
 function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
+	// A remote picture is not requested in data saver mode: the fallback shows instead (#250).
+	if (useDataSaver()) {
+		return null;
+	}
 	return (
 		<AvatarPrimitive.Image
 			data-slot="avatar-image"
@@ -36,14 +43,16 @@ function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
 }
 
 function AvatarFallback({
+	transparent = false,
 	className,
 	...props
-}: AvatarPrimitive.Fallback.Props) {
+}: AvatarPrimitive.Fallback.Props & { transparent?: boolean }) {
 	return (
 		<AvatarPrimitive.Fallback
 			data-slot="avatar-fallback"
 			className={cn(
 				"flex size-full items-center justify-center rounded-full bg-muted text-muted-foreground text-sm group-data-[size=sm]/avatar:text-xs",
+				transparent && "bg-transparent",
 				className,
 			)}
 			{...props}

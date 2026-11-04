@@ -1,0 +1,26 @@
+/* Tabs sliding (transitions.dev 16). The pill reads its box from --pill-* (written by
+   useSlidingPill for the segmented control) or, inside a Base UI TabsList, from the
+   indicator's own --active-tab-* variables. Only translate / width / height tween. */
+.t-tabs-pill {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 0;
+	pointer-events: none;
+	border-radius: inherit;
+	translate: var(--pill-x, var(--active-tab-left, 0px))
+		var(--pill-y, var(--active-tab-top, 0px));
+	width: var(--pill-w, var(--active-tab-width, 0px));
+	height: var(--pill-h, var(--active-tab-height, 0px));
+	transition:
+		translate var(--tabs-dur) var(--tabs-ease),
+		width var(--tabs-dur) var(--tabs-ease),
+		height var(--tabs-dur) var(--tabs-ease);
+	will-change: translate, width, height;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-tabs-pill {
+		transition: none !important;
+	}
+}

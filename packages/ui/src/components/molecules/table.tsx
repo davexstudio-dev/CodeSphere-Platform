@@ -1,3 +1,4 @@
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { cn } from "@codesphere/ui/lib/utils";
 
 type TableProps = React.ComponentProps<"table"> & {
@@ -10,14 +11,22 @@ type TableProps = React.ComponentProps<"table"> & {
 
 function Table({ className, maxHeight, ...props }: TableProps) {
 	return (
-		<div
+		<ScrollArea
 			data-slot="table-container"
 			data-scroll={maxHeight === undefined ? undefined : ""}
-			style={maxHeight === undefined ? undefined : { maxHeight }}
+			orientation={maxHeight === undefined ? "horizontal" : "both"}
+			style={
+				maxHeight === undefined
+					? undefined
+					: ({
+							"--max-height":
+								typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight,
+						} as React.CSSProperties)
+			}
 			className={cn(
-				"relative w-full overflow-x-auto rounded-lg border border-border",
+				"w-full rounded-lg border border-border",
 				maxHeight !== undefined &&
-					"overflow-y-auto [&_thead_th]:sticky [&_thead_th]:top-0 [&_thead_th]:z-[1] [&_thead_th]:bg-muted",
+					"max-h-(--max-height) [&_thead_th]:sticky [&_thead_th]:top-0 [&_thead_th]:z-1 [&_thead_th]:bg-muted",
 			)}
 		>
 			<table
@@ -25,7 +34,7 @@ function Table({ className, maxHeight, ...props }: TableProps) {
 				className={cn("w-full caption-bottom text-sm", className)}
 				{...props}
 			/>
-		</div>
+		</ScrollArea>
 	);
 }
 

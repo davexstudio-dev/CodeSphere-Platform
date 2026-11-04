@@ -1,7 +1,9 @@
+import { readFileSync } from "node:fs";
 import {
 	type Browser,
 	type BrowserContext,
 	expect,
+	type Locator,
 	type Page,
 	test,
 } from "@playwright/test";
@@ -16,11 +18,13 @@ const MODERATOR_EMAIL = "e2e.moderator@example.com";
 
 // Pages of the back-office, in the order of the sidebar.
 const MENUS = [
-	{ name: "Tableau de bord", path: "/dashboard" },
-	{ name: "Modération", path: "/admin" },
+	{ name: "Tableau de bord", path: "/admin" },
+	{ name: "Modération", path: "/admin/moderation" },
 	{ name: "Hackathon", path: "/admin/hackathons" },
 	{ name: "Tags", path: "/admin/tags" },
+	{ name: "Web Vitals", path: "/admin/vitals" },
 	{ name: "Journal d'audit", path: "/admin/audit" },
+	{ name: "Équipe", path: "/admin/staff" },
 ] as const;
 
 // One sign-in per staff account: the sign-in endpoint is rate-limited, and a session is all the
@@ -68,6 +72,17 @@ test.beforeEach(({ browser: _browser }, info) => info.setTimeout(120_000));
 
 const sidebar = (page: Page) =>
 	page.getByRole("navigation", { name: "Administration" });
+// The groups of the sidebar start folded but the one of the current screen: open them all before
+// reaching for a link.
+const expandGroups = async (nav: Locator) => {
+	const folded = nav.locator("button[aria-expanded=false]");
+	while ((await folded.count()) > 0) {
+		await folded.first().click();
+	}
+};
+// The staff badge at the top left of the sidebar (#286) and its menu.
+const accountMenu = (page: Page) =>
+	page.getByRole("button", { name: "Menu du compte" });
 const confirm = (page: Page) =>
 	page.getByRole("button", { name: /^Confirmer/ });
 
@@ -92,15 +107,16 @@ test.describe("access", () => {
 		baseURL,
 	}) => {
 		for (const [email, role] of [
-			[MODERATOR_EMAIL, "moderator"],
-			[ADMIN_EMAIL, "admin"],
+			[MODERATOR_EMAIL, "Modérateur"],
+			[ADMIN_EMAIL, "Admin"],
 		] as const) {
 			const page = await sessionAs(browser, baseURL, email);
-			await page.goto("/dashboard");
+			await page.goto("/admin");
 			await expect(
 				page.getByRole("heading", { name: "Tableau de bord" }),
 			).toBeVisible();
-			await expect(page.getByText(role, { exact: true })).toBeVisible();
+			// The staff badge at the top left of the sidebar (#286) names the role.
+			await expect(accountMenu(page)).toContainText(role);
 		}
 	});
 });
@@ -111,11 +127,13 @@ test.describe("menus", () => {
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/dashboard");
+		await page.goto("/admin");
 		for (const { name, path } of MENUS) {
+			await expandGroups(sidebar(page));
 			await sidebar(page).getByRole("link", { name }).click();
 			await expect(page).toHaveURL(new RegExp(`${path}$`));
 			await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
+			await expandGroups(sidebar(page));
 			await expect(sidebar(page).getByRole("link", { name })).toHaveAttribute(
 				"aria-current",
 				"page",
@@ -128,7 +146,7 @@ test.describe("menus", () => {
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/dashboard");
+		await page.goto("/admin");
 		const metrics = [
 			"Membres actifs",
 			"Questions posées",
@@ -152,10 +170,13 @@ test.describe("menus", () => {
 
 	test("the sidebar collapses and expands", async ({ browser, baseURL }) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/dashboard");
+		await page.goto("/admin");
 		const shell = page.locator("[data-slot=admin-shell]");
 		await page.getByRole("button", { name: "Réduire le menu" }).click();
 		await expect(shell).toHaveAttribute("data-collapsed", "true");
+		// Icon only, the staff badge stays a circle around its round avatar (not a squeezed pill).
+		const badge = await accountMenu(page).boundingBox();
+		expect(badge?.width).toBeCloseTo(badge?.height ?? 0, 0);
 		await page.getByRole("button", { name: "Déployer le menu" }).click();
 		await expect(shell).toHaveAttribute("data-collapsed", "false");
 	});
@@ -165,12 +186,14 @@ test.describe("menus", () => {
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/dashboard");
-		await page.getByRole("button", { name: "English" }).click();
+		await page.goto("/admin");
+		await accountMenu(page).click();
+		await page.getByRole("menuitemradio", { name: "English" }).click();
 		await expect(
 			page.getByRole("heading", { level: 1, name: "Dashboard" }),
 		).toBeVisible();
-		await page.getByRole("button", { name: "Français" }).click();
+		await page.getByRole("button", { name: "Account menu" }).click();
+		await page.getByRole("menuitemradio", { name: "Français" }).click();
 		await expect(
 			page.getByRole("heading", { level: 1, name: "Tableau de bord" }),
 		).toBeVisible();
@@ -180,11 +203,130 @@ test.describe("menus", () => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL, {
 			fresh: true,
 		});
-		await page.goto("/dashboard");
-		await page.getByRole("button", { name: "Se déconnecter" }).click();
-		await expect(page).toHaveURL(baseURL ? `${baseURL}/` : "/");
 		await page.goto("/admin");
+		await accountMenu(page).click();
+		await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
+		await expect(page).toHaveURL(baseURL ? `${baseURL}/` : "/");
+		await page.goto("/admin/moderation");
 		await expect(page).toHaveURL(/\/signin/);
+	});
+});
+
+test.describe("staff badge and account (#286)", () => {
+	test("the badge menu leads to « Mon compte » and back to the site", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		await page.goto("/admin");
+		await accountMenu(page).click();
+		await expect(page.getByText(ADMIN_EMAIL)).toBeVisible();
+		await page.getByRole("menuitem", { name: "Mon compte" }).click();
+		await expect(page).toHaveURL(/\/admin\/account$/);
+		await expect(
+			page.getByRole("heading", { level: 1, name: "Mon compte" }),
+		).toBeVisible();
+		await accountMenu(page).click();
+		await page.getByRole("menuitem", { name: "Retour au site" }).click();
+		await expect(page).toHaveURL(baseURL ? `${baseURL}/` : "/");
+	});
+
+	test("« Mon compte » shows the profile, this session and the activity", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, MODERATOR_EMAIL);
+		await page.goto("/admin/account");
+		const profile = page.locator("section", { hasText: "Profil" }).first();
+		await expect(profile.getByText(MODERATOR_EMAIL)).toBeVisible();
+		await page.getByRole("tab", { name: "Sécurité" }).click();
+		await expect(page.getByText("Cette session")).toBeVisible();
+		await page.getByRole("tab", { name: "Activité" }).click();
+		await expect(
+			page.getByRole("heading", { name: "Mon activité" }),
+		).toBeVisible();
+	});
+
+	test("a staff member renames their account and the badge follows", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, MODERATOR_EMAIL);
+		await page.goto("/admin/account");
+		const field = page.getByLabel("Nom affiché");
+		const original = await field.inputValue();
+		const renamed = `${original} Test`;
+		await field.fill(renamed);
+		await page.getByRole("button", { name: "Enregistrer" }).click();
+		await expect(accountMenu(page)).toContainText(renamed);
+		// Put the name back: the other tests read it.
+		await field.fill(original);
+		await page.getByRole("button", { name: "Enregistrer" }).click();
+		await expect(accountMenu(page)).toContainText(original);
+	});
+
+	test("an Admin invites two emails and the pending offers appear", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		const stamp = Date.now().toString(36);
+		const first = `e2e.invited1.${stamp}@example.com`;
+		const second = `e2e.invited2.${stamp}@example.com`;
+		await page.goto("/admin/staff");
+		await page.getByRole("button", { name: "Inviter" }).click();
+		const dialog = page.getByRole("dialog", { name: "Inviter dans l'équipe" });
+		await dialog.getByLabel("Adresses e-mail").fill(`${first}, ${second}`);
+		await expect(dialog.getByText("2 adresses")).toBeVisible();
+		await dialog
+			.getByRole("button", { name: "Envoyer les invitations" })
+			.click();
+		await expect(dialog.getByText("Invitation créée")).toHaveCount(2);
+		await dialog.getByRole("button", { name: "Fermer" }).first().click();
+		await expect(page.getByText("Invitations en attente")).toBeVisible();
+		await page.getByRole("button", { name: first }).click();
+		await expect(page.getByRole("heading", { name: first })).toBeVisible();
+		// Revoke it: the offer leaves the list.
+		await page.getByRole("button", { name: "Révoquer l'invitation" }).click();
+		await confirm(page).click();
+		await expect(page.getByRole("button", { name: first })).toHaveCount(0);
+		await expect(page.getByRole("button", { name: second })).toBeVisible();
+	});
+
+	test("a Moderator does not get the team screen", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, MODERATOR_EMAIL);
+		await page.goto("/admin");
+		await expect(
+			sidebar(page).getByRole("link", { name: "Équipe" }),
+		).toHaveCount(0);
+		await page.goto("/admin/staff");
+		await expect(
+			page.getByText("Écran non accessible à votre rôle"),
+		).toBeVisible();
+	});
+
+	test("an invited email gets the role at its first sign-in", async ({
+		browser,
+		baseURL,
+	}) => {
+		const admin = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		const guest = `e2e.guest.${Date.now().toString(36)}@example.com`;
+		await admin.goto("/admin/staff");
+		await admin.getByRole("button", { name: "Inviter" }).click();
+		const dialog = admin.getByRole("dialog", { name: "Inviter dans l'équipe" });
+		await dialog.getByLabel("Adresses e-mail").fill(guest);
+		await dialog
+			.getByRole("button", { name: "Envoyer les invitations" })
+			.click();
+		await expect(dialog.getByText("Invitation créée")).toBeVisible();
+
+		// The guest signs in for the first time: the account is created and the offer applied.
+		const page = await sessionAs(browser, baseURL, guest, { fresh: true });
+		await page.goto("/admin");
+		await expect(accountMenu(page)).toContainText("Modérateur");
 	});
 });
 
@@ -216,7 +358,10 @@ test.describe("tags", () => {
 		await page.getByRole("button", { name: "Supprimer ce Tag" }).click();
 		await confirm(page).click();
 		await expect(inList(renamed)).toHaveCount(0);
-		await expect(page.getByText("Choisissez un Tag")).toBeVisible();
+		// The screen falls back on the first Tag of the list (#291).
+		await expect(
+			page.getByRole("button", { name: "Supprimer ce Tag" }),
+		).toBeVisible();
 	});
 
 	test("a protected Tag cannot be renamed or deleted", async ({
@@ -235,6 +380,51 @@ test.describe("tags", () => {
 		).toBeDisabled();
 	});
 
+	test("an Admin reserves a Tag, which then cannot be edited, and lifts it", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		const name = `e2e-reserved-${Date.now().toString(36)}`;
+		await page.goto("/admin/tags");
+		await page.getByRole("button", { name: "Créer un Tag" }).click();
+		await page.getByLabel("Nom").fill(name);
+		await page.getByRole("switch", { name: "Réserver ce Tag" }).click();
+		await page.getByRole("button", { name: "Créer", exact: true }).click();
+		await expect(page.getByRole("heading", { name })).toBeVisible();
+		await expect(
+			page.getByText("Réservé", { exact: true }).first(),
+		).toBeVisible();
+		await expect(page.getByRole("button", { name: "Modifier" })).toHaveCount(0);
+		await expect(
+			page.getByRole("button", { name: "Supprimer ce Tag" }),
+		).toBeDisabled();
+
+		const reserved = page.getByRole("switch", { name: "Réservé" });
+		await reserved.click();
+		await expect(page.getByRole("button", { name: "Modifier" })).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: "Supprimer ce Tag" }),
+		).toBeEnabled();
+		await page.getByRole("button", { name: "Supprimer ce Tag" }).click();
+		await confirm(page).click();
+		// The screen falls back on the first Tag of the list (#291).
+		await expect(
+			page.getByRole("button", { name: "Supprimer ce Tag" }),
+		).toBeVisible();
+	});
+
+	test("a system Tag stays reserved", async ({ browser, baseURL }) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		await page.goto("/admin/tags");
+		await page
+			.getByRole("button", { name: /^roadmap/ })
+			.first()
+			.click();
+		await expect(page.getByRole("switch", { name: "Réservé" })).toBeDisabled();
+		await expect(page.getByText("toujours réservé")).toBeVisible();
+	});
+
 	test("a duplicate name is refused", async ({ browser, baseURL }) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
 		await page.goto("/admin/tags");
@@ -251,7 +441,7 @@ test.describe("moderation", () => {
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/admin");
+		await page.goto("/admin/moderation");
 		await page.getByRole("button", { name: /Awa Seed/ }).click();
 		await expect(page.getByRole("heading", { name: "Awa Seed" })).toBeVisible();
 
@@ -277,7 +467,7 @@ test.describe("moderation", () => {
 			).toBeVisible();
 		} finally {
 			// Leave the seeded Member as found, whatever failed above.
-			await page.goto("/admin");
+			await page.goto("/admin/moderation");
 			await page.getByRole("button", { name: /Awa Seed/ }).click();
 			const reactivate = page.getByRole("button", { name: "Réactiver" });
 			if (await reactivate.isVisible()) {
@@ -302,7 +492,7 @@ test.describe("moderation", () => {
 		// The Admin has to exist: signing in creates the account.
 		await sessionAs(browser, baseURL, ADMIN_EMAIL);
 		const page = await sessionAs(browser, baseURL, MODERATOR_EMAIL);
-		await page.goto("/admin");
+		await page.goto("/admin/moderation");
 		await page.getByLabel("Rechercher un Member").fill(ADMIN_EMAIL);
 		await page.getByRole("button", { name: /e2e/i }).first().click();
 		await expect(page.getByText(/Rang égal ou supérieur/)).toBeVisible();
@@ -316,10 +506,9 @@ test.describe("moderation", () => {
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
-		await page.goto("/admin");
-		await expect(
-			page.getByText("Choisissez un Member dans la liste."),
-		).toBeVisible();
+		await page.goto("/admin/moderation");
+		// The screen opens on the first Member of the list (#291).
+		await expect(page.locator("[data-slot=record-sheet]")).toBeVisible();
 		await page.getByRole("button", { name: "Actifs" }).first().click();
 		await expect(
 			page.getByRole("button", { name: "Actifs" }).first(),
@@ -393,6 +582,96 @@ test.describe("audit log", () => {
 			page.getByText("Aucun événement pour ces filtres."),
 		).toHaveCount(0);
 	});
+
+	// #287: the ⋯ menu of a row. The Tag events come from the Tag CRUD test above.
+	const rowMenus = (page: Page) =>
+		page.getByRole("button", { name: /^Options de la ligne/ });
+
+	test("the row menu shows the detail, filters and opens the target, by keyboard too", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		await page.goto("/admin/audit");
+		await page.getByLabel("Type de cible").fill("tag");
+		await expect(rowMenus(page).first()).toBeVisible();
+
+		// Keyboard: Enter opens the menu on its first item, Enter again opens the detail.
+		await rowMenus(page).first().focus();
+		await page.keyboard.press("Enter");
+		await expect(
+			page.getByRole("menuitem", { name: "Voir le détail" }),
+		).toBeFocused();
+		await page.keyboard.press("Enter");
+		const detail = page.getByRole("dialog", { name: "Événement du journal" });
+		await expect(detail).toBeVisible();
+		await expect(detail.getByText("Identifiant de la cible")).toBeVisible();
+		await page.keyboard.press("Escape");
+		await expect(detail).toBeHidden();
+
+		// Filter by this actor, then by this target; « Réinitialiser » clears both.
+		await rowMenus(page).first().click();
+		await page
+			.getByRole("menuitem", { name: "Filtrer par cet acteur" })
+			.click();
+		await expect(page.getByLabel("Acteur (identifiant)")).not.toHaveValue("");
+		await rowMenus(page).first().click();
+		await page
+			.getByRole("menuitem", { name: "Filtrer par cette cible" })
+			.click();
+		await expect(page.getByLabel("Identifiant de cible")).not.toHaveValue("");
+		await page
+			.getByRole("button", { name: "Réinitialiser les filtres" })
+			.click();
+		await expect(page.getByLabel("Acteur (identifiant)")).toHaveValue("");
+		await expect(page.getByLabel("Identifiant de cible")).toHaveValue("");
+
+		// A Tag event leads to the Tags screen.
+		await page.getByLabel("Type de cible").fill("tag");
+		await rowMenus(page).first().click();
+		await page.getByRole("menuitem", { name: "Ouvrir la cible" }).click();
+		await expect(page).toHaveURL(/\/admin\/tags$/);
+	});
+
+	test("an Admin exports the filtered journal as CSV", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		await page.goto("/admin/audit");
+		await page.getByLabel("Type de cible").fill("tag");
+		await expect(rowMenus(page).first()).toBeVisible();
+		await rowMenus(page).first().click();
+		const downloading = page.waitForEvent("download");
+		await page.getByRole("menuitem", { name: "Exporter en CSV" }).click();
+		const download = await downloading;
+		expect(download.suggestedFilename()).toMatch(
+			/^audit-log-\d{4}-\d{2}-\d{2}\.csv$/,
+		);
+		const text = readFileSync(await download.path(), "utf8");
+		// A BOM for Excel, then the header and at least one Tag event.
+		expect(text.replace(/^﻿/, "")).toMatch(
+			/^id,date,actor_id,action,target_type,target_id,reason,fields,from,to\r\n/,
+		);
+		expect(text).toContain(",tag,");
+	});
+
+	test("a Moderator reads the journal but the export is greyed, with the reason", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, MODERATOR_EMAIL);
+		await page.goto("/admin/audit");
+		await expect(rowMenus(page).first()).toBeVisible();
+		await rowMenus(page).first().click();
+		const exportItem = page.getByRole("menuitem", { name: /Exporter en CSV/ });
+		await expect(exportItem).toHaveAttribute("aria-disabled", "true");
+		await expect(exportItem).toContainText("Réservé aux Admins");
+		// The rest of the menu still works.
+		await expect(
+			page.getByRole("menuitem", { name: "Voir le détail" }),
+		).toBeEnabled();
+	});
 });
 
 test.describe("responsive", () => {
@@ -438,18 +717,129 @@ test.describe("responsive", () => {
 		expect(record?.width ?? 0).toBeGreaterThan(200);
 	});
 
-	test("on a phone the menu is a scrolling bar and the logo stays round", async ({
+	test("folded to icons, a group opens its entries in a menu", async ({
+		browser,
+		baseURL,
+	}) => {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		await page.setViewportSize({ width: 1280, height: 800 });
+		await page.goto("/admin");
+		await page.getByRole("button", { name: "Réduire le menu" }).click();
+		await sidebar(page).getByRole("button", { name: "Contenu" }).click();
+		await page.getByRole("menuitem", { name: "Tags" }).click();
+		await expect(page).toHaveURL(/\/admin\/tags$/);
+	});
+
+	test("on a phone the menu opens in a sheet, closes on a link, and the logo stays round", async ({
 		browser,
 		baseURL,
 	}) => {
 		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
 		await page.setViewportSize({ width: 375, height: 800 });
-		await page.goto("/dashboard");
-		await expect(
-			sidebar(page).getByRole("link", { name: "Tableau de bord" }),
-		).toBeVisible();
-		const mark = page.locator("[data-slot=logo] > span").first();
+		await page.goto("/admin");
+		await page.getByRole("button", { name: "Menu", exact: true }).click();
+		const sheet = page.getByRole("dialog");
+		await expect(sheet.getByText("Contenu", { exact: true })).toBeVisible();
+		await expandGroups(
+			sheet.getByRole("navigation", { name: "Administration" }),
+		);
+		await sheet.getByRole("link", { name: "Tags" }).click();
+		await expect(page).toHaveURL(/\/admin\/tags$/);
+		await expect(sheet).toBeHidden();
+		const mark = page.locator("[data-slot=logo] > span:visible").first();
 		const size = await mark.boundingBox();
 		expect(size?.width).toBeCloseTo(size?.height ?? 0, 0);
+	});
+});
+
+// The API is simulated: a real post needs an official account, and must never leave a test run.
+test.describe("social publication", () => {
+	const QUESTION = {
+		id: "11111111-1111-4111-8111-111111111111",
+		title: "Comment payer par mobile money ?",
+		authorKind: "human",
+	};
+
+	async function publishPage(browser: Browser, baseURL: string | undefined) {
+		const page = await sessionAs(browser, baseURL, ADMIN_EMAIL);
+		const answer = (status: number, json: unknown) => ({
+			status,
+			contentType: "application/json",
+			body: JSON.stringify({ json }),
+		});
+		await page.route("**/rpc/admin/social/status", (route) =>
+			route.fulfill(answer(200, { platforms: ["bluesky"], accounts: [] })),
+		);
+		await page.route("**/rpc/questions/list*", (route) =>
+			route.fulfill(
+				answer(200, {
+					items: [
+						QUESTION,
+						{
+							...QUESTION,
+							id: "agent",
+							title: "Question d'un Agent",
+							authorKind: "agent",
+						},
+					],
+					nextCursor: null,
+				}),
+			),
+		);
+		return { page, answer };
+	}
+
+	const chooseQuestion = async (page: Page) => {
+		await page.goto("/admin/social");
+		await page.getByRole("combobox", { name: "Contenu", exact: true }).click();
+		await expect(page.getByRole("option")).toHaveText([QUESTION.title]);
+		await page.getByRole("option", { name: QUESTION.title }).click();
+	};
+	const confirmPublish = async (page: Page) => {
+		await page.getByRole("button", { name: /^Publier/ }).click();
+		await page.getByRole("button", { name: /Confirmer/ }).click();
+	};
+
+	test("an Admin publishes a Question and sees the post", async ({
+		browser,
+		baseURL,
+	}) => {
+		const { page, answer } = await publishPage(browser, baseURL);
+		const sent: unknown[] = [];
+		await page.route("**/rpc/admin/social/publish", (route) => {
+			sent.push(route.request().postDataJSON());
+			return route.fulfill(
+				answer(200, {
+					platform: "bluesky",
+					type: "question",
+					id: QUESTION.id,
+					state: "published",
+					postUrl: "https://bsky.app/p/1",
+					message: null,
+					retryable: false,
+				}),
+			);
+		});
+		await chooseQuestion(page);
+		await confirmPublish(page);
+		await expect(page.getByText("Publié.")).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: "Voir la publication" }),
+		).toHaveAttribute("href", "https://bsky.app/p/1");
+		expect(sent).toEqual([
+			{ json: { type: "question", id: QUESTION.id, platform: "bluesky" } },
+		]);
+	});
+
+	test("a refused publication says so", async ({ browser, baseURL }) => {
+		const { page, answer } = await publishPage(browser, baseURL);
+		await page.route("**/rpc/admin/social/publish", (route) =>
+			route.fulfill(
+				answer(409, { defined: true, code: "CONFLICT", message: "refused" }),
+			),
+		);
+		await chooseQuestion(page);
+		await confirmPublish(page);
+		await expect(page.getByText(/^Publication refusée/)).toBeVisible();
 	});
 });

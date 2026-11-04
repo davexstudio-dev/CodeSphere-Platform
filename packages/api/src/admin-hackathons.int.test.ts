@@ -55,10 +55,10 @@ describe.skipIf(!url)("admin.hackathons.update on Postgres (#124)", () => {
 	test("the seed carries the organisers' calendar", async () => {
 		const found = await admin().hackathons.get({ slug });
 		expect(found.milestones.map((m) => [m.key, m.startsAt, m.endsAt])).toEqual([
-			["submission_close", "2026-10-25T17:00:00.000Z", null],
-			["peer_vote", "2026-10-25T18:00:00.000Z", "2026-10-26T23:59:00.000Z"],
-			["public_vote", "2026-10-27T00:00:00.000Z", "2026-10-30T23:59:00.000Z"],
-			["jury", "2026-11-01T00:00:00.000Z", null],
+			["submission_close", "2026-11-15T17:00:00.000Z", null],
+			["peer_vote", "2026-11-15T18:00:00.000Z", "2026-11-16T23:59:00.000Z"],
+			["public_vote", "2026-11-17T00:00:00.000Z", "2026-11-20T23:59:00.000Z"],
+			["jury", "2026-11-22T00:00:00.000Z", null],
 		]);
 	});
 
@@ -66,7 +66,7 @@ describe.skipIf(!url)("admin.hackathons.update on Postgres (#124)", () => {
 		const before = await admin().hackathons.get({ slug });
 		const milestones = before.milestones.map((m) =>
 			m.key === "submission_close"
-				? { ...m, startsAt: "2026-10-26T17:00:00.000Z" }
+				? { ...m, startsAt: "2026-11-16T17:00:00.000Z" }
 				: m,
 		);
 		const updated = await admin().admin.hackathons.update({
@@ -85,7 +85,7 @@ describe.skipIf(!url)("admin.hackathons.update on Postgres (#124)", () => {
 		expect(read.sourceNote).toBe(
 			"Calendrier confirmé par les organisateurs le 13/10.",
 		);
-		expect(read.milestones[0]?.startsAt).toBe("2026-10-26T17:00:00.000Z");
+		expect(read.milestones[0]?.startsAt).toBe("2026-11-16T17:00:00.000Z");
 		expect(read.criteria.map((c) => c.weight)).toEqual([60, 40]);
 		expect(read.prizes).toEqual(before.prizes);
 	});
@@ -179,5 +179,23 @@ describe.skipIf(!url)("admin.hackathons.update on Postgres (#124)", () => {
 				name: "X",
 			}),
 		).rejects.toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	test("an Admin turns the teams on and off, and the change is audited", async () => {
+		const before = await admin().hackathons.get({ slug });
+		expect(before.teamsEnabled).toBe(false);
+		const on = await admin().admin.hackathons.update({
+			slug,
+			expectedVersion: before.version,
+			teamsEnabled: true,
+		});
+		expect(on.teamsEnabled).toBe(true);
+		expect(on.version).toBe(before.version + 1);
+		const off = await admin().admin.hackathons.update({
+			slug,
+			expectedVersion: on.version,
+			teamsEnabled: false,
+		});
+		expect(off.teamsEnabled).toBe(false);
 	});
 });

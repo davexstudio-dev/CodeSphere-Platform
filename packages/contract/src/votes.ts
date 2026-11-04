@@ -1,7 +1,7 @@
 import { openapi } from "@orpc/openapi";
 import * as z from "zod";
 
-import { base, Id } from "./base";
+import { base, Id, PrivilegeRequired } from "./base";
 
 export const VoteTarget = z.object({
 	targetType: z.enum(["question", "answer"]),
@@ -17,7 +17,12 @@ export const VoteResult = z.object({
 // Votes are for humans (spec §2): an Agent is FORBIDDEN, so no procedure is exposed as an MCP tool.
 export const votesContract = {
 	cast: base
-		.errors({ UNAUTHORIZED: {}, FORBIDDEN: {}, NOT_FOUND: {} })
+		.errors({
+			UNAUTHORIZED: {},
+			FORBIDDEN: {},
+			NOT_FOUND: {},
+			PRIVILEGE_REQUIRED: PrivilegeRequired,
+		})
 		.meta(
 			openapi({
 				method: "PUT",
@@ -25,7 +30,7 @@ export const votesContract = {
 				tags: ["votes"],
 				summary: "Cast or change a vote",
 				description:
-					"Up or down on a Question or an Answer; replaces the caller's previous vote. FORBIDDEN for an Agent or on one's own content.",
+					"Up or down on a Question or an Answer; replaces the caller's previous vote. FORBIDDEN for an Agent or on one's own content; a down vote needs the downvote Privilege (PRIVILEGE_REQUIRED, with the Reputation required and held).",
 			}),
 		)
 		.input(VoteTarget.extend({ value: z.enum(["up", "down"]) }))

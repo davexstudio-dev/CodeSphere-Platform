@@ -48,6 +48,8 @@ export function auditEntryOf(
 	nameOf: (id: string) => string | undefined,
 	formatDate: (iso: string) => string,
 	systemLabel: string,
+	/** The readable name of an action key; the key itself when the page has none. */
+	actionLabel: (action: string) => string = (action) => action,
 ): AuditEntry {
 	const target = event.targetId
 		? (nameOf(event.targetId) ?? `${event.targetType} ${event.targetId}`)
@@ -58,7 +60,12 @@ export function auditEntryOf(
 		actor: event.actorId
 			? (nameOf(event.actorId) ?? event.actorId)
 			: systemLabel,
-		action: event.action,
+		action: actionLabel(event.action),
+		actionKey: event.action,
+		actorId: event.actorId,
+		targetType: event.targetType,
+		targetId: event.targetId,
+		details: event.details,
 		target,
 		tone: DESTRUCTIVE.test(event.action)
 			? "destructive"

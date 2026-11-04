@@ -2,6 +2,7 @@ import { isStaffRole } from "@codesphere/contract/roles";
 import { redirect } from "next/navigation";
 
 import { AdminIdentityProvider } from "@/components/admin-identity";
+import { ConsentGate } from "@/components/consent-gate";
 import { getServerSession } from "@/lib/server-session";
 
 // Guard of every /admin page (#120): no session → /signin, a non-Admin → home. The API stays
@@ -23,8 +24,11 @@ export default async function AdminLayout({
 				name: session.user.name,
 				email: session.user.email,
 				role: session.user.role ?? "member",
+				createdAt: new Date(session.user.createdAt).toISOString(),
+				emailVerified: session.user.emailVerified,
 			}}
 		>
+			<ConsentGate />
 			{children}
 		</AdminIdentityProvider>
 	);

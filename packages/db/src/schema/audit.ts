@@ -9,7 +9,16 @@ import {
 
 import { user } from "./auth";
 
-export type AuditDetails = { fields?: string[]; reason?: string };
+/** `from`/`to`: the roles of a role change (#285), never a personal value. */
+export type AuditDetails = {
+	fields?: string[];
+	reason?: string;
+	from?: string;
+	to?: string;
+	/** A legal document publication (#341): which text, never the text itself. */
+	document?: string;
+	language?: string;
+};
 
 // Admin audit log (spec §2): one row per sensitive admin action. Written by admin
 // procedures, read back for the audit view. `actorId` is nullable so a log entry survives

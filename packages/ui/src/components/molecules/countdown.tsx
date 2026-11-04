@@ -94,10 +94,7 @@ function Countdown({
 					<span aria-hidden="true" className="font-bold text-3xl tabular-nums">
 						{parts ? String(parts[key]).padStart(2, "0") : "--"}
 					</span>
-					<span
-						aria-hidden="true"
-						className="text-[11px] text-muted-foreground"
-					>
+					<span aria-hidden="true" className="text-2xs text-muted-foreground">
 						{labels[key]}
 					</span>
 				</div>

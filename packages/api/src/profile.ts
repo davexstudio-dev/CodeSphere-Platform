@@ -1,5 +1,6 @@
 // Projections of a user row (spec §2): the email never leaves, and the city is visible to
-// others only once the member made it public.
+// others only once the member made it public. The Reputation is not on the row: the caller sums the
+// journal (reputationOf) and passes it in.
 export type ProfileRow = {
 	id: string;
 	name: string;
@@ -10,10 +11,11 @@ export type ProfileRow = {
 	city: string | null;
 	cityPublic: boolean;
 	hideAgentContent: boolean;
+	locale: "fr" | "en" | null;
 	tagsOnboardingSkippedAt: Date | null;
 };
 
-export function publicProfile(row: ProfileRow) {
+export function publicProfile(row: ProfileRow, reputation: number | null) {
 	return {
 		id: row.id,
 		name: row.name,
@@ -22,15 +24,17 @@ export function publicProfile(row: ProfileRow) {
 		ownerId: row.ownerId,
 		country: row.country,
 		city: row.cityPublic ? row.city : null,
+		reputation,
 	};
 }
 
-export function ownProfile(row: ProfileRow) {
+export function ownProfile(row: ProfileRow, reputation: number | null) {
 	return {
-		...publicProfile(row),
+		...publicProfile(row, reputation),
 		city: row.city,
 		cityPublic: row.cityPublic,
 		hideAgentContent: row.hideAgentContent,
+		locale: row.locale,
 		tagsOnboardingSkipped: row.tagsOnboardingSkippedAt !== null,
 	};
 }

@@ -22,6 +22,25 @@ describe("AuditLog", () => {
 		expect(html).toContain("Raison : Spam répété");
 	});
 
+	test("has no Actions column unless the page can act on an entry", () => {
+		const html = renderToStaticMarkup(<AuditLog entries={[base]} />);
+		expect(html).not.toContain("Options de la ligne");
+	});
+
+	test("offers a menu per entry when actionsOf is given", () => {
+		const html = renderToStaticMarkup(
+			<AuditLog
+				entries={[base]}
+				actionsOf={() => [
+					{ id: "detail", label: "Voir le détail", onSelect() {} },
+				]}
+			/>,
+		);
+		expect(html).toContain(
+			"Options de la ligne : Membre suspendu · troll_account",
+		);
+	});
+
 	test("shows nothing extra for an entry without a reason", () => {
 		const html = renderToStaticMarkup(<AuditLog entries={[base]} />);
 		expect(html).not.toContain("Raison");

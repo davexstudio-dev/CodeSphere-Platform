@@ -14,6 +14,7 @@
 	"dependencies": {
 		"@codesphere/api": "workspace:*",
 		"@codesphere/auth": "workspace:*",
+		"@codesphere/contract": "workspace:*",
 		"@codesphere/db": "workspace:*",
 		"@codesphere/email": "workspace:*",
 		"@codesphere/logger": "workspace:*",
@@ -31,6 +32,7 @@
 		"@orpc/server": "catalog:",
 		"@orpc/shared": "catalog:",
 		"@orpc/zod": "catalog:",
+		"@sentry/bun": "catalog:",
 		"better-auth": "catalog:",
 		"hono": "catalog:",
 		"orpc-mcp": "catalog:",

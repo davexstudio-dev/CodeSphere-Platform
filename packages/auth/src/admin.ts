@@ -28,8 +28,8 @@ export type StaffLists = {
 	moderators: ReadonlySet<string>;
 };
 
-// The role a human Member must hold right now. Re-evaluated at every sign-in, so adding an
-// email to a list promotes at the next sign-in and removing it demotes (#120).
+// The role a new human account starts with (#120): the highest list naming their verified email.
+// Only the seed: afterwards the role lives in the database and roleAtSignIn keeps it (#285).
 export function roleFor(
 	user: { email: string; emailVerified: boolean },
 	staff: StaffLists,
@@ -44,4 +44,20 @@ export function roleFor(
 		return "moderator";
 	}
 	return "member";
+}
+
+/**
+ * The role a returning human holds after signing in (#285). The role lives in the database and is
+ * managed from the back-office; the lists only seed it when the account is created (roleFor). The
+ * one exception is SUPER_ADMIN_EMAILS: a verified email there is always put back to super_admin, so
+ * the staff can never lose its top role.
+ */
+export function roleAtSignIn(
+	user: { email: string; emailVerified: boolean; role: Role | null },
+	staff: StaffLists,
+): Role {
+	if (isAdminEmail(user.email, user.emailVerified, staff.superAdmins)) {
+		return "super_admin";
+	}
+	return user.role ?? "member";
 }

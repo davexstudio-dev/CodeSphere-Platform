@@ -4,10 +4,26 @@ import type { LoggerEnv } from "@codesphere/logger";
 import type { Context as HonoContext } from "hono";
 
 import type { AppDeps } from "./app";
+import { reportRequestError } from "./report";
 
 export type CreateContextOptions = {
 	context: HonoContext<LoggerEnv>;
-	deps: Pick<AppDeps, "auth" | "db" | "release" | "notifications" | "social">;
+	deps: Pick<
+		AppDeps,
+		| "auth"
+		| "db"
+		| "release"
+		| "notifications"
+		| "social"
+		| "reporter"
+		| "privilegeThresholds"
+		| "teamDeps"
+		| "writeQuota"
+		| "agentRules"
+		| "farmingLimits"
+		| "feedRanking"
+		| "superAdminEmails"
+	>;
 };
 
 export async function createContext({
@@ -30,9 +46,29 @@ export async function createContext({
 		session: sessionForRequest(session, carriesApiKey(headers)),
 		logger: context.get("logger"),
 		requestId: context.get("requestId"),
+		traceId: context.get("traceId"),
+		reportError: (error) =>
+			reportRequestError(
+				deps.reporter,
+				context.get("logger"),
+				{
+					traceId: context.get("traceId"),
+					requestId: context.get("requestId"),
+					method: context.req.method,
+					path: context.req.path,
+				},
+				error,
+			),
 		release: deps.release,
+		privilegeThresholds: deps.privilegeThresholds,
+		teamDeps: deps.teamDeps,
+		writeQuota: deps.writeQuota,
+		agentRules: deps.agentRules,
+		farmingLimits: deps.farmingLimits,
+		feedRanking: deps.feedRanking,
 		notifications: deps.notifications,
 		social: deps.social,
+		superAdminEmails: deps.superAdminEmails,
 	};
 }
 

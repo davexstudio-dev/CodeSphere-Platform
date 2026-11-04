@@ -1,5 +1,6 @@
 "use client";
 
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { cn } from "@codesphere/ui/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
@@ -68,40 +69,45 @@ export function QuestionSteps({
 		<nav
 			aria-label={label}
 			className={cn(
-				"sticky top-16 z-10 -mx-1 overflow-x-auto bg-background/90 px-1 py-2 backdrop-blur",
+				"sticky top-16 z-10 -mx-1 bg-background/90 px-1 py-2 backdrop-blur",
 				className,
 			)}
 		>
-			<ol className="flex w-max min-w-full items-center gap-1.5">
-				{steps.map((step, index) => (
-					<li key={step.id}>
-						<a
-							href={`#${step.id}`}
-							aria-current={active === step.id ? "location" : undefined}
-							onClick={(event) => {
-								const target = document.getElementById(step.id);
-								if (target) {
-									event.preventDefault();
-									pinned.current = true;
-									target.scrollIntoView({ behavior: "smooth", block: "start" });
-									setActive(step.id);
-								}
-							}}
-							className={cn(
-								"inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1 font-medium text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50",
-								active === step.id
-									? "border-primary bg-primary text-primary-foreground"
-									: "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
-							)}
-						>
-							<span aria-hidden className="font-mono text-xs opacity-70">
-								{index + 1}
-							</span>
-							{step.label}
-						</a>
-					</li>
-				))}
-			</ol>
+			<ScrollArea orientation="horizontal">
+				<ol className="flex w-max min-w-full items-center gap-1.5">
+					{steps.map((step, index) => (
+						<li key={step.id}>
+							<a
+								href={`#${step.id}`}
+								aria-current={active === step.id ? "location" : undefined}
+								onClick={(event) => {
+									const target = document.getElementById(step.id);
+									if (target) {
+										event.preventDefault();
+										pinned.current = true;
+										target.scrollIntoView({
+											behavior: "smooth",
+											block: "start",
+										});
+										setActive(step.id);
+									}
+								}}
+								className={cn(
+									"inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1 font-medium text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50",
+									active === step.id
+										? "border-primary bg-primary text-primary-foreground"
+										: "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
+								)}
+							>
+								<span aria-hidden className="font-mono text-xs opacity-70">
+									{index + 1}
+								</span>
+								{step.label}
+							</a>
+						</li>
+					))}
+				</ol>
+			</ScrollArea>
 		</nav>
 	);
 }

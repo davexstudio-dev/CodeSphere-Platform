@@ -7,12 +7,16 @@ const row = {
 	id: "h1",
 	slug: "cadev-2026",
 	name: "Coupe d'Afrique des Développeurs 2026",
-	organizer: "Systalink",
+	organizationId: "o1",
+	opensAt: null,
+	teamsEnabled: true,
 	summary: "Concours en ligne.",
+	status: "published" as const,
 	teamMin: 2,
 	teamMax: 5,
 	sourceUrl: "https://systalink.com/fr/coupe-afrique-des-developpeurs-cadev",
 	sourceNote: "Calendrier communiqué par les organisateurs.",
+	unpublishedReason: null,
 	verifiedAt: new Date("2026-10-11T00:00:00Z"),
 	version: 3,
 	createdAt: new Date(),
@@ -22,6 +26,7 @@ const row = {
 describe("toHackathon", () => {
 	test("orders the children by position and serialises dates as ISO", () => {
 		const h = toHackathon(row, {
+			organization: { name: "Systalink", slug: "systalink" },
 			milestones: [
 				{
 					key: "jury",
@@ -58,6 +63,7 @@ describe("toHackathon", () => {
 	test("refuses a criterion scored by an unknown party instead of guessing", () => {
 		expect(() =>
 			toHackathon(row, {
+				organization: { name: "Systalink", slug: "systalink" },
 				milestones: [],
 				prizes: [],
 				criteria: [

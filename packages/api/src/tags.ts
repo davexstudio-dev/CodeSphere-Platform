@@ -1,5 +1,6 @@
 import type { Database } from "@codesphere/db";
 import { sql } from "drizzle-orm";
+import { SYSTEM_TAGS } from "./system-tags";
 
 const rowsOf = <T>(result: unknown): T[] =>
 	(Array.isArray(result)
@@ -100,11 +101,12 @@ export async function ensureTags(db: Database, names: readonly string[]) {
 		return;
 	}
 	await db.execute(sql`
-		INSERT INTO tag (name)
-		SELECT DISTINCT trim(lower(n)) FROM unnest(ARRAY[${sql.join(
+		INSERT INTO tag (name, reserved)
+		SELECT DISTINCT trim(lower(n)), trim(lower(n)) = ANY (${sql.raw(`ARRAY[${SYSTEM_TAGS.map((t) => `'${t}'`).join(", ")}]::text[]`)}) FROM unnest(ARRAY[${sql.join(
 			names.map((name) => sql`${name}`),
 			sql`, `,
 		)}]::text[]) AS n
 		WHERE trim(n) <> ''
-		ON CONFLICT (name) DO NOTHING`);
+		ON CONFLICT (name) DO UPDATE SET reserved = true
+			WHERE tag.reserved = false AND EXCLUDED.reserved = true`);
 }

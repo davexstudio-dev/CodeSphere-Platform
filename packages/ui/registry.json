@@ -1,0 +1,176 @@
+{
+	"$schema": "https://ui.shadcn.com/schema/registry.json",
+	"name": "transitions",
+	"homepage": "https://transitions.dev",
+	"items": [
+		{
+			"name": "tokens",
+			"type": "registry:block",
+			"title": "Tokens",
+			"description": "Motion tokens: the shared duration, easing, distance, scale and blur scale, and the variables of every transition below.",
+			"files": [
+				{
+					"path": "src/styles/transitions/tokens.css",
+					"type": "registry:file",
+					"target": "src/styles/transitions/tokens.css"
+				}
+			],
+			"docs": "Internal and private: adapted from transitions.dev under its license, which forbids republishing the collection. Do not publish this registry."
+		},
+		{
+			"name": "menu-dropdown",
+			"type": "registry:block",
+			"title": "Menu dropdown",
+			"description": "Dropdown that grows from its trigger (Base UI menu popup: class t-dropdown).",
+			"registryDependencies": ["@transitions/tokens"],
+			"files": [
+				{
+					"path": "src/styles/transitions/menu-dropdown.css",
+					"type": "registry:file",
+					"target": "src/styles/transitions/menu-dropdown.css"
+				}
+			],
+			"docs": "Internal and private: adapted from transitions.dev under its license, which forbids republishing the collection. Do not publish this registry."
+		},
+		{
+			"name": "tabs-sliding",
+			"type": "registry:block",
+			"title": "Tabs sliding",
+			"description": "Active pill that slides between tabs (class t-tabs-pill; useSlidingPill for hand-made tab lists).",
+			"registryDependencies": ["@transitions/tokens"],
+			"files": [
+				{
+					"path": "src/styles/transitions/tabs-sliding.css",
+					"type": "registry:file",
+					"target": "src/styles/transitions/tabs-sliding.css"
+				},
+				{
+					"path": "src/hooks/use-sliding-pill.ts",
+					"type": "registry:file",
+					"target": "src/hooks/use-sliding-pill.ts"
+				}
+			],
+			"docs": "Internal and private: adapted from transitions.dev under its license, which forbids republishing the collection. Do not publish this registry."
+		},
+		{
+			"name": "texts-reveal",
+			"type": "registry:block",
+			"title": "Texts reveal",
+			"description": "Staggered blurred rise for a headline and its supporting line.",
+			"registryDependencies": ["@transitions/tokens"],
+			"files": [
+				{
+					"path": "src/styles/transitions/texts-reveal.css",
+					"type": "registry:file",
+					"target": "src/styles/transitions/texts-reveal.css"
+				},
+				{
+					"path": "src/components/molecules/texts-reveal.tsx",
+					"type": "registry:file",
+					"target": "src/components/molecules/texts-reveal.tsx"
+				}
+			],
+			"docs": "Internal and private: adapted from transitions.dev under its license, which forbids republishing the collection. Do not publish this registry."
+		},
+		{
+			"name": "panel-reveal",
+			"type": "registry:block",
+			"title": "Panel reveal",
+			"description": "Panel that slides into a region with a cross-blur (class t-panel-slide, data-open).",
+			"registryDependencies": ["@transitions/tokens"],
+			"files": [
+				{
+					"path": "src/styles/transitions/panel-reveal.css",
+					"type": "registry:file",
+					"target": "src/styles/transitions/panel-reveal.css"
+				}
+			],
+			"docs": "Internal and private: adapted from transitions.dev under its license, which forbids republishing the collection. Do not publish this registry."
+		},
+		{
+			"name": "skeleton-reveal",
+			"type": "registry:block",
+			"title": "Skeleton reveal",
+			"description": "Skeleton that cross-fades into the loaded content.",
+			"registryDependencies": ["@transitions/tokens"],
+			"files": [
+				{
+					"path": "src/styles/transitions/skeleton-reveal.css",
+					"type": "registry:file",
+					"target": "src/styles/transitions/skeleton-reveal.css"
+				},
+				{
+					"path": "src/components/molecules/skeleton-reveal.tsx",
+					"type": "registry:file",
+					"target": "src/components/molecules/skeleton-reveal.tsx"
+				}
+			],
+			"docs": "Internal and private: adapted from transitions.dev under its license, which forbids republishing the collection. Do not publish this registry."
+		},
+		{
+			"name": "toast",
+			"type": "registry:block",
+			"title": "Toast",
+			"description": "Sonner toasts: blur and slower-in, quicker-out timing.",
+			"registryDependencies": ["@transitions/tokens"],
+			"files": [
+				{
+					"path": "src/styles/transitions/toast.css",
+					"type": "registry:file",
+					"target": "src/styles/transitions/toast.css"
+				}
+			],
+			"docs": "Internal and private: adapted from transitions.dev under its license, which forbids republishing the collection. Do not publish this registry."
+		},
+		{
+			"name": "success-check",
+			"type": "registry:block",
+			"title": "Success check",
+			"description": "Tick that fades, turns and draws in.",
+			"registryDependencies": ["@transitions/tokens"],
+			"files": [
+				{
+					"path": "src/styles/transitions/success-check.css",
+					"type": "registry:file",
+					"target": "src/styles/transitions/success-check.css"
+				},
+				{
+					"path": "src/components/atoms/success-check.tsx",
+					"type": "registry:file",
+					"target": "src/components/atoms/success-check.tsx"
+				}
+			],
+			"docs": "Internal and private: adapted from transitions.dev under its license, which forbids republishing the collection. Do not publish this registry."
+		},
+		{
+			"name": "error-shake",
+			"type": "registry:block",
+			"title": "Error shake",
+			"description": "Shake of an invalid Input or Textarea (CSS only, on aria-invalid).",
+			"registryDependencies": ["@transitions/tokens"],
+			"files": [
+				{
+					"path": "src/styles/transitions/error-shake.css",
+					"type": "registry:file",
+					"target": "src/styles/transitions/error-shake.css"
+				}
+			],
+			"docs": "Internal and private: adapted from transitions.dev under its license, which forbids republishing the collection. Do not publish this registry."
+		},
+		{
+			"name": "toggle",
+			"type": "registry:block",
+			"title": "Toggle",
+			"description": "Switch thumb that settles with a small overshoot (class t-toggle-thumb).",
+			"registryDependencies": ["@transitions/tokens"],
+			"files": [
+				{
+					"path": "src/styles/transitions/toggle.css",
+					"type": "registry:file",
+					"target": "src/styles/transitions/toggle.css"
+				}
+			],
+			"docs": "Internal and private: adapted from transitions.dev under its license, which forbids republishing the collection. Do not publish this registry."
+		}
+	]
+}

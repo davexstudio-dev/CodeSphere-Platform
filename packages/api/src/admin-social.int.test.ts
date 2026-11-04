@@ -4,10 +4,18 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { createDb } from "@codesphere/db";
 import { auditLog } from "@codesphere/db/schema/audit";
 import { user } from "@codesphere/db/schema/auth";
+import { outboxEvents } from "@codesphere/db/schema/outbox";
 import { socialPost } from "@codesphere/db/schema/social";
-import { eq, inArray } from "drizzle-orm";
+import { createMockPublisher } from "@codesphere/social";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
-import { createSocialPostStore, shareKey } from "./admin-social";
+import {
+	createSocialPostStore,
+	recentPosts,
+	SOCIAL_PUBLISH_REQUESTED,
+	sendShare,
+	shareKey,
+} from "./admin-social";
 
 const url = process.env.TEST_DATABASE_URL;
 
@@ -35,6 +43,9 @@ describe.skipIf(!url)("social_post store on Postgres (#265)", () => {
 
 	afterAll(async () => {
 		await db.delete(socialPost).where(eq(socialPost.idempotencyKey, key));
+		await db
+			.delete(outboxEvents)
+			.where(sql`${outboxEvents.payload}->>'key' = ${key}`);
 		await db.delete(auditLog).where(eq(auditLog.actorId, actorId));
 		await db.delete(user).where(inArray(user.id, [actorId]));
 	});
@@ -70,5 +81,52 @@ describe.skipIf(!url)("social_post store on Postgres (#265)", () => {
 		});
 		expect(await store.reclaim(key, actorId)).toBe(true);
 		expect((await store.find(key))?.state).toBe("pending");
+	});
+
+	test("each claim writes one event, in the same statement", async () => {
+		const events = await db
+			.select()
+			.from(outboxEvents)
+			.where(
+				and(
+					eq(outboxEvents.type, SOCIAL_PUBLISH_REQUESTED),
+					sql`${outboxEvents.payload}->>'key' = ${key}`,
+				),
+			);
+		// The claim and the reclaim above; the claim that lost wrote nothing.
+		expect(events).toHaveLength(2);
+	});
+
+	test("the consumer sends once, however many deliveries", async () => {
+		const deps = {
+			store,
+			publisher: createMockPublisher().publisher,
+			siteUrl: "https://codesphere.test",
+			loadTarget: async () =>
+				({ ok: true, title: "T", path: "/hackathons/x" }) as const,
+		};
+		const first = await sendShare(deps, key);
+		expect(first?.state).toBe("published");
+		expect(await sendShare(deps, key)).toBeNull();
+	});
+
+	test("a post left behind is settled: never sent is retryable, mid-send is unknown", async () => {
+		const age = sql`now() - interval '1 hour'`;
+		await db
+			.update(socialPost)
+			.set({ state: "pending", updatedAt: age })
+			.where(eq(socialPost.idempotencyKey, key));
+		await recentPosts(db);
+		expect(await store.find(key)).toMatchObject({
+			state: "failed",
+			retryable: true,
+		});
+		await db
+			.update(socialPost)
+			.set({ state: "sending", retryable: false, updatedAt: age })
+			.where(eq(socialPost.idempotencyKey, key));
+		const posts = await recentPosts(db);
+		expect(posts.find((post) => post.id === input.id)?.state).toBe("unknown");
+		expect(await store.reclaim(key, actorId)).toBe(false);
 	});
 });

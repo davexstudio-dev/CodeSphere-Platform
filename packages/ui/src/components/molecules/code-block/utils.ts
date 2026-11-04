@@ -33,9 +33,36 @@ export function splitLines(code: string): string[] {
  */
 export async function copyToClipboard(text: string): Promise<boolean> {
 	try {
-		await navigator.clipboard.writeText(text);
+		// The Clipboard API can wait forever on a permission prompt nobody sees: give it a second.
+		await Promise.race([
+			navigator.clipboard.writeText(text),
+			new Promise<never>((_, reject) =>
+				setTimeout(() => reject(new Error("clipboard timeout")), 1000),
+			),
+		]);
 		return true;
 	} catch {
+		return copyWithSelection(text);
+	}
+}
+
+/** Fallback when the Clipboard API is refused (no permission, no focus): select a hidden textarea. */
+function copyWithSelection(text: string): boolean {
+	const field = document.createElement("textarea");
+	field.value = text;
+	field.setAttribute("readonly", "");
+	field.style.cssText =
+		"position:fixed;top:0;left:0;opacity:0;pointer-events:none";
+	// Inside an open dialog, only its own subtree can take focus: attach to the active element's root.
+	const host =
+		document.activeElement?.closest("[role='dialog']") ?? document.body;
+	host.appendChild(field);
+	field.select();
+	try {
+		return document.execCommand("copy");
+	} catch {
 		return false;
+	} finally {
+		field.remove();
 	}
 }

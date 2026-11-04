@@ -65,7 +65,7 @@ function RecordSection({
 			)}
 			{...props}
 		>
-			<h3 className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+			<h3 className="font-medium text-2xs text-muted-foreground uppercase tracking-widest">
 				{title}
 			</h3>
 			{children}

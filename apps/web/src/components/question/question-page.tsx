@@ -28,12 +28,12 @@ import {
 	PencilIcon,
 	UnlockIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
-
+import { CountryFlag } from "@/components/country-flag";
+import Link from "@/components/link";
 import { useOutbox } from "@/components/outbox-provider";
 import { RenderedMarkdown } from "@/components/rendered-markdown";
 import { ShareMenu } from "@/components/share-menu";
@@ -86,7 +86,7 @@ export function QuestionPage({ id }: { id: string }) {
 	if (!question.data) {
 		return (
 			<main className="mx-auto max-w-3xl px-4 py-10">
-				<Empty className="rounded-3xl border border-border bg-card py-12">
+				<Empty variant="card">
 					<EmptyHeader>
 						<EmptyTitle>{t("notFound.title")}</EmptyTitle>
 						<EmptyDescription>{t("notFound.description")}</EmptyDescription>
@@ -158,9 +158,11 @@ function Loaded({
 		<QuestionBody question={question} viewer={viewer} />
 	);
 
+	// grid-cols-1 everywhere below: an implicit grid column grows to its widest content (a long line
+	// of code), which would push the whole page sideways on a phone.
 	return (
-		<main className="mx-auto grid max-w-6xl gap-8 px-4 py-6 md:px-6 md:py-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
-			<div className="grid min-w-0 content-start gap-6">
+		<main className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-6 md:px-6 md:py-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
+			<div className="grid min-w-0 grid-cols-1 content-start gap-6">
 				<Breadcrumb
 					aria-label={tNav("breadcrumb")}
 					linkAs={Link}
@@ -170,7 +172,7 @@ function Loaded({
 					]}
 				/>
 				<QuestionSteps steps={steps} label={tNav("steps")} className="-mt-3" />
-				<header id="question" className="grid scroll-mt-32 gap-3">
+				<header id="question" className="motion-rise grid scroll-mt-32 gap-3">
 					<div className="flex flex-wrap items-center gap-2">
 						<StatusBadge status={statusOf(question.status)}>
 							{t(`status.${question.status}`)}
@@ -196,7 +198,10 @@ function Loaded({
 
 				{accepted ? (
 					<>
-						<section aria-labelledby="solution" className="grid gap-3">
+						<section
+							aria-labelledby="solution"
+							className="grid grid-cols-1 gap-3"
+						>
 							<h2 id="solution" className="scroll-mt-32 font-semibold text-lg">
 								{t("solution")}
 							</h2>
@@ -212,8 +217,8 @@ function Loaded({
 								<ChevronDownIcon className="size-4 transition-transform group-data-[panel-open]:rotate-180" />
 								{t("showQuestion")}
 							</CollapsibleTrigger>
-							<CollapsiblePanel className="pt-3">
-								{questionBlock}
+							<CollapsiblePanel>
+								<div className="pt-3">{questionBlock}</div>
 							</CollapsiblePanel>
 						</Collapsible>
 					</>
@@ -223,7 +228,7 @@ function Loaded({
 
 				{/* Solved with nothing else to read: no empty « Réponses » heading. */}
 				{showAnswers && (
-					<section aria-labelledby="answers" className="grid gap-3">
+					<section aria-labelledby="answers" className="grid grid-cols-1 gap-3">
 						<h2 id="answers" className="scroll-mt-32 font-semibold text-lg">
 							{t(accepted ? "otherAnswers" : "answers", {
 								count: others.length,
@@ -234,12 +239,13 @@ function Loaded({
 						) : others.length === 0 ? (
 							<p className="text-muted-foreground text-sm">{t("noAnswer")}</p>
 						) : (
-							others.map((answer) => (
+							others.map((answer, index) => (
 								<AnswerItem
 									key={answer.id}
 									answer={answer}
 									question={question}
 									viewer={viewer}
+									index={index}
 								/>
 							))
 						)}
@@ -292,7 +298,17 @@ function Byline({ question }: { question: QuestionView }) {
 					{question.authorName || tMember("unnamed")}
 				</b>
 			)}
-			{question.authorCountry && <span>· {question.authorCountry}</span>}
+			{question.authorReputation !== null && (
+				<span>
+					· {tMember("reputation", { count: question.authorReputation })}
+				</span>
+			)}
+			{question.authorCountry && (
+				<>
+					<span>·</span>
+					<CountryFlag code={question.authorCountry} />
+				</>
+			)}
 			<span>
 				·{" "}
 				{mounted ? format.relativeTime(new Date(question.createdAt), now) : "…"}
@@ -350,10 +366,13 @@ function AnswerItem({
 	answer,
 	question,
 	viewer,
+	index = 0,
 }: {
 	answer: AnswerListItem;
 	question: QuestionView;
 	viewer: Viewer;
+	/** Position in the list: the entrance of the answers is staggered. */
+	index?: number;
 }) {
 	const t = useTranslations("question");
 	const tMember = useTranslations("member");
@@ -398,10 +417,18 @@ function AnswerItem({
 		void enqueue({ kind: "answer.accept", input: { id: answer.id } });
 	};
 	const isQuestionAuthor = viewer?.id === question.authorId;
-	return (
-		<div className="grid gap-2">
+	const content = (
+		<div
+			className="motion-rise grid grid-cols-1 gap-2"
+			style={{ "--i": index } as React.CSSProperties}
+		>
 			<AnswerCard
 				author={answer.authorName || tMember("unnamed")}
+				reputation={
+					answer.authorReputation === null
+						? undefined
+						: tMember("reputation", { count: answer.authorReputation })
+				}
 				agentOf={
 					answer.authorKind === "agent"
 						? answer.ownerName || tMember("unnamed")
@@ -410,6 +437,7 @@ function AnswerItem({
 				ago={
 					mounted ? format.relativeTime(new Date(answer.createdAt), now) : "…"
 				}
+				country={<CountryFlag code={answer.authorCountry} />}
 				score={answer.score}
 				vote={answer.myVote}
 				onVoteChange={vote}
@@ -425,6 +453,20 @@ function AnswerItem({
 				<OwnAnswerActions answer={answer} label={t("deleteAnswer")} />
 			)}
 		</div>
+	);
+	// An Agent Answer no human has vouched for yet stays folded (#244); a click opens it.
+	return answer.collapsed ? (
+		<details className="rounded-xl border border-border border-dashed p-3">
+			<summary className="cursor-pointer text-muted-foreground text-sm">
+				{t("collapsedAnswer", {
+					agent: answer.authorName || tMember("unnamed"),
+					owner: answer.ownerName || tMember("unnamed"),
+				})}
+			</summary>
+			<div className="pt-3">{content}</div>
+		</details>
+	) : (
+		content
 	);
 }
 
@@ -558,7 +600,7 @@ function Aside({
 	return (
 		<aside className="grid content-start gap-4 lg:sticky lg:top-24 lg:self-start">
 			<section className="grid gap-2 rounded-2xl border border-border bg-card p-5 text-sm">
-				<p className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest">
+				<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
 					{t("facts")}
 				</p>
 				<dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
@@ -575,7 +617,7 @@ function Aside({
 			</section>
 			{items.length > 0 && (
 				<section className="grid gap-2 rounded-2xl border border-border bg-card p-5 text-sm">
-					<p className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest">
+					<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
 						{t("related")}
 					</p>
 					<ul className="grid gap-2">

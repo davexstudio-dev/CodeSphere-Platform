@@ -1,8 +1,8 @@
 import { apiKey } from "@better-auth/api-key";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
-import { CONSENT_VERSION } from "@codesphere/contract/consent";
 import { DEFAULT_ROLE, ROLES, STAFF_ROLES } from "@codesphere/contract/roles";
 import type { Database } from "@codesphere/db";
+import { currentLegalVersions } from "@codesphere/db/legal";
 import * as schema from "@codesphere/db/schema/auth";
 import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
@@ -10,12 +10,13 @@ import { admin, emailOTP, oAuthProxy } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 
 import { ac, roles } from "./access";
-import { parseAdminEmails, roleFor } from "./admin";
+import { parseAdminEmails, roleAtSignIn, roleFor } from "./admin";
 import { readConsent } from "./consent";
 import { displayNameFor } from "./display-name";
 import { type OAuthProxyEnv, oauthProxyFrom } from "./oauth-proxy";
 import { type SocialProviderEnv, socialProvidersFrom } from "./providers";
 import { isRefusedProxyCallback } from "./proxy-target";
+import { acceptStaffInvitation } from "./staff-invitation";
 import { withoutOAuthTokens } from "./tokens";
 
 export type AuthConfig = SocialProviderEnv &
@@ -37,6 +38,14 @@ export type AuthConfig = SocialProviderEnv &
 const stripTokens = async <T extends object>(account: T) => ({
 	data: withoutOAuthTokens(account),
 });
+
+/** `fr` when the first language of the header is French, `en` otherwise (same rule as the email package). */
+export function localeOfAcceptLanguage(
+	header: string | null | undefined,
+): "fr" | "en" {
+	const first = header?.split(",")[0]?.trim().toLowerCase() ?? "";
+	return first.startsWith("fr") ? "fr" : "en";
+}
 
 /** What the auth layer tells the outside world about a new account: no email client here. */
 export type NewMember = { id: string; email: string; name: string };
@@ -112,8 +121,8 @@ export function createAuth(
 					}),
 				}
 			: undefined,
-		// SSO in production: no email/password sign-in (#59, spec §3). The email code below is
-		// opt-in (EMAIL_OTP_SIGNIN), for local development and previews only.
+		// SSO, and no email/password sign-in (#59, spec §3). The email code below is opt-in
+		// (EMAIL_OTP_SIGNIN), on in previews, staging and production.
 		socialProviders: socialProvidersFrom(env),
 		account: {
 			// Link provider accounts on a verified email only: no trusted providers, so an
@@ -128,11 +137,12 @@ export function createAuth(
 			},
 			session: {
 				create: {
-					// Every sign-in re-derives the role from ADMIN_EMAILS (#120), for humans only:
-					// an Agent is never an Admin.
-					before: async (session) => {
+					// The role lives in the database (#285); a sign-in only puts a SUPER_ADMIN_EMAILS
+					// member back to super_admin. Humans only: an Agent is never staff.
+					before: async (session, ctx) => {
 						const [row] = await database
 							.select({
+								locale: schema.user.locale,
 								email: schema.user.email,
 								emailVerified: schema.user.emailVerified,
 								kind: schema.user.kind,
@@ -141,12 +151,32 @@ export function createAuth(
 							.from(schema.user)
 							.where(eq(schema.user.id, session.userId));
 						if (row && row.kind === "human") {
-							const role = roleFor(row, staff);
+							// The language of the emails (#337): taken from the first sign-in that has none, then
+							// left to the Member's settings.
+							if (!row.locale) {
+								await database
+									.update(schema.user)
+									.set({
+										locale: localeOfAcceptLanguage(
+											ctx?.headers?.get("accept-language"),
+										),
+									})
+									.where(eq(schema.user.id, session.userId));
+							}
+							const role = roleAtSignIn(row, staff);
 							if (role !== row.role) {
 								await database
 									.update(schema.user)
 									.set({ role })
 									.where(eq(schema.user.id, session.userId));
+							}
+							// An invitation (#286) raises the role of a verified email, once.
+							if (row.emailVerified) {
+								await acceptStaffInvitation(database, {
+									id: session.userId,
+									email: row.email,
+									role,
+								});
 							}
 						}
 						return { data: session };
@@ -156,10 +186,10 @@ export function createAuth(
 			user: {
 				create: {
 					before: async (user, ctx) => {
-						// No consent, no account (spec §3).
+						// No consent, no account (spec §3), to the version in force (#341).
 						const consent = readConsent(
 							ctx?.headers?.get("cookie"),
-							CONSENT_VERSION,
+							(await currentLegalVersions(database)).consent,
 							new Date(),
 						);
 						if (!consent.accepted) {
@@ -220,9 +250,14 @@ export function createAuth(
 				ownerId: { type: "string", required: false, input: false },
 				// Set by an Admin suspension (#123): read by the API context, never by the client.
 				suspendedAt: { type: "date", required: false, input: false },
+				// The consent given at sign-up (spec §3, #341), written by the user.create hook below.
+				// Better Auth keeps only the fields it knows: undeclared, they were dropped and no account
+				// ever had its consent recorded.
+				consentVersion: { type: "string", required: false, input: false },
+				consentAcceptedAt: { type: "date", required: false, input: false },
 				// Also declared by the admin plugin below; restated here with the enum's values so the
-				// Session type carries the exact roles. Derived from the staff email lists at sign-in,
-				// never by the client.
+				// Session type carries the exact roles. Seeded from the staff email lists, then managed
+				// through the audited staff procedures of the API (#285), never by the client.
 				role: {
 					type: [...ROLES],
 					required: false,
@@ -233,9 +268,9 @@ export function createAuth(
 		},
 		plugins: [
 			...(proxy ? [oAuthProxy(proxy)] : []),
-			// Role management and access control (#120). The roles and what each may do live in
-			// ./access; the permissions that would let a role bypass the email lists or the audited
-			// suspension (set-role, ban, impersonate…) are granted to none.
+			// Role management and access control (#120, #285). The roles and what each may do live in
+			// ./access; the plugin's own set-role, ban and impersonate endpoints are granted to none: role
+			// changes go through the audited staff procedures of the API.
 			admin({
 				ac,
 				roles,

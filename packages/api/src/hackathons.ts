@@ -6,11 +6,13 @@ import {
 	hackathonMilestone,
 	hackathonPrize,
 } from "@codesphere/db/schema/hackathons";
-import { asc, eq, inArray } from "drizzle-orm";
+import { organization } from "@codesphere/db/schema/organizations";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import type * as z from "zod";
 
 type HackathonRow = typeof hackathon.$inferSelect;
 type Children = {
+	organization: { name: string; slug: string | null };
 	milestones: {
 		key: string;
 		label: string;
@@ -43,8 +45,10 @@ export function toHackathon(
 	return {
 		slug: row.slug,
 		name: row.name,
-		organizer: row.organizer,
+		organizer: children.organization.name,
+		organizationSlug: children.organization.slug,
 		summary: row.summary,
+		status: row.status,
 		teamMin: row.teamMin,
 		teamMax: row.teamMax,
 		milestones: [...children.milestones].sort(byPosition).map((m) => ({
@@ -64,6 +68,8 @@ export function toHackathon(
 			// A bad value in the database fails loudly (INTERNAL_SERVER_ERROR) instead of being guessed.
 			scoredBy: JudgingCriterion.shape.scoredBy.parse(c.scoredBy),
 		})),
+		opensAt: row.opensAt ? row.opensAt.toISOString() : null,
+		teamsEnabled: row.teamsEnabled,
 		sourceUrl: row.sourceUrl,
 		sourceNote: row.sourceNote,
 		verifiedAt: row.verifiedAt.toISOString(),
@@ -71,21 +77,56 @@ export function toHackathon(
 	};
 }
 
-/** Loads Hackathons with their Milestones, Prizes and criteria in four queries, no join fan-out. */
+type Status = HackathonRow["status"];
+
+/** What a public page can open: everything but a draft (#325). */
+export const PUBLIC_STATUSES: Status[] = ["published", "ended", "archived"];
+/** What the public lists show: an archived Hackathon keeps its page but leaves them. */
+export const LISTED_STATUSES: Status[] = ["published", "ended"];
+export const ALL_STATUSES: Status[] = ["draft", ...PUBLIC_STATUSES];
+
+/**
+ * Loads Hackathons with their Milestones, Prizes and criteria in four queries, no join fan-out.
+ * Drafts stay out unless `statuses` asks for them.
+ */
 export async function loadHackathons(
 	db: Database,
-	filter?: { slug: string },
+	filter: {
+		slug?: string;
+		statuses?: Status[];
+		organizationId?: string;
+		/** Back-office reads only: a suspended Organization's Hackathons are hidden from the public (#326). */
+		includeSuspended?: boolean;
+	} = {},
 	limit = 20,
 ) {
-	const rows = await db
-		.select()
+	const joined = await db
+		.select({
+			row: hackathon,
+			orgName: organization.name,
+			orgSlug: organization.slug,
+			orgStatus: organization.status,
+		})
 		.from(hackathon)
-		.where(filter ? eq(hackathon.slug, filter.slug) : undefined)
+		.innerJoin(organization, eq(organization.id, hackathon.organizationId))
+		.where(
+			and(
+				inArray(hackathon.status, filter.statuses ?? PUBLIC_STATUSES),
+				filter.slug ? eq(hackathon.slug, filter.slug) : undefined,
+				filter.organizationId
+					? eq(hackathon.organizationId, filter.organizationId)
+					: undefined,
+				filter.includeSuspended
+					? undefined
+					: eq(organization.status, "validated"),
+			),
+		)
 		.orderBy(asc(hackathon.createdAt))
 		.limit(limit);
-	if (!rows.length) {
+	if (!joined.length) {
 		return [];
 	}
+	const rows = joined.map((j) => j.row);
 	const ids = rows.map((r) => r.id);
 	const [milestones, prizes, criteria] = await Promise.all([
 		db
@@ -101,8 +142,13 @@ export async function loadHackathons(
 			.from(hackathonCriterion)
 			.where(inArray(hackathonCriterion.hackathonId, ids)),
 	]);
-	return rows.map((row) =>
+	return joined.map(({ row, orgName, orgSlug, orgStatus }) =>
 		toHackathon(row, {
+			// The profile link only exists while the Organization's profile is public.
+			organization: {
+				name: orgName,
+				slug: orgStatus === "validated" ? orgSlug : null,
+			},
 			milestones: milestones.filter((m) => m.hackathonId === row.id),
 			prizes: prizes.filter((p) => p.hackathonId === row.id),
 			criteria: criteria.filter((c) => c.hackathonId === row.id),

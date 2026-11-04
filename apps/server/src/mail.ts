@@ -1,4 +1,5 @@
 import type { Context } from "@codesphere/api/context";
+import type { OrgMailConfig } from "@codesphere/api/outbox/org-mail-consumer";
 import type { AuthHooks } from "@codesphere/auth";
 import {
 	composeEmail,
@@ -64,6 +65,36 @@ export function createMailHooks(
 	};
 }
 
+export type OrgMailEnv = EmailEnv & {
+	PUBLIC_SITE_URL?: string;
+	/** Contact address of the legal page (#340), shown in the "Organization suspended" email. */
+	CONTACT_EMAIL?: string;
+};
+
+/**
+ * What the outbox consumer of the Organization emails needs (#337). Its mailer always exists: without
+ * an email service key it answers "disabled", which the consumer logs and counts as handled.
+ */
+export function orgMailFromEnv(
+	env: OrgMailEnv,
+	transport?: EmailTransport,
+): OrgMailConfig {
+	const mail = createEmailClient(env, transport);
+	return {
+		mailer: {
+			send: ({ to, idempotencyKey, message }) =>
+				mail.send({
+					to,
+					idempotencyKey,
+					...composeEmail(message),
+				}),
+		},
+		siteUrl: env.PUBLIC_SITE_URL || undefined,
+		contactEmail: env.CONTACT_EMAIL || undefined,
+		log: (line) => console.info(line),
+	};
+}
+
 /** The API's own notifications (#52): the Owner is told a key was created, never given the key. */
 export function createNotifications(
 	env: EmailEnv,
@@ -71,6 +102,38 @@ export function createNotifications(
 ): NonNullable<Context["notifications"]> {
 	const mail = createEmailClient(env);
 	return {
+		async agentPaused(member, agentName) {
+			const result = await mail.send({
+				to: member.email,
+				...composeEmail({
+					kind: "agent-paused",
+					props: { name: member.name, agentName },
+				}),
+			});
+			if (result.status === "failed") {
+				logger.warn({ message: result.message }, "agent paused email not sent");
+			}
+		},
+		async staffInvited(invitation) {
+			const result = await mail.send({
+				to: invitation.email,
+				...composeEmail({
+					kind: "staff-invitation",
+					props: {
+						invitedBy: invitation.invitedBy,
+						role: invitation.role,
+						days: invitation.days,
+					},
+				}),
+			});
+			if (result.status === "failed") {
+				logger.warn(
+					{ message: result.message },
+					"staff invitation email not sent",
+				);
+			}
+			return result.status === "sent";
+		},
 		async apiKeyCreated(member, keyName) {
 			const result = await mail.send({
 				to: member.email,

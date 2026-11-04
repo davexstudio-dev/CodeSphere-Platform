@@ -4,11 +4,15 @@ import { describe, expect, test } from "bun:test";
 import { cadev2026 } from "./cadev";
 
 describe("CADEV 2026 seed data", () => {
-	test("closes submissions on 25 October at 17:00 GMT (organisers' calendar)", () => {
+	test("closes submissions on 15 November at 17:00 GMT (moved from 25 October on 19 October)", () => {
 		const close = cadev2026.milestones.find(
 			(m) => m.key === "submission_close",
 		);
-		expect(close?.startsAt.toISOString()).toBe("2026-10-25T17:00:00.000Z");
+		expect(close?.startsAt.toISOString()).toBe("2026-11-15T17:00:00.000Z");
+	});
+
+	test("is open to francophone and English-speaking developers", () => {
+		expect(cadev2026.summary).toContain("anglophones");
 	});
 
 	test("lists its Milestones in chronological order with unique keys", () => {

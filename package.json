@@ -7,14 +7,14 @@
 			"packages/*"
 		],
 		"catalog": {
-			"zod": "^4.5.4",
+			"zod": "^4.6.7",
 			"typescript": "^6.0.3",
 			"@types/bun": "^1.4.2",
 			"varlock": "1.22.0",
 			"@orpc/server": "2.0.0-beta.41",
 			"@orpc/openapi": "2.0.0-beta.41",
 			"@orpc/zod": "2.0.0-beta.41",
-			"better-auth": "1.7.5",
+			"better-auth": "1.7.14",
 			"lucide-react": "^1.41.0",
 			"next-themes": "^0.4.6",
 			"react": "^19.2.8",
@@ -31,7 +31,8 @@
 			"@types/react": "^19.2.18",
 			"@types/react-dom": "^19.2.7",
 			"drizzle-orm": "1.0.0-rc.4",
-			"hono": "^4.13.7"
+			"hono": "^4.13.7",
+			"@sentry/bun": "^11.8.0"
 		}
 	},
 	"patchedDependencies": {
@@ -49,6 +50,7 @@
 		"db:generate": "turbo run db:generate -F @codesphere/db --",
 		"db:migrate": "turbo run db:migrate -F @codesphere/db --",
 		"db:seed": "bun run --cwd packages/db db:seed",
+		"db:seed:demo": "bun run --cwd packages/api db:seed:demo",
 		"e2e": "bun run --cwd apps/e2e e2e",
 		"db:local": "turbo run db:local -F @codesphere/db --",
 		"db:local:studio": "turbo run db:local:studio -F @codesphere/db --",
@@ -67,7 +69,8 @@
 		"postinstall": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./packages/db/",
 		"auth:generate": "cd apps/server && bun run auth:generate",
 		"licenses": "bun scripts/licenses.mjs",
-		"check": "biome check --write ."
+		"check": "biome check --write .",
+		"lint:ds": "oxlint apps packages"
 	},
 	"dependencies": {
 		"zod": "catalog:"
@@ -75,7 +78,9 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.12",
 		"@codesphere/config": "workspace:*",
+		"@shadcn/lint": "^0.2.3",
 		"@types/bun": "catalog:",
+		"oxlint": "^1.90.0",
 		"turbo": "^2.10.12",
 		"typescript": "catalog:",
 		"varlock": "catalog:"
@@ -88,6 +93,8 @@
 		"@next/env": "npm:@varlock/nextjs-integration@1.2.4",
 		"sharp": "npm:empty-npm-package@1.0.0",
 		"seroval": "1.6.9",
-		"seroval-plugins": "1.6.9"
+		"seroval-plugins": "1.6.9",
+		"undici": "7.30.1",
+		"systeminformation": "5.33.16"
 	}
 }

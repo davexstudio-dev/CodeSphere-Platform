@@ -1,3 +1,4 @@
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { cn } from "@codesphere/ui/lib/utils";
 
 type FollowedTagsProps = React.ComponentProps<"div"> & {
@@ -7,6 +8,8 @@ type FollowedTagsProps = React.ComponentProps<"div"> & {
 	highlighted?: string[];
 	/** Rendered after the list, e.g. a button to follow another tag. */
 	addAction?: React.ReactNode;
+	/** The Tags wrap onto several lines (a card); otherwise one row that scrolls sideways. */
+	wrap?: boolean;
 };
 
 function FollowedTags({
@@ -14,18 +17,24 @@ function FollowedTags({
 	tags,
 	highlighted = [],
 	addAction,
+	wrap,
 	className,
 	...props
 }: FollowedTagsProps) {
-	return (
+	const row = (
 		<div
-			data-slot="followed-tags"
-			className={cn("flex items-center gap-2 overflow-x-auto pb-1", className)}
-			{...props}
+			className={cn(
+				"flex items-center gap-2",
+				wrap ? "flex-wrap" : "pb-3",
+				wrap && className,
+			)}
+			{...(wrap ? { "data-slot": "followed-tags", ...props } : {})}
 		>
-			<span className="shrink-0 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
-				{label}
-			</span>
+			{label && (
+				<span className="shrink-0 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+					{label}
+				</span>
+			)}
 			{tags.map((tag) => {
 				const isHighlighted = highlighted.includes(tag);
 				return (
@@ -44,6 +53,20 @@ function FollowedTags({
 			})}
 			{addAction}
 		</div>
+	);
+	if (wrap) {
+		return row;
+	}
+	// One row: the project's ScrollArea, its bar under the pills (pb-3) rather than over them.
+	return (
+		<ScrollArea
+			orientation="horizontal"
+			data-slot="followed-tags"
+			className={cn("w-full min-w-0", className)}
+			{...props}
+		>
+			{row}
+		</ScrollArea>
 	);
 }
 

@@ -6,6 +6,7 @@ import { createDb } from "@codesphere/db";
 import { auditLog } from "@codesphere/db/schema/audit";
 import { user } from "@codesphere/db/schema/auth";
 import { hackathon } from "@codesphere/db/schema/hackathons";
+import { organization } from "@codesphere/db/schema/organizations";
 import { eq, inArray } from "drizzle-orm";
 
 import { withAudit } from "./audit";
@@ -21,7 +22,6 @@ describe.skipIf(!url)("withAudit on Postgres", () => {
 
 	const base = {
 		name: "Audit test",
-		organizer: "Test",
 		summary: "Test",
 		teamMin: 1,
 		teamMax: 2,
@@ -31,7 +31,21 @@ describe.skipIf(!url)("withAudit on Postgres", () => {
 	const eventsFor = (action: string) =>
 		db.select().from(auditLog).where(eq(auditLog.action, action));
 
+	let organizationId = "";
+
 	beforeAll(async () => {
+		const [org] = await db
+			.insert(organization)
+			.values({
+				slug: `it-audit-org-${id}`,
+				name: "Audit org",
+				website: "https://example.com",
+				country: "OTHER",
+				status: "validated",
+				system: true,
+			})
+			.returning({ id: organization.id });
+		organizationId = org?.id ?? "";
 		await db.insert(user).values({
 			id: actorId,
 			name: "Audit admin",
@@ -39,8 +53,8 @@ describe.skipIf(!url)("withAudit on Postgres", () => {
 			role: "admin",
 		});
 		await db.insert(hackathon).values([
-			{ ...base, slug },
-			{ ...base, slug: other },
+			{ ...base, organizationId, slug },
+			{ ...base, organizationId, slug: other },
 		]);
 	});
 
@@ -49,6 +63,7 @@ describe.skipIf(!url)("withAudit on Postgres", () => {
 		await db.delete(hackathon).where(eq(hackathon.slug, slug));
 		await db.delete(hackathon).where(eq(hackathon.slug, other));
 		await db.delete(user).where(eq(user.id, actorId));
+		await db.delete(organization).where(eq(organization.id, organizationId));
 	});
 
 	test("a successful mutation writes exactly one audit event", async () => {

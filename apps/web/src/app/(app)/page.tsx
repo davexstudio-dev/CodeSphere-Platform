@@ -15,18 +15,26 @@ import {
 import { FollowedTags } from "@codesphere/ui/components/molecules/followed-tags";
 import { SegmentedControl } from "@codesphere/ui/components/molecules/segmented-control";
 import { FeedFilters } from "@codesphere/ui/components/organisms/feed-filters";
+import { useDataSaver } from "@codesphere/ui/lib/data-saver";
 import { useQuery } from "@tanstack/react-query";
 import { CheckIcon, MessageSquareIcon, TagIcon } from "lucide-react";
 import type { Route } from "next";
-import Link from "next/link";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import type * as z from "zod";
 import { FeedSkeleton, HomeFeed, useFeed } from "@/components/home-feed";
+import { JobsModule, LatestJobs } from "@/components/jobs/jobs-module";
+import Link from "@/components/link";
 import { AskButton } from "@/components/site-header";
 import TagsOnboardingRedirect from "@/components/tags-onboarding-redirect";
+import { pageSizeFor } from "@/lib/data-saver";
 import { HAS_DATABASE } from "@/lib/deployment";
-import { firstName, greetingKey, submissionClose } from "@/lib/home";
+import {
+	featuredHackathon,
+	firstName,
+	greetingKey,
+	submissionClose,
+} from "@/lib/home";
 import { gettingStarted } from "@/lib/tags-onboarding";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useMounted } from "@/lib/use-mounted";
@@ -34,24 +42,31 @@ import { orpc } from "@/utils/orpc";
 
 type HackathonData = z.infer<typeof Hackathon>;
 
-// Home (#130, design from the home prototype): desktop visitor = one centred column with the
-// banner; desktop Member = feed and a sticky rail; phone = promise for a visitor, greeting and a
-// compact ribbon for a Member. The feed (#66): three tabs, language and country filters, cards
+// Home (#130, #323): desktop = feed and a sticky rail, with the latest job postings for a visitor;
+// phone = promise, banner and a row of postings for a visitor, greeting and a compact ribbon for a
+// Member. The feed (#66): three tabs, language and country filters, cards
 // leading to the Question page, Agents' Questions dashed and hidden on request.
 export default function Home() {
 	const { data: session, isPending } = useHydratedSession();
+	const dataSaver = useDataSaver();
 	// Without a database the banner is simply absent.
-	const hackathon = useQuery({
-		...orpc.hackathons.get.queryOptions({ input: { slug: "cadev-2026" } }),
+	const hackathons = useQuery({
+		...orpc.hackathons.list.queryOptions({
+			input: { limit: pageSizeFor(20, dataSaver) },
+		}),
 		enabled: HAS_DATABASE,
 	});
+	// Undefined while loading, null when no Hackathon has a step to come.
+	const hackathon = hackathons.data
+		? featuredHackathon(hackathons.data.items, Date.now())
+		: undefined;
 	if (isPending) {
 		return <PageSkeleton />;
 	}
 	return session ? (
-		<MemberHome name={session.user.name} hackathon={hackathon.data} />
+		<MemberHome name={session.user.name} hackathon={hackathon} />
 	) : (
-		<VisitorHome hackathon={hackathon.data} />
+		<VisitorHome hackathon={hackathon} />
 	);
 }
 
@@ -72,7 +87,7 @@ function Banner({
 	variant = "card",
 	className,
 }: {
-	hackathon: HackathonData | undefined;
+	hackathon: HackathonData | null | undefined;
 	variant?: "card" | "ribbon" | "rail";
 	className?: string;
 }) {
@@ -81,6 +96,9 @@ function Banner({
 	const format = useFormatter();
 	const locale = useLocale();
 	const mounted = useMounted();
+	if (hackathon === null) {
+		return null;
+	}
 	if (!hackathon) {
 		return (
 			<Skeleton
@@ -105,14 +123,19 @@ function Banner({
 			})
 		: "…";
 	const see = (
-		<Button
-			variant={variant === "rail" ? "outline" : "secondary"}
-			size="sm"
-			render={<Link href={`/hackathons/${hackathon.slug}` as Route} />}
-			nativeButton={false}
-		>
-			{t("see")}
-		</Button>
+		<div className="flex flex-wrap items-center gap-3">
+			<Button
+				variant="secondary"
+				size="sm"
+				render={<Link href={`/hackathons/${hackathon.slug}` as Route} />}
+				nativeButton={false}
+			>
+				{t("see")}
+			</Button>
+			<Link href="/hackathons" className="text-sm underline underline-offset-4">
+				{t("all")}
+			</Link>
+		</div>
 	);
 	return (
 		<CadevBanner
@@ -218,7 +241,7 @@ function FeedSection({ signedIn }: { signedIn: boolean }) {
 function EmptyFeed({ signedIn }: { signedIn: boolean }) {
 	const t = useTranslations("home.empty");
 	return (
-		<Empty className="rounded-3xl border border-border bg-card py-12">
+		<Empty variant="card">
 			<EmptyHeader>
 				<EmptyMedia variant="icon">
 					<MessageSquareIcon />
@@ -245,22 +268,36 @@ function EmptyFeed({ signedIn }: { signedIn: boolean }) {
 	);
 }
 
-function VisitorHome({ hackathon }: { hackathon: HackathonData | undefined }) {
+function VisitorHome({
+	hackathon,
+}: {
+	hackathon: HackathonData | null | undefined;
+}) {
 	const t = useTranslations("home.hero");
 	return (
-		<main className="mx-auto grid max-w-3xl gap-6 px-4 py-6 md:px-6 md:py-8">
-			{/* Phone only: the promise before the feed (variant 4 of the prototype). */}
-			<section className="grid gap-3 pt-4 md:hidden">
-				<p className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest">
-					{t("eyebrow")}
-				</p>
-				<h1 className="text-balance font-bold text-3xl leading-tight tracking-tight">
-					{t("title")}
-				</h1>
-				<p className="text-muted-foreground">{t("lead")}</p>
-			</section>
-			<Banner hackathon={hackathon} />
-			<FeedSection signedIn={false} />
+		<main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 md:grid-cols-[minmax(0,1fr)_20rem] md:gap-8 md:px-6 md:py-8">
+			<div className="grid min-w-0 content-start gap-5">
+				{/* Phone only: the promise, the banner and a row of postings, before a feed that never ends. */}
+				<div className="grid min-w-0 gap-5 md:hidden">
+					<section className="grid gap-3 pt-4">
+						<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
+							{t("eyebrow")}
+						</p>
+						<h1 className="text-balance font-bold text-3xl leading-tight tracking-tight">
+							{t("title")}
+						</h1>
+						<p className="text-muted-foreground">{t("lead")}</p>
+					</section>
+					<Banner hackathon={hackathon} />
+					<LatestJobs layout="row" />
+				</div>
+				<FeedSection signedIn={false} />
+			</div>
+			{/* Desktop only: sticky rail. */}
+			<aside className="sticky top-24 hidden content-start gap-4 self-start md:grid">
+				<Banner hackathon={hackathon} variant="rail" />
+				<LatestJobs />
+			</aside>
 		</main>
 	);
 }
@@ -270,7 +307,7 @@ function MemberHome({
 	hackathon,
 }: {
 	name: string;
-	hackathon: HackathonData | undefined;
+	hackathon: HackathonData | null | undefined;
 }) {
 	const t = useTranslations("home");
 	const mounted = useMounted();
@@ -304,6 +341,7 @@ function MemberHome({
 				<Banner hackathon={hackathon} variant="rail" />
 				<GettingStartedCard />
 				<FollowedTagsCard />
+				<JobsModule />
 			</aside>
 		</main>
 	);
@@ -343,7 +381,7 @@ function GettingStartedCard() {
 			<div className="flex items-baseline justify-between gap-2">
 				<p
 					id="getting-started"
-					className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest"
+					className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest"
 				>
 					{t("title")}
 				</p>
@@ -355,7 +393,7 @@ function GettingStartedCard() {
 				{steps.map(({ key, done, href }) => (
 					<li key={key} className="flex items-center gap-2">
 						{done ? (
-							<span className="grid size-5 place-items-center rounded-full bg-emerald-600 text-white">
+							<span className="grid size-5 place-items-center rounded-full bg-success text-white">
 								<CheckIcon className="size-3" />
 								<span className="sr-only">{t("done")}</span>
 							</span>
@@ -391,13 +429,13 @@ function FollowedTagsCard() {
 	const tags = followed.data?.items.map((tag) => tag.name) ?? [];
 	return (
 		<section className="grid gap-3 rounded-2xl border border-border bg-card p-5">
-			<p className="font-mono font-semibold text-[0.68rem] text-muted-foreground uppercase tracking-widest">
+			<p className="font-mono font-semibold text-2xs text-muted-foreground uppercase tracking-widest">
 				{t("title")}
 			</p>
 			{tags.length === 0 ? (
 				<p className="text-muted-foreground text-sm">{t("none")}</p>
 			) : (
-				<FollowedTags label="" tags={tags} className="flex-wrap" />
+				<FollowedTags label="" tags={tags} wrap />
 			)}
 			<Button
 				variant="outline"

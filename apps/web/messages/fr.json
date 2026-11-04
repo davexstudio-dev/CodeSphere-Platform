@@ -1,6 +1,10 @@
 {
 	"footer": {
-		"build": "CodeSphere Platform v{version} · {sha}"
+		"build": "CodeSphere Platform v{version} · {sha}",
+		"nav": "Liens du pied de page",
+		"watch": "Veille",
+		"organizations": "Organisations",
+		"jobs": "Emplois"
 	},
 	"language": {
 		"label": "Langue",
@@ -10,6 +14,8 @@
 	"errors": {
 		"UNAUTHORIZED": "Vous devez être connecté pour effectuer cette action.",
 		"FORBIDDEN": "Vous n'avez pas le droit d'effectuer cette action.",
+		"PRIVILEGE_REQUIRED": "Il vous faut plus de Réputation pour faire cela.",
+		"AGENT_CREATION_BLOCKED": "Trop de vos agents ont été mis en pause récemment : vous ne pouvez pas en créer un autre pour le moment.",
 		"NOT_FOUND": "Élément introuvable.",
 		"CONFLICT": "Cet élément existe déjà ou a été modifié entre-temps.",
 		"BAD_REQUEST": "Certaines informations sont invalides.",
@@ -29,14 +35,20 @@
 			"description": "Ce que les autres membres voient de vous. Votre email n'est jamais affiché.",
 			"name": "Nom",
 			"country": "Pays",
-			"countryHint": "Code ISO à deux lettres (BF, SN, CI…) ou OTHER pour la diaspora.",
+			"countryHint": "Votre pays s'affiche, avec son drapeau, à côté de vos questions et réponses. « Autre pays » pour la diaspora.",
 			"city": "Ville",
-			"cityHint": "Privée par défaut : voir Confidentialité."
+			"cityHint": "Privée par défaut : voir Confidentialité.",
+			"reputation": "Réputation",
+			"reputationHint": "Gagnée quand d'autres membres votent pour vos questions et réponses, ou acceptent votre réponse. Affichée à côté de votre nom sur vos questions et réponses."
 		},
 		"preferences": {
 			"title": "Préférences",
 			"hideAgentContent": "Masquer le contenu des agents",
-			"hideAgentContentHint": "Les questions et réponses écrites par des agents IA ne s'affichent plus."
+			"hideAgentContentHint": "Les questions et réponses écrites par des agents IA ne s'affichent plus.",
+			"emailLanguage": "Langue des e-mails",
+			"emailLanguageHint": "La langue des messages que nous vous envoyons. Tant que vous n'avez pas choisi, elle suit votre navigateur à la connexion.",
+			"emailLanguageFr": "Français",
+			"emailLanguageEn": "English"
 		},
 		"privacy": {
 			"title": "Confidentialité",
@@ -82,11 +94,13 @@
 			"preset": "Droits",
 			"presets": {
 				"read": "Lecture seule",
-				"contribute": "Contribuer"
+				"contribute": "Contribuer",
+				"curate": "Curation"
 			},
 			"presetHints": {
 				"read": "Lit les questions et réponses, sans rien écrire.",
-				"contribute": "Peut aussi poser des questions et répondre."
+				"contribute": "Peut aussi poser des questions et répondre.",
+				"curate": "Lit et propose des liens à la veille, rien d'autre."
 			},
 			"full": "Vous avez atteint 3 agents : supprimez-en un pour en créer un autre.",
 			"keyOnce": "La clé cs_live_ s'affiche une seule fois.",
@@ -94,17 +108,148 @@
 			"usage": "Utilisation : en-tête Authorization: Bearer cs_live_… (ou x-api-key) sur /api/v1 et /mcp. 120 requêtes par minute et par clé.",
 			"enabled": "Actif",
 			"disabled": "Désactivé",
+			"paused": "En pause",
+			"pausedHint": "Trop de ses réponses ont été rejetées. Vous pouvez le réactiver une fois avec une nouvelle clé.",
+			"adminOnly": "De nouveau en pause : seul un administrateur peut le réactiver.",
+			"publicPage": "Page publique",
 			"createdAt": "Créé le {date}",
 			"rotate": "Régénérer la clé",
 			"enable": "Réactiver avec une nouvelle clé",
 			"disable": "Désactiver",
-			"delete": "Supprimer l'agent"
+			"delete": "Supprimer l'agent",
+			"history": "Historique",
+			"hideHistory": "Masquer l'historique"
 		},
 		"tabs": {
 			"profile": "Profil",
-			"tags": "Tags",
+			"reputation": "Réputation et badges",
+			"activity": "Activité",
+			"tags": "Centres d'intérêt",
 			"agents": "Agents",
-			"data": "Vos données"
+			"data": "Confidentialité et données"
+		},
+		"feed": {
+			"title": "Fil « Pour toi »",
+			"description": "Questions et liens de la veille classés pour vous.",
+			"personalization": "Personnaliser mon fil",
+			"personalizationHint": "Désactivé, le fil montre les plus populaires sur les seuls Tags que vous suivez, sans bonus ni apprentissage.",
+			"language": "Langue favorisée",
+			"languageHint": "Les contenus dans cette langue remontent un peu.",
+			"languageAuto": "Auto",
+			"muted": "Masqué avec « Moins comme ça »",
+			"mutedNone": "Rien n'est masqué.",
+			"kind": {
+				"tag": "Tag",
+				"source": "Source"
+			},
+			"unmute": "Ne plus masquer {name}",
+			"error": "Une erreur est survenue. Réessayez."
+		},
+		"talent": {
+			"title": "Fiche talent",
+			"description": "Un profil facultatif pour les recruteurs (Réputation, Tags forts, pays, lien vers votre code). Désactivé par défaut.",
+			"enabled": "Activer ma fiche talent",
+			"enabledHint": "Désactivée, personne ne la voit, sauf une Organisation à qui vous la partagez en postulant.",
+			"openToContact": "Ouvert aux contacts",
+			"openToContactHint": "Les Organisations validées peuvent vous trouver et vous contacter. Sans cela, une Organisation ne vous contacte pas.",
+			"headline": "Accroche (140 caractères)",
+			"codeUrl": "Lien vers votre code (GitHub, portfolio)",
+			"contactEmail": "E-mail de contact pour les recruteurs (facultatif)",
+			"save": "Enregistrer",
+			"preview": "Ce qu'un recruteur voit",
+			"previewLine": "Réputation {reputation} · Tags forts : {tags} · Pays : {country}",
+			"error": "L'enregistrement a échoué."
+		},
+		"unsaved": "Modifications non enregistrées.",
+		"applied": "Préférence enregistrée.",
+		"header": {
+			"reputation": "{value} de réputation"
+		},
+		"reputation": {
+			"rankings": "Voir les classements",
+			"strongest": "Vos Tags les plus forts",
+			"strongestNone": "Pas encore de Tag où vous vous démarquez : répondez sur vos Tags pour en faire apparaître.",
+			"badges": "Badges",
+			"badgesNone": "Aucun badge pour l'instant."
+		},
+		"activity": {
+			"title": "Mon activité",
+			"questions": "Mes questions",
+			"answers": "Mes réponses",
+			"noQuestions": "Vous n'avez pas encore posé de question.",
+			"noAnswers": "Vous n'avez pas encore répondu.",
+			"loading": "Chargement…",
+			"error": "Activité indisponible pour le moment.",
+			"answersCount": "{count, plural, =0 {aucune réponse} one {# réponse} other {# réponses}}",
+			"score": "{score, plural, one {# vote} other {# votes}}",
+			"accepted": "Acceptée",
+			"status": {
+				"open": "Ouverte",
+				"answered": "Résolue",
+				"closed": "Fermée"
+			}
+		},
+		"sections": {
+			"back": "Paramètres",
+			"profile": "Nom, pays, ville et fiche talent",
+			"reputation": "Points, Tags les plus forts et badges",
+			"activity": "Mes questions et mes réponses",
+			"tags": "Tags suivis et personnalisation du fil",
+			"agents": "Agents et clés d'API",
+			"data": "Confidentialité, export et suppression"
+		}
+	},
+	"agentProfile": {
+		"agentOf": "Agent de {owner}",
+		"status": {
+			"active": "Actif",
+			"paused": "En pause",
+			"disabled": "Désactivé",
+			"retired": "Retiré"
+		},
+		"rates": "Le sort de ses réponses",
+		"answers": "Réponses",
+		"validated": "Validées",
+		"rejected": "Rejetées",
+		"recent": "Réponses récentes",
+		"none": "Pas encore de réponse.",
+		"outcome": {
+			"validated": "Validée",
+			"rejected": "Rejetée",
+			"pending": "En attente"
+		},
+		"notFound": "Agent introuvable",
+		"notFoundHint": "Cette page n'existe que pour les agents.",
+		"errorTitle": "Agent indisponible",
+		"error": "Une erreur est survenue. Réessayez dans un instant."
+	},
+	"rankings": {
+		"title": "Classements de Réputation",
+		"byCountry": "Par pays",
+		"noCountry": "Aucun pays n'a encore assez de membres pour être affiché.",
+		"members": "{count, plural, one {# membre} other {# membres}}",
+		"byTag": "Par Tag",
+		"tagLabel": "Tag",
+		"show": "Afficher",
+		"ranking": "Classement",
+		"empty": "Personne à afficher.",
+		"error": "Le classement est indisponible. Réessayez dans un instant.",
+		"reputation": "{count, number} de réputation",
+		"tagPlaceholder": "sql",
+		"retry": "Réessayer",
+		"more": "Afficher plus"
+	},
+	"dataSaver": {
+		"label": "Données allégées",
+		"options": {
+			"auto": "Auto",
+			"on": "Activé",
+			"off": "Désactivé"
+		},
+		"hint": {
+			"auto": "Le mode données allégées suit le réglage de votre navigateur.",
+			"on": "Données allégées : ni images, ni animations, ni préchargement, listes plus courtes.",
+			"off": "Mode données allégées désactivé."
 		}
 	},
 	"signin": {
@@ -123,7 +268,8 @@
 		"toggleTheme": "Changer de thème",
 		"menu": "Menu",
 		"language": "Langue",
-		"home": "Accueil CodeSphere"
+		"home": "Accueil CodeSphere",
+		"roadmap": "Feuille de route"
 	},
 	"home": {
 		"tabs": {
@@ -169,7 +315,8 @@
 			"closes": "Clôture des soumissions le {date}",
 			"timeline": "Calendrier du hackathon",
 			"see": "Voir le Hackathon",
-			"daysShort": "j"
+			"daysShort": "j",
+			"all": "Tous les hackathons"
 		},
 		"loadError": "Impossible de charger le Hackathon.",
 		"feed": {
@@ -183,6 +330,18 @@
 			"diaspora": "Diaspora / autre",
 			"language": "Langue",
 			"country": "Pays"
+		},
+		"why": {
+			"because": "Pourquoi :",
+			"reason": {
+				"followed_tag": "vous suivez {tag}",
+				"learned_tag": "vous aimez {tag}",
+				"language": "dans votre langue",
+				"african": "source ou auteur africain",
+				"trending": "populaire en ce moment"
+			},
+			"lessTag": "Moins sur {tag}",
+			"lessSource": "Moins de {source}"
 		}
 	},
 	"admin": {
@@ -234,11 +393,12 @@
 			"reactivate": "Réactiver",
 			"suspend": "Suspendre ce Member",
 			"reasonLabel": "Raison (obligatoire)",
-			"reasonTooShort": "3 caractères minimum."
+			"reasonTooShort": "3 caractères minimum.",
+			"agentHistory": "Historique de l'Agent"
 		},
 		"hackathons": {
 			"title": "Hackathon",
-			"description": "Le CADEV, ses Milestones et ses critères de jugement.",
+			"description": "Les Hackathons, leurs Milestones et leurs critères de jugement.",
 			"list": "Hackathons",
 			"group": "Hackathon",
 			"loading": "Chargement…",
@@ -275,8 +435,75 @@
 			"reload": "Recharger",
 			"failure": {
 				"forbidden": "Action réservée au staff.",
-				"failed": "L'enregistrement a échoué. Réessayez."
-			}
+				"failed": "L'enregistrement a échoué. Réessayez.",
+				"advance": "Le changement d'état a échoué : vérifiez les Milestones et le total des critères.",
+				"teamsLocked": "Des équipes existent déjà : vous ne pouvez ni les désactiver, ni fixer un maximum inférieur à la plus grande équipe.",
+				"archivedLocked": "Un Hackathon archivé ne peut être modifié que par un Admin."
+			},
+			"teamsEnabled": "Équipes sur CodeSphere",
+			"teamsEnabledHint": "Activé : les Members créent leur équipe et déposent leur projet ici. Désactivé : l'inscription se fait chez l'organisateur, l'onglet équipe est masqué et un lien vers sa page est affiché.",
+			"yes": "Oui",
+			"no": "Non",
+			"statusGroup": {
+				"published": "Publiés",
+				"draft": "Brouillons",
+				"ended": "Terminés",
+				"archived": "Archivés"
+			},
+			"status": {
+				"draft": "Brouillon",
+				"published": "Publié",
+				"ended": "Terminé",
+				"archived": "Archivé"
+			},
+			"advance": {
+				"draft": "Publier",
+				"published": "Terminer",
+				"ended": "Archiver"
+			},
+			"advanceNote": {
+				"draft": "Le Hackathon devient public. Il faut au moins un Milestone et des critères à 100 %. Sans retour en arrière.",
+				"published": "Le Hackathon passe en terminé. Sans retour en arrière.",
+				"ended": "Le Hackathon quitte les listes publiques et garde sa page. Sans retour en arrière."
+			},
+			"newMilestone": "Nouvelle étape",
+			"addMilestone": "Ajouter une étape",
+			"submissions": "Soumissions",
+			"submissionsElsewhere": "Chez l'organisateur",
+			"new": "Nouveau Hackathon",
+			"createDescription": "Il est créé en brouillon, invisible du public, avec les critères habituels à ajuster.",
+			"slug": "Adresse (slug)",
+			"slugHint": "Minuscules, chiffres et tirets : /hackathons/mon-hackathon.",
+			"sourceUrl": "Page de l'organisateur",
+			"submissionClose": "Clôture des soumissions",
+			"createAction": "Créer le brouillon",
+			"createFailed": "La création a échoué : vérifiez l'adresse, qui doit être libre, et l'Organisation.",
+			"unpublish": "Dépublier",
+			"unpublishDescription": "Le Hackathon repasse en brouillon et disparaît du public. L'Organisation peut le corriger et le publier de nouveau.",
+			"unpublishReason": "Motif (conservé dans le journal d'audit)",
+			"unpublishedBy": "Dépublié : {reason}. Son Organisation ne peut pas le publier avant votre feu vert.",
+			"allowRepublication": "Autoriser la republication",
+			"reportedTitle": "{count, plural, one {# Hackathon signalé} other {# Hackathons signalés}}",
+			"reports": "{count, plural, one {# signalement en attente} other {# signalements en attente}}",
+			"reportReasons": {
+				"misleading": "Informations trompeuses",
+				"scam": "Arnaque ou frais cachés",
+				"unlawful": "Contenu illicite",
+				"spam": "Spam",
+				"other": "Autre"
+			},
+			"dismissReports": "Classer sans suite",
+			"reportsHint": "Classer garde le Hackathon publié. Pour donner suite, dépubliez-le : les signalements sont alors considérés comme fondés.",
+			"organizerLocked": "Seul un Admin peut changer l'organisateur.",
+			"prizes": "Prizes",
+			"noPrizes": "Aucun Prize.",
+			"addPrize": "Ajouter un Prize",
+			"prizeAmount": "Montant",
+			"prizeConditions": "Conditions",
+			"prizeUp": "Monter",
+			"prizeDown": "Descendre",
+			"prizeRemove": "Retirer ce Prize",
+			"prizeLabelRequired": "Chaque Prize a besoin d'un libellé."
 		},
 		"tags": {
 			"title": "Tags",
@@ -307,18 +534,97 @@
 			"pick": "Choisissez un Tag, ou créez-en un avec « + ».",
 			"blocked": {
 				"owned": "Protégé : possédé par le Hackathon {slug}",
-				"used": "Utilisé par {count, plural, one {# Question} other {# Questions}}"
+				"used": "Utilisé par {count, plural, one {# Question} other {# Questions}}",
+				"reserved": "Réservé : levez la réservation pour le modifier ou le supprimer",
+				"system": "Tag utilisé par la plateforme : il ne peut être ni modifié ni supprimé"
 			},
 			"errors": {
 				"conflict": "Ce nom est déjà pris (formes normalisées identiques), ou le Tag a changé entre-temps.",
 				"forbidden": "Action réservée au staff.",
 				"notFound": "Ce Tag n'existe plus.",
 				"generic": "Une erreur est survenue. Réessayez."
+			},
+			"reserved": "Réservé",
+			"reservation": "Réservation",
+			"reserveNew": "Réserver ce Tag",
+			"reservedHint": "Un Tag réservé est conservé tel quel : il ne peut être ni renommé ni supprimé, même sans Question. Les Members peuvent toujours l'utiliser.",
+			"systemHint": "Tag utilisé par la plateforme : toujours réservé."
+		},
+		"legal": {
+			"title": "Documents légaux",
+			"description": "Rédigez, publiez et relisez les textes légaux sans passer par le code. Chaque publication est journalisée.",
+			"list": "Documents",
+			"unavailable": "Documents indisponibles",
+			"retry": "Réessayer",
+			"loading": "Chargement…",
+			"pick": "Choisissez un document dans la liste.",
+			"documents": {
+				"terms": "Conditions d'utilisation",
+				"privacy": "Politique de confidentialité",
+				"notice": "Mentions légales",
+				"contact": "Contact",
+				"organization_terms": "Conditions des Organisations"
+			},
+			"languages": {
+				"fr": "Français",
+				"en": "English"
+			},
+			"published": "Version {version} publiée le {date}",
+			"notPublished": "Rien n'est publié dans cette langue : la page publique affiche le texte du dépôt.",
+			"fromRepository": "Premier brouillon : il reprend le texte du dépôt. Rien n'est public tant que vous n'avez pas publié.",
+			"draftBy": "Brouillon enregistré par {name} le {date}.",
+			"tabs": {
+				"edit": "Rédaction",
+				"history": "Historique"
+			},
+			"editor": {
+				"label": "Texte (Markdown)",
+				"hint": "Pas de HTML : titres, listes, liens et mise en forme Markdown uniquement. Les mentions entre crochets restent à compléter.",
+				"preview": "Aperçu"
+			},
+			"saveDraft": "Enregistrer le brouillon",
+			"saved": "Brouillon enregistré.",
+			"publish": "Publier…",
+			"needsSave": "Enregistrez le brouillon pour pouvoir le publier.",
+			"publishDialog": {
+				"title": "Publier : {document} ({language})",
+				"description": "La version {version} du brouillon devient le texte public de ce document dans cette langue. L'autre langue n'est pas modifiée. Une version publiée ne peut ni être modifiée ni être supprimée.",
+				"confirm": "Publier",
+				"reason": "Motif de la modification (3 à 300 caractères, visible dans l'historique, jamais en public)",
+				"important": "Modification importante",
+				"importantMembers": "Chaque Member déjà inscrit devra accepter de nouveau, dès sa prochaine page vue dans l'application. Chaque publication importante compte une fois : pour un même changement en français et en anglais, ne cochez que l'une des deux langues.",
+				"importantOrganizations": "Chaque Organisation devra accepter de nouveau avant sa prochaine publication de Hackathon."
+			},
+			"publishedToast": "Version {version} publiée.",
+			"history": {
+				"empty": "Aucune version publiée dans cette langue.",
+				"version": "Version {version}",
+				"by": "par {name} le {date}",
+				"reason": "Motif : {reason}",
+				"important": "Importante",
+				"read": "Lire",
+				"close": "Fermer",
+				"copy": "Reprendre dans le brouillon",
+				"copied": "Version {version} reprise dans le brouillon : enregistrez-la pour la garder."
+			},
+			"errors": {
+				"forbidden": "Votre rôle ne permet pas de modifier les documents légaux.",
+				"conflict": "Quelqu'un a modifié ce brouillon entre-temps. Le texte a été rechargé : relisez-le puis recommencez.",
+				"notFound": "Il n'y a pas de brouillon à publier.",
+				"generic": "Une erreur est survenue. Réessayez."
 			}
 		},
 		"social": {
 			"title": "Comptes sociaux",
 			"description": "Connectez les comptes officiels X et LinkedIn de CodeSphere. Les jetons sont chiffrés et renouvelés avant leur expiration.",
+			"table": {
+				"account": "Compte",
+				"state": "État",
+				"details": "Détails",
+				"actions": "Actions"
+			},
+			"bySecret": "Par secret",
+			"bySecretHint": "Publie avec les secrets du déploiement : aucune connexion à faire.",
 			"callbackDescription": "Finalisation de la connexion…",
 			"finishing": "Finalisation de la connexion…",
 			"back": "Retour aux comptes sociaux",
@@ -327,7 +633,8 @@
 			"notSetUp": "Aucune application OAuth n'est configurée sur ce déploiement (voir SOCIAL_CREDENTIALS_SECRET, X_CLIENT_ID, LINKEDIN_CLIENT_ID).",
 			"platforms": {
 				"x": "X",
-				"linkedin": "LinkedIn"
+				"linkedin": "LinkedIn",
+				"bluesky": "Bluesky"
 			},
 			"state": {
 				"not-configured": "Non configuré",
@@ -349,9 +656,82 @@
 			"reconnect": "Reconnecter",
 			"disconnect": "Déconnecter",
 			"connectedNow": "{platform} connecté.",
-			"error": "La connexion a échoué. Réessayez."
+			"error": "La connexion a échoué. Réessayez.",
+			"publish": {
+				"title": "Publier sur un compte officiel",
+				"description": "Relayez une Question ou un Hackathon public, avec son lien.",
+				"type": "Type de contenu",
+				"types": {
+					"question": "Question",
+					"hackathon": "Hackathon"
+				},
+				"platform": "Compte",
+				"choosePlatform": "Choisir un compte",
+				"search": "Chercher une Question",
+				"content": "Contenu",
+				"chooseContent": "Choisir un contenu",
+				"text": "Texte avant le lien",
+				"textHint": "{max} caractères au plus. Vide : le titre du contenu.",
+				"once": "Un contenu part une seule fois par compte, et ne peut pas être retiré d'ici.",
+				"submit": "Publier",
+				"viewPost": "Voir la publication",
+				"states": {
+					"published": "Publié.",
+					"processing": "En cours de traitement par la plateforme. Vérifiez le compte avant de republier.",
+					"failed": "La publication a échoué.",
+					"unknown": "Résultat inconnu. Vérifiez le compte avant de republier.",
+					"pending": "Envoi lancé. Suivez-le dans les publications récentes."
+				},
+				"errors": {
+					"conflict": "Publication refusée : contenu d'un Agent, envoi en cours ou résultat inconnu. Vérifiez le compte.",
+					"notFound": "Ce contenu n'est plus public.",
+					"unavailable": "La publication n'est pas configurée pour ce compte.",
+					"rateLimited": "Trop de publications. Réessayez plus tard.",
+					"generic": "La publication a échoué. Vérifiez le compte avant de réessayer."
+				}
+			},
+			"posts": {
+				"title": "Publications récentes",
+				"states": {
+					"pending": "En cours",
+					"published": "Publié",
+					"processing": "En traitement",
+					"failed": "Échec",
+					"unknown": "Inconnu"
+				}
+			}
 		},
 		"kpi": "KPI",
+		"vitals": {
+			"title": "Web Vitals",
+			"description": "Vitesse mesurée dans les navigateurs de vrais visiteurs, par pays. Ni cookie ni donnée personnelle : chaque mesure ne fait qu'incrémenter un compteur.",
+			"lastDays": "{count, plural, one {Dernier jour} other {# derniers jours}}",
+			"country": "Pays",
+			"unknown": "Inconnu",
+			"samples": "{count, plural, one {# mesure} other {# mesures}}",
+			"note": "Chaque case : le 75e centile (arrondi à la borne de sa tranche) et la part des mesures dans le seuil « bon ». LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1, FCP ≤ 1,8 s, TTFB ≤ 0,8 s.",
+			"unavailable": "Mesures indisponibles",
+			"forbidden": "Réservé à l'équipe.",
+			"error": "Une erreur est survenue.",
+			"retry": "Réessayer",
+			"loading": "Chargement…",
+			"empty": "Aucune mesure pour cette période."
+		},
+		"reputation": {
+			"title": "Votes annulés",
+			"description": "Votes annulés par les garde-fous anti-farming : un même votant a donné trop de votes au même auteur en 30 jours. Ils restent dans le journal et ne comptent pas.",
+			"voter": "Votant",
+			"author": "Auteur",
+			"points": "Points non comptés",
+			"date": "Date",
+			"unavailable": "Liste indisponible",
+			"forbidden": "Réservé à l'équipe.",
+			"error": "Une erreur est survenue.",
+			"retry": "Réessayer",
+			"loading": "Chargement…",
+			"empty": "Aucun vote annulé.",
+			"more": "Afficher plus"
+		},
 		"audit": {
 			"title": "Journal d'audit",
 			"description": "Les actions du staff : suspensions, modifications, suppressions.",
@@ -365,7 +745,74 @@
 			"loading": "Chargement…",
 			"empty": "Aucun événement pour ces filtres.",
 			"more": "Voir plus",
-			"system": "Système"
+			"system": "Système",
+			"targetId": "Identifiant de cible",
+			"resetFilters": "Réinitialiser les filtres",
+			"rowLabel": "Options de la ligne : {action} · {target}",
+			"actionsHeader": "Options",
+			"rowActions": {
+				"detail": "Voir le détail",
+				"byActor": "Filtrer par cet acteur",
+				"byTarget": "Filtrer par cette cible",
+				"openTarget": "Ouvrir la cible",
+				"export": "Exporter en CSV",
+				"exportOnly": "Réservé aux Admins"
+			},
+			"exported": "{count, plural, one {# événement exporté} other {# événements exportés}}",
+			"exportTruncated": "Export limité aux {count} événements les plus récents : affinez les filtres pour le reste.",
+			"exportFailed": "L'export a échoué. Réessayez.",
+			"detail": {
+				"title": "Événement du journal",
+				"date": "Date",
+				"actor": "Acteur",
+				"action": "Action",
+				"target": "Cible",
+				"targetId": "Identifiant de la cible",
+				"reason": "Motif",
+				"fields": "Champs modifiés",
+				"role": "Rôle",
+				"roleChange": "{from} → {to}",
+				"none": "—"
+			},
+			"actions": {
+				"agent_key_create": "Clé d'agent créée",
+				"agent_key_revoke": "Clé d'agent révoquée",
+				"agent_pause": "Agent mis en pause",
+				"agent_reactivate": "Agent réactivé",
+				"hackathon_check_repositories": "Dépôts du hackathon vérifiés",
+				"hackathon_update": "Hackathon modifié",
+				"job_dismiss": "Signalement d'offre rejeté",
+				"job_uphold": "Offre retirée après signalement",
+				"member_delete": "Compte supprimé",
+				"member_reactivate": "Membre réactivé",
+				"member_revoke_sessions": "Sessions révoquées",
+				"member_set_role": "Rôle modifié",
+				"member_suspend": "Membre suspendu",
+				"milestone_update": "Étape modifiée",
+				"organization_apply": "Candidature d'organisation",
+				"organization_suspend": "Organisation suspendue",
+				"social_connect": "Compte social connecté",
+				"social_disconnect": "Compte social déconnecté",
+				"social_publish": "Publication sociale",
+				"social_retry": "Publication relancée",
+				"tag_create": "Tag créé",
+				"tag_delete": "Tag supprimé",
+				"tag_rename": "Tag renommé",
+				"watch_domain_block": "Domaine bloqué",
+				"watch_domain_unblock": "Domaine débloqué",
+				"watch_item_approve": "Élément de veille approuvé",
+				"watch_item_remove": "Élément de veille retiré",
+				"watch_source_create": "Source de veille ajoutée",
+				"watch_source_remove": "Source de veille retirée",
+				"watch_source_update": "Source de veille modifiée",
+				"staff_invite": "Invitation au staff envoyée",
+				"hackathon_create": "Hackathon créé",
+				"hackathon_status": "État du Hackathon changé"
+			}
+		},
+		"forbidden": {
+			"title": "Écran non accessible à votre rôle",
+			"text": "Votre rôle ne donne pas accès à cet écran. Demandez à un admin si vous en avez besoin."
 		},
 		"signOut": "Se déconnecter",
 		"common": {
@@ -403,6 +850,314 @@
 			"error": "Le serveur n'a pas répondu.",
 			"forbidden": "Votre rôle ne donne pas accès aux indicateurs.",
 			"retry": "Réessayer"
+		},
+		"watch": {
+			"title": "Veille",
+			"description": "Sources de confiance, propositions et signalements, domaines bloqués.",
+			"stats": {
+				"sources": "Sources actives",
+				"errors": "Flux en erreur"
+			},
+			"errors": {
+				"forbidden": "Action refusée.",
+				"conflict": "Cet élément existe déjà.",
+				"notFound": "Cet élément n'existe plus.",
+				"generic": "Une erreur est survenue. Réessayez."
+			},
+			"sources": {
+				"title": "Sources",
+				"ingest": "Lire maintenant",
+				"ingested": "{sources} sources lues, {added} nouveaux liens.",
+				"name": "Nom",
+				"feedUrl": "Flux RSS ou Atom",
+				"tags": "Tags (virgules)",
+				"african": "Source africaine",
+				"add": "Ajouter",
+				"none": "Aucune source pour le moment.",
+				"active": "Active",
+				"stopped": "Arrêtée",
+				"items": "{count, plural, one {# lien} other {# liens}}",
+				"fetched": "lue le {date}",
+				"neverFetched": "jamais lue",
+				"stop": "Arrêter",
+				"resume": "Reprendre",
+				"remove": "Retrait",
+				"confirmRemove": "Retirer {name} à sa demande ? Ses liens sont supprimés et son domaine bloqué.",
+				"removed": "{count, plural, one {# lien retiré} other {# liens retirés}}."
+			},
+			"review": {
+				"title": "À modérer",
+				"none": "Rien à modérer.",
+				"origin": {
+					"source": "Source",
+					"member": "Member",
+					"agent": "Agent"
+				},
+				"score": "score {score}",
+				"pending": "en attente",
+				"reports": "{count, plural, one {# signalement} other {# signalements}}",
+				"approve": "Approuver",
+				"remove": "Retirer",
+				"reason": "Motif du retrait",
+				"blockDomain": "Bloquer le domaine"
+			},
+			"domains": {
+				"title": "Domaines bloqués",
+				"domain": "Domaine",
+				"block": "Bloquer",
+				"unblock": "Débloquer",
+				"none": "Aucun domaine bloqué.",
+				"confirmBlock": "Bloquer {domain} ? Ses liens existants sont retirés."
+			}
+		},
+		"organizations": {
+			"title": "Organisations",
+			"description": "Demandes à valider, suspensions. Chaque décision est auditée.",
+			"none": "Rien dans cet état.",
+			"system": "créée par la plateforme",
+			"requestedBy": "demandée par {name}",
+			"validate": "Valider",
+			"reject": "Refuser",
+			"suspend": "Suspendre",
+			"reinstate": "Rétablir",
+			"reasonReject": "Motif du refus (montré au demandeur)",
+			"reasonSuspend": "Motif de la suspension",
+			"status": {
+				"pending": "À valider",
+				"validated": "Validées",
+				"rejected": "Refusées",
+				"suspended": "Suspendues"
+			},
+			"errors": {
+				"forbidden": "Action refusée.",
+				"conflict": "Cette demande a déjà été traitée. La liste est rechargée.",
+				"notFound": "Cette Organisation n'existe plus.",
+				"generic": "Une erreur est survenue. Réessayez."
+			},
+			"noOwner": "Sans responsable",
+			"assignOwner": "Désigner un responsable",
+			"assignOwnerPlaceholder": "Adresse du profil ou identifiant du Member"
+		},
+		"jobs": {
+			"title": "Emplois",
+			"description": "Offres signalées. Un signalement fondé retire l'offre ; deux suspendent l'Organisation.",
+			"stats": {
+				"jobs": "Offres signalées",
+				"reports": "Signalements"
+			},
+			"none": "Aucune offre signalée.",
+			"reports": "{count, plural, one {# signalement} other {# signalements}}",
+			"uphold": "Fondé : retirer",
+			"dismiss": "Écarter",
+			"reason": "Motif du retrait",
+			"suspended": "L'Organisation est suspendue (deux signalements fondés).",
+			"errors": {
+				"forbidden": "Action refusée.",
+				"conflict": "Déjà traité.",
+				"notFound": "Cette offre n'a plus de signalement en attente.",
+				"generic": "Une erreur est survenue. Réessayez."
+			}
+		},
+		"staff": {
+			"title": "Équipe",
+			"description": "Comptes du back-office : rôles, invitations, sessions. Chaque action est journalisée.",
+			"list": "Équipe",
+			"search": "Rechercher un compte",
+			"searchPlaceholder": "Nom ou e-mail",
+			"loading": "Chargement…",
+			"empty": "Aucun compte du staff.",
+			"pick": "Choisissez un compte ou une invitation.",
+			"unavailable": "Équipe indisponible",
+			"retry": "Réessayer",
+			"groups": {
+				"super_admin": "Super admins",
+				"admin": "Admins",
+				"moderator": "Modérateurs",
+				"pending": "Invitations en attente"
+			},
+			"roles": {
+				"member": "Membre",
+				"moderator": "Modérateur",
+				"admin": "Admin",
+				"super_admin": "Super admin"
+			},
+			"pendingMeta": "{days, plural, one {# jour} other {# jours}}",
+			"expiredMeta": "Expirée",
+			"deactivated": "Désactivé",
+			"invite": {
+				"button": "Inviter",
+				"title": "Inviter dans l'équipe",
+				"description": "Chaque adresse reçoit une offre valable 7 jours. Aucun compte ni mot de passe n'est créé : le rôle s'applique à la première connexion avec cette adresse vérifiée.",
+				"emails": "Adresses e-mail",
+				"emailsHelp": "Séparées par des virgules ou des retours à la ligne, 20 au maximum.",
+				"role": "Rôle",
+				"submit": "Envoyer les invitations",
+				"sending": "Envoi…",
+				"count": "{count, plural, one {# adresse} other {# adresses}}",
+				"invalid": "Adresse illisible : {emails}",
+				"overflow": "{count, plural, one {# adresse en trop sera ignorée} other {# adresses en trop seront ignorées}}",
+				"resultsTitle": "Résultat",
+				"status": {
+					"invited": "Invitation créée",
+					"promoted": "Rôle donné tout de suite",
+					"already_staff": "A déjà ce rôle ou plus",
+					"refused": "Refusé"
+				},
+				"emailNotSent": "e-mail non parti : prévenez la personne vous-même",
+				"done": "Fermer"
+			},
+			"invitation": {
+				"section": "Invitation",
+				"email": "E-mail",
+				"role": "Rôle offert",
+				"invitedBy": "Invitée par",
+				"sent": "Envoyée le",
+				"expires": "Expire le",
+				"expired": "expirée : renvoyez-la pour la rouvrir",
+				"leftDays": "{days, plural, one {# jour restant} other {# jours restants}}",
+				"resend": "Renvoyer",
+				"resent": "Invitation renvoyée pour 7 jours.",
+				"resentNoMail": "Prolongée de 7 jours, mais l'e-mail n'a pas pu partir.",
+				"revoke": "Révoquer l'invitation",
+				"revoked": "Invitation révoquée.",
+				"unknownInviter": "compte supprimé"
+			},
+			"account": {
+				"section": "Compte",
+				"email": "E-mail",
+				"role": "Rôle",
+				"joined": "Inscrit le",
+				"status": "Statut",
+				"active": "Actif",
+				"suspended": "Désactivé"
+			},
+			"manage": {
+				"roleSection": "Changer le rôle",
+				"newRole": "Nouveau rôle",
+				"reasonLabel": "Raison (obligatoire)",
+				"reasonTooShort": "3 caractères minimum.",
+				"applyRole": "Appliquer le rôle",
+				"roleChanged": "Rôle modifié.",
+				"accessSection": "Accès",
+				"deactivate": "Désactiver ce compte",
+				"reactivate": "Réactiver",
+				"revokeSessions": "Déconnecter partout",
+				"sessionsRevoked": "Sessions révoquées.",
+				"refusalSelf": "C'est votre compte : vos sessions se gèrent dans « Mon compte ».",
+				"refusalRank": "Rang égal ou supérieur au vôtre : vous ne pouvez pas gérer ce compte.",
+				"openAccount": "Ouvrir « Mon compte »"
+			},
+			"errors": {
+				"forbidden": "Action refusée : rang insuffisant.",
+				"conflict": "Ce compte a déjà changé d'état, ou une règle l'interdit (dernier super admin, rôle fixé par l'environnement). La liste a été rechargée.",
+				"notFound": "Ce compte ou cette invitation n'existe plus.",
+				"generic": "Une erreur est survenue. Réessayez."
+			},
+			"stats": {
+				"members": "Membres de l'équipe",
+				"admins": "Admins",
+				"moderators": "Modérateurs",
+				"pending": "Invitations"
+			}
+		},
+		"account": {
+			"title": "Mon compte",
+			"description": "Votre profil, vos préférences, vos sessions et votre activité dans le back-office.",
+			"profile": {
+				"title": "Profil",
+				"name": "Nom affiché",
+				"email": "E-mail",
+				"role": "Rôle",
+				"nameHint": "Ce nom apparaît dans votre badge et dans le journal d'audit.",
+				"emailHint": "L'adresse vient de votre fournisseur de connexion : elle ne se modifie pas ici.",
+				"memberSince": "Membre depuis",
+				"signIn": "Connexion",
+				"save": "Enregistrer",
+				"saving": "Enregistrement…",
+				"saved": "Nom mis à jour.",
+				"failed": "Le nom n'a pas pu être modifié. Réessayez.",
+				"invalid": "Entrez un nom de 1 à 80 caractères.",
+				"emailCode": "Code envoyé par e-mail",
+				"providers": {
+					"google": "Google",
+					"github": "GitHub",
+					"credential": "E-mail et mot de passe"
+				}
+			},
+			"sessions": {
+				"title": "Sessions actives",
+				"loading": "Chargement…",
+				"error": "Sessions indisponibles.",
+				"current": "Cette session",
+				"unknownDevice": "Appareil inconnu",
+				"started": "Ouverte le {date}",
+				"revoke": "Déconnecter",
+				"revokeOthers": "Déconnecter toutes les autres sessions",
+				"revoked": "Session déconnectée.",
+				"othersRevoked": "Autres sessions déconnectées.",
+				"failed": "La déconnexion a échoué. Réessayez.",
+				"onlyThis": "Aucune autre session ouverte.",
+				"stale": "Pour votre sécurité, la liste des sessions n'est disponible qu'après une connexion récente (moins de 24 h). Reconnectez-vous pour l'afficher.",
+				"reauth": "Se reconnecter"
+			},
+			"activity": {
+				"title": "Mon activité",
+				"description": "Vos dernières actions dans le journal d'audit.",
+				"loading": "Chargement…",
+				"empty": "Aucune action de votre part dans le journal.",
+				"unavailable": "Journal indisponible.",
+				"full": "Ouvrir le journal d'audit"
+			},
+			"hero": {
+				"memberSince": "Membre depuis le {date}",
+				"lastSignIn": "Session ouverte le {date}",
+				"verified": "E-mail vérifié",
+				"unverified": "E-mail non vérifié"
+			},
+			"access": {
+				"title": "Votre accès",
+				"description": "Les écrans du back-office que votre rôle ouvre.",
+				"count": "{count, plural, one {# écran} other {# écrans}}"
+			},
+			"preferences": {
+				"title": "Préférences",
+				"language": "Langue de l'interface",
+				"theme": "Thème"
+			},
+			"tabs": {
+				"profile": "Profil",
+				"security": "Sécurité",
+				"activity": "Activité",
+				"preferences": "Préférences"
+			},
+			"sections": {
+				"back": "Mon compte",
+				"profile": "Nom, rôle et accès",
+				"security": "Sessions ouvertes",
+				"activity": "Mes actions dans le back-office",
+				"preferences": "Langue, thème, données allégées"
+			}
+		},
+		"userMenu": {
+			"label": "Menu du compte",
+			"account": "Mon compte",
+			"settings": "Réglages",
+			"language": "Langue",
+			"theme": "Thème",
+			"backToSite": "Retour au site",
+			"signOut": "Se déconnecter",
+			"themes": {
+				"light": "Clair",
+				"dark": "Sombre",
+				"system": "Système"
+			}
+		},
+		"navGroups": {
+			"menu": "Menu",
+			"pilot": "Pilotage",
+			"content": "Contenu",
+			"community": "Communauté",
+			"team": "Équipe"
 		}
 	},
 	"onboarding": {
@@ -468,6 +1223,7 @@
 		"showQuestion": "Voir la question",
 		"answers": "{count, plural, =0 {Réponses} one {# réponse} other {# réponses}}",
 		"noAnswer": "Pas encore de réponse. Soyez le premier à aider.",
+		"collapsedAnswer": "Réponse de l'agent {agent} (propriétaire : {owner}), en attente de validation par un membre. L'afficher.",
 		"signInToAnswer": "Connectez-vous pour répondre et voter.",
 		"signIn": "Se connecter",
 		"closedNotice": "Cette question est fermée : elle ne reçoit plus de réponse.",
@@ -604,7 +1360,17 @@
 		}
 	},
 	"member": {
-		"unnamed": "Membre"
+		"unnamed": "Membre",
+		"reputation": "Réputation {count, number}"
+	},
+	"consent": {
+		"title": "Nos conditions ont changé",
+		"description": "Pour continuer à utiliser CodeSphere, lisez puis acceptez les conditions d'utilisation et la politique de confidentialité (version {version}). Vous pouvez aussi vous déconnecter, télécharger vos données ou supprimer votre compte.",
+		"readTerms": "Lire les conditions d'utilisation",
+		"readPrivacy": "Lire la politique de confidentialité",
+		"accept": "J'accepte",
+		"signOut": "Me déconnecter",
+		"otherOptions": "Autres options"
 	},
 	"legal": {
 		"nav": "Informations légales",
@@ -728,9 +1494,11 @@
 			"prizes": "Prix",
 			"rules": "Règles",
 			"judging": "Jugement",
-			"discussion": "Discussion"
+			"discussion": "Discussion",
+			"team": "Mon équipe",
+			"gallery": "Galerie"
 		},
-		"organizedBy": "Organisé par {organizer}",
+		"organizedBy": "Organisé par",
 		"ask": "Poser une question",
 		"closesIn": "Clôture des soumissions dans",
 		"closed": "Les soumissions sont closes.",
@@ -748,7 +1516,10 @@
 			"next": "Prochaine étape",
 			"team": "Équipes",
 			"teamSize": "De {min} à {max} membres",
-			"noMilestone": "Aucune étape à venir."
+			"noMilestone": "Aucune étape à venir.",
+			"externalTitle": "Inscription et dépôt chez l'organisateur",
+			"externalText": "Les équipes, l'inscription et le dépôt des projets se font sur le site de l'organisateur, pas ici. CodeSphere vous aide à préparer votre projet : posez vos questions et suivez le calendrier.",
+			"externalCta": "Aller au site de l'organisateur"
 		},
 		"timeline": {
 			"title": "Calendrier",
@@ -783,11 +1554,421 @@
 		"notFound": "Ce hackathon n'existe pas.",
 		"error": "Le hackathon n'a pas pu être chargé.",
 		"retry": "Réessayer",
-		"unavailable": "Les hackathons ne sont pas disponibles sur ce déploiement."
+		"unavailable": "Les hackathons ne sont pas disponibles sur ce déploiement.",
+		"team": {
+			"signIn": "Connectez-vous pour créer ou rejoindre une équipe.",
+			"signInButton": "Se connecter",
+			"createTitle": "Créer mon équipe",
+			"createHint": "Vous en êtes le capitaine : vous invitez les autres par lien ou par nom. Un Member n'est que dans une équipe par Hackathon.",
+			"teamName": "Nom de l'équipe",
+			"create": "Créer l'équipe",
+			"invited": "{by} vous invite dans l'équipe « {team} ».",
+			"accept": "Accepter",
+			"decline": "Refuser",
+			"size": "{count} sur {max} membres",
+			"registrationClosed": "inscriptions closes",
+			"captain": "Capitaine",
+			"remove": "Retirer",
+			"pending": "invité·e, sans réponse",
+			"inviteTitle": "Inviter",
+			"link": "Lien d'invitation",
+			"copy": "Copier",
+			"copied": "Lien copié.",
+			"rotate": "Nouveau lien",
+			"inviteByName": "Nom exact d'un Member",
+			"invite": "Inviter",
+			"leave": "Quitter l'équipe",
+			"disband": "Dissoudre l'équipe",
+			"confirmDisband": "Dissoudre l'équipe ? Sa soumission est supprimée.",
+			"errors": {
+				"already": "Vous êtes déjà dans une équipe de ce Hackathon.",
+				"full": "Cette équipe est complète.",
+				"closed": "C'est clos : les dates limites sont passées.",
+				"conflict": "Ce nom est déjà pris, ou plusieurs Members portent ce nom : utilisez le lien.",
+				"notFound": "Introuvable.",
+				"generic": "Une erreur est survenue. Réessayez."
+			},
+			"join": {
+				"title": "Rejoindre une équipe",
+				"intro": "Vous avez reçu un lien d'invitation. Rejoindre vous place dans cette équipe pour ce Hackathon.",
+				"button": "Rejoindre l'équipe",
+				"already": "Vous êtes déjà dans une équipe de ce Hackathon.",
+				"full": "Cette équipe est complète.",
+				"closed": "Les inscriptions sont closes.",
+				"invalid": "Ce lien n'est plus valable."
+			},
+			"submission": {
+				"title": "Soumission",
+				"hint": "Des liens seulement, pas de fichiers. Modifiable jusqu'à la date limite, puis figée et publiée dans la galerie.",
+				"frozen": "La date limite est passée : la soumission est figée.",
+				"projectTitle": "Titre du projet",
+				"description": "Description (Markdown, 20 caractères au moins)",
+				"repo": "Lien du dépôt",
+				"demo": "Lien de la démo",
+				"video": "Lien d'une vidéo (facultatif)",
+				"tags": "Tags, séparés par des virgules (5 au plus)",
+				"save": "Enregistrer la soumission",
+				"update": "Mettre à jour",
+				"saved": "Soumission enregistrée."
+			}
+		},
+		"gallery": {
+			"notYet": "La galerie s'ouvre à la date limite des soumissions.",
+			"empty": "Aucune soumission.",
+			"repo": "Dépôt",
+			"demo": "Démo",
+			"video": "Vidéo",
+			"more": "Voir plus"
+		},
+		"report": {
+			"button": "Signaler",
+			"why": "Pourquoi signalez-vous ce Hackathon ?",
+			"reasons": {
+				"misleading": "Informations trompeuses",
+				"scam": "Arnaque ou frais cachés",
+				"unlawful": "Contenu illicite",
+				"spam": "Spam",
+				"other": "Autre"
+			},
+			"comment": "Précisions (facultatif)",
+			"send": "Envoyer le signalement",
+			"sent": "Merci : les Admins vont examiner ce Hackathon.",
+			"forbidden": "Seul un Member peut signaler.",
+			"failed": "Le signalement a échoué. Réessayez."
+		}
 	},
 	"tagInput": {
 		"placeholder": "Ajouter un tag",
 		"remove": "Retirer {tag}",
 		"full": "{max} tags au maximum"
+	},
+	"roadmap": {
+		"nav": "Feuille de route",
+		"title": "Feuille de route",
+		"intro": "Où en est CodeSphere, ce qui vient ensuite et ce que nous ne ferons pas. Les trimestres sont des cibles, jamais des promesses de date.",
+		"community": "La communauté en chiffres",
+		"snapshot": "Chiffres du {date}, mis à jour une fois par jour.",
+		"unavailable": "Les chiffres sont indisponibles pour le moment.",
+		"activeMembers": "Membres actifs (30 jours)",
+		"questions": "Questions",
+		"answerRate": "Questions avec une réponse",
+		"median": "Délai médian avant la première réponse",
+		"medianNone": "Pas encore de réponse",
+		"minutes": "{count, plural, one {# minute} other {# minutes}}",
+		"hours": "{count, plural, one {# heure} other {# heures}}",
+		"acceptanceRate": "Réponses acceptées parmi les Questions répondues",
+		"countries": "Pays représentés",
+		"countriesNote": "Seuls les pays comptant au moins {min} Members sont comptés.",
+		"target": "Trimestre cible : {target}",
+		"status": {
+			"delivered": "Livré",
+			"in_progress": "En cours",
+			"planned": "Prévu"
+		},
+		"notDoing": "Ce que nous ne ferons pas maintenant",
+		"ideas": "Une idée ? Proposez-la",
+		"ideasHint": "Posez une Question avec le Tag « roadmap » : la communauté peut voter.",
+		"propose": "Proposer une idée",
+		"ideasRecent": "Idées récentes",
+		"ideasNone": "Aucune idée proposée pour le moment.",
+		"overview": "{done} lignes livrées sur {total}",
+		"overviewLabel": "Avancement de la feuille de route",
+		"sectionProgress": "{done} sur {total} livrées",
+		"legendDelivered": "{count} livrées",
+		"legendInProgress": "{count} en cours",
+		"legendPlanned": "{count} prévues",
+		"summary": "Sommaire",
+		"remaining": "{count, plural, =0 {Plus rien à faire} one {# ligne reste à faire} other {# lignes restent à faire}}"
+	},
+	"watch": {
+		"title": "Veille",
+		"intro": "Des liens utiles aux développeurs africains : sources de confiance et propositions de la communauté. Nous gardons le lien, le titre et un court résumé, jamais l'article.",
+		"views": {
+			"recent": "Récents",
+			"pending": "À valider",
+			"saved": "Gardés"
+		},
+		"african": "Source africaine",
+		"origin": {
+			"member": "Proposé par un Member",
+			"agent": "Proposé par un agent"
+		},
+		"pending": "En attente de vote",
+		"pendingHint": "Ces propositions deviennent visibles après un vote positif d'un Member ou l'approbation d'un Admin.",
+		"empty": {
+			"recent": "Rien à lire pour le moment.",
+			"pending": "Aucune proposition en attente.",
+			"saved": "Vous n'avez rien gardé pour plus tard."
+		},
+		"more": "Voir plus",
+		"retry": "Réessayer",
+		"error": "Une erreur est survenue. Réessayez.",
+		"needReputation": "Il vous faut plus de Réputation pour cette action.",
+		"upvote": "Voter pour",
+		"downvote": "Voter contre",
+		"save": "Garder pour plus tard",
+		"saved": "Gardé",
+		"report": "Signaler",
+		"reportReason": "Pourquoi ?",
+		"reportSend": "Envoyer",
+		"reported": "Merci, un Admin va regarder.",
+		"propose": {
+			"title": "Proposer un lien",
+			"hint": "25 de Réputation requis, 5 propositions par jour. Le lien apparaît après un vote positif ou l'approbation d'un Admin.",
+			"url": "Adresse du lien",
+			"titleLabel": "Titre",
+			"summary": "Résumé (300 caractères)",
+			"tags": "Tags, séparés par des virgules",
+			"submit": "Proposer",
+			"done": "Merci ! Votre proposition attend un vote.",
+			"needReputation": "Il vous faut 25 de Réputation pour proposer un lien.",
+			"exists": "Ce lien existe déjà.",
+			"blocked": "Ce site n'est pas accepté.",
+			"tooMany": "Limite de 5 propositions par jour atteinte.",
+			"error": "Le lien n'a pas pu être proposé."
+		}
+	},
+	"organizations": {
+		"title": "Organisations",
+		"intro": "Entreprises, universités, startups et communautés validées par un Admin. Une Organisation validée peut lister des Hackathons.",
+		"apply": "Demander la validation d'une Organisation",
+		"applyTitle": "Demander la validation d'une Organisation",
+		"applyIntro": "Un Admin examine chaque demande. Votre adresse e-mail doit être sur le domaine de l'Organisation : elle n'est jamais affichée.",
+		"name": "Nom",
+		"website": "Site web",
+		"contactEmail": "E-mail sur le domaine de l'Organisation",
+		"contactEmailHint": "Pas d'adresse gmail, yahoo ou similaire : elle doit être sur le domaine du site.",
+		"country": "Pays",
+		"countryHint": "Pays (code ISO, ex. SN) ou OTHER",
+		"description": "Présentation (1000 caractères)",
+		"submit": "Envoyer la demande",
+		"applied": "Demande envoyée : un Admin va l'examiner.",
+		"mine": "Mes demandes",
+		"viewProfile": "Voir le profil public",
+		"validated": "Organisation validée",
+		"empty": "Aucune Organisation validée pour le moment.",
+		"unavailable": "La liste est indisponible pour le moment.",
+		"status": {
+			"pending": "En attente",
+			"validated": "Validée",
+			"rejected": "Refusée",
+			"suspended": "Suspendue"
+		},
+		"errors": {
+			"conflict": "Cette Organisation existe déjà, ou vous avez atteint 3 demandes ouvertes.",
+			"domain": "L'adresse e-mail doit être sur le domaine du site web (pas de messagerie publique).",
+			"forbidden": "Seul un Member peut faire une demande.",
+			"generic": "La demande a échoué. Réessayez."
+		},
+		"manage": {
+			"signIn": "Connectez-vous pour gérer une Organisation.",
+			"signInAction": "Se connecter",
+			"notFound": "Cette Organisation n'existe pas, n'est pas validée, ou vous n'en faites pas partie.",
+			"publicProfile": "Voir le profil public",
+			"role": {
+				"owner": "Responsable",
+				"editor": "Éditeur"
+			},
+			"tabs": {
+				"hackathons": "Hackathons",
+				"members": "Membres",
+				"terms": "Conditions"
+			},
+			"hackathonsHint": "Un brouillon n'est jamais public. Publier le rend visible tout de suite, sans relecture : vous restez responsable de son contenu.",
+			"noHackathons": "Aucun Hackathon pour le moment.",
+			"edit": "Modifier",
+			"archivedReadOnly": "Un Hackathon archivé est en lecture seule : demandez à un Admin.",
+			"status": {
+				"draft": "Brouillon",
+				"published": "Publié",
+				"ended": "Terminé",
+				"archived": "Archivé"
+			},
+			"action": {
+				"publish": "Publier",
+				"end": "Terminer",
+				"archive": "Archiver"
+			},
+			"rolesHint": "Le responsable gère les membres et la fiche de l'Organisation. Un éditeur crée, modifie et publie les Hackathons.",
+			"transfer": "Passer la main",
+			"transferSent": "Proposition envoyée : l'éditeur doit l'accepter.",
+			"leave": "Quitter",
+			"remove": "Retirer",
+			"cancel": "Annuler",
+			"pending": "Invitations en attente",
+			"invitationRole": {
+				"editor": "éditeur",
+				"owner": "responsabilité"
+			},
+			"inviteLabel": "Inviter un Member",
+			"invite": "Inviter",
+			"invited": "Invitation envoyée : le Member doit l'accepter.",
+			"invitePlaceholder": "Adresse du profil ou identifiant",
+			"inviteHint": "Collez l'adresse de son profil (…/members/identifiant). Un Member suspendu ou un Agent ne peut pas être invité.",
+			"invitations": "Invitations reçues",
+			"invitationText": {
+				"editor": "{organization} vous invite à rejoindre son équipe comme éditeur.",
+				"owner": "{organization} vous propose d'en devenir le responsable."
+			},
+			"accept": "Accepter",
+			"decline": "Refuser",
+			"accepted": "Vous faites maintenant partie de l'équipe.",
+			"errors": {
+				"conflict": "Action impossible dans l'état actuel (déjà membre, invitation en cours, équipe pleine…).",
+				"forbidden": "Seul le responsable peut faire cela.",
+				"notFound": "Introuvable : l'invitation ou le Member n'existe plus.",
+				"generic": "L'action a échoué. Réessayez."
+			},
+			"terms": {
+				"title": "Conditions d'utilisation des Hackathons",
+				"intro": "En publiant un Hackathon sur CodeSphere, l'Organisation reconnaît que :",
+				"accept": "J'accepte au nom de l'Organisation",
+				"accepted": "Acceptées",
+				"acceptedBy": "par {name} le {date}.",
+				"acceptedToast": "Conditions acceptées : vous pouvez publier.",
+				"ownerOnly": "Seul le responsable de l'Organisation peut accepter ces conditions. Demandez-lui avant de publier.",
+				"needed": "Le responsable doit d'abord accepter les conditions (onglet Conditions).",
+				"clauses": {
+					"c1": "Elle est seule responsable des règles de son Hackathon, de son règlement et de l'exactitude des informations publiées (dates, éligibilité, Prizes).",
+					"c2": "Elle est seule responsable de la fiscalité et des obligations légales liées aux Prizes qu'elle promet ou verse. CodeSphere ne détient et ne verse aucun fonds.",
+					"c3": "Les gagnants sont choisis selon des critères de compétence annoncés à l'avance, jamais par tirage au sort ou par hasard.",
+					"c4": "Elle ne publie aucun contenu illicite, trompeur ou discriminatoire, et ne demande aucun paiement aux participants pour concourir.",
+					"c5": "CodeSphere peut dépublier un Hackathon, avec un motif, et suspendre une Organisation qui ne respecte pas ces conditions.",
+					"c6": "Le responsable de l'Organisation engage celle-ci en acceptant ces conditions."
+				}
+			},
+			"unpublished": "Dépublié par l'équipe CodeSphere : {reason}. Corrigez-le, puis demandez la levée du blocage pour le publier de nouveau.",
+			"unpublishedTitle": "Dépublié par l'équipe CodeSphere : un Admin doit lever le blocage."
+		},
+		"manageLink": "Gérer l'équipe et les Hackathons"
+	},
+	"jobs": {
+		"title": "Emplois",
+		"intro": "Offres d'Organisations validées. Postuler est toujours gratuit : une offre qui demande de l'argent au candidat est refusée.",
+		"publish": "Publier une offre",
+		"country": "Pays (SN, CI…)",
+		"tag": "Tag",
+		"remote": "À distance",
+		"empty": "Aucune offre pour le moment.",
+		"more": "Voir plus",
+		"retry": "Réessayer",
+		"error": "Une erreur est survenue. Réessayez.",
+		"notFound": "Cette offre n'existe pas ou a expiré.",
+		"applied": "Candidature envoyée",
+		"appliedToast": "C'est noté : l'Organisation voit que vous avez postulé.",
+		"appliedShared": "Vous avez postulé en partageant votre fiche CodeSphere.",
+		"appliedPlain": "Vous avez postulé sans partager votre fiche.",
+		"expires": "Expire le {date}",
+		"howToApply": "Comment postuler",
+		"free": "Postuler est gratuit. Ne payez jamais pour une candidature : signalez l'offre.",
+		"applyLink": "Postuler sur le site de l'Organisation",
+		"applyWithCard": "Postuler avec ma fiche CodeSphere",
+		"applyWithoutCard": "Je postule sans ma fiche",
+		"applyHint": "Vous postulez aussi sur le site ou par e-mail ci-dessus. Partager votre fiche l'affiche à cette Organisation pour cette offre seulement.",
+		"report": "Signaler",
+		"reportReason": "Pourquoi ?",
+		"reportSend": "Envoyer",
+		"reported": "Merci, un Admin va regarder.",
+		"applicants": "Candidatures reçues",
+		"noApplicants": "Personne n'a encore postulé via CodeSphere.",
+		"noCard": "Fiche non partagée",
+		"reputation": "Réputation {count}",
+		"close": "Clore l'offre",
+		"confirmClose": "Clore cette offre maintenant ?",
+		"errors": {
+			"forbidden": "Vous ne pouvez pas faire cela (vous êtes le propriétaire de cette offre, ou vous n'êtes pas connecté en tant que Member).",
+			"generic": "Une erreur est survenue. Réessayez."
+		},
+		"module": {
+			"title": "Emplois pour vos Tags",
+			"latest": "Derniers emplois",
+			"all": "Toutes les offres"
+		},
+		"publishPage": {
+			"title": "Publier une offre",
+			"intro": "Une offre dure 30 jours. Choisissez comment postuler : un lien ou un e-mail, pas les deux.",
+			"signIn": "Connectez-vous pour publier une offre.",
+			"needOrganization": "Il faut une Organisation validée pour publier.",
+			"applyOrganization": "Demander la validation d'une Organisation",
+			"organization": "Organisation",
+			"jobTitle": "Titre du poste",
+			"description": "Description (20 caractères au moins)",
+			"tags": "Tags, séparés par des virgules (5 au plus)",
+			"country": "Pays",
+			"applyHint": "Comment postuler (un seul des deux)",
+			"applyUrl": "Lien de candidature",
+			"applyEmail": "E-mail de candidature",
+			"rules": "Une offre qui demande de l'argent au candidat est refusée. 5 offres actives au plus par Organisation. Deux signalements fondés suspendent l'Organisation.",
+			"submit": "Publier pour 30 jours",
+			"done": "Offre publiée.",
+			"mine": "Mes offres",
+			"live": "en ligne",
+			"expired": "expirée",
+			"removed": "retirée",
+			"applicants": "{count, plural, =0 {aucune candidature} one {# candidature} other {# candidatures}}",
+			"errors": {
+				"rule": "Offre refusée : un seul moyen de postuler, et jamais de demande d'argent au candidat.",
+				"limit": "Vous avez déjà 5 offres en ligne.",
+				"forbidden": "Seul le propriétaire d'une Organisation validée peut publier.",
+				"generic": "La publication a échoué. Réessayez."
+			}
+		},
+		"stopSharing": "Ne plus partager ma fiche"
+	},
+	"countrySelect": {
+		"placeholder": "Rechercher un pays",
+		"empty": "Aucun pays trouvé.",
+		"clear": "Effacer le pays",
+		"open": "Ouvrir la liste des pays",
+		"africa": "Afrique",
+		"others": "Autres pays"
+	},
+	"agentActivity": {
+		"filter": "Type d'activité",
+		"filters": {
+			"all": "Tout",
+			"content": "Contenus",
+			"rejections": "Rejets",
+			"management": "Gestion"
+		},
+		"kinds": {
+			"question": "A posé une Question",
+			"answer": "A répondu",
+			"rejection": "Réponse rejetée par la communauté",
+			"pause": "Mis en pause automatiquement",
+			"resume": "Remis en service"
+		},
+		"actions": {
+			"agent": {
+				"key": {
+					"create": "Clé créée",
+					"revoke": "Clé révoquée"
+				},
+				"reactivate": "Réactivé par l'équipe"
+			}
+		},
+		"deleted": "supprimé depuis",
+		"loading": "Chargement…",
+		"error": "Historique indisponible.",
+		"empty": "Aucune activité pour ce filtre.",
+		"more": "Plus ancien"
+	},
+	"hackathonsPage": {
+		"title": "Hackathons",
+		"intro": "Les concours en cours et passés listés sur CodeSphere.",
+		"empty": "Aucun Hackathon pour le moment.",
+		"error": "Impossible de charger les Hackathons.",
+		"retry": "Réessayer",
+		"organizedBy": "Organisé par {name}",
+		"published": "En cours",
+		"ended": "Terminé",
+		"next": "Prochaine étape : {label}, {date}"
+	},
+	"notFound": {
+		"eyebrow": "Erreur 404",
+		"title": "Perdu dans le bruit",
+		"description": "Cette page n'existe pas ou a changé d'adresse. Revenez aux questions de la communauté, ou posez la vôtre.",
+		"home": "Retour à l'accueil",
+		"ask": "Poser une question"
 	}
 }

@@ -1,6 +1,10 @@
 "use client";
 
 import { Button } from "@codesphere/ui/components/atoms/button";
+import {
+	RevealLine,
+	TextsReveal,
+} from "@codesphere/ui/components/molecules/texts-reveal";
 import { cn } from "@codesphere/ui/lib/utils";
 
 type TagPickerProps = Omit<
@@ -65,26 +69,38 @@ function TagPicker({
 		<section
 			data-slot="tag-picker"
 			className={cn(
-				"flex flex-col gap-5 rounded-xl border border-border bg-card p-6 text-card-foreground",
+				"motion-rise flex flex-col gap-5 rounded-xl border border-border bg-card p-6 text-card-foreground",
 				className,
 			)}
 			{...props}
 		>
-			<header className="flex flex-col gap-1">
-				<h2 className="font-semibold text-xl tracking-tight">{l.title}</h2>
-				<p className="text-muted-foreground text-sm">{l.lead(min)}</p>
-			</header>
+			<TextsReveal className="flex flex-col gap-1">
+				<RevealLine
+					as="h2"
+					line={1}
+					className="font-semibold text-xl tracking-tight"
+				>
+					{l.title}
+				</RevealLine>
+				<RevealLine as="p" line={2} className="text-muted-foreground text-sm">
+					{l.lead(min)}
+				</RevealLine>
+			</TextsReveal>
 			<ul className="flex flex-wrap gap-2">
-				{tags.map((tag) => {
+				{tags.map((tag, index) => {
 					const selected = value.includes(tag);
 					return (
-						<li key={tag}>
+						<li
+							key={tag}
+							className="motion-rise"
+							style={{ "--i": index } as React.CSSProperties}
+						>
 							<button
 								type="button"
 								aria-pressed={selected}
 								onClick={() => toggle(tag)}
 								className={cn(
-									"rounded-full border px-3 py-1 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50",
+									"rounded-full border px-3 py-1 text-sm outline-none transition-[color,background-color,border-color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-95",
 									selected
 										? "border-primary bg-primary text-primary-foreground"
 										: "border-border text-muted-foreground hover:border-primary hover:text-foreground",

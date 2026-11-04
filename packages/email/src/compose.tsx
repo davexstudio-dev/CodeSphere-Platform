@@ -8,10 +8,20 @@ import {
 	type AccountDeletedProps,
 } from "./templates/account-deleted";
 import {
+	AGENT_PAUSED_SUBJECTS,
+	AgentPaused,
+	type AgentPausedProps,
+} from "./templates/agent-paused";
+import {
 	API_KEY_CREATED_SUBJECTS,
 	ApiKeyCreated,
 	type ApiKeyCreatedProps,
 } from "./templates/api-key-created";
+import {
+	HACKATHON_UNPUBLISHED_SUBJECTS,
+	HackathonUnpublished,
+	type HackathonUnpublishedProps,
+} from "./templates/hackathon-unpublished";
 import {
 	MEMBER_REACTIVATED_SUBJECTS,
 	MemberReactivated,
@@ -23,10 +33,25 @@ import {
 	type MemberSuspendedProps,
 } from "./templates/member-suspended";
 import {
+	ORGANIZATION_INVITATION_SUBJECTS,
+	OrganizationInvitation,
+	type OrganizationInvitationProps,
+} from "./templates/organization-invitation";
+import {
+	ORGANIZATION_SUSPENDED_SUBJECTS,
+	OrganizationSuspended,
+	type OrganizationSuspendedProps,
+} from "./templates/organization-suspended";
+import {
 	SIGN_IN_CODE_SUBJECTS,
 	SignInCode,
 	type SignInCodeProps,
 } from "./templates/sign-in-code";
+import {
+	STAFF_INVITATION_SUBJECTS,
+	StaffInvitation,
+	type StaffInvitationProps,
+} from "./templates/staff-invitation";
 import {
 	WELCOME_SUBJECTS,
 	Welcome,
@@ -40,7 +65,12 @@ export type EmailMessage =
 	| { kind: "member-suspended"; props: MemberSuspendedProps }
 	| { kind: "member-reactivated"; props: MemberReactivatedProps }
 	| { kind: "api-key-created"; props: ApiKeyCreatedProps }
-	| { kind: "sign-in-code"; props: SignInCodeProps };
+	| { kind: "agent-paused"; props: AgentPausedProps }
+	| { kind: "sign-in-code"; props: SignInCodeProps }
+	| { kind: "staff-invitation"; props: StaffInvitationProps }
+	| { kind: "organization-invitation"; props: OrganizationInvitationProps }
+	| { kind: "hackathon-unpublished"; props: HackathonUnpublishedProps }
+	| { kind: "organization-suspended"; props: OrganizationSuspendedProps };
 
 /** The subject and the body of a message, in the language of its props. */
 export function composeEmail(message: EmailMessage): {
@@ -74,10 +104,35 @@ export function composeEmail(message: EmailMessage): {
 				subject: API_KEY_CREATED_SUBJECTS[locale],
 				template: <ApiKeyCreated {...message.props} />,
 			};
+		case "agent-paused":
+			return {
+				subject: AGENT_PAUSED_SUBJECTS[locale],
+				template: <AgentPaused {...message.props} />,
+			};
 		case "sign-in-code":
 			return {
 				subject: SIGN_IN_CODE_SUBJECTS[locale],
 				template: <SignInCode {...message.props} />,
+			};
+		case "staff-invitation":
+			return {
+				subject: STAFF_INVITATION_SUBJECTS[locale],
+				template: <StaffInvitation {...message.props} />,
+			};
+		case "organization-invitation":
+			return {
+				subject: ORGANIZATION_INVITATION_SUBJECTS[locale],
+				template: <OrganizationInvitation {...message.props} />,
+			};
+		case "hackathon-unpublished":
+			return {
+				subject: HACKATHON_UNPUBLISHED_SUBJECTS[locale],
+				template: <HackathonUnpublished {...message.props} />,
+			};
+		case "organization-suspended":
+			return {
+				subject: ORGANIZATION_SUSPENDED_SUBJECTS[locale],
+				template: <OrganizationSuspended {...message.props} />,
 			};
 	}
 }

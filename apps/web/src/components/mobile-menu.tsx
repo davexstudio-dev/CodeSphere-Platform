@@ -16,6 +16,7 @@ import {
 import {
 	LogInIcon,
 	LogOutIcon,
+	MapIcon,
 	MenuIcon,
 	PlusIcon,
 	SettingsIcon,
@@ -30,6 +31,7 @@ import { useSignOut } from "@/components/outbox-provider";
 import SsoLoginDialog from "@/components/sso-login-dialog";
 import { setLocale } from "@/i18n/actions";
 import { isLocale } from "@/i18n/config";
+import { backOfficeHome } from "@/lib/post-signin";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 /**
@@ -55,7 +57,7 @@ export function MobileMenu() {
 				>
 					<MenuIcon />
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="min-w-56 bg-card">
+				<DropdownMenuContent align="end" className="min-w-56">
 					{session && (
 						<>
 							<DropdownMenuGroup>
@@ -76,6 +78,10 @@ export function MobileMenu() {
 						>
 							<PlusIcon />
 							{t("ask")}
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => router.push("/roadmap")}>
+							<MapIcon />
+							{t("roadmap")}
 						</DropdownMenuItem>
 					</DropdownMenuGroup>
 					<DropdownMenuSeparator />
@@ -107,7 +113,9 @@ export function MobileMenu() {
 								{t("settings")}
 							</DropdownMenuItem>
 							{isStaffRole(session.user.role) && (
-								<DropdownMenuItem onClick={() => router.push("/dashboard")}>
+								<DropdownMenuItem
+									onClick={() => router.push(backOfficeHome(session.user.role))}
+								>
 									<ShieldIcon />
 									{t("admin")}
 								</DropdownMenuItem>

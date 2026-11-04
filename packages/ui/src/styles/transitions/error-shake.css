@@ -1,0 +1,39 @@
+/* Error state shake (transitions.dev 12), pure CSS: the animation starts when aria-invalid turns
+   true on an Input or Textarea, so no class has to be toggled. The border colour and the message
+   already follow aria-invalid in the components themselves. The percent stops are the cumulative
+   leg durations of 80, 60, 80, 60 ms (28.57, 57.14, 78.57, 100); recompute them if
+   --shake-dur-a / --shake-dur-b change their ratio. */
+[data-slot="input"][aria-invalid="true"],
+[data-slot="textarea"][aria-invalid="true"] {
+	animation: t-input-shake calc(var(--shake-dur-a) * 2 + var(--shake-dur-b) * 2)
+		linear;
+}
+
+@keyframes t-input-shake {
+	0% {
+		transform: translateX(0);
+		animation-timing-function: var(--shake-ease);
+	}
+	28.57% {
+		transform: translateX(var(--shake-distance));
+		animation-timing-function: var(--shake-ease);
+	}
+	57.14% {
+		transform: translateX(calc(var(--shake-distance) * -1));
+		animation-timing-function: var(--shake-ease);
+	}
+	78.57% {
+		transform: translateX(var(--shake-overshoot));
+		animation-timing-function: var(--shake-ease);
+	}
+	100% {
+		transform: translateX(0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-slot="input"][aria-invalid="true"],
+	[data-slot="textarea"][aria-invalid="true"] {
+		animation: none !important;
+	}
+}

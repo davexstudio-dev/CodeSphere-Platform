@@ -1,7 +1,13 @@
 /// <reference types="bun" />
 import { describe, expect, test } from "bun:test";
 
-import { apiFetch, type WorkerEnv, withoutDatabase } from "./worker";
+import {
+	apiFetch,
+	apiQueue,
+	apiScheduled,
+	type WorkerEnv,
+	withoutDatabase,
+} from "./worker";
 
 // A preview deployed without a database (map #86, #150): the Worker must start, and readiness
 // must answer 503 instead of the whole Worker refusing to boot.
@@ -34,8 +40,59 @@ describe("Worker without DATABASE_URL", () => {
 		expect(response.status).toBe(503);
 	});
 
+	test("a too short social secret leaves the API up (#322)", async () => {
+		const response = await apiFetch(
+			new Request("https://pr-2.preview.example/api/v1/health"),
+			{
+				...env,
+				BETTER_AUTH_URL: "https://pr-2.preview.example",
+				SOCIAL_CREDENTIALS_SECRET: "short",
+				PUBLIC_SITE_URL: "https://pr-2.preview.example",
+				LINKEDIN_CLIENT_ID: "client",
+			},
+			{ waitUntil: () => {}, passThroughOnException: () => {} } as never,
+		);
+		expect(response.status).toBe(200);
+	});
+
 	test("every query on the fallback database rejects", async () => {
 		const db = withoutDatabase();
 		expect(() => db.select()).toThrow("no database configured");
+	});
+});
+
+describe("the outbox on the Worker (#259)", () => {
+	test("without a database, a queue message is retried later, never dropped", async () => {
+		const retried: number[] = [];
+		await apiQueue(
+			{
+				messages: [
+					{
+						body: {
+							id: "1",
+							type: "x",
+							aggregateType: "x",
+							aggregateId: "1",
+							payload: {},
+							createdAt: new Date().toISOString(),
+						},
+						ack: () => {
+							throw new Error("must not ack");
+						},
+						retry: (options) => retried.push(options?.delaySeconds ?? 0),
+					},
+				],
+			},
+			env,
+		);
+		expect(retried).toEqual([60]);
+	});
+
+	test("the scheduled run without a database does nothing", async () => {
+		await apiScheduled(
+			env,
+			{ waitUntil: () => {}, passThroughOnException: () => {} } as never,
+			"* * * * *",
+		);
 	});
 });

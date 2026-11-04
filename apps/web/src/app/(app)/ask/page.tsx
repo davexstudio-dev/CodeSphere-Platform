@@ -13,8 +13,9 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 export default function AskPage() {
 	const t = useTranslations("ask");
 	const { data: session, isPending } = useHydratedSession();
+	// grid-cols-1: the step labels would otherwise widen the column past a phone screen.
 	return (
-		<main className="mx-auto grid max-w-3xl gap-6 px-4 py-6 md:px-6 md:py-8">
+		<main className="mx-auto grid max-w-3xl grid-cols-1 gap-6 px-4 py-6 md:px-6 md:py-8">
 			<header className="grid gap-1">
 				<h1 className="font-bold text-2xl tracking-tight">{t("title")}</h1>
 				<p className="text-muted-foreground">{t("lead")}</p>

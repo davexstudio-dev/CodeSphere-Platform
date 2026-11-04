@@ -1,0 +1,289 @@
+/// <reference types="bun" />
+// Integration test of the CADEV demo content (#57) against a real Postgres: it loads through the
+// services, replays without changing anything, gives every demo Member some Reputation, and
+// creates the demo Agent once for its Owner.
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { createDb } from "@codesphere/db";
+import { auditLog } from "@codesphere/db/schema/audit";
+import { apikey, user } from "@codesphere/db/schema/auth";
+import {
+	jobApplications,
+	jobPostings,
+	jobReports,
+} from "@codesphere/db/schema/jobs";
+import { answers, questions, votes } from "@codesphere/db/schema/questions";
+import { reputationEvents } from "@codesphere/db/schema/reputation";
+import { watchItems, watchSources } from "@codesphere/db/schema/watch";
+import { and, count, eq, inArray, or } from "drizzle-orm";
+
+import { AnswerError } from "../answers/service";
+import { reputationOf } from "../reputation/service";
+import { createVoteService } from "../votes/service";
+import { demoMembers, demoQuestions } from "./content";
+import {
+	demoItems,
+	demoJobs,
+	demoSources,
+	resetDemoJobsWatch,
+} from "./jobs-watch";
+import { DEMO_AGENT_NAME, DemoSeedError, resetDemo, seedDemo } from "./seed";
+
+const url = process.env.TEST_DATABASE_URL;
+// Each run loads the whole content (dozens of Answers and Votes): far more than the default 5 s.
+const SEED_TIMEOUT = 60_000;
+
+describe.skipIf(!url)("demo content on Postgres", () => {
+	const db = createDb({ DATABASE_URL: url ?? "" });
+	const run = crypto.randomUUID();
+	const owner = `it-demo-owner-${run}`;
+	const ownerEmail = `${owner}@example.com`;
+	const memberIds = demoMembers.map((m) => m.id);
+	const people = [...memberIds, owner];
+
+	const journalSize = async () => {
+		const [row] = await db
+			.select({ n: count() })
+			.from(reputationEvents)
+			.where(inArray(reputationEvents.userId, memberIds));
+		return row?.n ?? 0;
+	};
+	const demoQuestionRows = () =>
+		db
+			.select({ id: questions.id, version: questions.version })
+			.from(questions)
+			.where(inArray(questions.authorId, memberIds))
+			.orderBy(questions.id);
+
+	// Run before as well: a hand-run `db:seed:demo` may have left the demo Members in this database.
+	const clean = async () => {
+		const agents = await db
+			.select({ id: user.id })
+			.from(user)
+			.where(eq(user.ownerId, owner));
+		const agentIds = agents.map((a) => a.id);
+		await resetDemoJobsWatch(db);
+		await db
+			.delete(reputationEvents)
+			.where(
+				or(
+					inArray(reputationEvents.userId, people),
+					inArray(reputationEvents.actorId, people),
+				),
+			);
+		await db.delete(votes).where(inArray(votes.userId, people));
+		await db.delete(answers).where(inArray(answers.authorId, people));
+		await db.delete(questions).where(inArray(questions.authorId, people));
+		await db.delete(auditLog).where(eq(auditLog.actorId, owner));
+		if (agentIds.length > 0) {
+			await db.delete(apikey).where(inArray(apikey.referenceId, agentIds));
+			await db.delete(user).where(inArray(user.id, agentIds));
+		}
+		await db.delete(user).where(inArray(user.id, people));
+	};
+	beforeAll(clean);
+	afterAll(clean);
+
+	test(
+		"loads the Members, Questions, Answers and acceptances, and replays without change",
+		async () => {
+			// A Member left by an earlier version of the content, under its old name.
+			await db.insert(user).values({
+				...demoMembers[0],
+				name: `${demoMembers[0].name} (démo)`,
+				kind: "human",
+			});
+			const first = await seedDemo(db);
+			const [renamed] = await db
+				.select({ name: user.name })
+				.from(user)
+				.where(eq(user.id, demoMembers[0].id));
+			expect(renamed?.name).toBe(demoMembers[0].name);
+			expect(first).toMatchObject({
+				members: demoMembers.length,
+				questions: demoQuestions.length,
+				agent: null,
+			});
+			const acceptedInContent = demoQuestions.filter((q) =>
+				q.answers.some((a) => a.accepted),
+			).length;
+			expect(first.accepted).toBe(acceptedInContent);
+			const rows = await demoQuestionRows();
+			expect(rows).toHaveLength(demoQuestions.length);
+			const accepted = await db
+				.select({ id: questions.id })
+				.from(questions)
+				.where(eq(questions.status, "answered"));
+			expect(
+				accepted.filter((q) => rows.some((r) => r.id === q.id)),
+			).toHaveLength(acceptedInContent);
+			for (const member of demoMembers) {
+				expect(
+					await reputationOf(db, { id: member.id, kind: "human" }),
+				).toBeGreaterThan(0);
+			}
+
+			const before = { journal: await journalSize(), rows };
+			const second = await seedDemo(db);
+			expect(second).toEqual(first);
+			expect(await journalSize()).toBe(before.journal);
+			expect(await demoQuestionRows()).toEqual(before.rows);
+		},
+		SEED_TIMEOUT,
+	);
+
+	test(
+		"creates the demo Agent once for a Member who signed in, and refuses an unknown email",
+		async () => {
+			await expect(
+				seedDemo(db, { ownerEmail: `nobody-${run}@example.com` }),
+			).rejects.toBeInstanceOf(DemoSeedError);
+
+			await db
+				.insert(user)
+				.values({ id: owner, name: "Owner", email: ownerEmail, kind: "human" });
+			const first = await seedDemo(db, { ownerEmail });
+			expect(first.agent).toMatchObject({ created: true });
+			expect(first.agent?.key).toBeTruthy();
+			const second = await seedDemo(db, { ownerEmail });
+			expect(second.agent).toMatchObject({ created: false, key: null });
+			expect(second.agent?.id).toBe(first.agent?.id as string);
+			const agents = await db
+				.select({ name: user.name, kind: user.kind })
+				.from(user)
+				.where(eq(user.ownerId, owner));
+			expect(agents).toEqual([{ name: DEMO_AGENT_NAME, kind: "agent" }]);
+		},
+		SEED_TIMEOUT,
+	);
+
+	test(
+		"after a content change, --reset clears the old demo content and the seed loads again",
+		async () => {
+			// What staging held: an older content, where a Member answered under another key,
+			// and a real Member's Vote on a demo Question.
+			const [q2] = await db
+				.select({ id: questions.id })
+				.from(questions)
+				.where(
+					and(
+						eq(questions.authorId, "demo-aicha"),
+						eq(questions.idempotencyKey, demoQuestions[1]?.key ?? ""),
+					),
+				);
+			if (!q2) throw new Error("demo Question 2 missing");
+			await resetDemo(db);
+			const [old] = await db
+				.insert(questions)
+				.values({
+					authorId: "demo-aicha",
+					idempotencyKey: demoQuestions[1]?.key ?? "",
+					title: "Ancienne question",
+					body: "Ancienne version.",
+					bodyHtml: "<p>Ancienne version.</p>",
+					language: "fr",
+					tags: ["ussd"],
+				})
+				.returning({ id: questions.id });
+			if (!old) throw new Error("seed failed");
+			await db.insert(answers).values({
+				questionId: old.id,
+				authorId: "demo-mariam",
+				idempotencyKey: crypto.randomUUID(),
+				body: "Ancienne réponse.",
+				bodyHtml: "<p>Ancienne réponse.</p>",
+			});
+			await createVoteService(db).cast(
+				owner,
+				{ targetType: "question", targetId: old.id },
+				"up",
+			);
+			await expect(seedDemo(db)).rejects.toBeInstanceOf(AnswerError);
+
+			const removed = await resetDemo(db);
+			expect(removed.questions).toBeGreaterThan(0);
+			expect(await demoQuestionRows()).toEqual([]);
+			const leftVotes = await db
+				.select({ n: count() })
+				.from(votes)
+				.where(inArray(votes.userId, people));
+			expect(leftVotes[0]?.n).toBe(0);
+			// Every point the demo content granted is given back: the journal sums to zero.
+			for (const id of [...memberIds, owner]) {
+				expect(await reputationOf(db, { id, kind: "human" })).toBe(0);
+			}
+
+			const reloaded = await seedDemo(db);
+			expect(reloaded.questions).toBe(demoQuestions.length);
+			expect(await demoQuestionRows()).toHaveLength(demoQuestions.length);
+		},
+		SEED_TIMEOUT,
+	);
+
+	test(
+		"loads the Job postings and the Watch feed (#291), replays and resets them",
+		async () => {
+			const jobIds = demoJobs.map((j) => j.id);
+			const itemIds = demoItems.map((i) => i.id);
+			const snapshot = async () => {
+				const jobs = await db
+					.select({
+						status: jobPostings.status,
+						expiresAt: jobPostings.expiresAt,
+					})
+					.from(jobPostings)
+					.where(inArray(jobPostings.id, jobIds));
+				const [reports] = await db
+					.select({ n: count() })
+					.from(jobReports)
+					.where(inArray(jobReports.jobId, jobIds));
+				const [applications] = await db
+					.select({ n: count() })
+					.from(jobApplications)
+					.where(inArray(jobApplications.jobId, jobIds));
+				const items = await db
+					.select({ visibility: watchItems.visibility })
+					.from(watchItems)
+					.where(inArray(watchItems.id, itemIds));
+				const [sources] = await db
+					.select({ n: count() })
+					.from(watchSources)
+					.where(
+						inArray(
+							watchSources.id,
+							demoSources.map((s) => s.id),
+						),
+					);
+				return {
+					jobs: jobs.length,
+					removed: jobs.filter((j) => j.status === "removed").length,
+					expired: jobs.filter((j) => j.expiresAt < new Date()).length,
+					reports: reports?.n,
+					applications: applications?.n,
+					items: items.length,
+					pending: items.filter((i) => i.visibility === "pending").length,
+					sources: sources?.n,
+				};
+			};
+
+			await seedDemo(db);
+			const first = await snapshot();
+			expect(first).toEqual({
+				jobs: 6,
+				removed: 1,
+				expired: 1,
+				reports: 2,
+				applications: 3,
+				items: 9,
+				pending: 2,
+				sources: 3,
+			});
+			await seedDemo(db);
+			expect(await snapshot()).toEqual(first);
+
+			await resetDemo(db);
+			const empty = await snapshot();
+			expect(empty).toMatchObject({ jobs: 0, items: 0, sources: 0 });
+		},
+		SEED_TIMEOUT,
+	);
+});

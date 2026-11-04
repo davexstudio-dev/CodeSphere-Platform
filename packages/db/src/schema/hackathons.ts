@@ -1,12 +1,17 @@
 import {
+	boolean,
 	index,
 	integer,
 	pgTable,
+	primaryKey,
 	text,
 	timestamp,
 	unique,
 	uuid,
 } from "drizzle-orm/pg-core";
+
+import { user } from "./auth";
+import { organization } from "./organizations";
 
 // Hackathon (spec §2): informational only, the MVP lists the CADEV 2026. Seeded with its
 // starting values, then edited by an Admin; `version` guards concurrent edits (CONFLICT).
@@ -14,8 +19,25 @@ export const hackathon = pgTable("hackathon", {
 	id: uuid("id").defaultRandom().primaryKey(),
 	slug: text("slug").notNull().unique(),
 	name: text("name").notNull(),
-	organizer: text("organizer").notNull(),
+	// The Organization that lists it (#257), replacing the former free-text organizer.
+	organizationId: uuid("organization_id")
+		.notNull()
+		.references(() => organization.id),
 	summary: text("summary").notNull(),
+	// draft -> published -> ended -> archived, by hand (#325). A draft is never public. What exists
+	// before this column is published; a new Hackathon is created as a draft explicitly.
+	status: text("status")
+		.$type<"draft" | "published" | "ended" | "archived">()
+		.default("published")
+		.notNull(),
+	// Why an Admin took it back to a draft (#326). While set, its Organization cannot publish it
+	// again: an Admin lifts the lock once the content is fixed. Null when nothing is pending.
+	unpublishedReason: text("unpublished_reason"),
+	// When the Hackathon opens (#261): a repository whose first commit is older is flagged.
+	opensAt: timestamp("opens_at"),
+	// Teams and submissions are run on CodeSphere (#261). Off for an event whose registration and
+	// submission live elsewhere (the CADEV: Systalink's Datacloud): the page then points to `sourceUrl`.
+	teamsEnabled: boolean("teams_enabled").default(true).notNull(),
 	teamMin: integer("team_min").notNull(),
 	teamMax: integer("team_max").notNull(),
 	sourceUrl: text("source_url").notNull(),
@@ -79,4 +101,35 @@ export const hackathonCriterion = pgTable(
 		position: integer("position").notNull(),
 	},
 	(table) => [index("hackathon_criterion_hackathon_idx").on(table.hackathonId)],
+);
+
+export const HACKATHON_REPORT_REASONS = [
+	"misleading",
+	"scam",
+	"unlawful",
+	"spam",
+	"other",
+] as const;
+
+// A Member's report on a published Hackathon (#326): one per Member and Hackathon, handled by an
+// Admin. The outcome stays null while it waits; `upheld` when the Hackathon was unpublished,
+// `dismissed` when the Admin kept it.
+export const hackathonReport = pgTable(
+	"hackathon_report",
+	{
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		hackathonId: uuid("hackathon_id")
+			.notNull()
+			.references(() => hackathon.id, { onDelete: "cascade" }),
+		reason: text("reason", { enum: HACKATHON_REPORT_REASONS }).notNull(),
+		comment: text("comment"),
+		outcome: text("outcome", { enum: ["upheld", "dismissed"] }),
+		createdAt: timestamp("created_at", { precision: 3 }).defaultNow().notNull(),
+	},
+	(t) => [
+		primaryKey({ columns: [t.userId, t.hackathonId] }),
+		index("hackathon_report_open_idx").on(t.hackathonId),
+	],
 );

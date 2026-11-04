@@ -14,10 +14,20 @@ export {
 	type AccountDeletedProps,
 } from "./templates/account-deleted";
 export {
+	AGENT_PAUSED_SUBJECTS,
+	AgentPaused,
+	type AgentPausedProps,
+} from "./templates/agent-paused";
+export {
 	API_KEY_CREATED_SUBJECTS,
 	ApiKeyCreated,
 	type ApiKeyCreatedProps,
 } from "./templates/api-key-created";
+export {
+	HACKATHON_UNPUBLISHED_SUBJECTS,
+	HackathonUnpublished,
+	type HackathonUnpublishedProps,
+} from "./templates/hackathon-unpublished";
 export {
 	MEMBER_REACTIVATED_SUBJECTS,
 	MemberReactivated,
@@ -29,10 +39,25 @@ export {
 	type MemberSuspendedProps,
 } from "./templates/member-suspended";
 export {
+	ORGANIZATION_INVITATION_SUBJECTS,
+	OrganizationInvitation,
+	type OrganizationInvitationProps,
+} from "./templates/organization-invitation";
+export {
+	ORGANIZATION_SUSPENDED_SUBJECTS,
+	OrganizationSuspended,
+	type OrganizationSuspendedProps,
+} from "./templates/organization-suspended";
+export {
 	SIGN_IN_CODE_SUBJECTS,
 	SignInCode,
 	type SignInCodeProps,
 } from "./templates/sign-in-code";
+export {
+	STAFF_INVITATION_SUBJECTS,
+	StaffInvitation,
+	type StaffInvitationProps,
+} from "./templates/staff-invitation";
 export {
 	WELCOME_SUBJECT,
 	WELCOME_SUBJECTS,

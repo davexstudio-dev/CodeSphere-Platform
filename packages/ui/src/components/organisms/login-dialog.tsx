@@ -35,11 +35,7 @@ function LoginDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			{!withoutTrigger && (
 				<DialogTrigger
-					render={
-						trigger ?? (
-							<Button size="lg" className="h-10 min-w-44 px-6 text-sm" />
-						)
-					}
+					render={trigger ?? <Button size="lg" className="h-10 min-w-44" />}
 				>
 					{trigger ? undefined : "Se connecter"}
 				</DialogTrigger>

@@ -1,32 +1,147 @@
 "use client";
 
-import { Button } from "@codesphere/ui/components/atoms/button";
+import { type Permissions, roleCan } from "@codesphere/auth/access";
+import {
+	Empty,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyTitle,
+} from "@codesphere/ui/components/molecules/empty";
 import { AdminShell } from "@codesphere/ui/components/organisms/admin-shell";
 import {
 	BarChart3Icon,
-	LogOutIcon,
+	BriefcaseIcon,
+	BuildingIcon,
+	FileTextIcon,
+	GaugeIcon,
+	LayoutDashboardIcon,
+	RssIcon,
+	ScaleIcon,
 	ScrollTextIcon,
 	ShareIcon,
 	ShieldIcon,
 	TagIcon,
 	TrophyIcon,
+	UsersIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-
+import AdminAccountMenu from "@/components/admin-account-menu";
 import { useAdminIdentity } from "@/components/admin-identity";
-import LocaleSwitcher from "@/components/locale-switcher";
-import { authClient } from "@/lib/auth-client";
+import Link from "@/components/link";
 
-const NAV = [
-	{ key: "dashboard.title", href: "/dashboard", icon: BarChart3Icon },
-	{ key: "moderation.title", href: "/admin", icon: ShieldIcon },
-	{ key: "hackathons.title", href: "/admin/hackathons", icon: TrophyIcon },
-	{ key: "tags.title", href: "/admin/tags", icon: TagIcon },
-	{ key: "social.title", href: "/admin/social", icon: ShareIcon },
-	{ key: "audit.title", href: "/admin/audit", icon: ScrollTextIcon },
-] as const;
+// Each screen with the permission its procedures require (#285): the same access control the API
+// enforces, so a moderator sees only what they can use.
+const NAV: {
+	group: "pilot" | "content" | "community" | "team";
+	key: string;
+	href: string;
+	icon: typeof ShieldIcon;
+	can: Permissions;
+}[] = [
+	{
+		group: "pilot",
+		key: "dashboard.title",
+		href: "/admin",
+		icon: BarChart3Icon,
+		can: { kpi: ["read"] },
+	},
+	{
+		group: "pilot",
+		key: "vitals.title",
+		href: "/admin/vitals",
+		icon: GaugeIcon,
+		can: { kpi: ["read"] },
+	},
+	{
+		group: "pilot",
+		key: "reputation.title",
+		href: "/admin/reputation",
+		icon: ScaleIcon,
+		can: { moderation: ["list"] },
+	},
+	{
+		group: "pilot",
+		key: "audit.title",
+		href: "/admin/audit",
+		icon: ScrollTextIcon,
+		can: { audit: ["read"] },
+	},
+	{
+		group: "content",
+		key: "moderation.title",
+		href: "/admin/moderation",
+		icon: ShieldIcon,
+		can: { moderation: ["list"] },
+	},
+	{
+		group: "content",
+		key: "tags.title",
+		href: "/admin/tags",
+		icon: TagIcon,
+		can: { tag: ["list"] },
+	},
+	{
+		group: "content",
+		key: "watch.title",
+		href: "/admin/watch",
+		icon: RssIcon,
+		can: { watch: ["manage"] },
+	},
+	{
+		group: "community",
+		key: "hackathons.title",
+		href: "/admin/hackathons",
+		icon: TrophyIcon,
+		can: { hackathon: ["update"] },
+	},
+	{
+		group: "community",
+		key: "organizations.title",
+		href: "/admin/organizations",
+		icon: BuildingIcon,
+		can: { organization: ["manage"] },
+	},
+	{
+		group: "community",
+		key: "jobs.title",
+		href: "/admin/jobs",
+		icon: BriefcaseIcon,
+		can: { job: ["manage"] },
+	},
+	{
+		group: "team",
+		key: "staff.title",
+		href: "/admin/staff",
+		icon: UsersIcon,
+		can: { staff: ["list"] },
+	},
+	{
+		group: "team",
+		key: "legal.title",
+		href: "/admin/legal",
+		icon: FileTextIcon,
+		can: { legal: ["manage"] },
+	},
+	{
+		group: "team",
+		key: "social.title",
+		href: "/admin/social",
+		icon: ShareIcon,
+		can: { social: ["manage"] },
+	},
+];
+
+export { NAV as ADMIN_NAV };
+
+/** The screen `pathname` belongs to: the longest matching entry, so /admin/tags is not /admin. */
+const screenOf = (pathname: string) =>
+	// « Mon compte » belongs to every staff member: no permission to ask for.
+	(pathname.startsWith("/admin/account") ? [] : NAV)
+		.filter(
+			(item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
+		)
+		.sort((a, b) => b.href.length - a.href.length)[0];
 
 /** The back-office layout with the navigation wired to the router and the signed-in Admin. */
 export default function AdminFrame({
@@ -41,46 +156,48 @@ export default function AdminFrame({
 	children: React.ReactNode;
 }) {
 	const pathname = usePathname();
-	const router = useRouter();
 	const identity = useAdminIdentity();
 	const t = useTranslations("admin");
+	// A screen the role cannot use shows why instead of a page of FORBIDDEN errors.
+	const screen = screenOf(pathname);
+	const allowed = !screen || roleCan(identity?.role, screen.can);
 
-	const signOut = () =>
-		authClient.signOut({
-			fetchOptions: { onSuccess: () => router.push("/") },
-		});
+	// One icon per group, for the sidebar folded to icons (keyed by the heading shown).
+	const groupIcons = {
+		[t("navGroups.pilot")]: LayoutDashboardIcon,
+		[t("navGroups.content")]: FileTextIcon,
+		[t("navGroups.community")]: UsersIcon,
+		[t("navGroups.team")]: ShieldIcon,
+	};
 
 	return (
 		<AdminShell
 			title={title}
 			description={description}
 			LinkComponent={Link}
-			user={
-				identity
-					? {
-							name: identity.name,
-							email: identity.email,
-							role: identity.role,
-						}
-					: undefined
-			}
-			nav={NAV.map(({ key, ...item }) => ({
-				...item,
-				label: t(key),
-				active: pathname === item.href,
-			}))}
-			actions={
-				<>
-					<LocaleSwitcher />
-					{actions}
-					<Button variant="ghost" size="sm" onClick={signOut}>
-						<LogOutIcon />
-						{t("signOut")}
-					</Button>
-				</>
-			}
+			userMenu={({ collapsed }) => <AdminAccountMenu compact={collapsed} />}
+			nav={NAV.filter((item) => roleCan(identity?.role, item.can)).map(
+				({ key, can: _can, group, ...item }) => ({
+					...item,
+					group: t(`navGroups.${group}`),
+					label: t(key),
+					active: pathname === item.href,
+				}),
+			)}
+			groupIcons={groupIcons}
+			actions={actions}
+			menuLabel={t("navGroups.menu")}
 		>
-			{children}
+			{allowed ? (
+				children
+			) : (
+				<Empty>
+					<EmptyHeader>
+						<EmptyTitle>{t("forbidden.title")}</EmptyTitle>
+						<EmptyDescription>{t("forbidden.text")}</EmptyDescription>
+					</EmptyHeader>
+				</Empty>
+			)}
 		</AdminShell>
 	);
 }

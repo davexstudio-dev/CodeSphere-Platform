@@ -12,6 +12,7 @@ import { user } from "./auth";
 
 export type SocialPostState =
 	| "pending"
+	| "sending"
 	| "published"
 	| "processing"
 	| "failed"
@@ -19,7 +20,8 @@ export type SocialPostState =
 
 // What an Admin publishes to CodeSphere's own social accounts (#265, ADR 0001). One row per
 // content and platform: `idempotencyKey` (`share:{type}:{id}:{platform}`) is unique, so a retry
-// never publishes twice. `pending` and `unknown` are never re-sent blindly: the platform may
+// never publishes twice. `pending` waits for the outbox's consumer, which moves it to `sending`
+// before anything leaves. `sending` and `unknown` are never re-sent blindly: the platform may
 // already hold the post. Only a `failed` row marked `retryable` is claimed again.
 export const socialPost = pgTable(
 	"social_post",

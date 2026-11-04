@@ -79,7 +79,8 @@ export function QuestionEditor({
 			<Field id="edit-body" label={t("body")} required>
 				<Textarea
 					id="edit-body"
-					className="min-h-48 font-mono"
+					mono
+					className="min-h-48"
 					value={body}
 					maxLength={20_000}
 					required

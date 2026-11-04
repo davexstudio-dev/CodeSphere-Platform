@@ -50,4 +50,51 @@ describe("unexpected failure", () => {
 		});
 		expect((error as Error).message).not.toContain("select");
 	});
+
+	test("reports the unexpected error with the trace id, and survives a failing tracker", async () => {
+		const admin = {
+			user: { id: "u1", role: "admin", kind: "human" },
+			session: { id: "s1" },
+		} as unknown as Session;
+		const reported: unknown[] = [];
+		const reporting = createRouterClient(appRouter, {
+			context: testContext({
+				session: admin,
+				requestId: "req-42",
+				traceId: "t-1",
+				reportError: (error) => reported.push(error),
+			}),
+		});
+		const error = await reporting.admin.auditLog
+			.list({ limit: 5 })
+			.catch((caught: unknown) => caught);
+		expect(reported).toHaveLength(1);
+		expect(error).toMatchObject({
+			code: "INTERNAL_SERVER_ERROR",
+			data: { requestId: "req-42", traceId: "t-1" },
+		});
+
+		const broken = createRouterClient(appRouter, {
+			context: testContext({
+				session: admin,
+				reportError: () => {
+					throw new Error("tracker down");
+				},
+			}),
+		});
+		await expect(
+			broken.admin.auditLog.list({ limit: 5 }),
+		).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
+	});
+
+	test("does not report expected errors", async () => {
+		const reported: unknown[] = [];
+		const reporting = createRouterClient(appRouter, {
+			context: testContext({ reportError: (e) => reported.push(e) }),
+		});
+		await expect(reporting.members.me()).rejects.toMatchObject({
+			code: "UNAUTHORIZED",
+		});
+		expect(reported).toHaveLength(0);
+	});
 });

@@ -16,6 +16,8 @@ export const AnswerDetail = z.object({
 	bodyHtml: z.string(),
 	score: z.number().int(),
 	accepted: z.boolean(),
+	/** An Agent Answer no human has vouched for yet: shown folded, ranked below human Answers (#244). */
+	collapsed: z.boolean(),
 	version: z.number().int().min(1),
 	createdAt: z.string().datetime(),
 	updatedAt: z.string().datetime(),
@@ -27,6 +29,10 @@ export const AnswerListItem = AnswerDetail.extend({
 	authorKind: z.enum(["human", "agent"]),
 	/** The Owner's name when the author is an Agent. */
 	ownerName: z.string().nullable(),
+	/** The author's Reputation (#239); null for an Agent, which earns none. */
+	authorReputation: z.number().int().nullable(),
+	/** The author's country (ISO 3166-1 alpha-2 or OTHER), shown as a flag; null when not set. */
+	authorCountry: z.string().nullable(),
 	myVote: z.enum(["up", "down"]).nullable(),
 });
 

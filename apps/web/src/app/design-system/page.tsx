@@ -71,6 +71,7 @@ import {
 } from "@codesphere/ui/components/molecules/collapsible";
 import { ConfirmTwoStep } from "@codesphere/ui/components/molecules/confirm-two-step";
 import { Countdown } from "@codesphere/ui/components/molecules/countdown";
+import { CountrySelect } from "@codesphere/ui/components/molecules/country-select";
 import {
 	Dialog,
 	DialogClose,
@@ -124,6 +125,7 @@ import { ReasonField } from "@codesphere/ui/components/molecules/reason-field";
 import { RelatedQuestions } from "@codesphere/ui/components/molecules/related-questions";
 import { RowActions } from "@codesphere/ui/components/molecules/row-actions";
 import { SaveBar } from "@codesphere/ui/components/molecules/save-bar";
+import { ScrollArea } from "@codesphere/ui/components/molecules/scroll-area";
 import { SegmentedControl } from "@codesphere/ui/components/molecules/segmented-control";
 import {
 	Select,
@@ -176,11 +178,13 @@ import {
 	VoteControl,
 } from "@codesphere/ui/components/molecules/vote-control";
 import { AdminMasterDetail } from "@codesphere/ui/components/organisms/admin-master-detail";
+import { AdminUserMenu } from "@codesphere/ui/components/organisms/admin-user-menu";
 import { AnswerForm } from "@codesphere/ui/components/organisms/answer-form";
 import { ApiKeyReveal } from "@codesphere/ui/components/organisms/api-key-reveal";
 import { AppFooter } from "@codesphere/ui/components/organisms/app-footer";
 import { AppHeader } from "@codesphere/ui/components/organisms/app-header";
 import { AuditLog } from "@codesphere/ui/components/organisms/audit-log";
+import { Dithering404 } from "@codesphere/ui/components/organisms/dithering-404";
 import { FeedFilters } from "@codesphere/ui/components/organisms/feed-filters";
 import { KpiGrid } from "@codesphere/ui/components/organisms/kpi-grid";
 import { LoginCard } from "@codesphere/ui/components/organisms/login-card";
@@ -210,18 +214,30 @@ import {
 	RecordSection,
 	RecordSheet,
 } from "@codesphere/ui/components/organisms/record-sheet";
+import { RoadmapTimeline } from "@codesphere/ui/components/organisms/roadmap-timeline";
+import { SectionNav } from "@codesphere/ui/components/organisms/section-nav";
+import { StatStrip } from "@codesphere/ui/components/organisms/stat-strip";
 import { TagPicker } from "@codesphere/ui/components/organisms/tag-picker";
 import {
 	BookOpenIcon,
+	DownloadIcon,
+	ExternalLinkIcon,
+	EyeIcon,
 	FileTextIcon,
+	FunnelIcon,
 	InfoIcon,
+	LogOutIcon,
 	SearchIcon,
 	TriangleAlertIcon,
+	UserCogIcon,
 	WifiOffIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
+import Link from "@/components/link";
+import { MotionSpecimens } from "./motion-specimens";
 import { auditEntries, moderationRows } from "./sample-data";
+import { Specimen } from "./specimen";
+import { DesignSystemToc } from "./toc";
 
 const TABS = ["Pour toi", "Récents", "Sans réponse"] as const;
 /** The caller sorts: the table only reports the click. */
@@ -297,7 +313,7 @@ function Section({
 	children: React.ReactNode;
 }) {
 	return (
-		<section className="flex flex-col gap-4 border-t pt-8">
+		<section data-toc-section className="flex flex-col gap-4 border-t pt-8">
 			<header>
 				<h2 className="font-semibold text-xl">{title}</h2>
 				{description && (
@@ -306,23 +322,6 @@ function Section({
 			</header>
 			{children}
 		</section>
-	);
-}
-
-function Specimen({
-	label,
-	children,
-}: {
-	label: string;
-	children: React.ReactNode;
-}) {
-	return (
-		<div className="flex flex-col gap-2">
-			<span className="font-mono text-muted-foreground text-xs">{label}</span>
-			<div className="flex flex-wrap items-center gap-3 rounded-md border p-4">
-				{children}
-			</div>
-		</div>
 	);
 }
 
@@ -338,6 +337,13 @@ const COLOR_TOKENS = [
 	{ name: "destructive", className: "bg-destructive" },
 	{ name: "border", className: "bg-border" },
 ] as const;
+
+const SCROLL_ORIENTATIONS = ["vertical", "horizontal", "both"] as const;
+const SCROLL_LABELS = {
+	vertical: "Vertical",
+	horizontal: "Horizontal",
+	both: "Les deux",
+};
 
 const ADMIN_GROUPS = [
 	{ key: "active", label: "Actifs" },
@@ -357,6 +363,12 @@ export default function DesignSystemPage() {
 	const [tablePage, setTablePage] = useState(1);
 	const [tableChecked, setTableChecked] = useState<Selection>(NO_SELECTION);
 	const [tableReasonOpen, setTableReasonOpen] = useState(false);
+	const [auditNote, setAuditNote] = useState<string | null>(null);
+	const [scrollOrientation, setScrollOrientation] =
+		useState<(typeof SCROLL_ORIENTATIONS)[number]>("vertical");
+	const [scrollRows, setScrollRows] = useState(20);
+	const [country, setCountry] = useState("");
+	const [scrollHeight, setScrollHeight] = useState(176);
 	const [checked, setChecked] = useState(false);
 	const [vote, setVote] = useState<Vote | null>("up");
 	const [step, setStep] = useState(1);
@@ -376,8 +388,9 @@ export default function DesignSystemPage() {
 	);
 
 	return (
-		<div className="min-h-svh">
-			<main className="mx-auto flex max-w-5xl flex-col gap-10 px-5 py-8">
+		<div className="min-h-svh lg:flex">
+			<DesignSystemToc />
+			<main className="mx-auto flex w-full min-w-0 max-w-5xl flex-col gap-10 px-5 py-8">
 				<header className="flex flex-col gap-2">
 					<Logo />
 					<h1 className="font-bold text-3xl tracking-tight">
@@ -387,7 +400,8 @@ export default function DesignSystemPage() {
 						Page de référence de tous les composants de{" "}
 						<code>@codesphere/ui</code>, classés en atomes, molécules et
 						organismes. Les états et variantes sont montrés tels qu&apos;ils
-						sont utilisés dans l&apos;application.
+						sont utilisés dans l&apos;application. Chaque composant a son code,
+						tel qu&apos;il est écrit dans cette page.
 					</p>
 				</header>
 
@@ -446,13 +460,14 @@ export default function DesignSystemPage() {
 						</div>
 					</Specimen>
 					<Specimen label="Checkbox">
-						<Label className="flex items-center gap-2">
+						<div className="flex items-center gap-2">
 							<Checkbox
+								id="ds-follow-tag"
 								checked={checked}
 								onCheckedChange={(v) => setChecked(v === true)}
 							/>
-							Suivre ce tag
-						</Label>
+							<Label htmlFor="ds-follow-tag">Suivre ce tag</Label>
+						</div>
 					</Specimen>
 					<Specimen label="Avatar — tailles et repli">
 						<Avatar size="sm">
@@ -495,15 +510,11 @@ export default function DesignSystemPage() {
 					<Specimen label="Switch, Separator">
 						<div className="flex items-center gap-2">
 							<Switch id="ds-hide-agents" defaultChecked />
-							<Label htmlFor="ds-hide-agents" className="font-normal text-sm">
-								Masquer le contenu d'agent
-							</Label>
+							<Label htmlFor="ds-hide-agents">Masquer le contenu d'agent</Label>
 						</div>
 						<div className="flex items-center gap-2">
 							<Switch id="ds-disabled" disabled />
-							<Label htmlFor="ds-disabled" className="font-normal text-sm">
-								Désactivé
-							</Label>
+							<Label htmlFor="ds-disabled">Désactivé</Label>
 						</div>
 						<Separator orientation="vertical" className="h-6" />
 						<span className="text-muted-foreground text-sm">
@@ -517,7 +528,7 @@ export default function DesignSystemPage() {
 						<div className="w-40 text-destructive">
 							<Sparkline
 								data={[15, 12, 13, 9, 10, 6, 5, 3]}
-								className="text-destructive"
+								tone="destructive"
 							/>
 						</div>
 					</Specimen>
@@ -706,7 +717,7 @@ export default function DesignSystemPage() {
 									state: "current",
 								},
 								{
-									date: "22 oct.",
+									date: "24 oct.",
 									title: "Gel des fonctionnalités",
 									state: "upcoming",
 								},
@@ -832,8 +843,10 @@ export default function DesignSystemPage() {
 															}
 														/>
 														<TableCell>{row.tag}</TableCell>
-														<TableCell className="tabular-nums">
-															{row.questions}
+														<TableCell>
+															<span className="tabular-nums">
+																{row.questions}
+															</span>
 														</TableCell>
 														<TableCell className="text-right">
 															<RowActions
@@ -949,6 +962,72 @@ export default function DesignSystemPage() {
 							<TabsContent value="prix">Contenu de l'onglet Prix.</TabsContent>
 						</Tabs>
 					</Specimen>
+					<Specimen label="ScrollArea — modifiable (registre shadcn)">
+						<div className="flex w-full flex-col gap-4">
+							<div className="flex flex-wrap items-end gap-4">
+								<div className="flex flex-col gap-1.5">
+									<Label>Défilement</Label>
+									<SegmentedControl
+										options={SCROLL_ORIENTATIONS}
+										value={scrollOrientation}
+										onValueChange={setScrollOrientation}
+										labels={SCROLL_LABELS}
+									/>
+								</div>
+								<div className="flex flex-col gap-1.5">
+									<Label htmlFor="ds-scroll-rows">Lignes</Label>
+									<Input
+										id="ds-scroll-rows"
+										type="number"
+										min={1}
+										max={200}
+										value={scrollRows}
+										onChange={(event) =>
+											setScrollRows(Number(event.target.value) || 1)
+										}
+										className="w-24"
+									/>
+								</div>
+								<div className="flex flex-col gap-1.5">
+									<Label htmlFor="ds-scroll-height">Hauteur (px)</Label>
+									<Input
+										id="ds-scroll-height"
+										type="number"
+										min={80}
+										max={480}
+										step={16}
+										value={scrollHeight}
+										onChange={(event) =>
+											setScrollHeight(Number(event.target.value) || 80)
+										}
+										className="w-28"
+									/>
+								</div>
+							</div>
+							<ScrollArea
+								// Remounted when the content changes: the bars are measured on mount and on scroll.
+								key={`${scrollOrientation}-${scrollRows}-${scrollHeight}`}
+								orientation={scrollOrientation}
+								style={
+									{ "--height": `${scrollHeight}px` } as React.CSSProperties
+								}
+								className="h-(--height) w-full rounded-md border"
+							>
+								<ul className="divide-y">
+									{Array.from({ length: scrollRows }, (_, row) => (
+										<li
+											key={row}
+											className="whitespace-nowrap px-3 py-2 text-sm"
+										>
+											Ligne {row + 1}
+											{scrollOrientation !== "vertical" &&
+												" — un contenu volontairement long pour déborder sur la largeur et montrer la barre horizontale du composant, quelle que soit la largeur de la colonne dans laquelle il s'affiche : encore quelques mots pour être sûr"}
+										</li>
+									))}
+								</ul>
+							</ScrollArea>
+						</div>
+					</Specimen>
 					<Specimen label="Collapsible — question repliable">
 						<Collapsible className="w-full max-w-md" defaultOpen>
 							<CollapsibleTrigger>
@@ -1045,7 +1124,7 @@ export default function DesignSystemPage() {
 							<DropdownMenuTrigger render={<Button variant="outline" />}>
 								Mon compte
 							</DropdownMenuTrigger>
-							<DropdownMenuContent className="bg-card">
+							<DropdownMenuContent>
 								<DropdownMenuGroup>
 									<DropdownMenuLabel>Compte</DropdownMenuLabel>
 									<DropdownMenuSeparator />
@@ -1098,6 +1177,14 @@ export default function DesignSystemPage() {
 								<QuestionCard key={question.id} {...question} />
 							))}
 						</div>
+					</Specimen>
+					<Specimen label="Dithering404">
+						<Dithering404
+							className="min-h-96 rounded-xl"
+							eyebrow="Erreur 404"
+							title="Perdu dans le bruit"
+							description="Cette page n'existe pas ou a changé d'adresse."
+						/>
 					</Specimen>
 					<Specimen label="CadevBanner">
 						<CadevBanner
@@ -1237,8 +1324,61 @@ export default function DesignSystemPage() {
 						</div>
 					</Specimen>
 					<Specimen label="AuditLog (données d'exemple)">
-						<div className="w-full">
-							<AuditLog entries={auditEntries.slice(0, 4)} />
+						<div className="flex w-full flex-col gap-2">
+							<AuditLog
+								entries={auditEntries.slice(0, 4)}
+								actionsOf={(entry) => [
+									{
+										id: "detail",
+										label: "Voir le détail",
+										icon: <EyeIcon />,
+										onSelect: () =>
+											setAuditNote(`Détail de « ${entry.action} » ouvert`),
+									},
+									{
+										id: "by-actor",
+										label: "Filtrer par acteur",
+										icon: <FunnelIcon />,
+										onSelect: () =>
+											setAuditNote(
+												`Journal filtré sur l'acteur ${entry.actor}`,
+											),
+									},
+									{
+										id: "by-target",
+										label: "Filtrer par cible",
+										icon: <FunnelIcon />,
+										onSelect: () =>
+											setAuditNote(
+												`Journal filtré sur la cible ${entry.target}`,
+											),
+									},
+									{
+										id: "open-target",
+										label: "Ouvrir la cible",
+										icon: <ExternalLinkIcon />,
+										onSelect: () =>
+											setAuditNote(`Cible ${entry.target} ouverte`),
+									},
+									{
+										id: "export",
+										label: "Exporter en CSV",
+										icon: <DownloadIcon />,
+										// Réservé à `audit:export` : grisé pour un Moderator.
+										disabled: entry.actor !== "admin@codesphere",
+										description:
+											entry.actor !== "admin@codesphere"
+												? "Réservé aux Admins"
+												: undefined,
+										onSelect: () =>
+											setAuditNote("Export CSV de la sélection filtrée lancé"),
+									},
+								]}
+							/>
+							<p aria-live="polite" className="text-muted-foreground text-xs">
+								{auditNote ??
+									"Ouvrez le menu ⋯ d'une ligne. L'export est grisé pour les acteurs sans le droit audit:export."}
+							</p>
 						</div>
 					</Specimen>
 					<Specimen label="KpiGrid">
@@ -1264,7 +1404,7 @@ export default function DesignSystemPage() {
 					</Specimen>
 					<Specimen label="AppFooter">
 						<AppFooter
-							className="w-full rounded-md border-t-0"
+							className="w-full"
 							version="1.0.0"
 							sha="6a2db9dd7e5e2bd5b4a4c60c247cc8bb13ff90bf"
 							links={[
@@ -1335,6 +1475,13 @@ export default function DesignSystemPage() {
 							onValueChange={setPickedTags}
 							onSubmit={() => {}}
 							onSkip={() => {}}
+						/>
+					</Specimen>
+					<Specimen label="CountrySelect — recherche par nom, liste défilante">
+						<CountrySelect
+							value={country}
+							onValueChange={setCountry}
+							ariaLabel="Pays"
 						/>
 					</Specimen>
 					<Specimen label="FeedFilters — langue et pays">
@@ -1423,10 +1570,13 @@ export default function DesignSystemPage() {
 					</Specimen>
 					<Specimen label="Pages complètes">
 						<Link href="/admin" className="text-primary text-sm underline">
-							/admin (modération)
+							/admin (tableau de bord)
 						</Link>
-						<Link href="/dashboard" className="text-primary text-sm underline">
-							/dashboard
+						<Link
+							href="/admin/moderation"
+							className="text-primary text-sm underline"
+						>
+							/admin/moderation
 						</Link>
 						<Link
 							href="/admin/audit"
@@ -1445,8 +1595,10 @@ export default function DesignSystemPage() {
 									<MessageScrollerViewport>
 										<MessageScrollerContent>
 											{Array.from({ length: 8 }, (_, i) => (
-												<MessageScrollerItem key={i} className="p-2 text-sm">
-													Message {i + 1}
+												<MessageScrollerItem key={i}>
+													<span className="block p-2 text-sm">
+														Message {i + 1}
+													</span>
 												</MessageScrollerItem>
 											))}
 										</MessageScrollerContent>
@@ -1538,6 +1690,100 @@ export default function DesignSystemPage() {
 							/>
 						</div>
 					</Specimen>
+					<Specimen label="AdminUserMenu — le badge du staff, en haut à gauche">
+						<div className="w-64 rounded-lg bg-sidebar p-3">
+							<AdminUserMenu
+								name="Awa Diallo"
+								email="awa@example.com"
+								roleLabel="Admin"
+								label="Menu du compte"
+							>
+								<DropdownMenuItem>
+									<UserCogIcon />
+									Mon compte
+								</DropdownMenuItem>
+								<DropdownMenuSeparator />
+								<DropdownMenuItem variant="destructive">
+									<LogOutIcon />
+									Se déconnecter
+								</DropdownMenuItem>
+							</AdminUserMenu>
+						</div>
+						<div className="w-16 rounded-lg bg-sidebar p-3">
+							<AdminUserMenu
+								compact
+								name="Awa Diallo"
+								roleLabel="Admin"
+								label="Menu du compte (réduit)"
+							>
+								<DropdownMenuItem>
+									<UserCogIcon />
+									Mon compte
+								</DropdownMenuItem>
+							</AdminUserMenu>
+						</div>
+					</Specimen>
+					<Specimen label="StatStrip — chiffres clés (bloc blocks.so stats-02)">
+						<StatStrip
+							className="w-full"
+							items={[
+								{ label: "Membres actifs (30 jours)", value: "428" },
+								{ label: "Questions", value: "1 930" },
+								{ label: "Questions avec une réponse", value: "74 %" },
+								{
+									label: "Délai médian avant la première réponse",
+									value: "2 heures",
+								},
+								{ label: "Réponses acceptées", value: "41 %" },
+								{ label: "Pays représentés", value: "17" },
+							]}
+						/>
+					</Specimen>
+					<Specimen label="RoadmapTimeline — frise de la feuille de route (bloc blocks.so onboarding-06)">
+						<RoadmapTimeline
+							className="w-full max-w-xl"
+							items={[
+								{
+									id: "a",
+									text: "Questions, Réponses, Réponse acceptée, Votes",
+									status: "delivered",
+									statusLabel: "Livré",
+									reference: "#219",
+								},
+								{
+									id: "b",
+									text: "Notifications",
+									status: "in_progress",
+									statusLabel: "En cours",
+								},
+								{
+									id: "c",
+									text: "Applications mobiles natives",
+									status: "planned",
+									statusLabel: "Prévu",
+								},
+							]}
+						/>
+					</Specimen>
+					<Specimen label="SectionNav — sommaire d'une longue page">
+						<SectionNav
+							className="w-full max-w-xs"
+							title="Sommaire"
+							items={[
+								{ id: "ds-statstrip", label: "Chiffres clés" },
+								{
+									id: "ds-roadmaptimeline",
+									label: "Phase 1",
+									progress: { done: 4, total: 5 },
+								},
+								{
+									id: "ds-sectionnav",
+									label: "Phase 2",
+									progress: { done: 1, total: 6 },
+								},
+							]}
+						/>
+					</Specimen>
 					<Specimen label="StateGate — chargement, erreur, vide">
 						<div className="grid w-full gap-4 md:grid-cols-3">
 							<StateGate status="loading">
@@ -1551,6 +1797,13 @@ export default function DesignSystemPage() {
 							</StateGate>
 						</div>
 					</Specimen>
+				</Section>
+
+				<Section
+					title="Mouvement"
+					description="Transitions du registre @transitions (packages/ui/REGISTRY.md) : respectent prefers-reduced-motion et le mode économie de données."
+				>
+					<MotionSpecimens />
 				</Section>
 			</main>
 		</div>

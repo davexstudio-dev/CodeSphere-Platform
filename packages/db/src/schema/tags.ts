@@ -1,4 +1,5 @@
 import {
+	boolean,
 	integer,
 	pgTable,
 	primaryKey,
@@ -29,5 +30,7 @@ export const tag = pgTable("tag", {
 	id: uuid("id").defaultRandom().primaryKey(),
 	name: text("name").notNull().unique(),
 	version: integer("version").default(1).notNull(),
+	// Reserved by an Admin: kept as is, never renamed nor deleted, even when no Question uses it.
+	reserved: boolean("reserved").default(false).notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
