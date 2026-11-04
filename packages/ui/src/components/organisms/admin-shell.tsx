@@ -225,7 +225,7 @@ function AdminShell({
 							{name}
 							<ChevronRightIcon
 								aria-hidden="true"
-								className="size-3 transition-transform group-data-[panel-open]/trigger:rotate-90"
+								className="size-3 transition-transform motion-reduce:transition-none group-data-[panel-open]/trigger:rotate-90"
 							/>
 						</CollapsibleTrigger>
 						<CollapsiblePanel className="t-collapse">{items}</CollapsiblePanel>

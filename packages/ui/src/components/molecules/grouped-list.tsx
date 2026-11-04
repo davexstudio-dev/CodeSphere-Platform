@@ -196,7 +196,7 @@ function GroupedList<T extends GroupedListItem>({
 										<span className="flex items-center gap-1.5">
 											<ChevronRightIcon
 												aria-hidden="true"
-												className="size-3 transition-transform group-data-[panel-open]/trigger:rotate-90"
+												className="size-3 transition-transform motion-reduce:transition-none group-data-[panel-open]/trigger:rotate-90"
 											/>
 											{section.label}
 										</span>
