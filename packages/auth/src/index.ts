@@ -250,6 +250,11 @@ export function createAuth(
 				ownerId: { type: "string", required: false, input: false },
 				// Set by an Admin suspension (#123): read by the API context, never by the client.
 				suspendedAt: { type: "date", required: false, input: false },
+				// The consent given at sign-up (spec §3, #341), written by the user.create hook below.
+				// Better Auth keeps only the fields it knows: undeclared, they were dropped and no account
+				// ever had its consent recorded.
+				consentVersion: { type: "string", required: false, input: false },
+				consentAcceptedAt: { type: "date", required: false, input: false },
 				// Also declared by the admin plugin below; restated here with the enum's values so the
 				// Session type carries the exact roles. Seeded from the staff email lists, then managed
 				// through the audited staff procedures of the API (#285), never by the client.
