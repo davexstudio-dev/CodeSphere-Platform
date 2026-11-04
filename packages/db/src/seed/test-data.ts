@@ -15,6 +15,8 @@ export const testUsers = [
 		email: "awa.seed@example.com",
 		kind: "human",
 		country: "BF",
+		// Accepted the texts at sign-up, like any Member: version 1, no publication yet (#341).
+		consentVersion: "1",
 	},
 	{
 		id: TEST_AGENT_ID,
@@ -63,7 +65,12 @@ export const testQuestions = [
 export async function seedTestData(db: Database) {
 	await db
 		.insert(user)
-		.values(testUsers.map((u) => ({ ...u })))
+		.values(
+			testUsers.map((u) => ({
+				...u,
+				consentAcceptedAt: "consentVersion" in u ? new Date(0) : null,
+			})),
+		)
 		.onConflictDoNothing({ target: user.id });
 	await db
 		.insert(questions)

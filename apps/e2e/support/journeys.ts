@@ -17,22 +17,6 @@ export async function signIn(page: Page, email = SEED_EMAIL) {
 	await codeField.fill(await readSignInCode(email));
 	await form.getByRole("button", { name: "Valider le code" }).click();
 	await expect(page).not.toHaveURL(/\/signin/);
-	await acceptConsentIfAsked(page);
-}
-
-/**
- * An account of the test data has no consent recorded, so the blocking screen asks it on its first
- * page view (#341). Accept it once; an account that already consented sees nothing.
- */
-async function acceptConsentIfAsked(page: Page) {
-	const gate = page.getByRole("dialog", { name: "Nos conditions ont changé" });
-	try {
-		await gate.waitFor({ state: "visible", timeout: 4000 });
-	} catch {
-		return;
-	}
-	await gate.getByRole("button", { name: "J'accepte" }).click();
-	await expect(gate).toBeHidden();
 }
 
 /** A title no earlier run used: the database keeps the Questions of every run. */
