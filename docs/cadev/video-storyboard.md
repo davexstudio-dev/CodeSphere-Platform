@@ -5,7 +5,7 @@ Décisions issues du ticket « Vidéo de démonstration CADEV » (#236 de la car
 ## Deux montages
 
 - **Maîtresse 16:9 de 3 minutes** pour le dossier et le jury. Elle se termine par « Essayez CodeSphere » et l'adresse du site, **sans appel à voter** (adresse et modalités du vote public non publiées, fichier soumis au plus tard le 15 nov. avant 17h00 GMT, échéance repoussée du 25 oct.).
-- **Coupe 9:16 de 60 secondes** pour WhatsApp, LinkedIn et les réseaux, sous-titres français incrustés (on regarde souvent sans le son). Elle est **refaite le 27 oct.** avec le vrai lien de vote : problème, démo en une scène, appel à voter.
+- **Coupe 9:16 de 60 secondes** pour WhatsApp, LinkedIn et les réseaux, sous-titres français incrustés (on regarde souvent sans le son). Elle est **refaite** quand le vrai lien de vote est publié : problème, démo en une scène, appel à voter.
 
 ## Phrase d'accroche
 
