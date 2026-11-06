@@ -26,5 +26,5 @@ ufw allow 443/tcp
 ufw --force enable
 
 echo "Host key fingerprint (DEPLOY_HOST_FINGERPRINT):"
-ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub
 docker compose version

@@ -35,7 +35,7 @@ En production, le workflow écrit ces trois fichiers (`chmod 600`) à chaque dé
 1. Commander le Cloud Server (Business, Dakar, Linux) sur platform.systalink.com et appliquer le code promo CADEV (art. 9, -40 %). L'éligibilité à l'art. 6 est demandée à l'organisateur (#169).
 2. Acheter le domaine ; créer les enregistrements DNS `A` de `PUBLIC_HOST` et `ADMIN_HOST` vers l'IP du serveur, en DNS seul (pas de proxy Cloudflare, #168).
 3. Sur le serveur : `DEPLOY_PUBKEY="ssh-ed25519 …" bash prepare-server.sh` en root (installe Docker et Compose, crée l'utilisateur `deploy` sans sudo avec la clé publique du déploiement, n'ouvre que les ports 22, 80 et 443 et affiche l'empreinte de l'étape 4). Clé à générer en local : `ssh-keygen -t ed25519 -N '' -C codesphere-deploy -f deploy_key`.
-4. Relever l'empreinte de la clé d'hôte : `ssh-keyscan -t ed25519 <IP> | ssh-keygen -lf -` (la valeur `SHA256:…`).
+4. Relever l'empreinte de la clé d'hôte **ECDSA** : `ssh-keyscan -t ecdsa <IP> | ssh-keygen -lf -` (la valeur `SHA256:…`). Pas ED25519 : l'action SSH du workflow (client Go) négocie la clé ECDSA en premier et refuse toute autre empreinte (`host key fingerprint mismatch`).
 5. Dans GitHub, **Settings > Environments > `production`** : reviewers requis (capitaine et @lamafx), branche `main` seule ; puis les secrets et la variable ci-dessous.
 6. Lancer le premier déploiement (section suivante) et vérifier `https://<PUBLIC_HOST>/api/v1/ready`.
 
@@ -46,9 +46,9 @@ En production, le workflow écrit ces trois fichiers (`chmod 600`) à chaque dé
 | `PROD_PUBLIC_HOST` | variable | hôte public, ex. `codesphereplatform.xyz` (contrôles HTTPS du workflow) |
 | `DEPLOY_HOST` | secret | IP ou nom du serveur |
 | `DEPLOY_SSH_KEY` | secret | clé privée de l'utilisateur `deploy` (ed25519, propre à ce déploiement) |
-| `DEPLOY_HOST_FINGERPRINT` | secret | empreinte `SHA256:…` de l'étape 4 : le workflow refuse un autre serveur |
+| `DEPLOY_HOST_FINGERPRINT` | secret | empreinte ECDSA `SHA256:…` de l'étape 4 : le workflow refuse un autre serveur |
 | `PROD_COMPOSE_ENV` | secret | contenu de `.env` (modèle `../.env.prod.example`) |
-| `PROD_SERVER_ENV` | secret | contenu de `apps/server/.env` (secrets, identifiants SSO, Resend ; modèle `prod.server.env.example`) |
+| `PROD_SERVER_ENV` | secret | contenu de `apps/server/.env` (secrets, identifiants SSO, Resend ; pas le `.env` de Compose ; modèle `prod.server.env.example`) |
 | `PROD_WEB_ENV` | secret | contenu de `apps/web/.env` (valeurs publiques seulement) |
 
 Au niveau du dépôt (**Settings > Secrets and variables > Actions**), pour tirer sur le serveur les images publiées sous `ghcr.io/davexstudio-dev` :
