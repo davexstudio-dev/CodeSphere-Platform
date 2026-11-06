@@ -18,7 +18,8 @@ export default function SsoLoginDialog({
 	open?: boolean;
 	onOpenChange?: (open: boolean) => void;
 }) {
-	const { pending, error, onProviderSelect, emailSignIn } = useSsoSignIn();
+	const { pending, error, onProviderSelect, emailSignIn, lastUsedMethod } =
+		useSsoSignIn();
 	const consentVersion = useConsentVersion();
 	return (
 		<LoginDialog
@@ -31,6 +32,7 @@ export default function SsoLoginDialog({
 			error={error}
 			onProviderSelect={onProviderSelect}
 			emailSignIn={emailSignIn}
+			lastUsedMethod={lastUsedMethod}
 		/>
 	);
 }
