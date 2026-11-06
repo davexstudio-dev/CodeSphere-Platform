@@ -6,7 +6,12 @@ import { currentLegalVersions } from "@codesphere/db/legal";
 import * as schema from "@codesphere/db/schema/auth";
 import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
-import { admin, emailOTP, oAuthProxy } from "better-auth/plugins";
+import {
+	admin,
+	emailOTP,
+	lastLoginMethod,
+	oAuthProxy,
+} from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 
 import { ac, roles } from "./access";
@@ -268,6 +273,9 @@ export function createAuth(
 		},
 		plugins: [
 			...(proxy ? [oAuthProxy(proxy)] : []),
+			// Remembers the last sign-in method in a readable cookie, so the sign-in card can point the
+			// Member back to it ("Dernière utilisée"). Cookie only: nothing is stored in the database.
+			lastLoginMethod(),
 			// Role management and access control (#120, #285). The roles and what each may do live in
 			// ./access; the plugin's own set-role, ban and impersonate endpoints are granted to none: role
 			// changes go through the audited staff procedures of the API.

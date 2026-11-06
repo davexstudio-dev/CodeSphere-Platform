@@ -3,6 +3,7 @@ import {
 	adminClient,
 	emailOTPClient,
 	inferAdditionalFields,
+	lastLoginMethodClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
@@ -14,6 +15,7 @@ export const authClient = createAuthClient({
 	// access control shared with the API; the other user fields are set server-side only.
 	plugins: [
 		emailOTPClient(),
+		lastLoginMethodClient(),
 		adminClient({ ac, roles }),
 		inferAdditionalFields({
 			user: {

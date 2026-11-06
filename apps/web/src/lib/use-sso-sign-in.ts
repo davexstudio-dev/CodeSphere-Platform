@@ -4,9 +4,10 @@ import { CONSENT_COOKIE } from "@codesphere/contract/consent";
 import type { SsoProvider } from "@codesphere/ui/components/molecules/provider-button";
 import type { EmailSignIn } from "@codesphere/ui/components/organisms/login-card";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
+import { toSignInMethod } from "@/lib/last-sign-in-method";
 
 // The consent version travels in a short-lived cookie that the server reads when it creates the
 // account (#63): without it, no account is created.
@@ -20,6 +21,13 @@ export function useSsoSignIn(initialError?: string) {
 	const t = useTranslations("signin");
 	const [pending, setPending] = useState<SsoProvider | null>(null);
 	const [error, setError] = useState<string | undefined>(initialError);
+	// Read after mount: the cookie is only on the client, and the server render must match.
+	const [lastUsedMethod, setLastUsedMethod] = useState<
+		SsoProvider | "email" | null
+	>(null);
+	useEffect(() => {
+		setLastUsedMethod(toSignInMethod(authClient.getLastUsedLoginMethod()));
+	}, []);
 
 	const onProviderSelect = async (
 		provider: SsoProvider,
@@ -79,5 +87,12 @@ export function useSsoSignIn(initialError?: string) {
 				}
 			: undefined;
 
-	return { pending, error, setError, onProviderSelect, emailSignIn };
+	return {
+		pending,
+		error,
+		setError,
+		onProviderSelect,
+		emailSignIn,
+		lastUsedMethod,
+	};
 }
