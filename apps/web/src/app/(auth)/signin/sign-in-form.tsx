@@ -17,8 +17,14 @@ export default function SignInForm({
 }) {
 	const t = useTranslations("signin");
 	const tHeader = useTranslations("header");
-	const { pending, error, setError, onProviderSelect, emailSignIn } =
-		useSsoSignIn();
+	const {
+		pending,
+		error,
+		setError,
+		onProviderSelect,
+		emailSignIn,
+		lastUsedMethod,
+	} = useSsoSignIn();
 
 	// A failed OAuth callback comes back here with `?error=<code>`.
 	useEffect(() => {
@@ -40,6 +46,7 @@ export default function SignInForm({
 				error,
 				onProviderSelect,
 				emailSignIn,
+				lastUsedMethod,
 			}}
 		/>
 	);

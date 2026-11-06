@@ -1,3 +1,4 @@
+import { Badge } from "@codesphere/ui/components/atoms/badge";
 import {
 	GithubMark,
 	GitlabMark,
@@ -25,10 +26,13 @@ type ProviderButtonProps = Omit<
 	"children"
 > & {
 	provider: SsoProvider;
+	/** The Member signed in with this provider last time: says so on the button. */
+	lastUsed?: boolean;
 };
 
 function ProviderButton({
 	provider,
+	lastUsed = false,
 	className,
 	...props
 }: ProviderButtonProps) {
@@ -40,11 +44,21 @@ function ProviderButton({
 			size="lg"
 			data-slot="provider-button"
 			data-provider={provider}
-			className={cn("w-full justify-center", className)}
+			data-last-used={lastUsed || undefined}
+			className={cn(
+				"relative w-full justify-center",
+				lastUsed && "border-primary/60",
+				className,
+			)}
 			{...props}
 		>
 			<Icon className="size-4" />
 			Continuer avec {label}
+			{lastUsed && (
+				<Badge variant="secondary" className="absolute right-3">
+					Dernière utilisée
+				</Badge>
+			)}
 		</Button>
 	);
 }

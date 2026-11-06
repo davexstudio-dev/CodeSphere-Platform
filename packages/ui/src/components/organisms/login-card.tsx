@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@codesphere/ui/components/atoms/badge";
 import { Button } from "@codesphere/ui/components/atoms/button";
 import { Checkbox } from "@codesphere/ui/components/atoms/checkbox";
 import { Input } from "@codesphere/ui/components/atoms/input";
@@ -51,6 +52,8 @@ type LoginCardProps = Omit<React.ComponentProps<"div">, "children"> & {
 	error?: string;
 	/** Adds an « email + code » sign-in under the providers (local development, previews). */
 	emailSignIn?: EmailSignIn;
+	/** Method the Member signed in with last time, marked « Dernière utilisée ». */
+	lastUsedMethod?: SsoProvider | "email" | null;
 	/** Hide the heading when the card sits inside a dialog that has its own. */
 	hideHeading?: boolean;
 };
@@ -66,6 +69,7 @@ function LoginCard({
 	error,
 	hideHeading = false,
 	emailSignIn,
+	lastUsedMethod = null,
 	className,
 	...props
 }: LoginCardProps) {
@@ -176,6 +180,7 @@ function LoginCard({
 					<ProviderButton
 						key={provider}
 						provider={provider}
+						lastUsed={lastUsedMethod === provider}
 						disabled={!accepted || pendingProvider !== null}
 						aria-busy={pendingProvider === provider}
 						onClick={() =>
@@ -196,6 +201,9 @@ function LoginCard({
 				>
 					<Label htmlFor={`${consentId}-email`}>
 						Ou avec un code par email
+						{lastUsedMethod === "email" && (
+							<Badge variant="secondary">Dernière utilisée</Badge>
+						)}
 					</Label>
 					<Input
 						id={`${consentId}-email`}
