@@ -12,6 +12,7 @@ Brouillon à valider par le capitaine avant le dépôt ; à adapter au format du
 - **Revue** : relecture des pull requests et correction des retours de CI.
 - **Documentation** : spécification, notes de recherche, grille OWASP, documents de ce dossier.
 - **Exploration** : comparaison d'options techniques (fiches dans `docs/research/`).
+- **Voix off de la vidéo** : voix synthétique française générée avec ElevenLabs, à partir d'un texte écrit par l'équipe. Le montage est fait avec Remotion (code), sans génération d'image ni de vidéo par IA.
 
 ## Garde-fous
 

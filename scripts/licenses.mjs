@@ -205,6 +205,13 @@ if (outFile) {
 					"",
 				]
 			: []),
+		"## Tools outside the product (not in bun.lock)",
+		"",
+		"Used to make the CADEV video, never installed by the platform or shipped in its images.",
+		"",
+		"- Remotion 4.0.542 (`video/`, #358): Remotion licence, free for individuals, non-profits and for-profit organisations of up to 3 employees.",
+		"- ElevenLabs (online service): synthetic French voice-over of the video, under its terms of use; declared in `docs/cadev/ai-usage.md`.",
+		"",
 	];
 	writeFileSync(outFile, lines.join("\n"));
 	console.log(`\nDeclaration written to ${outFile}`);
