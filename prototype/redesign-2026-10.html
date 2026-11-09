@@ -1,0 +1,427 @@
+<title>Redesign CodeSphere</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: six surfaces, five structural variants each, judged inside a stand-in of the real shell.
+   Palette Latérite, warm neutrals, Outfit for people, JetBrains Mono for data: the project's own system. */
+:root {
+  --bg:#f3ece4; --surface:#fffefc; --sunk:#e8ded3; --fg:#1d1410; --muted:#55453c; --faint:#857568;
+  --line:#d5c7ba; --line2:#b5a496; --accent:#a8432a; --accent-deep:#7a2c19; --on-accent:#fff; --tint:#f4e2d8;
+  --gold:#b87412; --ok:#2f7d4f; --ok-t:#e1f0e6; --warn:#a36a10; --warn-t:#f8ecd3; --bad:#b3362b; --bad-t:#f8e0dc;
+  --ink:#1c1411; --on-ink:#f7efe8; --on-ink2:#c9b8ab; --ink-line:#42332b; --ink-gold:#e9a23b;
+  --font:"Outfit",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14100d; --surface:#271d18; --sunk:#352821; --fg:#fbf5ef; --muted:#d3c3b6; --faint:#a08f83;
+  --line:#4d3d34; --line2:#6b574b; --accent:#e58a68; --accent-deep:#c9694a; --on-accent:#23130c; --tint:#3d2419;
+  --gold:#e9a23b; --ok:#6cc08f; --ok-t:#17301f; --warn:#e4b057; --warn-t:#352812; --bad:#ee8478; --bad-t:#3b1b17;
+  --ink:#3a2319; --ink-line:#65483a; --on-ink2:#e6d8cd; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14100d; --surface:#271d18; --sunk:#352821; --fg:#fbf5ef; --muted:#d3c3b6; --faint:#a08f83;
+  --line:#4d3d34; --line2:#6b574b; --accent:#e58a68; --accent-deep:#c9694a; --on-accent:#23130c; --tint:#3d2419;
+  --gold:#e9a23b; --ok:#6cc08f; --ok-t:#17301f; --warn:#e4b057; --warn-t:#352812; --bad:#ee8478; --bad-t:#3b1b17;
+  --ink:#3a2319; --ink-line:#65483a; --on-ink2:#e6d8cd; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.55 var(--font);padding-inline:0}
+h1,h2,h3,p,ul,ol,dl,dd{margin:0;padding:0} ul,ol{list-style:none}
+h1,h2,h3{text-wrap:balance;line-height:1.2;letter-spacing:-.015em}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font:600 11px/1.4 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.dim{color:var(--muted)} .sm{font-size:13px} .xs{font-size:12px}
+
+/* Prototype chrome, deliberately not part of the design under review */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--ink);color:var(--on-ink);padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.top b{font-weight:600}
+@media (max-width:760px){.top{position:static}.top>b{display:none}.note span.xs{display:none}}
+.dim.sm,.sm{font-size:14px} .xs{font-size:13px}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;min-width:0;flex:1 1 300px}
+.tabs button{white-space:nowrap;padding:5px 11px;border-radius:7px;font-size:13px;color:var(--on-ink2)}
+.tabs button[aria-pressed=true]{background:var(--on-ink);color:var(--ink);font-weight:600}
+.seg{display:flex;gap:2px;border:1px solid var(--ink-line);border-radius:8px;padding:2px}
+.seg button{padding:3px 9px;border-radius:6px;font-size:12px;color:var(--on-ink2)}
+.seg button[aria-pressed=true]{background:var(--ink-line);color:var(--on-ink)}
+.note{padding:14px max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);background:var(--sunk);display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.note strong{font-weight:600}
+.stagewrap{padding-bottom:96px}
+.stage{container-type:inline-size;margin-inline:auto;width:100%;background:var(--bg)}
+.stage.phone{max-width:390px;border-inline:1px solid var(--line2)}
+.bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--ink);color:var(--on-ink);border-radius:999px;padding:5px;display:flex;gap:4px;align-items:center;box-shadow:0 12px 34px -8px rgba(0,0,0,.55);max-width:calc(100vw - 24px)}
+.bar{border:1px solid var(--ink-gold)}
+.bar .arrow{width:34px;height:34px;border-radius:50%;background:var(--ink-line);color:var(--on-ink);flex:none}
+.bar .label{padding-inline:10px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.bar .label b{font-family:var(--mono);color:var(--ink-gold);margin-right:6px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--surface);border:1px solid var(--line2);color:var(--fg);border-radius:10px;padding:8px 14px;font-size:13px;box-shadow:0 8px 24px -8px rgba(0,0,0,.4)}
+
+/* Shared parts */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 13px;border-radius:9px;font-weight:500;font-size:14px;border:1px solid var(--line2);background:var(--surface);color:var(--fg);white-space:nowrap}
+.btn:hover{background:var(--sunk)}
+.btn.p{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.p:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
+.btn.d{color:var(--bad);border-color:color-mix(in oklab,var(--bad) 45%,var(--line))}
+.btn.d:hover{background:var(--bad-t)}
+.btn.s{padding:4px 10px;font-size:13px;border-radius:7px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:1px 8px;border-radius:99px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.pill.ok{background:var(--ok-t);color:var(--ok)} .pill.warn{background:var(--warn-t);color:var(--warn)} .pill.bad{background:var(--bad-t);color:var(--bad)} .pill.acc{background:var(--tint);color:var(--accent)}
+.tag{font:500 12px/1.5 var(--mono);color:var(--accent);background:var(--tint);border-radius:5px;padding:0 6px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.spread{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.wrap{max-width:1160px;margin-inline:auto;width:100%;padding:28px max(16px,env(safe-area-inset-right,0px)) 28px max(16px,env(safe-area-inset-left,0px))}
+.narrow{max-width:760px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+
+/* Public shell */
+.shead{display:flex;gap:18px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.logo{font-weight:700;letter-spacing:-.02em} .logo i{font-style:normal;color:var(--accent)}
+.shead nav{display:flex;gap:14px;font-size:14px;color:var(--muted)}
+.shead .r{margin-left:auto;display:flex;gap:8px}
+@container (max-width:620px){.shead nav{display:none}}
+
+/* Admin shell */
+.adm{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:640px}
+.side{border-right:1px solid var(--line);padding:16px 10px;background:var(--surface);display:grid;gap:14px;align-content:start}
+.side p{padding:0 8px 3px}
+.side a{display:block;padding:5px 8px;border-radius:7px;font-size:14px;color:var(--muted);cursor:default}
+.side a.on{background:var(--tint);color:var(--accent);font-weight:600}
+.amain{padding:22px;min-width:0;display:grid;gap:16px;align-content:start}
+@container (max-width:800px){.adm{grid-template-columns:minmax(0,1fr)}.side{display:none}.amain{padding:16px}}
+
+/* Admin paradigms */
+.mast{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);overflow:hidden}
+.mast>ul{border-right:1px solid var(--line);max-height:560px;overflow:auto}
+.mast li button{display:grid;gap:2px;width:100%;text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+.mast li button:hover{background:var(--sunk)}
+.mast li button[aria-current=true]{background:var(--tint)}
+.mdet{padding:22px;display:grid;gap:14px;align-content:start;min-width:0}
+@container (max-width:800px){.mast{grid-template-columns:minmax(0,1fr)}.mast>ul{border-right:0;border-bottom:1px solid var(--line);max-height:240px}}
+.tblw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
+th{font:600 11px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line2);background:var(--sunk)}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.kan{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;align-items:start}
+.tablabel{align-self:center;font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-gold);padding:0 3px 0 8px}
+.side a{display:flex!important;align-items:center;gap:9px}
+.side .logo{font-size:15px}
+.split{display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.inp{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:7px 10px}
+.show-sm{display:none}
+.hitem{display:grid;gap:1px;width:100%;text-align:left;padding:7px 8px;border-radius:8px}
+.hitem:hover{background:var(--sunk)}
+@container (max-width:620px){.hide-sm{display:none}.show-sm{display:inline-flex}}
+@container (min-width:621px){.wrap>.hero{display:none}}
+@container (max-width:800px){.split{grid-template-columns:minmax(0,1fr)}}
+.kcol{background:var(--sunk);border-radius:12px;padding:10px;display:grid;gap:8px}
+.kcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px;display:grid;gap:6px}
+@container (max-width:800px){.kan{grid-template-columns:minmax(0,1fr)}}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.kpis>div{background:var(--surface);padding:12px 14px}
+.kpis b{display:block;font:600 26px/1.1 var(--mono);letter-spacing:-.03em}
+.attn{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px}
+.attn>article{padding:16px;display:grid;gap:8px;align-content:start}
+.line{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.line:first-child{border-top:0}
+.focus{padding:28px;display:grid;gap:14px;max-width:680px;margin-inline:auto;width:100%}
+.prog{height:4px;border-radius:9px;background:var(--sunk);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent)}
+kbd{font:500 11px var(--mono);border:1px solid var(--line2);border-bottom-width:2px;border-radius:4px;padding:0 4px;margin-left:5px;opacity:.75}
+
+/* Hackathon cards */
+.cardstage{display:grid;gap:18px}
+.tick{display:grid;grid-template-columns:minmax(0,1fr) auto;border-radius:18px;overflow:hidden;color:var(--on-ink)}
+.tick .a{background:linear-gradient(120deg,#8f3a22,#5f2717);padding:26px;display:grid;gap:10px;align-content:space-between;min-width:0}
+.tick .b{background:var(--ink);padding:26px 30px;display:grid;gap:6px;align-content:center;justify-items:center;border-left:2px dashed var(--ink-line);min-width:190px}
+.tick .num{font:600 72px/.9 var(--mono);letter-spacing:-.05em}
+@container (max-width:620px){.tick{grid-template-columns:minmax(0,1fr)}.tick .b{border-left:0;border-top:2px dashed var(--ink-line)}}
+.fr{background:var(--ink);color:var(--on-ink);border-radius:20px;padding:28px;display:grid;gap:22px}
+.track{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:relative}
+.track li{position:relative;padding-top:20px;padding-right:12px;font-size:13px}
+.track li::before{content:"";position:absolute;top:5px;left:0;right:0;height:2px;background:var(--ink-line)}
+.track li::after{content:"";position:absolute;top:0;left:0;width:12px;height:12px;border-radius:50%;background:var(--ink);border:2px solid var(--on-ink2)}
+.track li.now::after{background:var(--ink-gold);border-color:var(--ink-gold);box-shadow:0 0 0 4px color-mix(in oklab,var(--ink-gold) 28%,transparent)}
+@container (max-width:620px){.track{grid-template-columns:minmax(0,1fr);gap:12px}.track li{padding-top:0;padding-left:22px}.track li::before{display:none}}
+.quiet{padding:26px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px 30px;align-items:center}
+.quiet .big{font:600 92px/.85 var(--mono);letter-spacing:-.06em;color:var(--accent)}
+.quiet dl{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;border-top:1px solid var(--line);padding-top:14px}
+.quiet dt{font:500 12px var(--mono);color:var(--muted)} .quiet dd{font-size:13px;font-weight:500}
+@container (max-width:620px){.quiet{grid-template-columns:minmax(0,1fr)}.quiet dl{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.score{background:radial-gradient(120% 140% at 0 0,#6f2c19,var(--ink) 62%);color:var(--on-ink);border-radius:20px;padding:26px;display:grid;gap:18px}
+.digits{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.digits div{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 4px 10px;text-align:center}
+.digits b{display:block;font:600 clamp(32px,8cqw,54px)/1 var(--mono);letter-spacing:-.04em}
+.strip{border-radius:14px;border:1px solid var(--line);background:var(--surface);overflow:hidden}
+.strip summary{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:12px 16px;cursor:pointer;list-style:none}
+.strip summary::-webkit-details-marker{display:none}
+.strip .cal{padding:6px 16px 16px;border-top:1px solid var(--line);display:grid;gap:8px}
+.strip .cal li{display:flex;gap:12px;font-size:14px}
+
+/* Visitor feeds */
+.q{padding:15px 16px;display:grid;gap:7px}
+.q h3{font-size:16.5px;font-weight:600}
+.q h3:hover,.jobrow h3:hover{color:var(--accent);cursor:pointer}
+.jobrow{padding:13px 16px;display:grid;gap:4px}
+.jobrow h3{font-size:15px;font-weight:600}
+.two{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+.even{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+.bento{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.b2{grid-column:span 2}.b3{grid-column:span 3}.b4{grid-column:span 4}.b6{grid-column:span 6}
+.so{display:grid;grid-template-columns:60px minmax(0,1fr);gap:12px;padding:13px 16px;border-top:1px solid var(--line)}
+.so:first-child{border-top:0}
+.votes{text-align:center;font:600 18px/1.1 var(--mono)}
+.hs{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.hs>article{flex:0 0 250px;padding:13px;display:grid;gap:5px;align-content:start}
+.jobin{background:var(--ink);color:var(--on-ink);border-radius:14px;padding:16px;display:grid;gap:7px}
+.jobin .dim{color:var(--on-ink2)} .jobin .tag{background:rgba(255,255,255,.1);color:var(--on-ink)}
+.hero{display:grid;gap:8px}
+.hero h1{font-size:clamp(26px,5cqw,40px);font-weight:700}
+.divide>*+*{border-top:1px solid var(--line)}
+@container (max-width:800px){.two,.even{grid-template-columns:minmax(0,1fr)}.b2,.b3,.b4{grid-column:span 6}}
+@media (prefers-reduced-motion:no-preference){.fade{animation:f .18s ease-out}@keyframes f{from{opacity:.4;transform:translateY(3px)}}}
+</style>
+
+<div class="top">
+  <b>Redesign CodeSphere</b>
+  <div class="tabs" id="tabs" role="group" aria-label="Surfaces"></div>
+  <div class="seg" role="group" aria-label="Largeur"><button id="wD">Ordinateur</button><button id="wP">Téléphone</button></div>
+  <div class="seg" role="group" aria-label="Thème"><button id="tL">Clair</button><button id="tS">Sombre</button></div>
+</div>
+<div class="note" id="note"></div>
+<div class="stagewrap"><div class="stage" id="stage"></div></div>
+<div class="bar" role="group" aria-label="Variantes">
+  <button class="arrow" id="prev" aria-label="Variante précédente">←</button>
+  <span class="label" id="label" aria-live="polite"></span>
+  <button class="arrow" id="next" aria-label="Variante suivante">→</button>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://unpkg.com/lucide@0.454.0/dist/umd/lucide.min.js"></script>
+<script>
+/* Throwaway prototype: example data, stubbed actions. Shell, labels and actions follow apps/web. */
+const CARD_V=[
+ ["Billet","Le compte à rebours devient le talon d'un billet : le nom à gauche, le temps restant à droite."],
+ ["Frise continue","Fond sombre et calendrier relié par une ligne : on voit où l'on en est d'un coup d'œil."],
+ ["Sobre","Surface neutre et un seul grand chiffre : la carte cesse de rivaliser avec le fil."],
+ ["Tableau d'affichage","Jours, heures, minutes et équipes en tuiles : le ton d'une compétition."],
+ ["Bandeau repliable","Une ligne fine ; le calendrier s'ouvre à la demande : les questions remontent de 300 px."]];
+const HOME_V=[
+ ["Fil + colonne Emplois","Les questions restent le sujet, les offres vivent dans une colonne fixe à droite."],
+ ["Fil mêlé","Une offre sombre s'insère toutes les trois questions : une seule colonne, un seul geste de lecture."],
+ ["Mosaïque","Une grille de blocs de tailles différentes : la page ressemble à une une de magazine."],
+ ["Deux colonnes égales","Questions et Emplois à parité : l'emploi devient une raison de venir au même titre."],
+ ["Ruban + liste dense","Un ruban d'offres défilant, puis une liste compacte avec les votes à gauche."]];
+const ADM_V=[
+ ["Boîte de décision","Liste à gauche, détail à droite : on traite sans quitter la page."],
+ ["Table dense","Tout sur un écran, filtres et sélection multiple : pour le volume."],
+ ["Colonnes d'état","Les éléments rangés par état : on voit où ça s'accumule."],
+ ["Santé d'abord","Chiffres en tête, urgences en grandes cartes, le reste en lignes."],
+ ["File guidée","Un seul élément à la fois, avec raccourcis clavier : pour vider la file."]];
+const SURF=[
+ {id:"accueil",name:"Accueil visiteur",v:HOME_V},{id:"carte",name:"Carte hackathon",v:CARD_V},
+ {id:"veille",name:"Veille",v:ADM_V,adm:1},{id:"hackadmin",name:"Hackathon",v:[
+  ["Fiche en sections","La structure actuelle (liste + fiche), avec des sections mieux hiérarchisées."],
+  ["Frise d'abord","Le calendrier devient la pièce centrale de l'écran."],
+  ["Onglets","Général, Milestones et Critères séparés : moins de défilement."],
+  ["Aperçu en direct","Formulaire à gauche, carte de l'accueil à droite, telle que les visiteurs la verront."],
+  ["Poste de pilotage","Prochaine étape et état des réglages en tête, détails en dessous."]],adm:1},
+ {id:"orgs",name:"Organisations",v:ADM_V,adm:1},{id:"emplois",name:"Emplois",v:ADM_V,adm:1},
+ {id:"social",name:"Comptes sociaux",v:ADM_V,adm:1}];
+
+const MS=[["Clôture des soumissions","15 nov."],["Votes entre participants du même pays","15 nov."],["Vote du public","17 nov."],["Délibération du jury","22 nov."]];
+const HK={name:"Coupe d'Afrique des Développeurs 2026",sum:"Concours en ligne pour équipes de développeurs africains, francophones et anglophones."};
+const QS=[
+ {t:"Comment vérifier le statut d'un paiement Orange Money quand le webhook n'arrive jamais ?",x:"Le paiement passe côté client, mais le callback ne revient qu'une fois sur dix.",tags:["mobile-money","nodejs"],s:24,a:3,who:"Aïcha K.",c:"CI",ago:"il y a 2 h",ok:1},
+ {t:"USSD : garder la session quand l'opérateur coupe après 20 secondes",x:"Comment reprendre un parcours en plusieurs écrans sans tout redemander ?",tags:["ussd","php"],s:17,a:2,who:"Moussa D.",c:"SN",ago:"il y a 5 h",ok:1},
+ {t:"React Native hors ligne : quelle file d'attente pour synchroniser en 2G ?",x:"Je perds des écritures quand la connexion revient par à-coups.",tags:["react-native","offline"],s:12,a:0,who:"Kwame A.",c:"GH",ago:"hier"},
+ {t:"Déployer Postgres à petit budget : VPS local ou base managée ?",x:"La latence vers l'Europe pèse, mais je n'ai pas d'équipe d'exploitation.",tags:["postgresql","devops"],s:9,a:4,who:"Fatou N.",c:"BF",ago:"hier",ok:1},
+ {t:"Comment tester un parcours Wave en local sans compte marchand ?",x:"Le bac à sable demande une validation qui prend plusieurs semaines.",tags:["mobile-money","tests"],s:6,a:1,who:"Ibrahim T.",c:"ML",ago:"il y a 2 j"}];
+const JOBS=[
+ {t:"Développeuse ou développeur React Native",o:"Kora Tech",c:"Côte d'Ivoire",r:1,tags:["react-native","typescript"],d:"il y a 2 j"},
+ {t:"Lead DevOps Kubernetes",o:"Kora Tech",c:"Sénégal",r:1,tags:["devops","kubernetes"],d:"il y a 3 j"},
+ {t:"Ingénieur·e backend Node.js",o:"Kora Tech",c:"Sénégal",r:0,tags:["nodejs","postgresql"],d:"il y a 5 j"},
+ {t:"Data analyst, stage 6 mois",o:"Kora Tech",c:"Côte d'Ivoire",r:0,tags:["python","sql"],d:"il y a 6 j"}];
+
+const SCREENS={
+ veille:{title:"Veille",desc:"Sources de confiance, propositions et signalements, domaines bloqués.",add:"Ajouter une source",
+  kpis:[["3","Sources actives"],["3","À traiter"],["1","Flux en erreur"],["1","Domaine bloqué"]],
+  cols:["À traiter","Sources","Domaines bloqués"],items:[
+  {c:0,t:"Les paiements mobiles dépassent les cartes en Afrique de l'Ouest",s:"techpoint.example · proposition d'un Membre",st:"En attente",tone:"warn",m:["Score 7","Proposé il y a 3 h"],b:"Lien proposé par un Membre. Il reste caché du fil tant qu'il n'est pas approuvé.",a:["Approuver","Retirer","Bloquer le domaine"]},
+  {c:0,t:"Gagnez de l'argent avec cette plateforme crypto",s:"gain-rapide.example · signalé",st:"3 signalements",tone:"bad",m:["Score −2","Publicité déguisée / lien trompeur"],b:"Trois Membres l'ont signalé. Retirer demande un motif, inscrit au journal d'audit.",a:["Retirer","Bloquer le domaine","Ignorer"]},
+  {c:0,t:"Benchmark Bun, Node et Deno en 2026",s:"devblog.example · proposition d'un Membre",st:"En attente",tone:"warn",m:["Score 4","Proposé hier"],b:"Lien proposé par un Membre, source encore inconnue.",a:["Approuver","Retirer","Bloquer le domaine"]},
+  {c:1,t:"TechCabal",s:"techcabal.com · FR · Africain",st:"Active",tone:"ok",m:["128 articles","Lu il y a 12 min"],b:"Flux lu toutes les 30 minutes. Dernière lecture sans erreur.",a:["Arrêter","Supprimer"]},
+  {c:1,t:"Hacker News, sélection",s:"news.ycombinator.com · EN",st:"Active",tone:"ok",m:["412 articles","Lu il y a 12 min"],b:"Flux lu toutes les 30 minutes. Dernière lecture sans erreur.",a:["Arrêter","Supprimer"]},
+  {c:1,t:"Blog Wave Dev",s:"wave.example · FR · Africain",st:"Erreur de flux",tone:"bad",m:["34 articles","HTTP 404 depuis 2 j"],b:"Le flux ne répond plus. Vérifiez l'adresse ou arrêtez la source.",a:["Corriger l'adresse","Arrêter","Supprimer"]},
+  {c:2,t:"gain-rapide.example",s:"Bloqué il y a 8 j",st:"Bloqué",tone:"",m:["Arnaque récurrente"],b:"Aucun lien de ce domaine ne peut être proposé.",a:["Débloquer"]}]},
+ emplois:{title:"Emplois",desc:"Un signalement fondé retire l'offre ; deux suspendent l'Organisation.",add:"Voir les offres publiques",
+  kpis:[["2","Offres signalées"],["5","Signalements"],["4","Offres en ligne"],["1","Retirée ce mois-ci"]],
+  cols:["Signalées","En ligne","Retirées"],items:[
+  {c:0,t:"Gagnez 5 000 € par semaine sans expérience",s:"Offshore Staffing · Diaspora",st:"3 signalements",tone:"bad",m:["Argent demandé au candidat","Publiée il y a 2 j"],b:"Un retrait fondé compterait pour cette Organisation. Au second, elle est suspendue.",a:["Retirer l'offre","Rejeter le signalement"]},
+  {c:0,t:"Data analyst, stage 6 mois",s:"Kora Tech · Côte d'Ivoire",st:"2 signalements",tone:"warn",m:["Stage non rémunéré ?","Publiée il y a 6 j"],b:"Premier signalement pour cette Organisation.",a:["Retirer l'offre","Rejeter le signalement"]},
+  {c:1,t:"Développeuse ou développeur React Native",s:"Kora Tech · Côte d'Ivoire · À distance",st:"En ligne",tone:"ok",m:["Expire dans 28 j","12 candidatures"],b:"Liste des offres en ligne : demande une nouvelle requête d'API.",a:["Voir l'offre"]},
+  {c:1,t:"Lead DevOps Kubernetes",s:"Kora Tech · Sénégal · À distance",st:"En ligne",tone:"ok",m:["Expire dans 27 j","4 candidatures"],b:"Liste des offres en ligne : demande une nouvelle requête d'API.",a:["Voir l'offre"]},
+  {c:2,t:"Développeur PHP freelance",s:"Kora Tech · Cameroun",st:"Retirée",tone:"",m:["Offre déjà pourvue","Il y a 9 j"],b:"Retirée avec motif, inscrite au journal d'audit.",a:["Voir le journal"]}]},
+ social:{title:"Comptes sociaux",desc:"Les comptes officiels de CodeSphere. Les jetons sont chiffrés et renouvelés avant leur expiration.",add:"Voir les publications",
+  kpis:[["1","Prêt à connecter"],["1","Application manquante"],["1","Actif par secret"],["0","Publication en échec"]],
+  cols:["À faire","Application manquante","Actifs"],items:[
+  {c:0,t:"LinkedIn",s:"Page CodeSphere Platform",st:"Non connecté",tone:"warn",m:["Application OAuth configurée"],b:"Connectez le compte officiel : vous serez redirigé vers LinkedIn, puis ramené ici.",a:["Connecter"]},
+  {c:1,t:"X",s:"Aucune application OAuth sur ce déploiement",st:"Non configuré",tone:"",m:["X_CLIENT_ID absent"],b:"Ajoutez la variable X_CLIENT_ID à l'environnement preview, puis relancez Staging.",a:["Voir la marche à suivre"]},
+  {c:2,t:"Bluesky",s:"codesphereplatform.bsky.social",st:"Actif",tone:"ok",m:["Mot de passe d'application"],b:"Pas de connexion OAuth : ce compte vient des secrets du déploiement.",a:["Tester la publication"]}]},
+ orgs:{title:"Organisations",desc:"Demandes à valider, suspensions. Chaque décision est auditée.",add:"Voir le journal",
+  kpis:[["2","Demandes à valider"],["3","Validées"],["1","Suspendue"],["1 j","Attente moyenne"]],
+  cols:["Demandes","Validées","Suspendues ou refusées"],items:[
+  {c:0,t:"Baobab Labs",s:"baobablabs.example · Sénégal",st:"En attente",tone:"warn",m:["Demandé par Moussa D.","Il y a 2 j"],b:"Studio de produits santé à Dakar. Contact : rh@baobablabs.example",a:["Valider","Refuser"]},
+  {c:0,t:"Sahel Pay",s:"sahelpay.example · Burkina Faso",st:"En attente",tone:"warn",m:["Demandé par Fatou N.","Il y a 6 h"],b:"Passerelle de paiement pour les PME. Contact : jobs@sahelpay.example",a:["Valider","Refuser"]},
+  {c:1,t:"Kora Tech",s:"kora-tech.example · Côte d'Ivoire",st:"Validée",tone:"ok",m:["4 offres en ligne","Depuis 40 j"],b:"Studio produit à Abidjan et Dakar : paiements mobiles et outils pour les PME.",a:["Suspendre"]},
+  {c:1,t:"CodeSphere",s:"codesphereplatform.xyz · Système",st:"Validée",tone:"ok",m:["Organisation système"],b:"Organisation interne à la plateforme.",a:[]},
+  {c:2,t:"Offshore Staffing",s:"offshore-staffing.example · Autre",st:"Suspendue",tone:"bad",m:["2 offres retirées","Il y a 3 j"],b:"Suspendue automatiquement après deux signalements fondés.",a:["Rétablir"]}]}
+};
+
+/* The same screens with the code's own labels and actions (apps/web/messages/fr.json, admin pages). */
+Object.assign(SCREENS,{
+ veille:{title:"Veille",desc:"Sources de confiance, propositions et signalements, domaines bloqués.",add:"Lire maintenant",
+  kpis:[["3","Sources"],["3","À modérer"],["1","Flux en erreur"],["1","Domaine bloqué"]],
+  cols:["À modérer","Sources","Domaines bloqués"],items:[
+  {c:0,t:"Les paiements mobiles dépassent les cartes en Afrique de l'Ouest",s:"techpoint.example · Member",st:"En attente",tone:"warn",m:["Score 7"],b:"Lien proposé par un Member, caché du fil tant qu'il n'est pas approuvé.",a:["Approuver","Retirer","Bloquer le domaine"]},
+  {c:0,t:"Gagnez de l'argent avec cette plateforme crypto",s:"gain-rapide.example · Member",st:"3 signalements",tone:"bad",m:["Score −2","Publicité déguisée / lien trompeur"],b:"Retirer demande un motif.",a:["Retirer","Bloquer le domaine"]},
+  {c:0,t:"Benchmark Bun, Node et Deno en 2026",s:"devblog.example · Agent",st:"En attente",tone:"warn",m:["Score 4"],b:"Lien proposé par un Agent.",a:["Approuver","Retirer","Bloquer le domaine"]},
+  {c:1,t:"TechCabal",s:"techcabal.com · FR · Source africaine",st:"Active",tone:"ok",m:["128 liens","lue le 30/10 à 11:30"],b:"Lue automatiquement toutes les 30 minutes.",a:["Arrêter","Retrait"]},
+  {c:1,t:"Hacker News, sélection",s:"news.ycombinator.com · EN",st:"Active",tone:"ok",m:["412 liens","lue le 30/10 à 11:30"],b:"Lue automatiquement toutes les 30 minutes.",a:["Arrêter","Retrait"]},
+  {c:1,t:"Blog Wave Dev",s:"wave.example · FR · Source africaine",st:"HTTP 404",tone:"bad",m:["34 liens","lue le 28/10 à 09:00"],b:"La dernière lecture a échoué.",a:["Arrêter","Retrait"]},
+  {c:2,t:"gain-rapide.example",s:"Arnaque récurrente",st:"Bloqué",tone:"",m:[],b:"Aucun lien de ce domaine n'est accepté.",a:["Débloquer"]}]},
+ emplois:{title:"Emplois",desc:"Offres signalées. Un signalement fondé retire l'offre ; deux suspendent l'Organisation.",
+  kpis:[["2","Offres signalées"],["5","Signalements"]],
+  cols:["Signalées"],items:[
+  {c:0,t:"Gagnez 5 000 € par semaine sans expérience",s:"Offshore Staffing",st:"3 signalements",tone:"bad",m:["Demande de l'argent au candidat"],b:"Un retrait fondé compte pour cette Organisation. Au second, elle est suspendue.",a:["Fondé : retirer","Écarter"]},
+  {c:0,t:"Data analyst, stage 6 mois",s:"Kora Tech",st:"2 signalements",tone:"warn",m:["Stage non rémunéré ?"],b:"Premier signalement pour cette Organisation.",a:["Fondé : retirer","Écarter"]}]},
+ social:{title:"Comptes sociaux",desc:"Connectez les comptes officiels X et LinkedIn de CodeSphere. Les jetons sont chiffrés et renouvelés avant leur expiration.",
+  kpis:[["1","Non connecté"],["1","Non configuré"],["1","Bluesky par secret"]],
+  cols:["À connecter","Non configurés","Publient déjà"],items:[
+  {c:0,t:"LinkedIn",s:"Aucun compte n'est encore connecté.",st:"Non connecté",tone:"warn",m:[],b:"Le jeton sera chiffré ; son expiration et sa date de connexion s'afficheront ici.",a:["Connecter"]},
+  {c:1,t:"X",s:"Aucune application OAuth n'est configurée pour cette plateforme.",st:"Non configuré",tone:"",m:[],b:"Rien à faire ici tant que X_CLIENT_ID n'est pas défini.",a:[]},
+  {c:2,t:"Bluesky",s:"codesphereplatform.bsky.social",st:"Par secret",tone:"ok",m:["Pas de connexion OAuth"],b:"Ce compte vient des secrets du déploiement : l'écran actuel ne l'affiche pas.",a:[]}]},
+ orgs:{title:"Organisations",desc:"Demandes à valider, suspensions. Chaque décision est auditée.",
+  kpis:[["2","À valider"],["2","Validées"],["1","Suspendue"],["1","Refusée"]],
+  cols:["À valider","Validées","Suspendues","Refusées"],items:[
+  {c:0,t:"Baobab Labs",s:"baobablabs.example · SN",st:"À valider",tone:"warn",m:["Demandé par Moussa D.","28 oct. 2026"],b:"Studio de produits santé à Dakar. rh@baobablabs.example",a:["Valider","Refuser"]},
+  {c:0,t:"Sahel Pay",s:"sahelpay.example · BF",st:"À valider",tone:"warn",m:["Demandé par Fatou N.","30 oct. 2026"],b:"Passerelle de paiement pour les PME. jobs@sahelpay.example",a:["Valider","Refuser"]},
+  {c:1,t:"Kora Tech",s:"kora-tech.example · CI",st:"Validée",tone:"ok",m:["Système"],b:"Studio produit à Abidjan et Dakar : paiements mobiles et outils pour les PME.",a:["Suspendre"]},
+  {c:1,t:"Université de Dakar",s:"ucad.example · SN",st:"Validée",tone:"ok",m:["Demandé par Awa S."],b:"Liste des Hackathons étudiants.",a:["Suspendre"]},
+  {c:2,t:"Offshore Staffing",s:"offshore-staffing.example · OTHER",st:"Suspendue",tone:"bad",m:["Deux signalements fondés"],b:"Suspendue après deux signalements fondés.",a:["Rétablir"]},
+  {c:3,t:"Formation Express",s:"formation-express.example · CM",st:"Refusée",tone:"",m:["Site sans rapport avec l'emploi"],b:"Demande refusée avec motif.",a:[]}]},
+ hackadmin:{title:"Hackathon",desc:"Le CADEV, ses Milestones et ses critères de jugement.",custom:1}
+});
+const NAV=[["Pilotage",[["Tableau de bord","bar-chart-3"],["Web Vitals","gauge"],["Votes annulés","scale"],["Journal d'audit","scroll-text"]]],["Contenu",[["Modération","shield"],["Tags","tag"],["Veille","rss"]]],["Communauté",[["Hackathon","trophy"],["Organisations","building"],["Emplois","briefcase"]]],["Équipe",[["Équipe","users"],["Comptes sociaux","share"]]]];
+const st={s:"accueil",v:0,phone:false,sel:{},filter:{},check:{},focus:{}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pill=(t,tone)=>`<span class="pill ${tone||""}">${esc(t)}</span>`;
+const tags=a=>a.map(t=>`<span class="tag">${esc(t)}</span>`).join("");
+const act=(a,i)=>{const d=/retirer|refuser|bloquer|suspendre|supprimer/i.test(a);return `<button class="btn s ${i===0&&!d?"p":d?"d":""}" data-act="${esc(a)}">${esc(a)}</button>`};
+const acts=it=>`<div class="row">${it.a.map(act).join("")}</div>`;
+
+/* Hackathon cards */
+const see=(cls="")=>`<button class="btn ${cls}" data-act="Voir le Hackathon">Voir le Hackathon</button>`;
+const live=`<p class="row" style="font:600 11px var(--mono);letter-spacing:.09em;text-transform:uppercase"><span style="width:7px;height:7px;border-radius:50%;background:var(--ink-gold)"></span>Hackathon en cours</p>`;
+const CARDS=[
+ ()=>`<section class="tick"><div class="a">${live}<div style="display:grid;gap:6px"><h2 style="font-size:clamp(24px,4cqw,32px);font-weight:700">${HK.name}</h2><p style="opacity:.88">${HK.sum}</p></div><div class="spread"><span class="sm">Prochaine étape : clôture des soumissions, 15 nov.</span>${see()}</div></div>
+  <div class="b"><span class="num">16</span><span class="eyebrow" style="color:var(--on-ink2)">jours</span><span class="mono" style="color:var(--on-ink2)">+ 05 h</span><span class="xs" style="color:var(--on-ink2)">votre fuseau horaire</span></div></section>`,
+ ()=>`<section class="fr"><div class="spread" style="align-items:flex-start"><div style="display:grid;gap:8px;flex:1 1 300px;min-width:0">${live}<h2 style="font-size:clamp(24px,4cqw,32px);font-weight:700">${HK.name}</h2><p style="color:var(--on-ink2)">${HK.sum}</p></div><div class="mono" style="text-align:right;flex:none"><span style="font-size:52px;font-weight:600;letter-spacing:-.04em;line-height:1">16<small style="font-size:18px;color:var(--on-ink2)"> j</small> 05<small style="font-size:18px;color:var(--on-ink2)"> h</small></span></div></div>
+  <ol class="track">${MS.map((m,i)=>`<li class="${i?"":"now"}"><b style="font-weight:600;display:block;line-height:1.3">${m[0]}</b><span class="mono xs" style="color:var(--on-ink2)">${m[1]}</span></li>`).join("")}</ol><div>${see()}</div></section>`,
+ ()=>`<section class="panel quiet"><div class="big">16</div><div style="display:grid;gap:6px;min-width:0"><p class="eyebrow">Jours avant la clôture · Hackathon en cours</p><h2 style="font-size:clamp(22px,3.6cqw,30px);font-weight:700">${HK.name}</h2><p class="dim">${HK.sum}</p><div>${see("p")}</div></div><dl>${MS.map(m=>`<div><dt>${m[1]}</dt><dd>${m[0]}</dd></div>`).join("")}</dl></section>`,
+ ()=>`<section class="score"><div class="spread">${live}<span class="xs" style="color:var(--on-ink2)">Prochaine étape : 15 nov.</span></div><h2 style="font-size:clamp(24px,4.4cqw,36px);font-weight:700">${HK.name}</h2><div class="digits">${[["16","jours"],["05","heures"],["42","minutes"],["38","équipes"]].map(d=>`<div><b>${d[0]}</b><span class="xs" style="color:var(--on-ink2)">${d[1]}</span></div>`).join("")}</div><div class="spread"><p class="sm" style="color:var(--on-ink2);flex:1 1 240px">${HK.sum}</p>${see()}</div></section>`,
+ ()=>`<details class="strip"><summary><span class="pill acc">Hackathon en cours</span><b style="font-weight:600;flex:1 1 220px;min-width:0">${HK.name}</b><span class="mono" style="font-weight:600">16 j 05 h</span><span class="btn s">Calendrier</span></summary><ol class="cal">${MS.map(m=>`<li><span class="mono dim" style="width:58px;flex:none">${m[1]}</span>${m[0]}</li>`).join("")}<li>${see("p")}</li></ol></details>`];
+function cardView(){return `<div class="wrap narrow cardstage fade">${CARDS[st.v]()}<div class="panel" style="padding:14px 16px;display:grid;gap:4px"><p class="eyebrow">Sous la carte, le fil</p><p style="font-weight:600">${esc(QS[0].t)}</p><p class="dim sm">${esc(QS[0].x)}</p></div></div>`}
+
+/* Visitor home */
+const qMeta=q=>`<div class="spread xs dim"><div class="row">${tags(q.tags)}</div><span><b style="color:var(--fg)">${q.who}</b> · ${q.c} · ${q.ago}</span></div>`;
+/* Same order as QuestionCard: Tags, title, excerpt, then score and answers, then the author. */
+const qc=(q,cls="panel")=>`<article class="q ${cls}"><div class="row">${tags(q.tags)}</div><h3>${esc(q.t)}</h3><p class="dim sm">${esc(q.x)}</p><div class="spread sm dim" style="border-top:1px solid var(--line);padding-top:9px"><div class="row" style="gap:14px"><span>▲ ${q.s}</span><span style="${q.ok?"color:var(--accent);font-weight:600":""}">${q.ok?"✓ ":""}${q.a} réponse${q.a>1?"s":""}</span></div><span class="xs">${q.ago}</span></div><div class="row xs dim"><b style="color:var(--fg)">${q.who}</b><span>· ${q.c}</span><span style="margin-left:auto">FR</span></div></article>`;
+const jc=j=>`<article class="jobrow"><h3>${esc(j.t)}</h3><p class="dim sm">${j.o} · ${j.c}${j.r?" · À distance":""}</p><div class="row">${tags(j.tags)}</div></article>`;
+const miniCard=()=>`<section class="fr" style="padding:20px;gap:10px">${live}<h2 style="font-size:20px;font-weight:700">${HK.name}</h2><div class="spread"><span class="mono" style="font-size:24px;font-weight:600">16 j 05 h</span>${see()}</div></section>`;
+const heroT=`<section class="hero"><p class="eyebrow">Q&amp;R pour les développeurs d'Afrique et de la diaspora</p><h1>Vos questions de code, nos réponses d'ici.</h1><p class="dim" style="max-width:60ch">Mobile money, USSD, déploiement à petit budget : posez la question, la communauté répond, le fil s'adapte à vos Tags.</p></section>`;
+const segs=`<div class="row"><span class="pill">Pour toi</span><span class="pill acc">Récents</span><span class="pill">Sans réponse</span><span class="pill">Toutes les langues ▾</span><span class="pill">Tous les pays ▾</span></div>`;
+const allJ=`<button class="btn s" data-act="Voir tous les emplois">Tous les emplois</button>`;
+const HOMES=[
+ ()=>`<div class="wrap fade" style="display:grid;gap:22px">${heroT}<div class="two"><div style="display:grid;gap:12px;min-width:0">${segs}${QS.map(q=>qc(q)).join("")}</div><aside style="display:grid;gap:14px;position:sticky;top:64px">${miniCard()}<section class="panel"><div class="spread" style="padding:13px 16px 4px"><h2 style="font-size:16px;font-weight:600">Emplois</h2>${allJ}</div><div class="divide">${JOBS.map(jc).join("")}</div></section></aside></div></div>`,
+ ()=>{let out=[];QS.forEach((q,i)=>{out.push(qc(q));if(i%2===1&&JOBS[i>>1]){const j=JOBS[i>>1];out.push(`<article class="jobin"><p class="eyebrow" style="color:var(--ink-gold)">Emploi · ${j.o}</p><h3 style="font-size:17px;font-weight:600">${esc(j.t)}</h3><div class="spread"><span class="sm dim">${j.c}${j.r?" · À distance":""}</span><button class="btn s" style="color:var(--fg)" data-act="Voir l'offre">Voir l'offre</button></div></article>`)}});return `<div class="wrap narrow fade" style="display:grid;gap:14px">${heroT}${CARDS[1]()}${segs}${out.join("")}</div>`},
+ ()=>`<div class="wrap fade bento"><div class="b4 panel" style="padding:24px">${heroT}<div class="row" style="margin-top:12px"><button class="btn p" data-act="Poser une question">Poser une question</button>${allJ}</div></div><div class="b2">${miniCard()}</div><div class="b3 panel">${qc(QS[0],"")}</div><div class="b3 panel">${qc(QS[1],"")}</div>${JOBS.slice(0,3).map(j=>`<div class="b2 panel">${jc(j)}</div>`).join("")}<div class="b4 panel">${qc(QS[2],"")}</div><div class="b2 panel">${jc(JOBS[3])}</div></div>`,
+ ()=>`<div class="wrap fade" style="display:grid;gap:20px">${heroT}${CARDS[4]()}<div class="even"><section style="display:grid;gap:10px;min-width:0"><div class="spread"><h2 style="font-size:20px;font-weight:700">Questions</h2>${segs}</div><div class="panel divide">${QS.map(q=>qc(q,"")).join("")}</div></section><section style="display:grid;gap:10px;min-width:0"><div class="spread"><h2 style="font-size:20px;font-weight:700">Emplois</h2>${allJ}</div><div class="panel divide">${JOBS.map(jc).join("")}</div></section></div></div>`,
+ ()=>`<div class="wrap fade" style="display:grid;gap:20px">${CARDS[4]()}<section style="display:grid;gap:10px"><div class="spread"><h2 style="font-size:18px;font-weight:700">Ils recrutent</h2>${allJ}</div><div class="hs">${JOBS.map(j=>`<article class="panel"><p class="eyebrow">${j.o}</p><h3 style="font-size:15px;font-weight:600">${esc(j.t)}</h3><p class="dim sm">${j.c}${j.r?" · À distance":""}</p></article>`).join("")}</div></section><section style="display:grid;gap:10px"><div class="spread"><h2 style="font-size:18px;font-weight:700">Questions</h2>${segs}</div><div class="panel">${QS.map(q=>`<article class="so"><div class="votes">${q.s}<div class="xs dim" style="font:400 11px var(--font)">votes</div></div><div style="display:grid;gap:5px;min-width:0"><h3 style="font-size:15.5px;font-weight:600">${esc(q.t)}</h3>${qMeta(q)}</div></article>`).join("")}</div></section></div>`];
+/* SiteHeader: logo, theme, language, roadmap, ask, account. No section links; on a phone, a menu holds the rest. */
+const ic=n=>`<i data-lucide="${n}" style="width:16px;height:16px;flex:none"></i>`;
+const homeView=()=>`<header class="shead"><span class="logo">Code<i>Sphere</i></span><div class="r"><button class="btn s" aria-label="Changer de thème" data-act="Thème">${ic("sun")}</button><span class="row hide-sm"><button class="btn s" data-act="Langue">FR</button><button class="btn s" data-act="Feuille de route">${ic("map")}Feuille de route</button><button class="btn s p" data-act="Poser une question">${ic("plus")}Poser une question</button><button class="btn s" data-act="Se connecter">Se connecter</button></span><button class="btn s show-sm" aria-label="Menu" data-act="Menu">${ic("menu")}</button></div></header>${HOMES[st.v]()}`;
+
+/* Admin paradigms, same data so structures compare directly */
+const adminKey=()=>st.s;
+const P_INBOX=d=>{const k=adminKey(),f=st.filter[k]??0,list=d.items.filter(i=>i.c===f),sel=list.find(i=>i.t===st.sel[k])||list[0];return `<div class="row">${d.cols.map((c,i)=>`<button class="btn s ${i===f?"p":""}" data-filter="${i}">${c} · ${d.items.filter(x=>x.c===i).length}</button>`).join("")}</div>
+ <div class="panel mast"><ul>${list.map(i=>`<li><button data-sel="${esc(i.t)}" aria-current="${i===sel}"><span class="spread"><b style="font-weight:600;font-size:14px;flex:1 1 150px;min-width:0">${esc(i.t)}</b>${pill(i.st,i.tone)}</span><span class="xs dim">${esc(i.s)}</span></button></li>`).join("")}</ul>
+ <div class="mdet">${sel?`<div class="spread"><h2 style="font-size:21px;font-weight:700;flex:1 1 220px;min-width:0">${esc(sel.t)}</h2>${pill(sel.st,sel.tone)}</div><p class="dim sm">${esc(sel.s)}</p><p>${esc(sel.b)}</p><div class="row">${sel.m.map(m=>pill(m)).join("")}</div>${acts(sel)}`:`<p class="dim">Rien à traiter ici.</p>`}</div></div>`};
+const P_TABLE=d=>{const k=adminKey(),f=st.filter[k]??-1,list=d.items.filter(i=>f<0||i.c===f),ck=st.check[k]||{},n=Object.values(ck).filter(Boolean).length;return `<div class="spread"><div class="row"><button class="btn s ${f<0?"p":""}" data-filter="-1">Tout · ${d.items.length}</button>${d.cols.map((c,i)=>`<button class="btn s ${i===f?"p":""}" data-filter="${i}">${c}</button>`).join("")}</div>${n?`<div class="row"><span class="sm dim">${n} sélectionné${n>1?"s":""}</span><button class="btn s" data-act="Action groupée">Action groupée</button></div>`:""}</div>
+ <div class="panel tblw"><table><thead><tr><th style="width:32px"></th><th>Élément</th><th>Catégorie</th><th>État</th><th>Détail</th><th></th></tr></thead><tbody>${list.map(i=>`<tr><td><input type="checkbox" id="c-${esc(i.t).replace(/\W/g,"")}" aria-label="Sélectionner ${esc(i.t)}" data-check="${esc(i.t)}" ${ck[i.t]?"checked":""}></td><td><b style="font-weight:600">${esc(i.t)}</b><div class="xs dim">${esc(i.s)}</div></td><td class="sm dim">${d.cols[i.c]}</td><td>${pill(i.st,i.tone)}</td><td class="xs dim">${esc(i.m.join(" · "))}</td><td style="text-align:right">${i.a[0]?act(i.a[0],0):""}</td></tr>`).join("")}</tbody></table></div>`};
+const P_KAN=d=>`<div class="kan">${d.cols.map((c,ci)=>{const l=d.items.filter(i=>i.c===ci);return `<section class="kcol"><p class="spread eyebrow"><span>${c}</span><span>${l.length}</span></p>${l.map(i=>`<article class="kcard"><b style="font-weight:600;font-size:14px;line-height:1.3">${esc(i.t)}</b><span class="xs dim">${esc(i.s)}</span><div class="row">${pill(i.st,i.tone)}</div>${i.a[0]?`<div class="row">${act(i.a[0],0)}</div>`:""}</article>`).join("")||`<p class="xs dim" style="padding:6px">Vide</p>`}</section>`}).join("")}</div>`;
+const P_HEALTH=d=>{const u=d.items.filter(i=>i.c===0),o=d.items.filter(i=>i.c!==0);return `<div class="kpis">${d.kpis.map(k=>`<div><b>${k[0]}</b><span class="xs dim">${k[1]}</span></div>`).join("")}</div><div class="attn">${u.map(i=>`<article class="panel"><div class="spread"><span class="eyebrow">${d.cols[0]}</span>${pill(i.st,i.tone)}</div><h3 style="font-size:17px;font-weight:600">${esc(i.t)}</h3><p class="sm dim">${esc(i.s)}</p><p class="sm">${esc(i.b)}</p>${acts(i)}</article>`).join("")}</div><div class="panel">${o.map(i=>`<div class="line"><b style="font-weight:600;font-size:14px">${esc(i.t)}</b><span class="xs dim" style="flex:1 1 180px;min-width:0">${esc(i.s)}</span>${pill(i.st,i.tone)}${i.a[0]?act(i.a[0],1):""}</div>`).join("")}</div>`};
+const P_FOCUS=d=>{const k=adminKey(),n=d.items.length,x=Math.min(st.focus[k]||0,n-1),i=d.items[x],isNext=x<n-1;return `<div class="panel focus"><div class="spread"><span class="eyebrow">${d.cols[i.c]} · ${x+1} sur ${n}</span>${pill(i.st,i.tone)}</div><div class="prog"><i style="width:${(x+1)/n*100}%"></i></div><h2 style="font-size:clamp(22px,4cqw,30px);font-weight:700">${esc(i.t)}</h2><p class="dim">${esc(i.s)}</p><p>${esc(i.b)}</p><div class="row">${i.m.map(m=>pill(m)).join("")}</div><div class="row">${i.a.map((a,ix)=>`<button class="btn ${ix===0&&!/retirer|refuser|bloquer|suspendre|supprimer/i.test(a)?"p":/retirer|refuser|bloquer|suspendre|supprimer/i.test(a)?"d":""}" data-act="${esc(a)}">${esc(a)}<kbd>${ix+1}</kbd></button>`).join("")}<button class="btn" data-step="-1" ${x?"":"disabled"}>Précédent</button><button class="btn" data-step="1" ${isNext?"":"disabled"}>Passer<kbd>J</kbd></button></div></div>`};
+const PS=[P_INBOX,P_TABLE,P_KAN,P_HEALTH,P_FOCUS];
+const socialFix=()=>st.s==="social"?`<p class="sm dim">Aperçu après correction du câblage. Aujourd'hui, staging n'affiche que le message « Aucune application OAuth ».</p>`:"";
+/* The Hackathon screen edits one record: five layouts of the same fields, no shared list paradigm. */
+const CRIT=[["Pertinence",25,"jury"],["Qualité technique",30,"jury"],["Expérience utilisateur",20,"jury"],["Innovation",15,"jury"],["Vote du public",10,"public"]];
+const edit=`<button class="btn s" data-act="Modifier">Modifier</button>`;
+const fld=(l,v)=>`<div><dt class="xs dim">${l}</dt><dd style="font-weight:500">${v}</dd></div>`;
+const hGen=`<dl class="grid2">${fld("Organisateur","CodeSphere")}${fld("Équipe","2 à 5 personnes")}${fld("Équipes sur CodeSphere","Oui")}${fld("Note de source","—")}</dl><p class="sm">${HK.sum}</p>`;
+const hMs=`<ul class="divide">${MS.map(m=>`<li class="spread" style="padding:9px 0"><span style="flex:1 1 200px;min-width:0">${m[0]}</span><span class="mono sm dim">${m[1]} 2026</span></li>`).join("")}</ul>`;
+const hCr=`<ul style="display:grid;gap:9px">${CRIT.map(c=>`<li style="display:grid;gap:3px"><span class="spread sm"><span>${c[0]} · <span class="dim">${c[2]}</span></span><span class="mono">${c[1]} %</span></span><span class="prog"><i style="width:${c[1]*2}%"></i></span></li>`).join("")}</ul><p class="xs dim">Total : 100 %</p>`;
+const sec=(t,b,x="")=>`<section class="panel" style="padding:18px;display:grid;gap:12px;align-content:start;min-width:0"><div class="spread"><h2 style="font-size:17px;font-weight:600">${t}</h2>${x}</div>${b}</section>`;
+/* Several Hackathons (decision #228: draft, published, ended, archived). Needs create + status in the API. */
+const HL=[
+ {n:HK.name,o:"CodeSphere",g:"Publiés",tone:"ok",st:"Publié",team:"Non : inscriptions chez Systalink",size:"selon l'organisateur",sub:"Sur le site de l'organisateur",sum:HK.sum,act:"Terminer",ms:MS},
+ {n:"Hack4Sahel",o:"Université de Dakar",g:"Publiés",tone:"ok",st:"Publié",team:"Oui",size:"2 à 4 personnes",sub:"12 soumissions",sum:"Solutions numériques pour l'agriculture au Sahel.",act:"Terminer",ms:[["Ouverture des inscriptions","3 nov."],["Clôture des soumissions","12 déc."],["Vote du public","15 déc."],["Délibération du jury","20 déc."]]},
+ {n:"Dakar Fintech Challenge",o:"Kora Tech",g:"Brouillons",tone:"warn",st:"Brouillon",team:"Oui",size:"1 à 5 personnes",sub:"Pas encore ouvert",sum:"Paiements mobiles et inclusion financière.",act:"Publier",ms:[["Ouverture des inscriptions","10 janv."],["Clôture des soumissions","28 févr."],["Vote du public","3 mars"],["Délibération du jury","10 mars"]]},
+ {n:"AfriCode Sprint 2025",o:"Kora Tech",g:"Terminés",tone:"",st:"Terminé",team:"Oui",size:"2 à 5 personnes",sub:"34 soumissions",sum:"Sprint de 48 heures pour étudiants.",act:"Archiver",ms:[["Ouverture des inscriptions","2 juin"],["Clôture des soumissions","4 juin"],["Vote du public","5 juin"],["Délibération du jury","9 juin"]]}];
+const hMulti=()=>{const h=HL.find(x=>x.n===st.sel.hackadmin)||HL[0];return `<div class="split"><div class="panel" style="padding:10px;align-self:start;display:grid;gap:10px"><button class="btn p" data-act="Nouveau Hackathon">${ic("plus")}Nouveau Hackathon</button>${["Publiés","Brouillons","Terminés"].map(g=>`<div style="display:grid;gap:3px"><p class="eyebrow" style="padding:2px 6px">${g}</p>${HL.filter(x=>x.g===g).map(x=>`<button data-sel="${esc(x.n)}" aria-current="${x===h}" class="hitem" style="${x===h?"background:var(--tint)":""}"><b style="font-weight:600;font-size:14px;line-height:1.3">${esc(x.n)}</b><span class="xs dim">${esc(x.o)}</span></button>`).join("")}</div>`).join("")}</div>
+ <div style="display:grid;gap:14px;min-width:0;align-content:start"><section class="fr" style="gap:16px;padding:22px"><div class="spread"><div style="flex:1 1 240px;min-width:0"><span class="pill ${h.tone}">${h.st}</span><h2 style="font-size:22px;font-weight:700;margin-top:6px">${esc(h.n)}</h2></div><div class="row"><button class="btn s" data-act="Modifier">Modifier</button><button class="btn s" data-act="${h.act}">${h.act}</button></div></div><ol class="track">${h.ms.map((m,i)=>`<li class="${h.g==="Publiés"&&!i?"now":""}"><b style="font-weight:600;display:block;line-height:1.3">${m[0]}</b><span class="mono xs" style="color:var(--on-ink2)">${m[1]}</span></li>`).join("")}</ol></section><div class="even">${sec("Général",`<dl class="grid2">${fld("Organisation",h.o)}${fld("Équipe",h.size)}${fld("Équipes sur CodeSphere",h.team)}${fld("Soumissions",h.sub)}</dl><p class="sm">${esc(h.sum)}</p>`)}${sec("Critères de jugement",hCr)}</div></div></div>`};
+const HA=[
+ ()=>`<div class="split"><div class="panel" style="padding:10px;align-self:start"><p class="eyebrow" style="padding:4px 8px">Hackathons</p><button class="btn" style="width:100%;justify-content:flex-start;white-space:normal;text-align:left;background:var(--tint)">${HK.name}</button></div><div style="display:grid;gap:14px;min-width:0">${sec("Général",hGen,edit)}${sec("Milestones",hMs)}${sec("Critères de jugement",hCr)}</div></div>`,
+ hMulti,
+ ()=>{const t=st.filter.hackadmin??0;return `<div class="row">${["Général","Milestones","Critères de jugement"].map((x,i)=>`<button class="btn s ${i===t?"p":""}" data-filter="${i}">${x}</button>`).join("")}</div>${sec(["Général","Milestones","Critères de jugement"][t],[hGen,hMs,hCr][t],edit)}`},
+ ()=>`<div class="even">${sec("Modifier",`<label class="sm" for="ha-n" style="font-weight:500">Nom</label><input id="ha-n" class="inp" value="${HK.name}"><label class="sm" for="ha-s" style="font-weight:500">Résumé</label><textarea id="ha-s" class="inp" rows="3">${HK.sum}</textarea>${hMs}<div class="row"><button class="btn p" data-act="Enregistrer">Enregistrer</button><button class="btn" data-act="Annuler">Annuler</button></div>`)}<div style="display:grid;gap:8px;align-content:start;min-width:0"><p class="eyebrow">Aperçu sur l'accueil</p>${CARDS[1]()}</div></div>`,
+ ()=>`<div class="kpis">${[["16 j","Avant la clôture"],["4","Milestones"],["100 %","Total des critères"],["Oui","Équipes sur CodeSphere"]].map(k=>`<div><b>${k[0]}</b><span class="xs dim">${k[1]}</span></div>`).join("")}</div>${sec("Prochaine étape",`<p style="font-size:20px;font-weight:600">${MS[0][0]}, ${MS[0][1]}</p>`,edit)}<div class="even">${sec("Général",hGen)}${sec("Critères de jugement",hCr)}</div>`];
+function adminView(){const d=SCREENS[st.s];return `<div class="adm"><nav class="side" aria-label="Administration"><div class="row" style="padding:0 8px"><span class="logo">Code<i>Sphere</i></span><span class="pill">Admin</span></div>${NAV.map(g=>`<div><p class="eyebrow">${g[0]}</p>${g[1].map(n=>`<a class="${n[0]===d.title?"on":""}">${ic(n[1])}${n[0]}</a>`).join("")}</div>`).join("")}</nav><main class="amain fade"><div class="spread" style="border-bottom:1px solid var(--line);padding-bottom:14px"><div style="flex:1 1 280px;min-width:0"><h1 style="font-size:21px;font-weight:600">${d.title}</h1><p class="dim sm">${d.desc}</p></div>${d.add?`<button class="btn" data-act="${d.add}">${d.add}</button>`:""}</div>${socialFix()}${d.custom?HA[st.v]():PS[st.v](d)}</main></div>`}
+
+/* Switching */
+const surf=()=>SURF.find(s=>s.id===st.s);
+function render(){
+ const s=surf(),v=s.v[st.v];
+ const tb=x=>`<button data-tab="${x.id}" aria-pressed="${x.id===st.s}">${x.name}</button>`,lb=t=>`<span class="tablabel">${t}</span>`;
+ $("tabs").innerHTML=lb("Site")+SURF.filter(x=>!x.adm).map(tb).join("")+lb("Dashboard")+SURF.filter(x=>x.adm).map(tb).join("");
+ $("note").innerHTML=`<strong>${s.name} · ${v[0]}</strong><span class="dim sm">${v[1]}</span><span class="dim xs">Données d'exemple, boutons inactifs.${st.s==="accueil"?" Le bloc Emplois est une proposition : l'accueil visiteur n'en affiche pas aujourd'hui.":""}</span>`;
+ $("label").innerHTML=`<b>${st.v+1}/5</b>${v[0]}`;
+ $("stage").className="stage"+(st.phone?" phone":"");
+ $("wD").setAttribute("aria-pressed",!st.phone);$("wP").setAttribute("aria-pressed",st.phone);
+ $("stage").innerHTML=st.s==="carte"?cardView():st.s==="accueil"?homeView():adminView();
+ window.lucide&&lucide.createIcons();
+ const h=`${st.s}-${st.v+1}`;if(location.hash.slice(1)!==h){try{history.replaceState(null,"","#"+h)}catch(e){location.hash=h}}
+}
+function cycle(n){st.v=(st.v+n+5)%5;render()}
+function fromHash(){const m=location.hash.slice(1).match(/^([a-z]+)-([1-5])$/);if(m&&SURF.some(s=>s.id===m[1])){st.s=m[1];st.v=+m[2]-1}}
+let tt;function toast(m){const t=$("toast");t.textContent=m+" : action simulée";t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,1600)}
+$("prev").onclick=()=>cycle(-1);$("next").onclick=()=>cycle(1);
+function theme(t){document.documentElement.dataset.theme=t;$("tL").setAttribute("aria-pressed",t==="light");$("tS").setAttribute("aria-pressed",t==="dark")}
+$("tL").onclick=()=>theme("light");$("tS").onclick=()=>theme("dark");theme("light");
+$("wD").onclick=()=>{st.phone=false;render()};$("wP").onclick=()=>{st.phone=true;render()};
+document.addEventListener("click",e=>{const b=e.target.closest("button,input");if(!b)return;const k=st.s,dt=b.dataset;
+ if(dt.tab){st.s=dt.tab;st.v=0;render();scrollTo(0,0)}
+ else if(dt.act)toast(dt.act);
+ else if(dt.filter!==undefined){st.filter[k]=+dt.filter;render()}
+ else if(dt.sel){st.sel[k]=dt.sel;render()}
+ else if(dt.step){st.focus[k]=Math.max(0,(st.focus[k]||0)+ +dt.step);render()}
+ else if(dt.check){(st.check[k]=st.check[k]||{})[dt.check]=b.checked;render()}
+});
+document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea,[contenteditable]"))return;
+ if(e.key==="ArrowLeft")cycle(-1);else if(e.key==="ArrowRight")cycle(1);
+ else if(SCREENS[st.s]?.items&&st.v===4&&e.key.toLowerCase()==="j"){const n=SCREENS[st.s].items.length;st.focus[st.s]=Math.min(n-1,(st.focus[st.s]||0)+1);render()}});
+addEventListener("hashchange",()=>{fromHash();render()});
+fromHash();render();
+</script>
