@@ -144,6 +144,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_SERVER_URL=
             NEXT_PUBLIC_EMAIL_OTP_SIGNIN=true
+            NEXT_PUBLIC_DESIGN_SYSTEM=false
             APP_VERSION=${{ inputs.version || format('pr-{0}', github.event.number) }}
             GIT_SHA=${{ github.event.pull_request.head.sha || github.sha }}
 
