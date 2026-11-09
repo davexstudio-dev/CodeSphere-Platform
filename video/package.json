@@ -1,0 +1,24 @@
+{
+	"name": "codesphere-video",
+	"private": true,
+	"version": "0.0.0",
+	"description": "CADEV demo video built with Remotion (#358). Standalone: not a workspace, not part of the shipped product.",
+	"scripts": {
+		"studio": "remotion studio src/index.ts",
+		"render:master": "remotion render src/index.ts Master out/codesphere-master-16x9.mp4",
+		"render:cut": "remotion render src/index.ts Cut out/codesphere-cut-9x16.mp4",
+		"srt": "bun scripts/srt.ts",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@remotion/cli": "4.0.542",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"remotion": "4.0.542"
+	},
+	"devDependencies": {
+		"@types/node": "^22.20.5",
+		"@types/react": "^19.0.0",
+		"typescript": "^5.6.0"
+	}
+}
