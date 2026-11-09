@@ -6,12 +6,10 @@ const last = (scenes: { to: number }[]) => scenes[scenes.length - 1].to;
 
 const master: VideoProps = {
 	scenes: MASTER_SCENES,
-	// voiceFile: "master.mp3",
 	burnSubtitles: false,
 };
 const cut: VideoProps = {
 	scenes: CUT_SCENES,
-	// voiceFile: "cut.mp3",
 	burnSubtitles: true,
 };
 

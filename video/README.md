@@ -20,7 +20,12 @@ npm run render:cut          # out/codesphere-cut-9x16.mp4
 ## Ce qu'il faut ajouter
 
 1. **Prises d'écran** : déposer chaque plan dans `public/clips/` (un MP4 par plan, 1920×1080 pour la maîtresse, 1080×1920 pour la coupe), puis renseigner `clip: "<fichier>.mp4"` du plan dans `src/data.ts`. Tant qu'il manque, une carte « prise d'écran manquante » s'affiche.
-2. **Voix off** : générée avec **ElevenLabs** (voix synthétique française, décision du capitaine du 2026-11-09, qui remplace la voix humaine du storyboard). Exporter `master.mp3` et `cut.mp3` dans `public/voice/`, puis décommenter `voiceFile` dans `src/Root.tsx`. Le script est le champ `voice` de chaque plan dans `src/data.ts`. Vérifier que l'offre ElevenLabs utilisée autorise l'usage commercial et la publication, et conserver la licence de la voix choisie. L'usage est déclaré dans `docs/cadev/ai-usage.md`.
+2. **Voix off** : générée avec **ElevenLabs** (voix synthétique française, décision du capitaine du 2026-11-09, qui remplace la voix humaine du storyboard), **un MP3 par plan** pour rester calée sur l'image. Le texte lu est le champ `voice` de chaque plan dans `src/data.ts`.
+   - `bun scripts/voice.ts --dry` affiche tous les textes et fichiers sans rien appeler.
+   - `ELEVENLABS_API_KEY=… ELEVENLABS_VOICE_ID=… npm run voice` écrit `public/voice/master-<plan>.mp3` et `cut-<plan>.mp3`. La clé reste dans l'environnement : ne jamais l'écrire dans un fichier ni la coller dans un chat. Les fichiers déjà générés sont ignorés (`--force` pour refaire), pour ne pas dépenser de crédits deux fois.
+   - Rendre ensuite avec `npm run render:master:voice` et `npm run render:cut:voice`.
+   - Vérifier que l'offre ElevenLabs autorise l'usage commercial et la publication, et conserver la licence de la voix choisie. L'usage est déclaré dans `docs/cadev/ai-usage.md`.
+   - Une voix de synthèse peut mal prononcer « CodeSphere », « MCP » ou « USSD » : écouter chaque fichier, et ajuster l'écriture du champ `voice` (par exemple « Code Sphère ») sans toucher au sous-titre `en`.
 3. **Musique** (facultatif) : Pixabay Music ou Free Music Archive filtré sur CC0. Relire les conditions du morceau au moment du téléchargement et noter sa source et sa licence dans la description de la vidéo. Ne pas committer le fichier (voir `.gitignore`).
 4. **Appel à voter** : renseigner `VOTE_LINK` dans `src/data.ts` quand le vrai lien est publié (#237). La maîtresse n'en a jamais.
 
