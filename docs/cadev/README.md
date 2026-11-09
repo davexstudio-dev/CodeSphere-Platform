@@ -5,8 +5,8 @@ Issue #167, carte #1. Dépôt le **15 nov. 2026 avant 17h00 GMT** (repoussé du 
 | Livrable | Document | État | Qui |
 |---|---|---|---|
 | Démo (3 min) | [demo-script.md](demo-script.md) | brouillon | équipe, répétition à replanifier avant le 15 nov. (#57) |
-| Pitch (le dossier de soumission en tient lieu) | [pitch.md](pitch.md) | stratégie décidée (#235), à rédiger | @lamafx |
-| Vidéo (maîtresse 16:9 de 3 min, coupe 9:16 de 60 s) | [video-storyboard.md](video-storyboard.md) | stratégie décidée (#236), tournage à faire | @lamafx |
+| Pitch (le dossier de soumission en tient lieu) | [pitch.md](pitch.md), [pitch-deck.md](pitch-deck.md) | stratégie décidée (#235), diapositives rédigées en français, chiffres à relever | @lamafx |
+| Vidéo (maîtresse 16:9 de 3 min, coupe 9:16 de 60 s) | [video-storyboard.md](video-storyboard.md) | stratégie décidée (#236), production avec Remotion suivie en #358 | @lamafx |
 | Feuille de route | [../roadmap.md](../roadmap.md) | brouillon, trimestres cibles à fixer | capitaine |
 | Vote public (17 au 20 nov., décalé de 21 jours, à confirmer) | décisions dans le ticket #237 | kit de relais, relais et responsable à désigner | à désigner |
 | Repo public | `LICENSE` (MIT), [README](../../README.md), historique scanné par gitleaks | prêt côté code ; rendre le dépôt public reste une action humaine | capitaine |
