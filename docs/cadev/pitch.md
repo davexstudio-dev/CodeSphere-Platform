@@ -25,15 +25,15 @@ Thème retenu (communiqué par l'équipe, non trouvé dans les sources publiques
 | 3 | Ce qui est nouveau | Innovation (15 %) | **Agent-native** : les agents IA sont des Members badgés, avec clé d'API, OpenAPI et MCP ; ils répondent, ne votent jamais, et leurs réponses restent repliées tant qu'un humain ne les a pas validées (prévu). **Local-first** : lecture hors ligne, envoi mis en file. |
 | 4 | L'expérience | UX (20 %) | Mobile d'abord, question en quatre étapes avec brouillon local, page CADEV avec compte à rebours dans le fuseau du lecteur, thème clair et sombre. Captures ou démo. |
 | 5 | Sous le capot | Qualité technique (30 %) | Deux décisions expliquées : le contrat oRPC unique qui alimente le web, REST `/api/v1` et MCP ; la file d'envoi hors-ligne avec clé d'idempotence. Un bogue réel trouvé et corrigé. Postgres + Drizzle, better-auth, CSP avec nonce et grille OWASP, tests d'intégration sur Postgres réel, 3 parcours Playwright avant chaque déploiement. **Usage de l'IA déclaré honnêtement** ([ai-usage.md](ai-usage.md)) : ce que l'IA a fait, ce que l'équipe a décidé, comment c'est vérifié. Un membre répond à une question technique sans notes. |
-| 6 | Où on en est | Qualité technique | Chiffres réels du tableau de bord le 24 oct. (contenu de démonstration signalé comme tel, vingt testeurs réels). **Hébergement : à écrire selon l'état réel du déploiement sur Datacloud ; ne pas écrire « hébergé chez Systalink » tant que ce n'est pas fait.** |
+| 6 | Où on en est | Qualité technique | Chiffres réels du tableau de bord à la date de soumission (contenu de démonstration signalé comme tel, vingt testeurs réels). **Hébergement : à écrire selon l'état réel du déploiement sur Datacloud ; ne pas écrire « hébergé chez Systalink » tant que ce n'est pas fait.** |
 | 7 | La suite | Pertinence | Présentée comme **prévue** : Réputation, recherche, fil de veille, emplois, hackathons ouverts, paiements par mobile money. Phases et trimestres cibles dans [../roadmap.md](../roadmap.md). Pas d'appel à voter dans le fichier soumis. |
 | 8 | L'équipe | — | @0xdaydy (capitaine, backend), @Justice-47 et @Strong-Ari (frontend), @lamafx (QA, docs, déploiement). |
 
 ## Voix et versions
 
-- **Voix** : @lamafx présente, @0xdaydy répond aux questions techniques, un des deux frontends pilote la démo. Rôles fixés avant la répétition du 23 oct.
+- **Voix** : @lamafx présente, @0xdaydy répond aux questions techniques, un des deux frontends pilote la démo. Rôles fixés avant la répétition générale (voir [submission-checklist.md](submission-checklist.md))
 - **Version maîtresse de 3 minutes** : celle ci-dessus.
-- **Version de 60 secondes** pour les réseaux et le vote public : le problème, la démo en une scène, l'appel à voter (ajouté le 27 oct. avec le vrai lien). Même histoire, mêmes mots clés.
+- **Version de 60 secondes** pour les réseaux et le vote public : le problème, la démo en une scène, l'appel à voter (ajouté quand le vrai lien de vote est publié). Même histoire, mêmes mots clés.
 
 ## Calendrier (cible interne)
 
@@ -42,6 +42,6 @@ Thème retenu (communiqué par l'équipe, non trouvé dans les sources publiques
 ## À préparer
 
 - Captures en clair et en sombre, mobile et bureau (`/`, `/ask`, une Question avec réponse d'agent, `/hackathons/cadev-2026`).
-- Chiffres réels du tableau de bord le 24 oct. (Members, Questions, part de réponses acceptées, délai de première réponse).
+- Chiffres réels du tableau de bord à la date de soumission (Members, Questions, part de réponses acceptées, délai de première réponse).
 - La phrase d'accroche testée sur quelqu'un hors de l'équipe.
-- Les questions à poser à cadev@systalink.com avant le 22 oct. : transfert des droits du gagnant (l'article a disparu du règlement), format attendu du pitch et de la vidéo, adresse et modalités du vote public.
+- Les questions à poser à cadev@systalink.com dès que possible (la date du 22 oct. est caduque) : transfert des droits du gagnant (l'article a disparu du règlement), format attendu du pitch et de la vidéo, adresse et modalités du vote public.
