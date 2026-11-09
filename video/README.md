@@ -2,9 +2,9 @@
 
 Projet **autonome** : il n'est pas un workspace Bun et ne fait pas partie du produit livré. Il produit la maîtresse 16:9 de 3 minutes et la coupe 9:16 de 60 secondes décrites dans [`docs/cadev/video-storyboard.md`](../docs/cadev/video-storyboard.md).
 
-## Licence de Remotion : à trancher avant d'utiliser
+## Licence de Remotion
 
-Remotion n'est pas sous licence permissive (`SEE LICENSE IN LICENSE.md`) : gratuit pour les particuliers et les entreprises de 3 personnes ou moins, licence payante au-delà. L'équipe compte 4 membres et le règlement CADEV (art. 6) n'accepte que des licences permissives. Cet outil n'est ni installé ni exécuté par la plateforme, mais il est listé ici : à confirmer avec la licence de Remotion et à déclarer ou écarter dans `docs/cadev/third-party-licenses.md` avant de rendre le dépôt public.
+Remotion n'est pas sous licence permissive (`SEE LICENSE IN LICENSE.md`), mais sa licence gratuite couvre : un individu, une organisation à but lucratif de 3 employés ou moins, une organisation à but non lucratif. L'équipe participe à titre personnel, sans société : elle est éligible. **Si une société de plus de 3 employés porte un jour le projet, une licence d'entreprise devient nécessaire.** Remotion n'est ni installé ni exécuté par la plateforme ; il est déclaré dans `docs/cadev/third-party-licenses.md` (section « outils hors produit »).
 
 ## Utilisation
 
@@ -20,8 +20,8 @@ npm run render:cut          # out/codesphere-cut-9x16.mp4
 ## Ce qu'il faut ajouter
 
 1. **Prises d'écran** : déposer chaque plan dans `public/clips/` (un MP4 par plan, 1920×1080 pour la maîtresse, 1080×1920 pour la coupe), puis renseigner `clip: "<fichier>.mp4"` du plan dans `src/data.ts`. Tant qu'il manque, une carte « prise d'écran manquante » s'affiche.
-2. **Voix off humaine** : déposer `master.mp3` et `cut.mp3` dans `public/voice/`, puis décommenter `voiceFile` dans `src/Root.tsx`. Le texte de chaque plan est le champ `voice` de `src/data.ts`.
-3. **Musique libre de droits** (facultatif) : fichier dans `public/music/`, `musicFile` dans `src/Root.tsx`, licence notée dans la description de la vidéo.
+2. **Voix off** : générée avec **ElevenLabs** (voix synthétique française, décision du capitaine du 2026-11-09, qui remplace la voix humaine du storyboard). Exporter `master.mp3` et `cut.mp3` dans `public/voice/`, puis décommenter `voiceFile` dans `src/Root.tsx`. Le script est le champ `voice` de chaque plan dans `src/data.ts`. Vérifier que l'offre ElevenLabs utilisée autorise l'usage commercial et la publication, et conserver la licence de la voix choisie. L'usage est déclaré dans `docs/cadev/ai-usage.md`.
+3. **Musique** (facultatif) : Pixabay Music ou Free Music Archive filtré sur CC0. Relire les conditions du morceau au moment du téléchargement et noter sa source et sa licence dans la description de la vidéo. Ne pas committer le fichier (voir `.gitignore`).
 4. **Appel à voter** : renseigner `VOTE_LINK` dans `src/data.ts` quand le vrai lien est publié (#237). La maîtresse n'en a jamais.
 
 ## Règles du storyboard

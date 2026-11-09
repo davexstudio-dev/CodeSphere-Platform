@@ -1,7 +1,7 @@
 // Plans of the CADEV demo video. Source of truth: docs/cadev/video-storyboard.md (#236).
 // Times are seconds from the start of the cut. `clip` is a screen recording in public/clips/;
 // leave it undefined until the recording exists (a placeholder card shows instead).
-// `voice` is what the narrator says (French, human voice, #358); `en` feeds the English SRT.
+// `voice` is what the narrator says (French, synthetic ElevenLabs voice, #358); `en` feeds the English SRT.
 
 export const FPS = 30;
 

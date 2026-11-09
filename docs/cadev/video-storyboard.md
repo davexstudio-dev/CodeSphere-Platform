@@ -17,7 +17,7 @@ Elle s'affiche en titre au début et revient en carton final. La démo ne prouve
 
 - Enregistrement 1920×1080, 30 i/s, navigateur en zoom 125 %, curseur agrandi. **Barre d'adresse recadrée** : l'adresse du site est ajoutée en texte au montage final, pour que l'état du déploiement ne force pas à tout refaire.
 - Prises de vue d'écran uniquement, texte à l'écran, pas d'acteurs.
-- Voix off **humaine**, en français, par un membre de l'équipe (pas de voix synthétique). Sous-titres français incrustés sur la coupe de 60 secondes ; sous-titres anglais en piste séparée (SRT) sur la maîtresse.
+- Voix off en français, **synthétique (ElevenLabs)**, décision du capitaine du 2026-11-09 : elle remplace la voix humaine prévue d'abord, et l'usage est déclaré dans [ai-usage.md](ai-usage.md). Sous-titres français incrustés sur la coupe de 60 secondes ; sous-titres anglais en piste séparée (SRT) sur la maîtresse.
 - Application réelle, contenu de démonstration signalé comme tel, aucune fonctionnalité non construite. La coupure réseau est réelle (DevTools en mode hors ligne).
 - Musique libre de droits (licence à noter dans la description), volume bas sous la voix.
 - Pas de vraie adresse email ni de vraie clé à l'écran : compte et agent de démo, clé floutée.

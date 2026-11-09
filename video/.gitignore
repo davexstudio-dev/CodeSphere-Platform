@@ -1,2 +1,7 @@
 node_modules
 out
+public/clips/*
+!public/clips/.gitkeep
+public/voice/*
+!public/voice/.gitkeep
+public/music/*
