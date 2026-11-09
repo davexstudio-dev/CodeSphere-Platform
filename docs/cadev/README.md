@@ -12,10 +12,10 @@ Issue #167, carte #1. Dépôt le **15 nov. 2026 avant 17h00 GMT** (repoussé du 
 | Repo public | `LICENSE` (MIT), [README](../../README.md), historique scanné par gitleaks | prêt côté code ; rendre le dépôt public reste une action humaine | capitaine |
 | Déclaration d'usage de l'IA | [ai-usage.md](ai-usage.md) | brouillon à valider | capitaine |
 | Déclaration d'auteur | [author-declaration.md](author-declaration.md) | modèle, une signature par membre | chaque membre |
-| Composants tiers et licences | [third-party-licenses.md](third-party-licenses.md) | généré le 2026-10-15 ; à régénérer à la soumission | `bun run licenses -- --out=docs/cadev/third-party-licenses.md` |
+| Composants tiers et licences | [third-party-licenses.md](third-party-licenses.md) | régénéré le 2026-11-09 ; à régénérer à la soumission si les dépendances changent | `bun run licenses -- --out=docs/cadev/third-party-licenses.md` |
 | Check-list de soumission | [submission-checklist.md](submission-checklist.md) | calendrier replanifié, étapes et responsables | @lamafx |
 | Politique de confidentialité | `/legal/privacy` (PR #191) | publiée | — |
-| Déploiement sur Systalink | #35, #169 | bloqué : Cloud Server acheté mais en maintenance, identifiants inaccessibles au 17 oct. ; le règlement exige un déploiement sur Datacloud avant la limite | capitaine |
+| Déploiement sur Systalink | #35, #169 | **en ligne** depuis le 2026-11-06 : `https://codesphereplatform.xyz/api/v1/health` répond 200 (v0.9.1 le 2026-11-09). Reste la supervision hors serveur (#41, fermée avec des points non faits) | capitaine |
 
 ## Points à ne pas oublier
 

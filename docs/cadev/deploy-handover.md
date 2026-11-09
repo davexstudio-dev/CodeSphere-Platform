@@ -1,5 +1,7 @@
 # Premier déploiement sur Systalink : état et actions restantes (#35, #41)
 
+> **Périmé depuis le 2026-11-06** : la production est en ligne sur Systalink (#35 fermée, v0.9.1 le 2026-11-09). Ce relevé du 2026-11-04 n'est gardé qu'à titre d'historique.
+
 Relevé du **2026-11-04**, depuis l'extérieur, sans accès SSH (aucun identifiant utilisé).
 
 ## Constat
