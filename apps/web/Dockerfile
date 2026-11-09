@@ -16,6 +16,10 @@ ENV SERVER_URL=${SERVER_URL}
 # server (docker-compose.prod.yml).
 ARG NEXT_PUBLIC_EMAIL_OTP_SIGNIN=false
 ENV NEXT_PUBLIC_EMAIL_OTP_SIGNIN=${NEXT_PUBLIC_EMAIL_OTP_SIGNIN}
+# /design-system is an internal reference: closed in every image unless a build asks for it
+# (docker-compose.yml, the local stack). Inlined at build time.
+ARG NEXT_PUBLIC_DESIGN_SYSTEM=false
+ENV NEXT_PUBLIC_DESIGN_SYSTEM=${NEXT_PUBLIC_DESIGN_SYSTEM}
 # Footer build identity (#42): .git is excluded from the context, so the build args carry the values.
 # No defaults here: an unset arg lets next.config.ts fall back to package.json and git.
 ARG APP_VERSION

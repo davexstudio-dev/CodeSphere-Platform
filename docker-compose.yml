@@ -10,6 +10,7 @@ services:
         - server_env
       args:
         NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+        NEXT_PUBLIC_DESIGN_SYSTEM: "true"
         APP_VERSION: ${APP_VERSION:-}
         GIT_SHA: ${GIT_SHA:-}
     init: true

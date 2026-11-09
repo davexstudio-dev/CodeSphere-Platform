@@ -12,12 +12,13 @@ Brouillon à valider par le capitaine avant le dépôt ; à adapter au format du
 - **Revue** : relecture des pull requests et correction des retours de CI.
 - **Documentation** : spécification, notes de recherche, grille OWASP, documents de ce dossier.
 - **Exploration** : comparaison d'options techniques (fiches dans `docs/research/`).
+- **Voix off de la vidéo** : voix synthétique française générée avec ElevenLabs, à partir d'un texte écrit par l'équipe. Le montage est fait avec Remotion (code), sans génération d'image ni de vidéo par IA.
 
 ## Garde-fous
 
 - Toute modification passe par une pull request vers `develop`, avec CI verte (lint, types, tests unitaires et d'intégration, parcours Playwright, gitleaks, audit de dépendances, licences) et relecture humaine avant fusion.
 - Les décisions de produit, d'architecture et de priorité sont prises par l'équipe (issues « Grilling » de la carte #1).
-- Les commits produits avec l'IA portent la mention `Co-Authored-By: Claude` ; au 2026-11-04, 304 commits de `develop` sur 385 la portent (`git log origin/develop --grep='Co-Authored-By: Claude' -i`, à recompter à la soumission).
+- Les commits produits avec l'IA portent la mention `Co-Authored-By: Claude` ; au 2026-11-09, 313 commits de `develop` sur 397 la portent (`git log origin/develop --grep='Co-Authored-By: Claude' -i`, à recompter à la soumission).
 - Aucune donnée personnelle réelle n'a été fournie à l'IA ; les secrets restent dans les secrets GitHub et les fichiers `.env` non versionnés.
 
 ## Dans le produit
