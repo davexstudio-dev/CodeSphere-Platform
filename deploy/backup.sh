@@ -21,16 +21,20 @@ set -eu
 
 cd "$(dirname "$0")/.."
 
-if [ -f .env ]; then
-	set -a
-	. ./.env
-	set +a
-fi
+# The four settings are read from .env one by one, not by sourcing it: .env is written for
+# docker compose, where a value is literal, whereas the shell would run or mangle a
+# POSTGRES_PASSWORD containing a space, `$`, `&` or `(`. The environment wins over the file.
+env_value() {
+	[ -f .env ] || return 0
+	sed -n "s/^$1=//p" .env | tail -n 1 | sed -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'\$/\1/"
+}
 
+BACKUP_DIR="${BACKUP_DIR:-$(env_value BACKUP_DIR)}"
+KEEP_DAYS="${KEEP_DAYS:-$(env_value KEEP_DAYS)}"
+OFFSITE_REMOTE="${OFFSITE_REMOTE:-$(env_value OFFSITE_REMOTE)}"
+BACKUP_HEARTBEAT_URL="${BACKUP_HEARTBEAT_URL:-$(env_value BACKUP_HEARTBEAT_URL)}"
 BACKUP_DIR="${BACKUP_DIR:-./backups}"
 KEEP_DAYS="${KEEP_DAYS:-7}"
-OFFSITE_REMOTE="${OFFSITE_REMOTE:-}"
-BACKUP_HEARTBEAT_URL="${BACKUP_HEARTBEAT_URL:-}"
 if [ "${NO_HEARTBEAT:-}" = 1 ]; then
 	BACKUP_HEARTBEAT_URL=""
 fi
