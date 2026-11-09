@@ -8,6 +8,9 @@
 		"render:master": "remotion render src/index.ts Master out/codesphere-master-16x9.mp4",
 		"render:cut": "remotion render src/index.ts Cut out/codesphere-cut-9x16.mp4",
 		"srt": "bun scripts/srt.ts",
+		"voice": "bun scripts/voice.ts",
+		"render:master:voice": "remotion render src/index.ts Master out/codesphere-master-16x9.mp4 --props=./props/master-voice.json",
+		"render:cut:voice": "remotion render src/index.ts Cut out/codesphere-cut-9x16.mp4 --props=./props/cut-voice.json",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {

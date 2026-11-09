@@ -13,8 +13,8 @@ import { FPS, type Scene, SITE_URL, TAGLINE, TEAM, VOTE_LINK } from "./data";
 
 export type VideoProps = {
 	scenes: Scene[];
-	/** File in public/voice/, the human voice-over. Undefined until recorded. */
-	voiceFile?: string;
+	/** Plays public/voice/<prefix>-<scene id>.mp3 in each scene (scripts/voice.ts). Unset: silent. */
+	voicePrefix?: string;
 	/** File in public/music/, royalty-free music (note its licence in the video description). */
 	musicFile?: string;
 	/** Burn French subtitles into the picture (the 9:16 cut). The master uses a separate SRT. */
@@ -195,7 +195,7 @@ function SceneView({
 
 export const CodeSphereVideo = ({
 	scenes,
-	voiceFile,
+	voicePrefix,
 	musicFile,
 	burnSubtitles,
 	voteLink = VOTE_LINK,
@@ -213,9 +213,11 @@ export const CodeSphereVideo = ({
 						burnSubtitles={burnSubtitles}
 						voteLink={voteLink}
 					/>
+					{voicePrefix ? (
+						<Audio src={staticFile(`voice/${voicePrefix}-${scene.id}.mp3`)} />
+					) : null}
 				</Sequence>
 			))}
-			{voiceFile ? <Audio src={staticFile(`voice/${voiceFile}`)} /> : null}
 			{musicFile ? (
 				<Audio src={staticFile(`music/${musicFile}`)} volume={0.12} />
 			) : null}
