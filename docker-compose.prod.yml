@@ -76,6 +76,8 @@ services:
         NEXT_PUBLIC_SERVER_URL: ""
         # Must match EMAIL_OTP_SIGNIN on the server below.
         NEXT_PUBLIC_EMAIL_OTP_SIGNIN: "true"
+        # The component reference is not public: /design-system answers 404.
+        NEXT_PUBLIC_DESIGN_SYSTEM: "false"
         APP_VERSION: ${APP_VERSION:-dev}
         GIT_SHA: ${GIT_SHA:-dev}
     env_file:
