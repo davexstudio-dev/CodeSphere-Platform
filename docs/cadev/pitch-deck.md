@@ -74,7 +74,7 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 - **File d'envoi hors ligne avec clé d'idempotence** : rejouer une requête ne crée pas de doublon. Une version périmée donne un conflit typé.
 - PostgreSQL et Drizzle, better-auth, CSP avec nonce, grille OWASP.
 - Tests d'intégration sur un vrai PostgreSQL, parcours Playwright avant chaque déploiement, CI avec gitleaks et audit des dépendances.
-- **Usage de l'IA déclaré** ([ai-usage.md](ai-usage.md)) : Claude Code a écrit une grande partie du code à partir d'issues rédigées par l'équipe ; 313 commits de `develop` sur 397 portent la mention. Les décisions de produit et d'architecture sont celles de l'équipe, chaque fusion passe par une revue humaine et une CI verte. La plateforme elle-même n'appelle aucun modèle d'IA.
+- **Usage de l'IA déclaré** ([ai-usage.md](ai-usage.md)) : Claude Code a écrit une grande partie du code à partir d'issues rédigées par l'équipe ; 319 commits de `develop` sur 408 (au 11 nov.) portent la mention. Les décisions de produit et d'architecture sont celles de l'équipe, chaque fusion passe par une revue humaine et une CI verte. La plateforme elle-même n'appelle aucun modèle d'IA.
 
 *Parole (≈ 40 s)* : Un membre répond à une question technique sans notes. Citer le bogue réel des clés d'agent (#50, commit `bbc9b67`) : les clés faisaient 48 caractères alors que le plugin better-auth en exige 64 au minimum, donc toutes les clés `cs_live_` étaient refusées ; et une clé au-delà de 120 requêtes par minute retombait en session anonyme (401) au lieu de recevoir un 429. Alternatives réelles si besoin : modération (#123, `03b5be5`), Tags orphelins (#44, `dab6aad`).
 
