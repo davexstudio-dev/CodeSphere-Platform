@@ -146,6 +146,41 @@ const scenes = {
 		await sleep(3500);
 		// Stops here: the "Publier la question" button is never clicked.
 	},
+	// The network cut is real (CDP offline), the answer is really sent when it comes back. The scene
+	// returns a cleanup that deletes that test answer, run on a page that is not part of the clip.
+	async offline(page) {
+		await page.goto(await questionUrl(page), { waitUntil: "networkidle" });
+		await sleep(1500);
+		const body = page.getByLabel("Votre réponse en Markdown");
+		await body.scrollIntoViewIfNeeded();
+		// Leave room under the form for the button and the "pending" message.
+		await page.mouse.wheel(0, 350);
+		await sleep(1000);
+		await body.pressSequentially(
+			"Vérifie la signature du callback avec le secret partagé, puis traite l'appel de façon idempotente.",
+			{ delay: 40 },
+		);
+		await sleep(1500);
+		await context.setOffline(true);
+		await sleep(2000);
+		await page.getByRole("button", { name: "Publier la réponse" }).click();
+		await sleep(5000);
+		await context.setOffline(false);
+		await page
+			.getByText("En attente d'envoi")
+			.waitFor({ state: "hidden", timeout: 30000 })
+			.catch(() => {});
+		await sleep(4000);
+		const url = page.url();
+		return async () => {
+			const cleanup = await context.newPage();
+			await cleanup.goto(url, { waitUntil: "networkidle" });
+			await cleanup.getByRole("button", { name: "Supprimer ma réponse" }).first().click();
+			await cleanup.getByRole("button", { name: /^Confirmer/ }).click();
+			await sleep(2500);
+			await cleanup.close();
+		};
+	},
 	async cadev(page) {
 		await page.goto(`${BASE}/hackathons/cadev-2026`, {
 			waitUntil: "networkidle",
@@ -175,9 +210,10 @@ const only = process.env.SCENES?.split(",");
 for (const [id, run] of Object.entries(scenes)) {
 	if (only && !only.includes(id)) continue;
 	const page = await context.newPage();
+	let cleanup;
 	try {
 		console.log(`recording ${id}`);
-		await run(page);
+		cleanup = await run(page);
 	} catch (error) {
 		console.error(`scene ${id} failed: ${error.message.split("\n")[0]}`);
 	}
@@ -187,6 +223,11 @@ for (const [id, run] of Object.entries(scenes)) {
 		// Copy, not rename: the scratch directory can be on another drive than the repository.
 		copyFileSync(await video.path(), resolve(OUT, `${id}.webm`));
 		console.log(`saved public/clips/${id}.webm`);
+	}
+	if (cleanup) {
+		await cleanup().catch((error) =>
+			console.error(`cleanup of ${id} failed: ${error.message.split("\n")[0]}`),
+		);
 	}
 }
 await context.close();
