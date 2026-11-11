@@ -84,6 +84,28 @@ const scenes = {
 	},
 	async ask(page) {
 		await page.goto(`${BASE}/ask`, { waitUntil: "networkidle" });
+		// A previous take leaves a Draft on the device (idb-keyval): drop it, or the new text is
+		// appended to the old one. Then reload so the form starts empty.
+		await page.evaluate(
+			() =>
+				new Promise((done) => {
+					const open = indexedDB.open("keyval-store");
+					open.onerror = () => done();
+					open.onsuccess = () => {
+						const tx = open.result.transaction("keyval", "readwrite");
+						const store = tx.objectStore("keyval");
+						store.openCursor().onsuccess = (event) => {
+							const cursor = event.target.result;
+							if (!cursor) return;
+							if (String(cursor.key).endsWith(":draft:question:new")) cursor.delete();
+							cursor.continue();
+						};
+						tx.oncomplete = () => done();
+						tx.onerror = () => done();
+					};
+				}),
+		);
+		await page.reload({ waitUntil: "networkidle" });
 		await sleep(1500);
 		await page
 			.getByLabel("Titre")
@@ -107,7 +129,12 @@ const scenes = {
 			.getByRole("tab", { name: "Aperçu" })
 			.click()
 			.catch(() => {});
-		await sleep(2500);
+		// The preview is loaded on demand: wait until it has rendered before filming it.
+		await page
+			.getByText("Préparation de l'aperçu")
+			.waitFor({ state: "hidden", timeout: 20000 })
+			.catch(() => {});
+		await sleep(3500);
 		await page.getByRole("button", { name: "Continuer" }).click();
 		await sleep(800);
 		await page
@@ -143,7 +170,10 @@ while (!existsSync(OK_FILE)) {
 }
 await login.close();
 
+// SCENES=ask,cadev records only those scenes (default: all).
+const only = process.env.SCENES?.split(",");
 for (const [id, run] of Object.entries(scenes)) {
+	if (only && !only.includes(id)) continue;
 	const page = await context.newPage();
 	try {
 		console.log(`recording ${id}`);
