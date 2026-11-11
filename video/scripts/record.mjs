@@ -5,7 +5,7 @@
 // 2. waits for the file $SCRATCH/ok to exist, then records each scene in a fresh page;
 // 3. writes public/clips/<scene>.webm (convert with `npx remotion ffmpeg`, see the README).
 // Nothing is ever published: the /ask scene stops at the review step.
-import { existsSync, mkdirSync, renameSync, rmSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 
@@ -154,7 +154,8 @@ for (const [id, run] of Object.entries(scenes)) {
 	const video = page.video();
 	await page.close();
 	if (video) {
-		renameSync(await video.path(), resolve(OUT, `${id}.webm`));
+		// Copy, not rename: the scratch directory can be on another drive than the repository.
+		copyFileSync(await video.path(), resolve(OUT, `${id}.webm`));
 		console.log(`saved public/clips/${id}.webm`);
 	}
 }
