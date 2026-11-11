@@ -181,6 +181,19 @@ const scenes = {
 			await cleanup.close();
 		};
 	},
+	// The feed a Member lands on after signing in (used to end the "signin" plan: staff accounts
+	// land on /admin after the sign-in, so this is filmed separately, already signed in).
+	async feed(page) {
+		await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
+		await sleep(1500);
+		await page
+			.getByRole("tab", { name: "Pour toi" })
+			.click()
+			.catch(() => {});
+		await sleep(2500);
+		await scroll(page, 5, 700);
+		await sleep(1500);
+	},
 	async cadev(page) {
 		await page.goto(`${BASE}/hackathons/cadev-2026`, {
 			waitUntil: "networkidle",
