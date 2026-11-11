@@ -76,7 +76,7 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 - Tests d'intégration sur un vrai PostgreSQL, parcours Playwright avant chaque déploiement, CI avec gitleaks et audit des dépendances.
 - **Usage de l'IA déclaré** ([ai-usage.md](ai-usage.md)) : Claude Code a écrit une grande partie du code à partir d'issues rédigées par l'équipe ; 313 commits de `develop` sur 397 portent la mention. Les décisions de produit et d'architecture sont celles de l'équipe, chaque fusion passe par une revue humaine et une CI verte. La plateforme elle-même n'appelle aucun modèle d'IA.
 
-*Parole (≈ 40 s)* : Un membre répond à une question technique sans notes. Citer un bogue réel trouvé et corrigé : **à choisir dans l'historique avant la répétition** (ne pas en inventer un).
+*Parole (≈ 40 s)* : Un membre répond à une question technique sans notes. Citer le bogue réel de modération (#123, commit `03b5be5`) : la suspension refusait seulement l'auto-suspension, donc un modérateur pouvait suspendre un admin ou un super_admin. Le correctif exige que l'acteur ait un rang strictement supérieur à la cible, et le rang est vérifié dans le même `WHERE` que l'écriture, ce qui supprime la course entre lecture et écriture. Alternatives réelles si besoin : clés d'agent (#50, `bbc9b67`), Tags orphelins (#44, `dab6aad`).
 
 **Image** : schéma du contrat unique (web, REST, MCP) ; capture de la CI verte.
 
@@ -131,7 +131,7 @@ Phases et trimestres cibles : [../roadmap.md](../roadmap.md). Pas d'appel à vot
 ## À faire avant de figer le PDF
 
 - [ ] Relever les chiffres de la diapositive 6 (tableau de bord de la production).
-- [ ] Choisir le bogue réel de la diapositive 5.
+- [x] Bogue réel de la diapositive 5 : #123 (modération), choisi le 2026-11-11.
 - [ ] Prendre les captures (clair, sombre, mobile, bureau) : `/`, `/ask`, une Question avec réponse d'agent, `/hackathons/cadev-2026`.
 - [ ] Tester la phrase d'accroche sur quelqu'un hors de l'équipe.
 - [ ] Réécrire les diapositives 1 et 2 si le thème officiel diffère.
