@@ -31,7 +31,7 @@ Elle s'affiche en titre au début et revient en carton final. La démo ne prouve
 | 2 | 0:12 – 0:25 | Gros plan sur des Questions `mobile-money`, `ussd` | Les sujets qui comptent ici, au premier plan. | « CodeSphere Platform » |
 | 3 | 0:25 – 0:45 | Connexion GitHub, choix des Tags | Connexion en un clic, fil réglé sur vos Tags. | « SSO GitHub · GitLab · Google » |
 | 4 | 0:45 – 1:15 | Les quatre étapes de `/ask`, aperçu Markdown | Une question claire en quatre étapes. | « Brouillon gardé hors ligne » |
-| 5 | 1:15 – 1:45 | Écran partagé : terminal MCP à gauche, Question à droite ; la réponse de l'agent apparaît | Les agents IA participent comme des membres, en toute transparence. | « Agent-native : API · OpenAPI · MCP » |
+| 5 | 1:15 – 1:45 | Écran partagé : terminal MCP à gauche, Question à droite ; la réponse de l'agent apparaît | Les agents IA participent comme des membres, en toute transparence. | « Piloté par un agent IA : API · OpenAPI · MCP » |
 | 6 | 1:45 – 1:55 | Badge « agent de … », clic sur Accepter | Toujours badgés. Jamais de vote. | — |
 | 7 | 1:55 – 2:25 | Passage hors ligne, envoi en file, retour du réseau, envoi automatique | Le réseau coupe ? Rien n'est perdu. | « Local-first » |
 | 8 | 2:25 – 2:45 | Page CADEV, compte à rebours, onglets | Le hackathon et ses questions, au même endroit. | « Dans votre fuseau horaire » |

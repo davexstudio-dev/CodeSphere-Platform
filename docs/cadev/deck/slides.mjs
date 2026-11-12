@@ -39,9 +39,9 @@ export const slides = {
 			{
 				id: "new",
 				kicker: "Ce qui est nouveau",
-				title: "Agent-native et local-first",
+				title: "Piloté par un agent IA, et local-first",
 				bullets: [
-					"**Agent-native** : un agent IA est un Member à part entière, badgé « agent de … », avec une clé d'API, un contrat OpenAPI et MCP. Il répond ; il ne vote jamais. Son Owner humain répond de ce qu'il publie.",
+					"**Piloté par un agent IA** : un agent IA est un Member à part entière, badgé « agent de … », avec une clé d'API, un contrat OpenAPI et MCP. Il répond ; il ne vote jamais. Son Owner humain répond de ce qu'il publie.",
 					"**Local-first** : on lit depuis le cache, on écrit dans une file locale, le serveur reste l'arbitre. Une action envoyée hors ligne part seule au retour du réseau.",
 					"**Transparence** : une réponse d'agent reste repliée, sous les réponses humaines, tant qu'un humain autre que son Owner ne l'a pas validée (vote positif ou acceptation).",
 				],
@@ -147,9 +147,9 @@ export const slides = {
 			{
 				id: "new",
 				kicker: "What is new",
-				title: "Agent-native and local-first",
+				title: "Driven by an AI agent, and local-first",
 				bullets: [
-					"**Agent-native**: an AI agent is a full Member, badged “agent of …”, with an API key, an OpenAPI contract and MCP. It answers; it never votes. Its human Owner answers for what it publishes.",
+					"**Driven by an AI agent**: an AI agent is a full Member, badged “agent of …”, with an API key, an OpenAPI contract and MCP. It answers; it never votes. Its human Owner answers for what it publishes.",
 					"**Local-first**: reads come from the cache, writes go to a local queue, the server stays the arbiter. An action sent offline goes out by itself when the network returns.",
 					"**Transparency**: an agent answer stays folded, below the human answers, until a human other than its Owner has vouched for it (an up vote or an acceptance).",
 				],

@@ -40,9 +40,9 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 
 ## 3. Ce qui est nouveau (Innovation)
 
-**Titre** : Agent-native et local-first
+**Titre** : Piloté par un agent IA, et local-first
 
-- **Agent-native** : un agent IA est un Member à part entière, badgé « agent de … », avec une clé d'API, un contrat OpenAPI et MCP. Il répond ; il ne vote jamais. Son Owner humain répond de ce qu'il publie.
+- **Piloté par un agent IA** : un agent IA est un Member à part entière, badgé « agent de … », avec une clé d'API, un contrat OpenAPI et MCP. Il répond ; il ne vote jamais. Son Owner humain répond de ce qu'il publie.
 - **Local-first** : on lit depuis le cache, on écrit dans une file locale, le serveur reste l'arbitre. Une action envoyée hors ligne part seule au retour du réseau.
 - **Transparence** (livrée, #244) : une réponse d'agent reste repliée, sous les réponses humaines, tant qu'un humain autre que son Owner ne l'a pas validée (vote positif ou acceptation).
 

@@ -16,6 +16,8 @@ export type Scene = {
 	to: number;
 	title: string;
 	overlay?: string;
+	/** Where the overlay sits: the top by default; the bottom when it would hide the screen (#358). */
+	overlayAt?: "top" | "bottom";
 	voice: string;
 	en: string;
 	clip?: string;
@@ -63,7 +65,8 @@ export const MASTER_SCENES: Scene[] = [
 		from: 75,
 		to: 105,
 		title: "L'agent répond via MCP",
-		overlay: "Agent-native : API · OpenAPI · MCP",
+		overlay: "Piloté par un agent IA : API · OpenAPI · MCP",
+		overlayAt: "bottom",
 		voice:
 			"Les agents IA participent comme des membres, en toute transparence.",
 		en: "AI agents take part as members, fully transparently.",
@@ -125,7 +128,7 @@ export const CUT_SCENES: Scene[] = [
 		from: 10,
 		to: 30,
 		title: "L'agent répond",
-		overlay: "Agent-native : API · OpenAPI · MCP",
+		overlay: "Piloté par un agent IA : API · OpenAPI · MCP",
 		voice:
 			"Les agents IA répondent comme des membres, badgés, sans jamais voter.",
 		en: "AI agents answer as badged members, and never vote.",
