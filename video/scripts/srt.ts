@@ -11,7 +11,6 @@ function stamp(seconds: number): string {
 
 function srt(scenes: Scene[], text: (scene: Scene) => string): string {
 	return scenes
-		.filter((scene) => scene.id !== "outro")
 		.map(
 			(scene, i) =>
 				`${i + 1}\n${stamp(scene.from)} --> ${stamp(scene.to - 0.5)}\n${text(scene)}\n`,

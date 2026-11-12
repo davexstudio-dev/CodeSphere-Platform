@@ -30,6 +30,22 @@ npm run render:cut          # out/codesphere-cut-9x16.mp4
 3. **Musique** (facultatif) : Pixabay Music ou Free Music Archive filtré sur CC0. Relire les conditions du morceau au moment du téléchargement et noter sa source et sa licence dans la description de la vidéo. Ne pas committer le fichier (voir `.gitignore`).
 4. **Appel à voter** : renseigner `VOTE_LINK` dans `src/data.ts` quand le vrai lien est publié (#237). La maîtresse n'en a jamais.
 
+## Plans automatisés et coupe 9:16
+
+Tous les plans de la maîtresse se tournent par script sur le **staging**, avec le profil Playwright de `record.mjs` (`SCRATCH=<dossier hors dépôt>`) :
+
+- `node scripts/record.mjs` : `problem`, `topics`, `ask`, `offline`, `cadev`, `feed` (`SCENES=ask,cadev` pour n'en refaire que certains).
+- `node scripts/record-agent.mjs` : `agent` (terminal à gauche, question à droite) et `badge`. **Renouvelle la clé de l'agent de démo** (l'ancienne cesse de marcher) et la garde en mémoire seulement.
+- `node scripts/record-signin.mjs` : `signin`, par code e-mail (`EMAIL=<adresse>` ; le script attend que vous déposiez les 6 chiffres dans `$SCRATCH/code`). Le profil doit être déconnecté. L'adresse tapée apparaît à l'écran : elle est masquée au rendu (voir ci-dessous).
+- Coupe 9:16 : `VIEWPORT=540x960 CLIP_PREFIX=cut- SCENES=problem,offline node scripts/record.mjs` et `LAYOUT=vertical node scripts/record-agent.mjs` (terminal en haut, page en bas). Playwright enregistre à la taille de la fenêtre : agrandir ensuite à 1080×1920 avec ffmpeg, puis recadrer et caler chaque clip sur la durée de son plan (`cut-problem.mp4`, `cut-agent.mp4`, `cut-offline.mp4`).
+- `record-agent.mjs` et `record-signin.mjs` utilisent un `ffmpeg` du PATH (celui de Remotion n'a ni `hstack` ni `vstack`).
+
+Chaque script supprime ce qu'il a publié (question de démo, réponse de test) et ne laisse rien dans la file d'envoi du profil. Vérifier après un échec.
+
+**Données personnelles à l'écran** : `blurs` d'une scène de `src/data.ts` masque une zone (fractions de l'image, secondes depuis le début du plan). Utilisé pour l'adresse e-mail de `signin`. Le nom du compte de démo reste visible sur les plans connectés : utiliser un compte de démo si on ne veut pas le montrer.
+
+**Rendus** (`--browser-executable` si le Chrome de Remotion ne démarre pas) : `npm run render:master:voice`, `npm run render:cut:voice`. Version légère 480p : `ffmpeg -i out/codesphere-master-16x9.mp4 -vf scale=-2:480 -crf 28 out/codesphere-master-480p.mp4`.
+
 ## Règles du storyboard
 
 Aucune fonctionnalité non construite. Aucune vraie adresse e-mail ni clé à l'écran (clé floutée). Contenu de démonstration signalé comme tel. Sous-titres anglais en piste séparée sur la maîtresse (SRT), sous-titres français incrustés sur la coupe.
