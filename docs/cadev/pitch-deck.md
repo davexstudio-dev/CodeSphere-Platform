@@ -87,8 +87,8 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 **Titre** : En ligne, chez Systalink
 
 - La production tourne sur le Cloud Server Systalink à Dakar depuis le 6 nov. 2026, en HTTPS (`/api/v1/health`).
-- Chiffres réels au `[date du relevé]` : Members `[à relever]`, Questions `[à relever]`, part de réponses acceptées `[à relever]`, délai de première réponse `[à relever]`.
-- Une partie du contenu est de la **démonstration**, signalée comme telle. Testeurs réels : `[à relever]`.
+- Relevé du 12 nov. 2026 sur l'API publique de la production (v0.9.2) : 10 Questions, 28 Réponses, 6 Members, 9 Questions sur 10 avec une réponse acceptée. Le délai de première réponse n'est pas indiqué : il n'a pas de sens sur du contenu chargé en bloc.
+- **Tout ce contenu est de la démonstration** (chargé le 6 nov.), signalé comme tel : aucune Question ni Réponse n'a encore été écrite par un testeur réel. Le dire tel quel.
 - *Honnêteté* : la sauvegarde nocturne est sur le serveur ; la copie hors serveur est prévue, pas en place.
 
 *Parole (≈ 15 s)* : Revérifier la santé de la production le jour J avant d'afficher « chez Systalink ». Ne pas annoncer R2.
