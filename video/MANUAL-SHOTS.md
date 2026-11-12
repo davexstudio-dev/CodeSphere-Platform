@@ -1,5 +1,7 @@
 # Plans à filmer à la main (#358)
 
+> **Mise à jour du 12 nov.** : ces plans sont maintenant produits par `scripts/record-signin.mjs` et `scripts/record-agent.mjs` (voir le [README](README.md)). Ce guide reste utile pour un tournage manuel (OBS), par exemple pour remplacer le terminal reconstitué du plan `agent` par un vrai terminal.
+
 `scripts/record.mjs` filme les plans publics ou simples (`problem`, `topics`, `ask`, `cadev`). Les quatre plans ci-dessous demandent un geste humain ou plusieurs fenêtres : à filmer avec OBS (format et règles dans [`docs/cadev/video-storyboard.md`](../docs/cadev/video-storyboard.md)).
 
 **Règles communes**

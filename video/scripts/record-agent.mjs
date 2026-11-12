@@ -211,10 +211,20 @@ const out=document.getElementById("out");
 window.add=(html)=>{out.insertAdjacentHTML("beforeend",html+"\\n")};
 window.typeLine=async(cls,text,ms)=>{const s=document.createElement("span");s.className=cls;out.appendChild(s);for(const c of text){s.textContent+=c;await new Promise(r=>setTimeout(r,ms))}out.insertAdjacentText("beforeend","\\n")};
 </script>`;
+// LAYOUT=vertical: terminal on top, page below, 1080x1920 (the 9:16 cut, public/clips/cut-agent.mp4).
+const VERTICAL = process.env.LAYOUT === "vertical";
+// Playwright records at the viewport size and does not upscale: record small, enlarge with ffmpeg.
+const SCALE = 1;
+const TERMINAL_HTML = VERTICAL
+	? TERMINAL.replace("font:19px/1.5", "font:14px/1.45")
+	: TERMINAL;
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
 async function recordAgent() {
-	const SIDE = { width: 768, height: 864 };
+	const SIDE = VERTICAL
+		? { width: 540, height: 480 }
+		: { width: 768, height: 864 };
+	const VIDEO = { width: SIDE.width * SCALE, height: SIDE.height * SCALE };
 	const browser = await chromium
 		.launch(
 			process.env.CHROME_PATH
@@ -225,18 +235,20 @@ async function recordAgent() {
 	opened.push(browser);
 	const leftContext = await browser.newContext({
 		viewport: SIDE,
-		recordVideo: { dir: TMP, size: SIDE },
+		deviceScaleFactor: SCALE,
+		recordVideo: { dir: TMP, size: VIDEO },
 	});
 	const rightContext = await launchProfile({
 		viewport: SIDE,
-		recordVideo: { dir: TMP, size: SIDE },
+		deviceScaleFactor: SCALE,
+		recordVideo: { dir: TMP, size: VIDEO },
 	});
 	const [left, right] = await Promise.all([
 		leftContext.newPage(),
 		rightContext.newPage(),
 	]);
 	await Promise.all([
-		left.setContent(TERMINAL),
+		left.setContent(TERMINAL_HTML),
 		right.goto(questionUrl, { waitUntil: "networkidle" }),
 	]);
 	await sleep(2500);
@@ -348,7 +360,9 @@ async function recordAgent() {
 			"-i",
 			paths[1],
 			"-filter_complex",
-			"[0:v][1:v]hstack=inputs=2,scale=1920:1080",
+			VERTICAL
+				? "[0:v][1:v]vstack=inputs=2,scale=1080:1920"
+				: "[0:v][1:v]hstack=inputs=2,scale=1920:1080",
 			"-c:v",
 			"libx264",
 			"-pix_fmt",
@@ -357,11 +371,11 @@ async function recordAgent() {
 			"30",
 			"-an",
 			"-shortest",
-			resolve(OUT, "agent.mp4"),
+			resolve(OUT, VERTICAL ? "cut-agent.mp4" : "agent.mp4"),
 		],
 		{ stdio: "inherit" },
 	);
-	console.log("saved public/clips/agent.mp4");
+	console.log(`saved public/clips/${VERTICAL ? "cut-agent" : "agent"}.mp4`);
 }
 
 async function recordBadge() {
@@ -431,7 +445,9 @@ try {
 	);
 	await rpc("notifications/initialized", {});
 	await recordAgent();
-	await recordBadge();
+	if (!VERTICAL) {
+		await recordBadge();
+	}
 } catch (error) {
 	console.error(
 		`failed: ${

@@ -10,6 +10,16 @@ export const TAGLINE =
 export const SITE_URL = "codesphereplatform.xyz";
 export const TEAM = ["@0xdaydy", "@Justice-47", "@Strong-Ari", "@lamafx"];
 
+/** A redaction on the picture (no personal data on screen): fractions of the frame, seconds from the scene start. */
+export type Blur = {
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+	from: number;
+	to: number;
+};
+
 export type Scene = {
 	id: string;
 	from: number;
@@ -17,7 +27,8 @@ export type Scene = {
 	title: string;
 	overlay?: string;
 	/** Where the overlay sits: the top by default; the bottom when it would hide the screen (#358). */
-	overlayAt?: "top" | "bottom";
+	overlayAt?: "top" | "middle" | "bottom";
+	blurs?: Blur[];
 	voice: string;
 	en: string;
 	clip?: string;
@@ -44,6 +55,11 @@ export const MASTER_SCENES: Scene[] = [
 	},
 	{
 		id: "signin",
+		// The address typed to get the code (it moves up when the code field appears).
+		blurs: [
+			{ x: 0.645, y: 0.566, w: 0.21, h: 0.044, from: 4.3, to: 6.9 },
+			{ x: 0.645, y: 0.508, w: 0.21, h: 0.044, from: 6.9, to: 13.7 },
+		],
 		from: 25,
 		to: 45,
 		title: "Connexion et Tags",
@@ -129,6 +145,7 @@ export const CUT_SCENES: Scene[] = [
 		to: 30,
 		title: "L'agent répond",
 		overlay: "Piloté par un agent IA : API · OpenAPI · MCP",
+		overlayAt: "middle",
 		voice:
 			"Les agents IA répondent comme des membres, badgés, sans jamais voter.",
 		en: "AI agents answer as badged members, and never vote.",

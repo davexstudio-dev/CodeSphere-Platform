@@ -21,7 +21,14 @@ if (!SCRATCH) {
 const OK_FILE = resolve(SCRATCH, "ok");
 const TMP = resolve(SCRATCH, "videos");
 const OUT = resolve("public/clips");
-const SIZE = { width: 1536, height: 864 };
+// VIEWPORT=540x960 CLIP_PREFIX=cut- records the vertical clips of the 9:16 cut (540x960, enlarged to
+// 1080x1920 with ffmpeg: Playwright records at the viewport size and does not upscale).
+const [VIEW_W, VIEW_H] = (process.env.VIEWPORT ?? "1536x864")
+	.split("x")
+	.map(Number);
+const SCALE = Number(process.env.DSF ?? 1);
+const PREFIX = process.env.CLIP_PREFIX ?? "";
+const SIZE = { width: VIEW_W, height: VIEW_H };
 const QUESTION = "ba3f5fb7";
 
 mkdirSync(OUT, { recursive: true });
@@ -32,7 +39,11 @@ const options = {
 	headless: false,
 	viewport: SIZE,
 	locale: "fr-FR",
-	recordVideo: { dir: TMP, size: SIZE },
+	deviceScaleFactor: SCALE,
+	recordVideo: {
+		dir: TMP,
+		size: { width: VIEW_W * SCALE, height: VIEW_H * SCALE },
+	},
 	// Optional: a Chromium that is already installed (the one Playwright expects may be missing).
 	...(process.env.CHROME_PATH
 		? { executablePath: process.env.CHROME_PATH }
@@ -154,6 +165,13 @@ const scenes = {
 	async offline(page) {
 		await page.goto(await questionUrl(page), { waitUntil: "networkidle" });
 		await sleep(1500);
+		// On a narrow page the answers and the form are under the "Réponses" tab.
+		await page
+			.getByRole("tab", { name: /Réponses/ })
+			.first()
+			.click({ timeout: 3000 })
+			.catch(() => {});
+		await sleep(800);
 		const body = page.getByLabel("Votre réponse en Markdown");
 		await body.scrollIntoViewIfNeeded();
 		// Leave room under the form for the button and the "pending" message.
@@ -173,11 +191,24 @@ const scenes = {
 			.getByText("En attente d'envoi")
 			.waitFor({ state: "hidden", timeout: 30000 })
 			.catch(() => {});
+		// The answer is really published once its delete button shows (it can take a while on a phone).
+		await page
+			.getByRole("button", { name: "Supprimer ma réponse" })
+			.first()
+			.waitFor({ timeout: 40000 })
+			.catch(() => {});
 		await sleep(4000);
 		const url = page.url();
 		return async () => {
 			const cleanup = await context.newPage();
 			await cleanup.goto(url, { waitUntil: "networkidle" });
+			// On a narrow page the answers are under the "Réponses" tab.
+			await cleanup
+				.getByRole("tab", { name: /Réponses/ })
+				.first()
+				.click({ timeout: 3000 })
+				.catch(() => {});
+			await sleep(800);
 			await cleanup
 				.getByRole("button", { name: "Supprimer ma réponse" })
 				.first()
@@ -240,7 +271,7 @@ for (const [id, run] of Object.entries(scenes)) {
 	await page.close();
 	if (video) {
 		// Copy, not rename: the scratch directory can be on another drive than the repository.
-		copyFileSync(await video.path(), resolve(OUT, `${id}.webm`));
+		copyFileSync(await video.path(), resolve(OUT, `${PREFIX}${id}.webm`));
 		console.log(`saved public/clips/${id}.webm`);
 	}
 	if (cleanup) {

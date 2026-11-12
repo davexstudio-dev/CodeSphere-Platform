@@ -9,7 +9,15 @@ import {
 	useCurrentFrame,
 	useVideoConfig,
 } from "remotion";
-import { FPS, type Scene, SITE_URL, TAGLINE, TEAM, VOTE_LINK } from "./data";
+import {
+	type Blur,
+	FPS,
+	type Scene,
+	SITE_URL,
+	TAGLINE,
+	TEAM,
+	VOTE_LINK,
+} from "./data";
 
 export type VideoProps = {
 	scenes: Scene[];
@@ -82,7 +90,39 @@ function Screen({ scene }: { scene: Scene }) {
 	);
 }
 
-function Overlay({ text, bottom }: { text: string; bottom?: boolean }) {
+/** Hides a region of the screen recording while it shows personal data. */
+function Blurs({ blurs }: { blurs: Blur[] }) {
+	const seconds = useCurrentFrame() / FPS;
+	return (
+		<>
+			{blurs
+				.filter((blur) => seconds >= blur.from && seconds < blur.to)
+				.map((blur) => (
+					<div
+						key={`${blur.from}-${blur.y}`}
+						style={{
+							position: "absolute",
+							left: `${blur.x * 100}%`,
+							top: `${blur.y * 100}%`,
+							width: `${blur.w * 100}%`,
+							height: `${blur.h * 100}%`,
+							borderRadius: 8,
+							backdropFilter: "blur(18px)",
+							background: "rgba(236, 229, 221, 0.94)",
+						}}
+					/>
+				))}
+		</>
+	);
+}
+
+function Overlay({
+	text,
+	at = "top",
+}: {
+	text: string;
+	at?: "top" | "middle" | "bottom";
+}) {
 	const { height } = useVideoConfig();
 	const size = Math.round(height * 0.032);
 	return (
@@ -91,7 +131,9 @@ function Overlay({ text, bottom }: { text: string; bottom?: boolean }) {
 				...font,
 				position: "absolute",
 				left: "5%",
-				...(bottom ? { bottom: "6%" } : { top: "6%" }),
+				...(at === "bottom"
+					? { bottom: "6%" }
+					: { top: at === "middle" ? "46%" : "6%" }),
 				maxWidth: "90%",
 				padding: `${size * 0.5}px ${size}px`,
 				borderRadius: size,
@@ -187,8 +229,9 @@ function SceneView({
 	return (
 		<AbsoluteFill style={{ opacity, background: palette.bg }}>
 			<Screen scene={scene} />
+			{scene.blurs ? <Blurs blurs={scene.blurs} /> : null}
 			{scene.overlay ? (
-				<Overlay text={scene.overlay} bottom={scene.overlayAt === "bottom"} />
+				<Overlay text={scene.overlay} at={scene.overlayAt} />
 			) : null}
 			{burnSubtitles ? <Subtitle text={scene.voice} /> : null}
 		</AbsoluteFill>
