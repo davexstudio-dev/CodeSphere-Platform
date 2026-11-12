@@ -31,9 +31,13 @@ function figure(s, labels) {
 
 function slideHtml(s, i, total, labels) {
 	const list = (s.bullets ?? []).map((b) => `<li>${inline(b)}</li>`).join("");
-	const planned = (s.planned ?? []).map((b) => `<li>${inline(b)}</li>`).join("");
+	const planned = (s.planned ?? [])
+		.map((b) => `<li>${inline(b)}</li>`)
+		.join("");
 	const team = (s.team ?? [])
-		.map(([n, r]) => `<li><strong>${esc(n)}</strong><span>${esc(r)}</span></li>`)
+		.map(
+			([n, r]) => `<li><strong>${esc(n)}</strong><span>${esc(r)}</span></li>`,
+		)
 		.join("");
 	return `<section class="slide ${s.image ? "with-fig" : ""} ${(s.bullets ?? []).length >= 5 ? "dense" : ""}" id="${s.id}">
 <header><span class="kicker">${esc(s.kicker)}</span><span class="n">${i + 1} / ${total}</span></header>
@@ -85,10 +89,13 @@ mark.todo{background:var(--warn);color:#111;padding:0 .25em;border-radius:6px}
 const todos = [];
 for (const [lang, deck] of Object.entries(slides)) {
 	const total = deck.slides.length;
-	const body = deck.slides.map((s, i) => slideHtml(s, i, total, deck.labels)).join("\n");
+	const body = deck.slides
+		.map((s, i) => slideHtml(s, i, total, deck.labels))
+		.join("\n");
 	const html = `<!doctype html><html lang="${deck.lang}"><head><meta charset="utf-8"><title>${esc(deck.deckTitle)}</title><style>${css}</style></head><body>${body}</body></html>`;
 	writeFileSync(resolve(out, `deck.${lang}.html`), html);
-	for (const m of html.matchAll(/<mark class="todo">([^<]+)<\/mark>/g)) todos.push(`${lang}: ${m[1]}`);
+	for (const m of html.matchAll(/<mark class="todo">([^<]+)<\/mark>/g))
+		todos.push(`${lang}: ${m[1]}`);
 	for (const s of deck.slides)
 		if (s.image && !existsSync(resolve("assets", s.image)))
 			todos.push(`${lang}: capture manquante assets/${s.image}`);
@@ -97,7 +104,9 @@ for (const [lang, deck] of Object.entries(slides)) {
 if (!process.argv.includes("--no-pdf")) {
 	const require = createRequire(resolve("../../../apps/e2e/package.json"));
 	const { chromium } = require("@playwright/test");
-	const opts = process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {};
+	const opts = process.env.CHROME_PATH
+		? { executablePath: process.env.CHROME_PATH }
+		: {};
 	let browser;
 	try {
 		browser = await chromium.launch({ channel: "chrome", ...opts });
@@ -119,4 +128,7 @@ if (!process.argv.includes("--no-pdf")) {
 }
 
 console.log(`Deck généré dans ${out}`);
-if (todos.length) console.log(`\nÀ compléter avant de figer (${todos.length}) :\n- ${[...new Set(todos)].join("\n- ")}`);
+if (todos.length)
+	console.log(
+		`\nÀ compléter avant de figer (${todos.length}) :\n- ${[...new Set(todos)].join("\n- ")}`,
+	);

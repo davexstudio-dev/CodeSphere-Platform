@@ -187,7 +187,9 @@ function SceneView({
 	return (
 		<AbsoluteFill style={{ opacity, background: palette.bg }}>
 			<Screen scene={scene} />
-			{scene.overlay ? <Overlay text={scene.overlay} bottom={scene.overlayAt === "bottom"} /> : null}
+			{scene.overlay ? (
+				<Overlay text={scene.overlay} bottom={scene.overlayAt === "bottom"} />
+			) : null}
 			{burnSubtitles ? <Subtitle text={scene.voice} /> : null}
 		</AbsoluteFill>
 	);

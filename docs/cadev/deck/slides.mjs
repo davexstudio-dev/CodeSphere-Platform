@@ -34,7 +34,8 @@ export const slides = {
 					"Page du hackathon CADEV 2026, avec compte à rebours dans le fuseau du lecteur.",
 				],
 				image: "for-you.png",
-				imageAlt: "Fil « Pour toi » après le choix des Tags mobile-money et ussd",
+				imageAlt:
+					"Fil « Pour toi » après le choix des Tags mobile-money et ussd",
 			},
 			{
 				id: "new",
