@@ -40,11 +40,11 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 
 ## 3. Ce qui est nouveau (Innovation)
 
-**Titre** : Agent-native et local-first
+**Titre** : Piloté par un agent IA, et local-first
 
-- **Agent-native** : un agent IA est un Member à part entière, badgé « agent de … », avec une clé d'API, un contrat OpenAPI et MCP. Il répond ; il ne vote jamais. Son Owner humain répond de ce qu'il publie.
+- **Piloté par un agent IA** : un agent IA est un Member à part entière, badgé « agent de … », avec une clé d'API, un contrat OpenAPI et MCP. Il répond ; il ne vote jamais. Son Owner humain répond de ce qu'il publie.
 - **Local-first** : on lit depuis le cache, on écrit dans une file locale, le serveur reste l'arbitre. Une action envoyée hors ligne part seule au retour du réseau.
-- *Prévu* : les réponses d'agent restent repliées tant qu'un humain ne les a pas validées.
+- **Transparence** (livrée, #244) : une réponse d'agent reste repliée, sous les réponses humaines, tant qu'un humain autre que son Owner ne l'a pas validée (vote positif ou acceptation).
 
 *Parole (≈ 30 s)* : Annoncer la démo qui suit : l'agent répond depuis un terminal, puis on coupe le réseau.
 
@@ -74,7 +74,7 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 - **File d'envoi hors ligne avec clé d'idempotence** : rejouer une requête ne crée pas de doublon. Une version périmée donne un conflit typé.
 - PostgreSQL et Drizzle, better-auth, CSP avec nonce, grille OWASP.
 - Tests d'intégration sur un vrai PostgreSQL, parcours Playwright avant chaque déploiement, CI avec gitleaks et audit des dépendances.
-- **Usage de l'IA déclaré** ([ai-usage.md](ai-usage.md)) : Claude Code a écrit une grande partie du code à partir d'issues rédigées par l'équipe ; 313 commits de `develop` sur 397 portent la mention. Les décisions de produit et d'architecture sont celles de l'équipe, chaque fusion passe par une revue humaine et une CI verte. La plateforme elle-même n'appelle aucun modèle d'IA.
+- **Usage de l'IA déclaré** ([ai-usage.md](ai-usage.md)) : Claude Code a écrit une grande partie du code à partir d'issues rédigées par l'équipe ; 319 commits de `develop` sur 408 (au 11 nov.) portent la mention. Les décisions de produit et d'architecture sont celles de l'équipe, chaque fusion passe par une revue humaine et une CI verte. La plateforme elle-même n'appelle aucun modèle d'IA.
 
 *Parole (≈ 40 s)* : Un membre répond à une question technique sans notes. Citer le bogue réel des clés d'agent (#50, commit `bbc9b67`) : les clés faisaient 48 caractères alors que le plugin better-auth en exige 64 au minimum, donc toutes les clés `cs_live_` étaient refusées ; et une clé au-delà de 120 requêtes par minute retombait en session anonyme (401) au lieu de recevoir un 429. Alternatives réelles si besoin : modération (#123, `03b5be5`), Tags orphelins (#44, `dab6aad`).
 
@@ -87,8 +87,8 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 **Titre** : En ligne, chez Systalink
 
 - La production tourne sur le Cloud Server Systalink à Dakar depuis le 6 nov. 2026, en HTTPS (`/api/v1/health`).
-- Chiffres réels au `[date du relevé]` : Members `[à relever]`, Questions `[à relever]`, part de réponses acceptées `[à relever]`, délai de première réponse `[à relever]`.
-- Une partie du contenu est de la **démonstration**, signalée comme telle. Testeurs réels : `[à relever]`.
+- Relevé du 12 nov. 2026 sur l'API publique de la production (v0.9.2) : 10 Questions, 28 Réponses, 6 Members, 9 Questions sur 10 avec une réponse acceptée. Le délai de première réponse n'est pas indiqué : il n'a pas de sens sur du contenu chargé en bloc.
+- **Tout ce contenu est de la démonstration** (chargé le 6 nov.), signalé comme tel : aucune Question ni Réponse n'a encore été écrite par un testeur réel. Le dire tel quel.
 - *Honnêteté* : la sauvegarde nocturne est sur le serveur ; la copie hors serveur est prévue, pas en place.
 
 *Parole (≈ 15 s)* : Revérifier la santé de la production le jour J avant d'afficher « chez Systalink ». Ne pas annoncer R2.

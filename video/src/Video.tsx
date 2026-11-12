@@ -82,7 +82,7 @@ function Screen({ scene }: { scene: Scene }) {
 	);
 }
 
-function Overlay({ text }: { text: string }) {
+function Overlay({ text, bottom }: { text: string; bottom?: boolean }) {
 	const { height } = useVideoConfig();
 	const size = Math.round(height * 0.032);
 	return (
@@ -91,7 +91,7 @@ function Overlay({ text }: { text: string }) {
 				...font,
 				position: "absolute",
 				left: "5%",
-				top: "6%",
+				...(bottom ? { bottom: "6%" } : { top: "6%" }),
 				maxWidth: "90%",
 				padding: `${size * 0.5}px ${size}px`,
 				borderRadius: size,
@@ -187,7 +187,9 @@ function SceneView({
 	return (
 		<AbsoluteFill style={{ opacity, background: palette.bg }}>
 			<Screen scene={scene} />
-			{scene.overlay ? <Overlay text={scene.overlay} /> : null}
+			{scene.overlay ? (
+				<Overlay text={scene.overlay} bottom={scene.overlayAt === "bottom"} />
+			) : null}
 			{burnSubtitles ? <Subtitle text={scene.voice} /> : null}
 		</AbsoluteFill>
 	);
