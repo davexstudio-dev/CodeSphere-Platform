@@ -34,7 +34,9 @@ const options = {
 	locale: "fr-FR",
 	recordVideo: { dir: TMP, size: SIZE },
 	// Optional: a Chromium that is already installed (the one Playwright expects may be missing).
-	...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),
+	...(process.env.CHROME_PATH
+		? { executablePath: process.env.CHROME_PATH }
+		: {}),
 };
 let context;
 try {
@@ -97,7 +99,8 @@ const scenes = {
 						store.openCursor().onsuccess = (event) => {
 							const cursor = event.target.result;
 							if (!cursor) return;
-							if (String(cursor.key).endsWith(":draft:question:new")) cursor.delete();
+							if (String(cursor.key).endsWith(":draft:question:new"))
+								cursor.delete();
 							cursor.continue();
 						};
 						tx.oncomplete = () => done();
@@ -175,7 +178,10 @@ const scenes = {
 		return async () => {
 			const cleanup = await context.newPage();
 			await cleanup.goto(url, { waitUntil: "networkidle" });
-			await cleanup.getByRole("button", { name: "Supprimer ma réponse" }).first().click();
+			await cleanup
+				.getByRole("button", { name: "Supprimer ma réponse" })
+				.first()
+				.click();
 			await cleanup.getByRole("button", { name: /^Confirmer/ }).click();
 			await sleep(2500);
 			await cleanup.close();

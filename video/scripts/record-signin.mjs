@@ -9,7 +9,13 @@
 // 4. writes public/clips/signin.mp4 (1920x1080, no sound).
 // Note: the address typed is visible on screen. Use an address you accept to show, or blur it when editing.
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 
@@ -41,7 +47,10 @@ const options = {
 };
 let context;
 try {
-	context = await chromium.launchPersistentContext(PROFILE, { ...options, channel: "chrome" });
+	context = await chromium.launchPersistentContext(PROFILE, {
+		...options,
+		channel: "chrome",
+	});
 } catch {
 	context = await chromium.launchPersistentContext(PROFILE, options);
 }
@@ -60,7 +69,9 @@ try {
 	await sleep(2000);
 	await page.getByRole("checkbox").first().check();
 	await sleep(1000);
-	await page.getByLabel("Ou avec un code par email").pressSequentially(EMAIL, { delay: 55 });
+	await page
+		.getByLabel("Ou avec un code par email")
+		.pressSequentially(EMAIL, { delay: 55 });
 	await sleep(1200);
 	await page.getByRole("button", { name: "Envoyer le code" }).click();
 	await page.getByLabel("Code reçu par email").waitFor({ timeout: 30000 });
@@ -75,15 +86,26 @@ try {
 	rmSync(CODE_FILE, { force: true });
 	codeAt = seconds();
 	await sleep(800);
-	await page.getByLabel("Code reçu par email").pressSequentially(code, { delay: 120 });
+	await page
+		.getByLabel("Code reçu par email")
+		.pressSequentially(code, { delay: 120 });
 	await sleep(800);
 	await page.getByRole("button", { name: "Valider le code" }).click();
 	await page
-		.waitForURL((url) => !url.pathname.startsWith("/signin"), { timeout: 30000 })
-		.catch(async (error) => {
-			const alert = await page.getByRole("alert").allInnerTexts().catch(() => []);
-			await page.screenshot({ path: resolve(SCRATCH, "debug-signin.png") }).catch(() => {});
-			throw new Error(`still on /signin after the code (${alert.join(" ").slice(0, 160) || "no alert shown"})`);
+		.waitForURL((url) => !url.pathname.startsWith("/signin"), {
+			timeout: 30000,
+		})
+		.catch(async () => {
+			const alert = await page
+				.getByRole("alert")
+				.allInnerTexts()
+				.catch(() => []);
+			await page
+				.screenshot({ path: resolve(SCRATCH, "debug-signin.png") })
+				.catch(() => {});
+			throw new Error(
+				`still on /signin after the code (${alert.join(" ").slice(0, 160) || "no alert shown"})`,
+			);
 		});
 	await page.waitForLoadState("networkidle").catch(() => {});
 	await sleep(5000);
@@ -102,11 +124,69 @@ if (videoPath && !process.exitCode) {
 	const first = resolve(TMP, "part1.mp4");
 	const second = resolve(TMP, "part2.mp4");
 	const list = resolve(TMP, "list.txt");
-	const encode = ["-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", "30", "-an", "-vf", "scale=1920:1080"];
-	execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", videoPath, "-t", String(sentAt), ...encode, first], { stdio: "inherit" });
-	execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-ss", String(codeAt), "-i", videoPath, ...encode, second], { stdio: "inherit" });
-	writeFileSync(list, `file '${first.replace(/\\/g, "/")}'\nfile '${second.replace(/\\/g, "/")}'\n`);
-	execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", list, "-c", "copy", resolve(OUT, "signin.mp4")], { stdio: "inherit" });
+	const encode = [
+		"-c:v",
+		"libx264",
+		"-pix_fmt",
+		"yuv420p",
+		"-r",
+		"30",
+		"-an",
+		"-vf",
+		"scale=1920:1080",
+	];
+	execFileSync(
+		FFMPEG,
+		[
+			"-y",
+			"-loglevel",
+			"error",
+			"-i",
+			videoPath,
+			"-t",
+			String(sentAt),
+			...encode,
+			first,
+		],
+		{ stdio: "inherit" },
+	);
+	execFileSync(
+		FFMPEG,
+		[
+			"-y",
+			"-loglevel",
+			"error",
+			"-ss",
+			String(codeAt),
+			"-i",
+			videoPath,
+			...encode,
+			second,
+		],
+		{ stdio: "inherit" },
+	);
+	writeFileSync(
+		list,
+		`file '${first.replace(/\\/g, "/")}'\nfile '${second.replace(/\\/g, "/")}'\n`,
+	);
+	execFileSync(
+		FFMPEG,
+		[
+			"-y",
+			"-loglevel",
+			"error",
+			"-f",
+			"concat",
+			"-safe",
+			"0",
+			"-i",
+			list,
+			"-c",
+			"copy",
+			resolve(OUT, "signin.mp4"),
+		],
+		{ stdio: "inherit" },
+	);
 	console.log("saved public/clips/signin.mp4");
 	rmSync(TMP, { recursive: true, force: true });
 }
