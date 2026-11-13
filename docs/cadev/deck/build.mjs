@@ -135,7 +135,9 @@ if (!process.argv.includes("--no-pdf")) {
 	}
 	for (const lang of Object.keys(slides)) {
 		const page = await browser.newPage();
-		await page.goto(pathToFileURL(resolve(out, `deck.${lang}${suffix}.html`)).href);
+		await page.goto(
+			pathToFileURL(resolve(out, `deck.${lang}${suffix}.html`)).href,
+		);
 		await page.pdf({
 			path: resolve(out, `codesphere-pitch.${lang}${suffix}.pdf`),
 			width: "1920px",
