@@ -3,6 +3,7 @@ import {
 	AbsoluteFill,
 	Audio,
 	interpolate,
+	Loop,
 	OffthreadVideo,
 	Sequence,
 	staticFile,
@@ -19,12 +20,17 @@ import {
 	VOTE_LINK,
 } from "./data";
 
+// Length of public/music/master-bg.mp3 (ffprobe: 175.02 s). Change it with the file.
+const MUSIC_SECONDS = 175.02;
+
 export type VideoProps = {
 	scenes: Scene[];
 	/** Plays public/voice/<prefix>-<scene id>.mp3 in each scene (scripts/voice.ts). Unset: silent. */
 	voicePrefix?: string;
 	/** File in public/music/, royalty-free music (note its licence in the video description). */
 	musicFile?: string;
+	/** Length of musicFile in seconds, so the loop covers the whole video. Default: master-bg.mp3. */
+	musicSeconds?: number;
 	/** Burn French subtitles into the picture (the 9:16 cut). The master uses a separate SRT. */
 	burnSubtitles?: boolean;
 	/** The vote call, shown only once the real vote link is published (#237). */
@@ -242,6 +248,7 @@ export const CodeSphereVideo = ({
 	scenes,
 	voicePrefix,
 	musicFile,
+	musicSeconds = MUSIC_SECONDS,
 	burnSubtitles,
 	voteLink = VOTE_LINK,
 }: VideoProps) => {
@@ -259,12 +266,18 @@ export const CodeSphereVideo = ({
 						voteLink={voteLink}
 					/>
 					{voicePrefix ? (
-						<Audio src={staticFile(`voice/${voicePrefix}-${scene.id}.mp3`)} />
+						<Audio
+							src={staticFile(`voice/${voicePrefix}-${scene.id}.mp3`)}
+							playbackRate={scene.voiceRate ?? 1}
+						/>
 					) : null}
 				</Sequence>
 			))}
 			{musicFile ? (
-				<Audio src={staticFile(`music/${musicFile}`)} volume={0.12} />
+				// The track loops if it is shorter than the video.
+				<Loop durationInFrames={Math.ceil(musicSeconds * FPS)}>
+					<Audio src={staticFile(`music/${musicFile}`)} volume={0.12} />
+				</Loop>
 			) : null}
 		</AbsoluteFill>
 	);
