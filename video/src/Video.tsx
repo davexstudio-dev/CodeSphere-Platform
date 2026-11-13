@@ -3,6 +3,7 @@ import {
 	AbsoluteFill,
 	Audio,
 	interpolate,
+	Loop,
 	OffthreadVideo,
 	Sequence,
 	staticFile,
@@ -18,6 +19,9 @@ import {
 	TEAM,
 	VOTE_LINK,
 } from "./data";
+
+// Length of public/music/master-bg.mp3 (ffprobe: 175.02 s). Change it with the file.
+const MUSIC_SECONDS = 175.02;
 
 export type VideoProps = {
 	scenes: Scene[];
@@ -264,7 +268,10 @@ export const CodeSphereVideo = ({
 				</Sequence>
 			))}
 			{musicFile ? (
-				<Audio src={staticFile(`music/${musicFile}`)} volume={0.12} />
+				// The track is shorter than the master (175 s against 180 s): it loops.
+				<Loop durationInFrames={Math.ceil(MUSIC_SECONDS * FPS)}>
+					<Audio src={staticFile(`music/${musicFile}`)} volume={0.12} />
+				</Loop>
 			) : null}
 		</AbsoluteFill>
 	);

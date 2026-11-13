@@ -7,10 +7,12 @@ const last = (scenes: { to: number }[]) => scenes[scenes.length - 1].to;
 const master: VideoProps = {
 	scenes: MASTER_SCENES,
 	burnSubtitles: false,
+	musicFile: "master-bg.mp3",
 };
 const cut: VideoProps = {
 	scenes: CUT_SCENES,
 	burnSubtitles: true,
+	musicFile: "master-bg.mp3",
 };
 
 export const Root = () => (
