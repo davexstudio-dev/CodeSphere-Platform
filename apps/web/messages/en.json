@@ -1678,7 +1678,11 @@
 		"legendInProgress": "{count} in progress",
 		"legendPlanned": "{count} planned",
 		"summary": "Summary",
-		"remaining": "{count, plural, =0 {Nothing left to do} one {# line left to do} other {# lines left to do}}"
+		"remaining": "{count, plural, =0 {Nothing left to do} one {# line left to do} other {# lines left to do}}",
+		"goalsTitle": "Phase indicators",
+		"goalsHint": "What we will measure. No Goal is reached yet: the values are set after 30 days of real data.",
+		"goalTarget": "Goal: {target}",
+		"goalNotReached": "Not reached yet"
 	},
 	"watch": {
 		"title": "Watch",

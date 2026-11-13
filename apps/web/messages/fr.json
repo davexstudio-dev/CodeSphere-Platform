@@ -1678,7 +1678,11 @@
 		"legendInProgress": "{count} en cours",
 		"legendPlanned": "{count} prévues",
 		"summary": "Sommaire",
-		"remaining": "{count, plural, =0 {Plus rien à faire} one {# ligne reste à faire} other {# lignes restent à faire}}"
+		"remaining": "{count, plural, =0 {Plus rien à faire} one {# ligne reste à faire} other {# lignes restent à faire}}",
+		"goalsTitle": "Indicateurs de la phase",
+		"goalsHint": "Ce que nous mesurerons. Aucun Objectif n'est atteint à ce jour : les valeurs sont fixées après 30 jours de données réelles.",
+		"goalTarget": "Objectif : {target}",
+		"goalNotReached": "Pas encore atteint"
 	},
 	"watch": {
 		"title": "Veille",

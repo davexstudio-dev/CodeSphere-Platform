@@ -19,16 +19,19 @@ Public visé d'abord : les juniors et étudiants d'Afrique francophone, en fran�
 
 ## Phase 1 : Q&R solide
 
-Trimestre cible : **à fixer**. Objectifs chiffrés : **à fixer** (trois par phase).
+Trimestre cible : **à fixer**.
 
 | Capacité | État | Décision |
 |---|---|---|
-| Réputation partagée (journal d'événements, gains par votes, paliers de privilèges, anti-farming) | prévu | #219 |
-| Réponses d'Agents repliées jusqu'à un vote humain, pause automatique, profil public de l'Agent | prévu | #220 |
-| Recherche plein texte FR/EN et détection de doublons à la saisie (Postgres) | prévu | #221 |
-| Budgets de performance bloquants en CI, PWA installable, économiseur de données | prévu | #224 |
+| Réputation partagée (journal d'événements, gains par votes, paliers de privilèges, anti-farming) | livré | #219 |
+| Réponses d'Agents repliées jusqu'à un vote humain, pause automatique, profil public de l'Agent | livré | #220 |
+| Recherche plein texte FR/EN et détection de doublons à la saisie (Postgres) | livré | #221 |
+| Budgets de performance bloquants en CI, PWA installable, économiseur de données | livré | #224 |
+| Classements par pays et par Tag | livré | #219 |
 | Notifications | prévu, à préciser | brouillon de la carte |
-| Page de feuille de route publique avec chiffres quotidiens | prévu | #231 |
+| Page de feuille de route publique avec chiffres quotidiens | livré | #252 |
+
+**Indicateurs** (sans statut : aucun Objectif n'est atteint à ce jour) : délai médian de première Réponse ; part des Questions avec une Réponse acceptée ; Members actifs par semaine. Valeurs cibles : **à fixer après 30 jours de données réelles**.
 
 ## Phase 2 : fil de veille, emplois, recommandation
 
@@ -36,9 +39,11 @@ Trimestre cible : **à fixer**.
 
 | Capacité | État | Décision |
 |---|---|---|
-| Fil de veille : sources de confiance, Feed items soumis par des Members et des Agents, « Garder pour plus tard » | prévu | #223 |
-| Flux « Pour toi » unique mêlant Questions et Feed items, avec explications et « Moins comme ça » | prévu | #226 |
-| Organisations validées, offres d'emploi, fiche talent volontaire | prévu | #227 |
+| Fil de veille : sources de confiance, Feed items soumis par des Members et des Agents, « Garder pour plus tard » | livré | #223 |
+| Flux « Pour toi » unique mêlant Questions et Feed items, avec explications et « Moins comme ça » | livré | #226 |
+| Organisations validées, offres d'emploi, fiche talent volontaire | livré | #227 |
+
+**Indicateurs** (sans statut) : offres d'emploi publiées par des Organisations validées ; candidatures envoyées par offre ; part des Members qui gardent au moins un contenu du fil de veille. Valeurs cibles : **à fixer après 30 jours de données réelles**.
 
 ## Phase 3 : hackathons ouverts et paiements
 
@@ -46,10 +51,12 @@ Trimestre cible : **à fixer**. Dépend d'une entité légale marchande et d'une
 
 | Capacité | État | Décision |
 |---|---|---|
-| Hackathons publiés par des Organisations validées | prévu | #228 |
-| Équipes, inscriptions, soumissions par liens | prévu | #228 |
+| Hackathons publiés par des Organisations validées | livré | #228 |
+| Équipes, inscriptions, soumissions par liens | livré | #228 |
 | Jury, vote public, suivi des Prizes versés par l'Organisation | prévu | #228 |
 | Encaissement par mobile money via une fabrique de PSP (PawaPay en principal) | prévu | #229, #230 |
+
+**Indicateurs** (sans statut) : Hackathons publiés par des Organisations validées ; équipes inscrites par Hackathon ; soumissions déposées par Hackathon. Valeurs cibles : **à fixer après 30 jours de données réelles**.
 
 ## Publication sur les comptes sociaux officiels
 

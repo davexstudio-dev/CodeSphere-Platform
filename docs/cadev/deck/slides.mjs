@@ -80,9 +80,10 @@ export const slides = {
 				kicker: "Où on en est",
 				title: "En ligne, chez Systalink",
 				bullets: [
-					"La production tourne sur le Cloud Server Systalink à Dakar depuis le 6 nov. 2026, en HTTPS (`/api/v1/health`, version v0.9.2 au 12 nov.). À revérifier le jour J.",
-					"Relevé du 12 nov. sur l'API publique : 10 Questions, 28 Réponses, 6 Members, 9 Questions sur 10 avec une réponse acceptée.",
+					"La production tourne sur le Cloud Server Systalink à Dakar depuis le 6 nov. 2026, en HTTPS (`/api/v1/health`, version v0.9.2, vérifiée le 13 nov.).",
+					"Snapshot du 13 nov. (page Roadmap, calculé chaque jour) : 10 Questions, 6 Members actifs, 100 % des Questions avec une Réponse, 90 % avec une Réponse acceptée.",
 					"**Tout ce contenu est de la démonstration**, chargé le 6 nov. et signalé comme tel : aucune Question ni Réponse n'a encore été écrite par un testeur réel. Pas de délai de première réponse : il n'a pas de sens sur du contenu chargé en bloc.",
+					"Aucun Objectif n'est atteint : les Indicateurs de chaque phase (délai de première Réponse, Members actifs par semaine…) sont suivis sur la page Roadmap, valeurs cibles fixées après 30 jours de données réelles.",
 					"Honnêteté : la sauvegarde nocturne est sur le serveur ; la copie hors serveur est prévue, pas en place.",
 				],
 				image: "production.png",
@@ -91,14 +92,17 @@ export const slides = {
 			{
 				id: "next",
 				kicker: "La suite",
-				title: "Prévu, pas encore livré",
+				title: "Ce qui est livré, ce qui est prévu",
+				bullets: [
+					"**Livré** : recherche, réputation, Réponses d'Agents repliées, fil de veille, flux « Pour toi » mixte, Organisations, emplois et fiches Talent, Hackathons publiés par des Organisations.",
+					"Chaque phase a trois Indicateurs, sans Objectif atteint à ce jour : valeurs fixées après 30 jours de données réelles (page `/roadmap`).",
+				],
 				planned: [
-					"Recherche et fil de veille.",
-					"Emplois et fiches Talent.",
-					"Hackathons ouverts à d'autres organisations.",
+					"Notifications.",
+					"Jury, vote public et suivi des Prizes versés.",
 					"Paiements par mobile money (encaissement des offres d'emploi, phase 3).",
 				],
-				note: "Tout ce qui figure ici est une intention. Phases et trimestres cibles : feuille de route du dépôt.",
+				note: "Tout ce qui figure sous « Prévu » est une intention. Phases, statuts et Indicateurs : page Roadmap.",
 			},
 			{
 				id: "team",
@@ -188,9 +192,10 @@ export const slides = {
 				kicker: "Where we are",
 				title: "Live, at Systalink",
 				bullets: [
-					"Production runs on the Systalink Cloud Server in Dakar since 6 Nov 2026, over HTTPS (`/api/v1/health`, version v0.9.2 on 12 Nov). Re-check on the day.",
-					"Reading of 12 Nov on the public API: 10 Questions, 28 Answers, 6 Members, 9 of 10 Questions with an accepted answer.",
+					"Production runs on the Systalink Cloud Server in Dakar since 6 Nov 2026, over HTTPS (`/api/v1/health`, version v0.9.2, checked on 13 Nov).",
+					"Snapshot of 13 Nov (Roadmap page, computed daily): 10 Questions, 6 active Members, 100% of Questions with an Answer, 90% with an accepted Answer.",
 					"**All of this content is demo content**, loaded on 6 Nov and labelled as such: no Question or Answer has been written by a real tester yet. No first-answer delay: it means nothing on content loaded in bulk.",
+					"No Goal is reached yet: each phase's Indicators (time to first Answer, active Members per week…) are tracked on the Roadmap page, with target values set after 30 days of real data.",
 					"In the interest of honesty: the nightly backup is on the server; the off-server copy is planned, not in place.",
 				],
 				image: "production.png",
@@ -199,14 +204,17 @@ export const slides = {
 			{
 				id: "next",
 				kicker: "What's next",
-				title: "Planned, not yet shipped",
+				title: "What is shipped, what is planned",
+				bullets: [
+					'**Shipped**: search, reputation, folded Agent answers, watch feed, mixed "For you" feed, Organizations, jobs and Talent profiles, Hackathons published by Organizations.',
+					"Each phase has three Indicators, with no Goal reached yet: values set after 30 days of real data (`/roadmap` page).",
+				],
 				planned: [
-					"Search and a watch feed.",
-					"Jobs and Talent profiles.",
-					"Hackathons open to other organisations.",
+					"Notifications.",
+					"Jury, public vote and tracking of Prizes paid.",
 					"Mobile money payments (collecting job-post fees, phase 3).",
 				],
-				note: "Everything here is an intention. Phases and target quarters: the repository roadmap.",
+				note: 'Everything under "Planned" is an intention. Phases, statuses and Indicators: the Roadmap page.',
 			},
 			{
 				id: "team",

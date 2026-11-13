@@ -78,10 +78,10 @@ export default async function Page() {
 	];
 
 	return (
-		<div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 md:px-8 md:py-14 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-12">
+		<div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 md:px-8 md:py-14 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-12">
 			{/* Sticky under the site bar (h-16, itself sticky), never under it: top = 4 rem + 1.5 rem.
 			    Its height is the viewport's minus that offset; a longer summary scrolls inside. */}
-			<aside className="lg:sticky lg:top-22 lg:flex lg:max-h-[calc(100svh-7rem)] lg:flex-col lg:self-start">
+			<aside className="sticky top-16 z-10 -mx-4 border-b bg-background px-4 py-2 md:-mx-8 md:px-8 lg:top-22 lg:z-auto lg:mx-0 lg:flex lg:max-h-[calc(100svh-7rem)] lg:flex-col lg:self-start lg:border-b-0 lg:bg-transparent lg:p-0 max-lg:[@media(max-height:520px)]:static">
 				<ScrollArea className="lg:min-h-0 lg:flex-1">
 					<SectionNav title={t("summary")} items={summary} />
 					<p className="mt-3 hidden text-muted-foreground text-xs lg:block">
@@ -91,7 +91,7 @@ export default async function Page() {
 			</aside>
 			<main className="flex min-w-0 flex-col gap-12">
 				<header className="flex flex-col gap-4">
-					<Badge variant="outline" className="w-fit">
+					<Badge variant="outline" className="w-fit text-xs">
 						{t("nav")}
 					</Badge>
 					<h1 className="font-semibold text-4xl tracking-tight md:text-5xl">
@@ -154,7 +154,10 @@ export default async function Page() {
 				</header>
 
 				<section aria-labelledby="community" className="flex flex-col gap-4">
-					<h2 id="community" className="scroll-mt-28 font-semibold text-xl">
+					<h2
+						id="community"
+						className="scroll-mt-36 font-semibold text-xl lg:scroll-mt-28"
+					>
 						{t("community")}
 					</h2>
 					{figures && snapshot ? (
@@ -186,11 +189,11 @@ export default async function Page() {
 							<div className="flex flex-wrap items-center gap-x-3 gap-y-1">
 								<h2
 									id={section.id}
-									className="scroll-mt-28 font-semibold text-xl"
+									className="scroll-mt-36 font-semibold text-xl lg:scroll-mt-28"
 								>
 									{section.title}
 								</h2>
-								<Badge variant="secondary">
+								<Badge variant="secondary" className="text-xs">
 									<span className="tabular-nums">
 										{t("sectionProgress", {
 											done: progress.delivered,
@@ -215,12 +218,37 @@ export default async function Page() {
 									}))}
 								/>
 							</Card>
+							{section.goals.length > 0 && (
+								<Card className="gap-3 p-5 md:p-6">
+									<h3 className="font-medium text-sm">{t("goalsTitle")}</h3>
+									<p className="text-muted-foreground text-xs">
+										{t("goalsHint")}
+									</p>
+									<ul className="flex flex-col gap-2.5">
+										{section.goals.map((goal) => (
+											<li
+												key={goal.text}
+												className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm"
+											>
+												<span>{goal.text}</span>
+												<span className="text-muted-foreground text-xs">
+													{t("goalTarget", { target: goal.target })} ·{" "}
+													{t("goalNotReached")}
+												</span>
+											</li>
+										))}
+									</ul>
+								</Card>
+							)}
 						</section>
 					);
 				})}
 
 				<section aria-labelledby="not-doing" className="flex flex-col gap-4">
-					<h2 id="not-doing" className="scroll-mt-28 font-semibold text-xl">
+					<h2
+						id="not-doing"
+						className="scroll-mt-36 font-semibold text-xl lg:scroll-mt-28"
+					>
 						{t("notDoing")}
 					</h2>
 					<Card className="p-5 md:p-6">
@@ -246,7 +274,10 @@ export default async function Page() {
 								className="mt-1 size-5 shrink-0 text-primary"
 							/>
 							<div className="flex flex-col gap-1">
-								<h2 id="ideas" className="scroll-mt-28 font-semibold text-xl">
+								<h2
+									id="ideas"
+									className="scroll-mt-36 font-semibold text-xl lg:scroll-mt-28"
+								>
 									{t("ideas")}
 								</h2>
 								<p className="text-muted-foreground text-sm">
