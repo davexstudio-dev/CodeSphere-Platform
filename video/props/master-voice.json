@@ -1,1 +1,5 @@
-{ "voicePrefix": "master", "musicFile": "master-bg-180.mp3", "musicSeconds": 180 }
+{
+	"voicePrefix": "master",
+	"musicFile": "master-bg-180.mp3",
+	"musicSeconds": 180
+}
