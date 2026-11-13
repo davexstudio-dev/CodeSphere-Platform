@@ -78,7 +78,7 @@ export default async function Page() {
 	];
 
 	return (
-		<div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 md:px-8 md:py-14 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-12">
+		<div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)] gap-6 px-4 py-10 md:px-8 md:py-14 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-12">
 			{/* Sticky under the site bar (h-16, itself sticky), never under it: top = 4 rem + 1.5 rem.
 			    Its height is the viewport's minus that offset; a longer summary scrolls inside. */}
 			<aside className="lg:sticky lg:top-22 lg:flex lg:max-h-[calc(100svh-7rem)] lg:flex-col lg:self-start">
@@ -91,7 +91,7 @@ export default async function Page() {
 			</aside>
 			<main className="flex min-w-0 flex-col gap-12">
 				<header className="flex flex-col gap-4">
-					<Badge variant="outline" className="w-fit">
+					<Badge variant="outline" className="w-fit text-xs">
 						{t("nav")}
 					</Badge>
 					<h1 className="font-semibold text-4xl tracking-tight md:text-5xl">
@@ -190,7 +190,7 @@ export default async function Page() {
 								>
 									{section.title}
 								</h2>
-								<Badge variant="secondary">
+								<Badge variant="secondary" className="text-xs">
 									<span className="tabular-nums">
 										{t("sectionProgress", {
 											done: progress.delivered,

@@ -71,8 +71,8 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 								href={`#${item.id}`}
 								aria-current={current ? "location" : undefined}
 								className={cn(
-									"flex flex-col gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50",
-									"lg:rounded-md lg:border-transparent lg:bg-transparent lg:px-2.5",
+									"flex min-h-11 flex-col justify-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50",
+									"lg:min-h-0 lg:justify-start lg:rounded-md lg:border-transparent lg:bg-transparent lg:px-2.5",
 									current &&
 										"border-primary/40 bg-primary/10 text-foreground lg:border-transparent lg:bg-muted",
 									!current && "text-muted-foreground",
