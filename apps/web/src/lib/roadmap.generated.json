@@ -96,6 +96,32 @@
 					"status": "delivered",
 					"ref": "#252"
 				}
+			],
+			"goals": [
+				{
+					"fr": "Délai médian de première Réponse",
+					"en": "Median time to first Answer",
+					"target": {
+						"fr": "À fixer après 30 jours de données réelles",
+						"en": "To be set after 30 days of real data"
+					}
+				},
+				{
+					"fr": "Part des Questions avec une Réponse acceptée",
+					"en": "Share of Questions with an accepted Answer",
+					"target": {
+						"fr": "À fixer après 30 jours de données réelles",
+						"en": "To be set after 30 days of real data"
+					}
+				},
+				{
+					"fr": "Members actifs par semaine",
+					"en": "Active Members per week",
+					"target": {
+						"fr": "À fixer après 30 jours de données réelles",
+						"en": "To be set after 30 days of real data"
+					}
+				}
 			]
 		},
 		{
@@ -112,20 +138,46 @@
 				{
 					"fr": "Fil de veille : sources de confiance, contenus soumis par des Members et des Agents, « Garder pour plus tard »",
 					"en": "Watch feed: trusted sources, items submitted by Members and Agents, \"Save for later\"",
-					"status": "planned",
+					"status": "delivered",
 					"ref": "#223"
 				},
 				{
 					"fr": "Flux « Pour toi » unique mêlant Questions et contenus du fil, avec explications et « Moins comme ça »",
 					"en": "A single \"For you\" feed mixing Questions and feed items, with explanations and \"Less like this\"",
-					"status": "planned",
+					"status": "delivered",
 					"ref": "#226"
 				},
 				{
 					"fr": "Organisations validées, offres d'emploi, fiche talent volontaire",
 					"en": "Verified Organizations, job offers, optional talent profile",
-					"status": "planned",
+					"status": "delivered",
 					"ref": "#227"
+				}
+			],
+			"goals": [
+				{
+					"fr": "Offres d'emploi publiées par des Organisations validées",
+					"en": "Job offers published by verified Organizations",
+					"target": {
+						"fr": "À fixer après 30 jours de données réelles",
+						"en": "To be set after 30 days of real data"
+					}
+				},
+				{
+					"fr": "Candidatures envoyées par offre",
+					"en": "Applications sent per job offer",
+					"target": {
+						"fr": "À fixer après 30 jours de données réelles",
+						"en": "To be set after 30 days of real data"
+					}
+				},
+				{
+					"fr": "Part des Members qui gardent au moins un contenu du fil de veille",
+					"en": "Share of Members who save at least one watch feed item",
+					"target": {
+						"fr": "À fixer après 30 jours de données réelles",
+						"en": "To be set after 30 days of real data"
+					}
 				}
 			]
 		},
@@ -143,7 +195,7 @@
 				{
 					"fr": "Hackathons publiés par des Organisations validées, équipes, inscriptions, soumissions par liens",
 					"en": "Hackathons published by verified Organizations, teams, registrations, link submissions",
-					"status": "planned",
+					"status": "delivered",
 					"ref": "#228"
 				},
 				{
@@ -157,6 +209,32 @@
 					"en": "Mobile money collection through a PSP factory",
 					"status": "planned",
 					"ref": "#229"
+				}
+			],
+			"goals": [
+				{
+					"fr": "Hackathons publiés par des Organisations validées",
+					"en": "Hackathons published by verified Organizations",
+					"target": {
+						"fr": "À fixer après 30 jours de données réelles",
+						"en": "To be set after 30 days of real data"
+					}
+				},
+				{
+					"fr": "Équipes inscrites par Hackathon",
+					"en": "Teams registered per Hackathon",
+					"target": {
+						"fr": "À fixer après 30 jours de données réelles",
+						"en": "To be set after 30 days of real data"
+					}
+				},
+				{
+					"fr": "Soumissions déposées par Hackathon",
+					"en": "Submissions filed per Hackathon",
+					"target": {
+						"fr": "À fixer après 30 jours de données réelles",
+						"en": "To be set after 30 days of real data"
+					}
 				}
 			]
 		}

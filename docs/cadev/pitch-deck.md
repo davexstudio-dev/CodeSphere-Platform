@@ -87,8 +87,9 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 **Titre** : En ligne, chez Systalink
 
 - La production tourne sur le Cloud Server Systalink à Dakar depuis le 6 nov. 2026, en HTTPS (`/api/v1/health`).
-- Relevé du 12 nov. 2026 sur l'API publique de la production (v0.9.2) : 10 Questions, 28 Réponses, 6 Members, 9 Questions sur 10 avec une réponse acceptée. Le délai de première réponse n'est pas indiqué : il n'a pas de sens sur du contenu chargé en bloc.
+- Snapshot du 13 nov. 2026 (page Roadmap, calculé chaque jour ; production v0.9.2) : 10 Questions, 6 Members actifs, 100 % des Questions avec une Réponse, 90 % avec une Réponse acceptée. Le délai de première réponse n'est pas indiqué : il n'a pas de sens sur du contenu chargé en bloc.
 - **Tout ce contenu est de la démonstration** (chargé le 6 nov.), signalé comme tel : aucune Question ni Réponse n'a encore été écrite par un testeur réel. Le dire tel quel.
+- **Aucun Objectif n'est atteint** : les Indicateurs de chaque phase (délai de première Réponse, Members actifs par semaine…) sont suivis sur la page Roadmap ; les valeurs cibles sont fixées après 30 jours de données réelles.
 - *Honnêteté* : la sauvegarde nocturne est sur le serveur ; la copie hors serveur est prévue, pas en place.
 
 *Parole (≈ 15 s)* : Revérifier la santé de la production le jour J avant d'afficher « chez Systalink ». Ne pas annoncer R2.
@@ -99,16 +100,15 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 
 ## 7. La suite (Pertinence)
 
-**Titre** : Prévu, pas encore livré
+**Titre** : Ce qui est livré, ce qui est prévu
 
-- Recherche et fil de veille.
-- Emplois et fiches Talent.
-- Hackathons ouverts à d'autres organisations.
-- Paiements par mobile money (encaissement des offres d'emploi, phase 3).
+- **Livré** : recherche, réputation, Réponses d'Agents repliées, fil de veille, flux « Pour toi » mixte, Organisations, emplois et fiches Talent, Hackathons publiés par des Organisations.
+- Chaque phase a trois Indicateurs, sans Objectif atteint à ce jour : valeurs fixées après 30 jours de données réelles (page `/roadmap`).
+- **Prévu** : Notifications ; jury, vote public et suivi des Prizes versés ; paiements par mobile money (phase 3).
 
-Phases et trimestres cibles : [../roadmap.md](../roadmap.md). Pas d'appel à voter dans le fichier soumis.
+Phases, statuts et Indicateurs : [../roadmap.md](../roadmap.md) et la page `/roadmap`. Pas d'appel à voter dans le fichier soumis.
 
-*Parole (≈ 10 s)* : Tout ce qui figure ici est présenté comme une intention.
+*Parole (≈ 15 s)* : Ce qui est livré est visible en production ; tout ce qui est prévu est présenté comme une intention. Aucun Objectif n'est atteint : on mesure, on ne revendique pas.
 
 **Image** : frise de la feuille de route.
 
@@ -130,7 +130,7 @@ Phases et trimestres cibles : [../roadmap.md](../roadmap.md). Pas d'appel à vot
 
 ## À faire avant de figer le PDF
 
-- [ ] Relever les chiffres de la diapositive 6 (tableau de bord de la production).
+- [x] Chiffres de la diapositive 6 : Snapshot de la production du 13 nov. (à relire si le PDF est regénéré un autre jour).
 - [x] Bogue réel de la diapositive 5 : #50 (clés d'agent), choisi le 2026-11-11.
 - [ ] Prendre les captures (clair, sombre, mobile, bureau) : `/`, `/ask`, une Question avec réponse d'agent, `/hackathons/cadev-2026`.
 - [ ] Tester la phrase d'accroche sur quelqu'un hors de l'équipe.

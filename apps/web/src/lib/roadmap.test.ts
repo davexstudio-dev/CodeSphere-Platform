@@ -29,6 +29,27 @@ describe("roadmap", () => {
 		}
 	});
 
+	test("every phase has three Goals, in both languages, and none has a status", () => {
+		const phases = generated.sections.filter((s) => s.id.startsWith("phase"));
+		expect(phases).toHaveLength(3);
+		for (const phase of phases) {
+			const goals = phase.goals ?? [];
+			expect(goals).toHaveLength(3);
+			for (const goal of goals) {
+				expect(goal.fr && goal.en).toBeTruthy();
+				expect(goal.target.fr && goal.target.en).toBeTruthy();
+				expect("status" in goal).toBe(false);
+			}
+		}
+	});
+
+	test("Goals are not counted in the delivered share", () => {
+		const phase = roadmapIn("fr").sections.find((s) => s.id === "phase1");
+		const items = phase?.items ?? [];
+		expect(phase?.goals).toHaveLength(3);
+		expect(progressOf(items).total).toBe(items.length);
+	});
+
 	test("picks the language", () => {
 		expect(roadmapIn("fr").sections[0]?.title).toBe("Déjà livré");
 		expect(roadmapIn("en").sections[0]?.title).toBe("Already delivered");

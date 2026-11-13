@@ -215,6 +215,28 @@ export default async function Page() {
 									}))}
 								/>
 							</Card>
+							{section.goals.length > 0 && (
+								<Card className="gap-3 p-5 md:p-6">
+									<h3 className="font-medium text-sm">{t("goalsTitle")}</h3>
+									<p className="text-muted-foreground text-xs">
+										{t("goalsHint")}
+									</p>
+									<ul className="flex flex-col gap-2.5">
+										{section.goals.map((goal) => (
+											<li
+												key={goal.text}
+												className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm"
+											>
+												<span>{goal.text}</span>
+												<span className="text-muted-foreground text-xs">
+													{t("goalTarget", { target: goal.target })} ·{" "}
+													{t("goalNotReached")}
+												</span>
+											</li>
+										))}
+									</ul>
+								</Card>
+							)}
 						</section>
 					);
 				})}

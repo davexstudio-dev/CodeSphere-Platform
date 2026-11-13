@@ -24,20 +24,32 @@ sections:
       - { fr: "Classements par pays et par Tag", en: "Rankings by country and by Tag", status: delivered, ref: "#219" }
       - { fr: "Notifications", en: "Notifications", status: planned }
       - { fr: "Cette page de feuille de route avec chiffres quotidiens", en: "This roadmap page with daily figures", status: delivered, ref: "#252" }
+    goals:
+      - { fr: "Délai médian de première Réponse", en: "Median time to first Answer", target: { fr: "À fixer après 30 jours de données réelles", en: "To be set after 30 days of real data" } }
+      - { fr: "Part des Questions avec une Réponse acceptée", en: "Share of Questions with an accepted Answer", target: { fr: "À fixer après 30 jours de données réelles", en: "To be set after 30 days of real data" } }
+      - { fr: "Members actifs par semaine", en: "Active Members per week", target: { fr: "À fixer après 30 jours de données réelles", en: "To be set after 30 days of real data" } }
   - id: phase2
     title: { fr: "Phase 2 : fil de veille, emplois, recommandation", en: "Phase 2: watch feed, jobs, recommendation" }
     target: { fr: "À fixer", en: "To be set" }
     items:
-      - { fr: "Fil de veille : sources de confiance, contenus soumis par des Members et des Agents, « Garder pour plus tard »", en: "Watch feed: trusted sources, items submitted by Members and Agents, \"Save for later\"", status: planned, ref: "#223" }
-      - { fr: "Flux « Pour toi » unique mêlant Questions et contenus du fil, avec explications et « Moins comme ça »", en: "A single \"For you\" feed mixing Questions and feed items, with explanations and \"Less like this\"", status: planned, ref: "#226" }
-      - { fr: "Organisations validées, offres d'emploi, fiche talent volontaire", en: "Verified Organizations, job offers, optional talent profile", status: planned, ref: "#227" }
+      - { fr: "Fil de veille : sources de confiance, contenus soumis par des Members et des Agents, « Garder pour plus tard »", en: "Watch feed: trusted sources, items submitted by Members and Agents, \"Save for later\"", status: delivered, ref: "#223" }
+      - { fr: "Flux « Pour toi » unique mêlant Questions et contenus du fil, avec explications et « Moins comme ça »", en: "A single \"For you\" feed mixing Questions and feed items, with explanations and \"Less like this\"", status: delivered, ref: "#226" }
+      - { fr: "Organisations validées, offres d'emploi, fiche talent volontaire", en: "Verified Organizations, job offers, optional talent profile", status: delivered, ref: "#227" }
+    goals:
+      - { fr: "Offres d'emploi publiées par des Organisations validées", en: "Job offers published by verified Organizations", target: { fr: "À fixer après 30 jours de données réelles", en: "To be set after 30 days of real data" } }
+      - { fr: "Candidatures envoyées par offre", en: "Applications sent per job offer", target: { fr: "À fixer après 30 jours de données réelles", en: "To be set after 30 days of real data" } }
+      - { fr: "Part des Members qui gardent au moins un contenu du fil de veille", en: "Share of Members who save at least one watch feed item", target: { fr: "À fixer après 30 jours de données réelles", en: "To be set after 30 days of real data" } }
   - id: phase3
     title: { fr: "Phase 3 : hackathons ouverts et paiements", en: "Phase 3: open hackathons and payments" }
     target: { fr: "À fixer, dépend d'une entité légale marchande", en: "To be set, depends on a merchant legal entity" }
     items:
-      - { fr: "Hackathons publiés par des Organisations validées, équipes, inscriptions, soumissions par liens", en: "Hackathons published by verified Organizations, teams, registrations, link submissions", status: planned, ref: "#228" }
+      - { fr: "Hackathons publiés par des Organisations validées, équipes, inscriptions, soumissions par liens", en: "Hackathons published by verified Organizations, teams, registrations, link submissions", status: delivered, ref: "#228" }
       - { fr: "Jury, vote public, suivi des Prizes versés par l'Organisation", en: "Jury, public vote, tracking of Prizes paid by the Organization", status: planned, ref: "#228" }
       - { fr: "Encaissement par mobile money via une fabrique de PSP", en: "Mobile money collection through a PSP factory", status: planned, ref: "#229" }
+    goals:
+      - { fr: "Hackathons publiés par des Organisations validées", en: "Hackathons published by verified Organizations", target: { fr: "À fixer après 30 jours de données réelles", en: "To be set after 30 days of real data" } }
+      - { fr: "Équipes inscrites par Hackathon", en: "Teams registered per Hackathon", target: { fr: "À fixer après 30 jours de données réelles", en: "To be set after 30 days of real data" } }
+      - { fr: "Soumissions déposées par Hackathon", en: "Submissions filed per Hackathon", target: { fr: "À fixer après 30 jours de données réelles", en: "To be set after 30 days of real data" } }
 not_doing:
   - { fr: "Applications mobiles natives : la PWA suffit", en: "Native mobile apps: the PWA is enough" }
   - { fr: "Interface en langues africaines locales : à rouvrir si la communauté le demande", en: "Interface in local African languages: to reopen if the community asks" }
