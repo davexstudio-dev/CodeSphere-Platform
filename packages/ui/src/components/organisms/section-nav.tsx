@@ -18,10 +18,11 @@ type SectionNavProps = Omit<React.ComponentProps<"nav">, "children"> & {
 
 // Tailwind's `lg` breakpoint: below it the summary is a row of chips, from it a vertical list.
 const WIDE = "(min-width: 1024px)";
-// Where a section heading lands under the sticky bars (px from the top of the viewport): the site
-// bar (64) plus, below `lg` only, this component's own sticky row, minus a margin.
-const BAND_TOP_NARROW = 128;
-const BAND_TOP_WIDE = 88;
+// Where a section heading lands under the sticky bars (px from the top of the viewport): the
+// site bar (64) plus, below `lg` only, this component's own sticky row. A heading at or above
+// this line counts as « passed ».
+const LINE_NARROW = 152;
+const LINE_WIDE = 120;
 
 /**
  * The summary of a long page: a row of chips on a small screen, a sticky list on a wide one, with
@@ -30,10 +31,15 @@ const BAND_TOP_WIDE = 88;
  * view, hides the scrollbar and fades the edge where more chips wait.
  */
 function SectionNav({ title, items, className, ...props }: SectionNavProps) {
-	const [active, setActive] = useState<string | null>(items[0]?.id ?? null);
+	const [active, setActive] = useState<string | null>(null);
 	const [fade, setFade] = useState({ start: false, end: false });
 	const list = useRef<HTMLUListElement>(null);
 
+	// The current section is the last one whose heading has gone past a line under the sticky bars;
+	// at the bottom of the page it is the last one, since its heading may never get that far up.
+	// Above the first heading there is none. Computed from the scroll position rather than from an
+	// IntersectionObserver, which says nothing when no heading crosses its band (top, bottom, a
+	// deep link, a resize).
 	useEffect(() => {
 		const targets = items
 			.map((item) => document.getElementById(item.id))
@@ -41,25 +47,42 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 		if (targets.length === 0) {
 			return;
 		}
-		const top = window.matchMedia(WIDE).matches
-			? BAND_TOP_WIDE
-			: BAND_TOP_NARROW;
-		// A section is « current » while its heading crosses the band under the sticky bars.
-		const observer = new IntersectionObserver(
-			(entries) => {
-				const visible = entries
-					.filter((entry) => entry.isIntersecting)
-					.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-				if (visible[0]) {
-					setActive(visible[0].target.id);
+		let frame = 0;
+		const update = () => {
+			frame = 0;
+			const line = window.matchMedia(WIDE).matches ? LINE_WIDE : LINE_NARROW;
+			const atBottom =
+				window.scrollY > 0 &&
+				window.innerHeight + window.scrollY >=
+					document.documentElement.scrollHeight - 2;
+			let current: HTMLElement | null = atBottom
+				? (targets[targets.length - 1] ?? null)
+				: null;
+			if (!atBottom) {
+				let nearest = Number.NEGATIVE_INFINITY;
+				for (const target of targets) {
+					const top = target.getBoundingClientRect().top;
+					if (top <= line && top > nearest) {
+						nearest = top;
+						current = target;
+					}
 				}
-			},
-			{ rootMargin: `-${top}px 0px -70% 0px` },
-		);
-		for (const target of targets) {
-			observer.observe(target);
-		}
-		return () => observer.disconnect();
+			}
+			setActive(current?.id ?? null);
+		};
+		const schedule = () => {
+			if (frame === 0) {
+				frame = requestAnimationFrame(update);
+			}
+		};
+		update();
+		window.addEventListener("scroll", schedule, { passive: true });
+		window.addEventListener("resize", schedule);
+		return () => {
+			cancelAnimationFrame(frame);
+			window.removeEventListener("scroll", schedule);
+			window.removeEventListener("resize", schedule);
+		};
 	}, [items]);
 
 	// Which edges of the row still hide chips: those get a fade.
@@ -89,7 +112,16 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 			active && row
 				? row.querySelector<HTMLElement>(`a[href="#${CSS.escape(active)}"]`)
 				: null;
-		if (!row || !chip || row.scrollWidth <= row.clientWidth) {
+		if (!row || row.scrollWidth <= row.clientWidth) {
+			return;
+		}
+		const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+			.matches
+			? "auto"
+			: "smooth";
+		if (!chip) {
+			// Nothing is current (above the first section): bring the row back to its start.
+			row.scrollTo({ left: 0, behavior });
 			return;
 		}
 		const rowBox = row.getBoundingClientRect();
@@ -99,9 +131,7 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 				row.scrollLeft +
 				(chipBox.left - rowBox.left) -
 				(row.clientWidth - chipBox.width) / 2,
-			behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-				? "auto"
-				: "smooth",
+			behavior,
 		});
 	}, [active]);
 
