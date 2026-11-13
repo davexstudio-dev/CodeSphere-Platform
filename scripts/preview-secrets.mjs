@@ -35,6 +35,8 @@ const KEYS = [
 	"SUPER_ADMIN_EMAILS",
 	"ADMIN_EMAILS",
 	"MODERATOR_EMAILS",
+	// Staging only: the password of the Basic auth that keeps it out of public reach.
+	"STAGING_ACCESS_PASSWORD",
 ];
 
 // DATABASE_URL is optional: a preview without the `preview-db` label has no database (#150).

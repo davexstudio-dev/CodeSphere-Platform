@@ -239,6 +239,8 @@ jobs:
           SUPER_ADMIN_EMAILS: ${{ secrets.SUPER_ADMIN_EMAILS }}
           ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
           MODERATOR_EMAILS: ${{ secrets.MODERATOR_EMAILS }}
+          # Basic auth in front of staging (apps/web/staging-gate.ts). Unset = staging stays public.
+          STAGING_ACCESS_PASSWORD: ${{ secrets.STAGING_ACCESS_PASSWORD }}
         run: |
           # Secrets go through a file, never the command line; removed right after.
           umask 077
@@ -279,9 +281,13 @@ jobs:
       # Next.js bump the OpenNext adapter did not support made every page answer 500 (Worker error
       # 1101) while /api/v1/health stayed green. A public page must answer 200 too.
       - name: Check a page of the web app
+        env:
+          STAGING_ACCESS_PASSWORD: ${{ secrets.STAGING_ACCESS_PASSWORD }}
         run: |
+          auth=()
+          if [ -n "$STAGING_ACCESS_PASSWORD" ]; then auth=(--user "ci:$STAGING_ACCESS_PASSWORD"); fi
           for attempt in $(seq 1 12); do
-            headers=$(curl -sS -m 15 -o /dev/null -D - "$ORIGIN/roadmap" || true)
+            headers=$(curl -sS -m 15 "${auth[@]}" -o /dev/null -D - "$ORIGIN/roadmap" || true)
             status=$(printf '%s' "$headers" | awk 'toupper($1) ~ /^HTTP/ {code=$2} END {print code}')
             if [ "$status" = "200" ]; then
               echo "the web app answers after $attempt attempt(s)"

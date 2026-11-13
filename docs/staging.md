@@ -53,6 +53,21 @@ Les secrets passent au Worker par un fichier (`scripts/preview-secrets.mjs`), ja
 
 **Connexion par code e-mail.** Elle est active en staging et dans les previews : `EMAIL_OTP_SIGNIN=true` sur le Worker (`--var`) et `NEXT_PUBLIC_EMAIL_OTP_SIGNIN=true` au build, les deux doivent concorder (le second est inlined dans le bundle). Le code part par Resend : sans `RESEND_API_KEY` et `EMAIL_FROM`, la demande échoue avec « The sign-in code could not be sent. » (le code n'est journalisé qu'en développement). Les previews le règlent de la même façon dans `preview.yml`, la production dans `docker-compose.prod.yml` et le build de `production.yml`.
 
+## Accès restreint (mot de passe)
+
+Staging n'est pas public : si le secret `STAGING_ACCESS_PASSWORD` est défini (environnement `preview`), le Worker exige une authentification HTTP Basic sur tout le site (`apps/web/staging-gate.ts`). Le navigateur ouvre une fenêtre ; le nom d'utilisateur est libre, seul le mot de passe compte. Sans ce secret, staging reste public : la production et les previews n'ont jamais de barrière.
+
+Restent ouverts, parce qu'aucun humain ne peut saisir de mot de passe : `/api/v1/health` (la vérification du déploiement), `/api/auth/callback/*` et `/api/auth/oauth-proxy-callback` (retour des fournisseurs d'identité et relais vers les previews, signé par `OAUTH_PROXY_SECRET`), `/webhooks/*` (Resend, qui signe ses appels). Toute autre route répond `401` avec `X-Robots-Tag: noindex`.
+
+Activer ou changer le mot de passe (à lancer par toi, dans un terminal : Claude n'écrit pas les secrets), puis redéployer :
+
+```sh
+gh secret set STAGING_ACCESS_PASSWORD --env preview
+gh workflow run staging.yml --ref develop
+```
+
+Pour désactiver la barrière : supprimer le secret et redéployer. Le job `deploy` s'authentifie lui-même avec ce secret pour sa vérification d'une page.
+
 ## Vérification `/api/v1/health`
 
 Le job `deploy` attend jusqu'à 5 minutes un `200` sur `/api/v1/health`. Si Cloudflare Bot Fight Mode défie le runner GitHub (`403` + `cf-mitigated: challenge`), l'étape passe avec un avertissement : le Worker est joignable mais la santé n'est pas vérifiée.
