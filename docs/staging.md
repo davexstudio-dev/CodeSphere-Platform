@@ -68,6 +68,24 @@ gh workflow run staging.yml --ref develop
 
 Pour désactiver la barrière : supprimer le secret et redéployer. Le job `deploy` s'authentifie lui-même avec ce secret pour sa vérification d'une page.
 
+### Variante : un compte par personne (Cloudflare Access)
+
+Le mot de passe est partagé. Pour n'ouvrir staging qu'à des adresses e-mail précises (code à usage unique envoyé par Cloudflare, révocable une par une), on met **Cloudflare Access** devant le domaine. Cela se règle dans Cloudflare, hors dépôt, et ne demande aucun redéploiement :
+
+1. Zero Trust › Settings › Authentication : vérifier que « One-time PIN » est activé (offre gratuite, jusqu'à 50 personnes).
+2. Zero Trust › Access › Applications › Add › Self-hosted. Domaine : `staging.codesphereplatform.xyz`. Durée de session au choix (24 h).
+3. Politique **Allow** : Include › Emails (les quatre adresses de l'équipe, ou `ends with` pour un domaine).
+4. Politique **Bypass** (action « Bypass », Include › Everyone) pour chaque chemin que les machines appellent, **placée avant** l'Allow, comme application distincte par chemin :
+   - `staging.codesphereplatform.xyz/api/v1/health`
+   - `staging.codesphereplatform.xyz/api/auth/callback/*`
+   - `staging.codesphereplatform.xyz/api/auth/oauth-proxy-callback`
+   - `staging.codesphereplatform.xyz/webhooks/*`
+5. Supprimer le secret `STAGING_ACCESS_PASSWORD` et redéployer : sinon l'équipe se verrait demander les deux.
+
+Le Worker de staging n'a plus d'adresse `workers.dev` ni d'URL de preview (`workers_dev` et `preview_urls` à `false` dans `wrangler.jsonc`) : le domaine protégé est la seule entrée. Sans Access ni mot de passe, staging est public.
+
+Vérifier depuis un navigateur privé : `/` doit renvoyer vers la page de connexion Cloudflare ; `curl -i https://staging.codesphereplatform.xyz/api/v1/health` doit toujours répondre `200`.
+
 ## Vérification `/api/v1/health`
 
 Le job `deploy` attend jusqu'à 5 minutes un `200` sur `/api/v1/health`. Si Cloudflare Bot Fight Mode défie le runner GitHub (`403` + `cf-mitigated: challenge`), l'étape passe avec un avertissement : le Worker est joignable mais la santé n'est pas vérifiée.
