@@ -170,10 +170,10 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 				}
 				className={cn(
 					// Row of chips below `lg`: scrolls sideways, no scrollbar, chips snap, edges fade.
-					"-mx-1 -my-1 flex snap-x snap-proximity gap-1.5 overflow-x-auto px-1 py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+					"-mx-1 -my-1 flex snap-x snap-proximity scroll-px-6 gap-1.5 overflow-x-auto px-1 py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
 					"[mask-image:linear-gradient(to_right,transparent,#000_var(--fade-start),#000_calc(100%-var(--fade-end)),transparent)]",
 					// Vertical list from `lg`.
-					"lg:mx-0 lg:my-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-0 lg:py-0 lg:[mask-image:none]",
+					"lg:mx-0 lg:my-0 lg:scroll-px-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-0 lg:py-0 lg:[mask-image:none]",
 				)}
 			>
 				{items.map((item) => {

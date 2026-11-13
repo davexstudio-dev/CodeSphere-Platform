@@ -81,7 +81,7 @@ export default async function Page() {
 		<div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 md:px-8 md:py-14 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-12">
 			{/* Sticky under the site bar (h-16, itself sticky), never under it: top = 4 rem + 1.5 rem.
 			    Its height is the viewport's minus that offset; a longer summary scrolls inside. */}
-			<aside className="sticky top-16 z-10 -mx-4 border-b bg-background px-4 py-2 md:-mx-8 md:px-8 lg:top-22 lg:z-auto lg:mx-0 lg:flex lg:max-h-[calc(100svh-7rem)] lg:flex-col lg:self-start lg:border-b-0 lg:bg-transparent lg:p-0">
+			<aside className="sticky top-16 z-10 -mx-4 border-b bg-background px-4 py-2 md:-mx-8 md:px-8 lg:top-22 lg:z-auto lg:mx-0 lg:flex lg:max-h-[calc(100svh-7rem)] lg:flex-col lg:self-start lg:border-b-0 lg:bg-transparent lg:p-0 max-lg:[@media(max-height:520px)]:static">
 				<ScrollArea className="lg:min-h-0 lg:flex-1">
 					<SectionNav title={t("summary")} items={summary} />
 					<p className="mt-3 hidden text-muted-foreground text-xs lg:block">
