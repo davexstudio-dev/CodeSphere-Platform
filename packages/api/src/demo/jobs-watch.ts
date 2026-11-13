@@ -83,7 +83,8 @@ export const demoJobs: DemoJob[] = [
 		remote: true,
 		publishedDaysAgo: 1,
 		status: "removed",
-		removedReason: "Annonce trompeuse : gain irréaliste, retirée après signalement.",
+		removedReason:
+			"Annonce trompeuse : gain irréaliste, retirée après signalement.",
 	},
 	{
 		id: "00000000-0000-4000-8000-0000000a0005",
