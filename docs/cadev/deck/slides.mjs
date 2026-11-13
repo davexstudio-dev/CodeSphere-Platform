@@ -206,7 +206,7 @@ export const slides = {
 				kicker: "What's next",
 				title: "What is shipped, what is planned",
 				bullets: [
-					"**Shipped**: search, reputation, folded Agent answers, watch feed, mixed \"For you\" feed, Organizations, jobs and Talent profiles, Hackathons published by Organizations.",
+					'**Shipped**: search, reputation, folded Agent answers, watch feed, mixed "For you" feed, Organizations, jobs and Talent profiles, Hackathons published by Organizations.',
 					"Each phase has three Indicators, with no Goal reached yet: values set after 30 days of real data (`/roadmap` page).",
 				],
 				planned: [
@@ -214,7 +214,7 @@ export const slides = {
 					"Jury, public vote and tracking of Prizes paid.",
 					"Mobile money payments (collecting job-post fees, phase 3).",
 				],
-				note: "Everything under \"Planned\" is an intention. Phases, statuses and Indicators: the Roadmap page.",
+				note: 'Everything under "Planned" is an intention. Phases, statuses and Indicators: the Roadmap page.',
 			},
 			{
 				id: "team",
