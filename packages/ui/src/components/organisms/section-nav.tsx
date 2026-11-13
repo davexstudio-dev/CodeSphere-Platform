@@ -23,9 +23,6 @@ const WIDE = "(min-width: 1024px)";
 // this line counts as « passed ».
 const LINE_NARROW = 152;
 const LINE_WIDE = 120;
-// Where an anchor tap leaves a heading: the `scroll-mt-*` the page gives its headings.
-const LANDING_NARROW = 144;
-const LANDING_WIDE = 112;
 
 /**
  * The summary of a long page: a row of chips on a small screen, a sticky list on a wide one, with
@@ -68,14 +65,21 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 				window.scrollY > 0 &&
 				window.innerHeight + window.scrollY >=
 					document.documentElement.scrollHeight - 2;
-			// At the bottom the last section wins, unless the current heading has just been brought
-			// to its landing spot by a tap on its chip: then the chip tapped stays the highlighted one.
-			const landing = wide ? LANDING_WIDE : LANDING_NARROW;
-			const justLanded =
-				current !== null &&
-				Math.abs(current.getBoundingClientRect().top - landing) <= 6;
-			if (atBottom && !justLanded) {
-				current = targets[targets.length - 1] ?? null;
+			// At the bottom the last section wins, unless the section named in the URL (a tap on its
+			// chip) is on screen: the last headings share one scroll position there, so only the
+			// fragment tells which chip was meant.
+			if (atBottom) {
+				const named = location.hash
+					? document.getElementById(location.hash.slice(1))
+					: null;
+				const namedTop = named?.getBoundingClientRect().top ?? -1;
+				current =
+					named &&
+					targets.includes(named) &&
+					namedTop >= 0 &&
+					namedTop < window.innerHeight
+						? named
+						: (targets[targets.length - 1] ?? null);
 			}
 			setActive(current?.id ?? null);
 		};
@@ -87,10 +91,12 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 		update();
 		window.addEventListener("scroll", schedule, { passive: true });
 		window.addEventListener("resize", schedule);
+		window.addEventListener("hashchange", schedule);
 		return () => {
 			cancelAnimationFrame(frame);
 			window.removeEventListener("scroll", schedule);
 			window.removeEventListener("resize", schedule);
+			window.removeEventListener("hashchange", schedule);
 		};
 	}, [items]);
 
