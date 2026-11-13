@@ -269,7 +269,7 @@ describe.skipIf(!url)("demo content on Postgres", () => {
 			const first = await snapshot();
 			expect(first).toEqual({
 				jobs: 6,
-				removed: 1,
+				removed: 2,
 				expired: 1,
 				reports: 2,
 				applications: 3,

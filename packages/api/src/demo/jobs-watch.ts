@@ -82,6 +82,8 @@ export const demoJobs: DemoJob[] = [
 		country: "OTHER",
 		remote: true,
 		publishedDaysAgo: 1,
+		status: "removed",
+		removedReason: "Annonce trompeuse : gain irréaliste, retirée après signalement.",
 	},
 	{
 		id: "00000000-0000-4000-8000-0000000a0005",
@@ -105,13 +107,13 @@ export const demoJobs: DemoJob[] = [
 	},
 ];
 
-// The suspicious posting waits for an Admin; the removed one was upheld.
+// Both reports were upheld: the scam-like posting and the duplicate are off the public page.
 const demoReports = [
 	{
 		userId: "demo-koffi",
 		jobId: "00000000-0000-4000-8000-0000000a0004",
 		reason: "Ressemble à une arnaque.",
-		outcome: null,
+		outcome: "upheld" as const,
 	},
 	{
 		userId: "demo-mariam",
