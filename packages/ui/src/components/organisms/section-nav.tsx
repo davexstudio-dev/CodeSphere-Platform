@@ -23,6 +23,9 @@ const WIDE = "(min-width: 1024px)";
 // this line counts as « passed ».
 const LINE_NARROW = 152;
 const LINE_WIDE = 120;
+// Where an anchor tap leaves a heading: the `scroll-mt-*` the page gives its headings.
+const LANDING_NARROW = 144;
+const LANDING_WIDE = 112;
 
 /**
  * The summary of a long page: a row of chips on a small screen, a sticky list on a wide one, with
@@ -50,23 +53,29 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 		let frame = 0;
 		const update = () => {
 			frame = 0;
-			const line = window.matchMedia(WIDE).matches ? LINE_WIDE : LINE_NARROW;
+			const wide = window.matchMedia(WIDE).matches;
+			const line = wide ? LINE_WIDE : LINE_NARROW;
+			let current: HTMLElement | null = null;
+			let nearest = Number.NEGATIVE_INFINITY;
+			for (const target of targets) {
+				const top = target.getBoundingClientRect().top;
+				if (top <= line && top > nearest) {
+					nearest = top;
+					current = target;
+				}
+			}
 			const atBottom =
 				window.scrollY > 0 &&
 				window.innerHeight + window.scrollY >=
 					document.documentElement.scrollHeight - 2;
-			let current: HTMLElement | null = atBottom
-				? (targets[targets.length - 1] ?? null)
-				: null;
-			if (!atBottom) {
-				let nearest = Number.NEGATIVE_INFINITY;
-				for (const target of targets) {
-					const top = target.getBoundingClientRect().top;
-					if (top <= line && top > nearest) {
-						nearest = top;
-						current = target;
-					}
-				}
+			// At the bottom the last section wins, unless the current heading has just been brought
+			// to its landing spot by a tap on its chip: then the chip tapped stays the highlighted one.
+			const landing = wide ? LANDING_WIDE : LANDING_NARROW;
+			const justLanded =
+				current !== null &&
+				Math.abs(current.getBoundingClientRect().top - landing) <= 6;
+			if (atBottom && !justLanded) {
+				current = targets[targets.length - 1] ?? null;
 			}
 			setActive(current?.id ?? null);
 		};
