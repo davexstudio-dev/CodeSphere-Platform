@@ -29,6 +29,8 @@ export type VideoProps = {
 	voicePrefix?: string;
 	/** File in public/music/, royalty-free music (note its licence in the video description). */
 	musicFile?: string;
+	/** Length of musicFile in seconds, so the loop covers the whole video. Default: master-bg.mp3. */
+	musicSeconds?: number;
 	/** Burn French subtitles into the picture (the 9:16 cut). The master uses a separate SRT. */
 	burnSubtitles?: boolean;
 	/** The vote call, shown only once the real vote link is published (#237). */
@@ -246,6 +248,7 @@ export const CodeSphereVideo = ({
 	scenes,
 	voicePrefix,
 	musicFile,
+	musicSeconds = MUSIC_SECONDS,
 	burnSubtitles,
 	voteLink = VOTE_LINK,
 }: VideoProps) => {
@@ -263,13 +266,16 @@ export const CodeSphereVideo = ({
 						voteLink={voteLink}
 					/>
 					{voicePrefix ? (
-						<Audio src={staticFile(`voice/${voicePrefix}-${scene.id}.mp3`)} />
+						<Audio
+							src={staticFile(`voice/${voicePrefix}-${scene.id}.mp3`)}
+							playbackRate={scene.voiceRate ?? 1}
+						/>
 					) : null}
 				</Sequence>
 			))}
 			{musicFile ? (
-				// The track is shorter than the master (175 s against 180 s): it loops.
-				<Loop durationInFrames={Math.ceil(MUSIC_SECONDS * FPS)}>
+				// The track loops if it is shorter than the video.
+				<Loop durationInFrames={Math.ceil(musicSeconds * FPS)}>
 					<Audio src={staticFile(`music/${musicFile}`)} volume={0.12} />
 				</Loop>
 			) : null}

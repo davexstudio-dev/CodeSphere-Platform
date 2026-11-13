@@ -7,7 +7,9 @@ const last = (scenes: { to: number }[]) => scenes[scenes.length - 1].to;
 const master: VideoProps = {
 	scenes: MASTER_SCENES,
 	burnSubtitles: false,
-	musicFile: "master-bg.mp3",
+	voicePrefix: "master",
+	musicFile: "master-bg-180.mp3",
+	musicSeconds: 180,
 };
 const cut: VideoProps = {
 	scenes: CUT_SCENES,
