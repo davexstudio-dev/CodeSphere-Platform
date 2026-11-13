@@ -53,6 +53,39 @@ Les secrets passent au Worker par un fichier (`scripts/preview-secrets.mjs`), ja
 
 **Connexion par code e-mail.** Elle est active en staging et dans les previews : `EMAIL_OTP_SIGNIN=true` sur le Worker (`--var`) et `NEXT_PUBLIC_EMAIL_OTP_SIGNIN=true` au build, les deux doivent concorder (le second est inlined dans le bundle). Le code part par Resend : sans `RESEND_API_KEY` et `EMAIL_FROM`, la demande échoue avec « The sign-in code could not be sent. » (le code n'est journalisé qu'en développement). Les previews le règlent de la même façon dans `preview.yml`, la production dans `docker-compose.prod.yml` et le build de `production.yml`.
 
+## Accès restreint (mot de passe)
+
+Staging n'est pas public : si le secret `STAGING_ACCESS_PASSWORD` est défini (environnement `preview`), le Worker exige une authentification HTTP Basic sur tout le site (`apps/web/staging-gate.ts`). Le navigateur ouvre une fenêtre ; le nom d'utilisateur est libre, seul le mot de passe compte. Sans ce secret, staging reste public : la production et les previews n'ont jamais de barrière.
+
+Restent ouverts, parce qu'aucun humain ne peut saisir de mot de passe : `/api/v1/health` (la vérification du déploiement), `/api/auth/callback/*` et `/api/auth/oauth-proxy-callback` (retour des fournisseurs d'identité et relais vers les previews, signé par `OAUTH_PROXY_SECRET`), `/webhooks/*` (Resend, qui signe ses appels). Toute autre route répond `401` avec `X-Robots-Tag: noindex`.
+
+Activer ou changer le mot de passe (à lancer par toi, dans un terminal : Claude n'écrit pas les secrets), puis redéployer :
+
+```sh
+gh secret set STAGING_ACCESS_PASSWORD --env preview
+gh workflow run staging.yml --ref develop
+```
+
+Pour désactiver la barrière : supprimer le secret et redéployer. Le job `deploy` s'authentifie lui-même avec ce secret pour sa vérification d'une page.
+
+### Variante : un compte par personne (Cloudflare Access)
+
+Le mot de passe est partagé. Pour n'ouvrir staging qu'à des adresses e-mail précises (code à usage unique envoyé par Cloudflare, révocable une par une), on met **Cloudflare Access** devant le domaine. Cela se règle dans Cloudflare, hors dépôt, et ne demande aucun redéploiement :
+
+1. Zero Trust › Settings › Authentication : vérifier que « One-time PIN » est activé (offre gratuite, jusqu'à 50 personnes).
+2. Zero Trust › Access › Applications › Add › Self-hosted. Domaine : `staging.codesphereplatform.xyz`. Durée de session au choix (24 h).
+3. Politique **Allow** : Include › Emails (les quatre adresses de l'équipe, ou `ends with` pour un domaine).
+4. Politique **Bypass** (action « Bypass », Include › Everyone) pour chaque chemin que les machines appellent, **placée avant** l'Allow, comme application distincte par chemin :
+   - `staging.codesphereplatform.xyz/api/v1/health`
+   - `staging.codesphereplatform.xyz/api/auth/callback/*`
+   - `staging.codesphereplatform.xyz/api/auth/oauth-proxy-callback`
+   - `staging.codesphereplatform.xyz/webhooks/*`
+5. Supprimer le secret `STAGING_ACCESS_PASSWORD` et redéployer : sinon l'équipe se verrait demander les deux.
+
+Le Worker de staging n'a plus d'adresse `workers.dev` ni d'URL de preview (`workers_dev` et `preview_urls` à `false` dans `wrangler.jsonc`) : le domaine protégé est la seule entrée. Sans Access ni mot de passe, staging est public.
+
+Vérifier depuis un navigateur privé : `/` doit renvoyer vers la page de connexion Cloudflare ; `curl -i https://staging.codesphereplatform.xyz/api/v1/health` doit toujours répondre `200`.
+
 ## Vérification `/api/v1/health`
 
 Le job `deploy` attend jusqu'à 5 minutes un `200` sur `/api/v1/health`. Si Cloudflare Bot Fight Mode défie le runner GitHub (`403` + `cf-mitigated: challenge`), l'étape passe avec un avertissement : le Worker est joignable mais la santé n'est pas vérifiée.
