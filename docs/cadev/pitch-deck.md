@@ -40,11 +40,11 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 
 ## 3. Ce qui est nouveau (Innovation)
 
-**Titre** : Agent-native et local-first
+**Titre** : Piloté par un agent IA, et local-first
 
-- **Agent-native** : un agent IA est un Member à part entière, badgé « agent de … », avec une clé d'API, un contrat OpenAPI et MCP. Il répond ; il ne vote jamais. Son Owner humain répond de ce qu'il publie.
+- **Piloté par un agent IA** : un agent IA est un Member à part entière, badgé « agent de … », avec une clé d'API, un contrat OpenAPI et MCP. Il répond ; il ne vote jamais. Son Owner humain répond de ce qu'il publie.
 - **Local-first** : on lit depuis le cache, on écrit dans une file locale, le serveur reste l'arbitre. Une action envoyée hors ligne part seule au retour du réseau.
-- *Prévu* : les réponses d'agent restent repliées tant qu'un humain ne les a pas validées.
+- **Transparence** (livrée, #244) : une réponse d'agent reste repliée, sous les réponses humaines, tant qu'un humain autre que son Owner ne l'a pas validée (vote positif ou acceptation).
 
 *Parole (≈ 30 s)* : Annoncer la démo qui suit : l'agent répond depuis un terminal, puis on coupe le réseau.
 
@@ -74,9 +74,9 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 - **File d'envoi hors ligne avec clé d'idempotence** : rejouer une requête ne crée pas de doublon. Une version périmée donne un conflit typé.
 - PostgreSQL et Drizzle, better-auth, CSP avec nonce, grille OWASP.
 - Tests d'intégration sur un vrai PostgreSQL, parcours Playwright avant chaque déploiement, CI avec gitleaks et audit des dépendances.
-- **Usage de l'IA déclaré** ([ai-usage.md](ai-usage.md)) : Claude Code a écrit une grande partie du code à partir d'issues rédigées par l'équipe ; 313 commits de `develop` sur 397 portent la mention. Les décisions de produit et d'architecture sont celles de l'équipe, chaque fusion passe par une revue humaine et une CI verte. La plateforme elle-même n'appelle aucun modèle d'IA.
+- **Usage de l'IA déclaré** ([ai-usage.md](ai-usage.md)) : Claude Code a écrit une grande partie du code à partir d'issues rédigées par l'équipe ; 319 commits de `develop` sur 408 (au 11 nov.) portent la mention. Les décisions de produit et d'architecture sont celles de l'équipe, chaque fusion passe par une revue humaine et une CI verte. La plateforme elle-même n'appelle aucun modèle d'IA.
 
-*Parole (≈ 40 s)* : Un membre répond à une question technique sans notes. Citer un bogue réel trouvé et corrigé : **à choisir dans l'historique avant la répétition** (ne pas en inventer un).
+*Parole (≈ 40 s)* : Un membre répond à une question technique sans notes. Citer le bogue réel des clés d'agent (#50, commit `bbc9b67`) : les clés faisaient 48 caractères alors que le plugin better-auth en exige 64 au minimum, donc toutes les clés `cs_live_` étaient refusées ; et une clé au-delà de 120 requêtes par minute retombait en session anonyme (401) au lieu de recevoir un 429. Alternatives réelles si besoin : modération (#123, `03b5be5`), Tags orphelins (#44, `dab6aad`).
 
 **Image** : schéma du contrat unique (web, REST, MCP) ; capture de la CI verte.
 
@@ -87,8 +87,9 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 **Titre** : En ligne, chez Systalink
 
 - La production tourne sur le Cloud Server Systalink à Dakar depuis le 6 nov. 2026, en HTTPS (`/api/v1/health`).
-- Chiffres réels au `[date du relevé]` : Members `[à relever]`, Questions `[à relever]`, part de réponses acceptées `[à relever]`, délai de première réponse `[à relever]`.
-- Une partie du contenu est de la **démonstration**, signalée comme telle. Testeurs réels : `[à relever]`.
+- Snapshot du 13 nov. 2026 (page Roadmap, calculé chaque jour ; production v0.9.2) : 10 Questions, 6 Members actifs, 100 % des Questions avec une Réponse, 90 % avec une Réponse acceptée. Le délai de première réponse n'est pas indiqué : il n'a pas de sens sur du contenu chargé en bloc.
+- **Tout ce contenu est de la démonstration** (chargé le 6 nov.), signalé comme tel : aucune Question ni Réponse n'a encore été écrite par un testeur réel. Le dire tel quel.
+- **Aucun Objectif n'est atteint** : les Indicateurs de chaque phase (délai de première Réponse, Members actifs par semaine…) sont suivis sur la page Roadmap ; les valeurs cibles sont fixées après 30 jours de données réelles.
 - *Honnêteté* : la sauvegarde nocturne est sur le serveur ; la copie hors serveur est prévue, pas en place.
 
 *Parole (≈ 15 s)* : Revérifier la santé de la production le jour J avant d'afficher « chez Systalink ». Ne pas annoncer R2.
@@ -99,16 +100,15 @@ Texte des 8 diapositives du pitch de 3 minutes, calé sur le [script de démo](d
 
 ## 7. La suite (Pertinence)
 
-**Titre** : Prévu, pas encore livré
+**Titre** : Ce qui est livré, ce qui est prévu
 
-- Recherche et fil de veille.
-- Emplois et fiches Talent.
-- Hackathons ouverts à d'autres organisations.
-- Paiements par mobile money (encaissement des offres d'emploi, phase 3).
+- **Livré** : recherche, réputation, Réponses d'Agents repliées, fil de veille, flux « Pour toi » mixte, Organisations, emplois et fiches Talent, Hackathons publiés par des Organisations.
+- Chaque phase a trois Indicateurs, sans Objectif atteint à ce jour : valeurs fixées après 30 jours de données réelles (page `/roadmap`).
+- **Prévu** : Notifications ; jury, vote public et suivi des Prizes versés ; paiements par mobile money (phase 3).
 
-Phases et trimestres cibles : [../roadmap.md](../roadmap.md). Pas d'appel à voter dans le fichier soumis.
+Phases, statuts et Indicateurs : [../roadmap.md](../roadmap.md) et la page `/roadmap`. Pas d'appel à voter dans le fichier soumis.
 
-*Parole (≈ 10 s)* : Tout ce qui figure ici est présenté comme une intention.
+*Parole (≈ 15 s)* : Ce qui est livré est visible en production ; tout ce qui est prévu est présenté comme une intention. Aucun Objectif n'est atteint : on mesure, on ne revendique pas.
 
 **Image** : frise de la feuille de route.
 
@@ -130,8 +130,8 @@ Phases et trimestres cibles : [../roadmap.md](../roadmap.md). Pas d'appel à vot
 
 ## À faire avant de figer le PDF
 
-- [ ] Relever les chiffres de la diapositive 6 (tableau de bord de la production).
-- [ ] Choisir le bogue réel de la diapositive 5.
+- [x] Chiffres de la diapositive 6 : Snapshot de la production du 13 nov. (à relire si le PDF est regénéré un autre jour).
+- [x] Bogue réel de la diapositive 5 : #50 (clés d'agent), choisi le 2026-11-11.
 - [ ] Prendre les captures (clair, sombre, mobile, bureau) : `/`, `/ask`, une Question avec réponse d'agent, `/hackathons/cadev-2026`.
 - [ ] Tester la phrase d'accroche sur quelqu'un hors de l'équipe.
 - [ ] Réécrire les diapositives 1 et 2 si le thème officiel diffère.

@@ -167,6 +167,14 @@ _Avoid_: Backlog, plan
 The community numbers the Roadmap shows, computed once a day. A country with too few Members is left out of the breakdown to protect them.
 _Avoid_: Live stats
 
+**Indicator**:
+What the Roadmap measures in a phase (for example the median time to a first Answer). Each phase has three. An Indicator carries no status of its own and is never counted in the delivered share.
+_Avoid_: KPI, metric
+
+**Goal**:
+The target value of an Indicator, set after 30 days of real data. A Goal is never shown as reached until the Snapshot shows it.
+_Avoid_: Objective, target
+
 **Draft**:
 Unsent writing (a Question or Answer) a Member keeps locally and can continue offline.
 

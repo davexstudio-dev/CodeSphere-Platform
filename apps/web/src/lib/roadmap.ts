@@ -12,11 +12,18 @@ export type RoadmapItem = {
 	ref: string | null;
 };
 
+/** An Indicator and its Goal. Never given a status: a Goal is not part of the delivered share. */
+export type RoadmapGoal = {
+	text: string;
+	target: string;
+};
+
 export type RoadmapSection = {
 	id: string;
 	title: string;
 	target: string | null;
 	items: RoadmapItem[];
+	goals: RoadmapGoal[];
 };
 
 const pick = (text: Text, locale: Locale) =>
@@ -37,6 +44,10 @@ export function roadmapIn(locale: Locale) {
 					text: pick(item, locale),
 					status: item.status as RoadmapStatus,
 					ref: "ref" in item && typeof item.ref === "string" ? item.ref : null,
+				})),
+				goals: (section.goals ?? []).map((goal) => ({
+					text: pick(goal, locale),
+					target: pick(goal.target, locale),
 				})),
 			}),
 		),
