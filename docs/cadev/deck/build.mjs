@@ -52,11 +52,31 @@ ${s.cta ? `<p class="cta">${esc(s.cta)}</p>` : ""}
 </div>${figure(s, labels)}</div></section>`;
 }
 
-const css = `
-:root{--bg:#0f1720;--fg:#f4f6f8;--muted:#9fb0c0;--accent:#2dd4a7;--card:#18232f;--warn:#fbbf24}
+// Charte du projet : jetons de packages/ui/src/styles/globals.css (terracotta, fonds chauds, Outfit).
+// Sombre par défaut ; `--light` produit la variante crème (fichiers *.light.*).
+const light = process.argv.includes("--light");
+const suffix = light ? ".light" : "";
+const theme = light
+	? "--bg:oklch(0.975 0.012 75);--fg:oklch(0.24 0.03 50);--muted:oklch(0.5 0.03 60);--accent:oklch(0.515 0.139 35.1);--card:oklch(0.995 0.005 75);--line:oklch(0.89 0.02 70);--warn:oklch(0.93 0.05 80);--warn-ink:oklch(0.515 0.139 35.1);--on-warn:oklch(0.24 0.03 50)"
+	: "--bg:oklch(0.2 0.02 50);--fg:oklch(0.95 0.015 75);--muted:oklch(0.72 0.03 70);--accent:oklch(0.7 0.14 38);--card:oklch(0.25 0.025 50);--line:oklch(0.34 0.03 50);--warn:oklch(0.93 0.05 80);--warn-ink:oklch(0.93 0.05 80);--on-warn:oklch(0.24 0.03 50)";
+// Outfit (OFL) embarquée en base64 : le rendu ne dépend pas de la machine.
+const fontFace = (file, range) =>
+	`@font-face{font-family:Outfit;font-weight:100 900;src:url(data:font/woff2;base64,${readFileSync(resolve("assets/fonts", file)).toString("base64")}) format("woff2");unicode-range:${range}}`;
+const fonts =
+	fontFace(
+		"outfit-latin-ext.woff2",
+		"U+100-2BA,U+2BD-2C5,U+2C7-2CC,U+2CE-2D7,U+2DD-2FF,U+304,U+308,U+329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF",
+	) +
+	fontFace(
+		"outfit-latin.woff2",
+		"U+00-FF,U+131,U+152-153,U+2BB-2BC,U+2C6,U+2DA,U+2DC,U+304,U+308,U+329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD",
+	);
+
+const css = `${fonts}
+:root{${theme}}
 @page{size:1920px 1080px;margin:0}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,"Segoe UI",system-ui,sans-serif}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Outfit,"Segoe UI",system-ui,sans-serif}
 .slide{width:1920px;height:1080px;padding:64px 96px;display:flex;flex-direction:column;break-after:page;overflow:hidden}
 header{display:flex;justify-content:space-between;color:var(--muted);font-size:26px;letter-spacing:.08em;text-transform:uppercase}
 .kicker{color:var(--accent);font-weight:700}
@@ -70,16 +90,16 @@ blockquote{margin:0 0 26px;padding:18px 26px;border-left:6px solid var(--accent)
 .dense h1{font-size:50px;margin-bottom:20px}
 .dense ul{font-size:25px;line-height:1.3}
 .dense li{margin-bottom:9px}
-.planned{margin-top:20px;padding:16px 26px;border:2px dashed var(--muted);border-radius:14px}
-.planned b{color:var(--warn);text-transform:uppercase;letter-spacing:.08em;font-size:24px}
+.planned{margin-top:20px;padding:16px 26px;border:2px dashed var(--line);border-radius:14px}
+.planned b{color:var(--warn-ink);text-transform:uppercase;letter-spacing:.08em;font-size:24px}
 .planned ul{font-size:28px;margin-top:8px}
 .note{color:var(--muted);font-size:28px;margin-top:28px}
 figure{margin:0;height:100%;max-height:780px;display:flex;align-items:center;justify-content:center}
-figure img{max-width:100%;max-height:100%;border-radius:16px;box-shadow:0 20px 60px #0008;object-fit:contain}
-figure.missing{flex-direction:column;gap:12px;border:3px dashed var(--muted);border-radius:16px;color:var(--muted);width:100%}
+figure img{max-width:100%;max-height:100%;border-radius:16px;box-shadow:0 20px 60px oklch(0 0 0 / .45);object-fit:contain}
+figure.missing{flex-direction:column;gap:12px;border:3px dashed var(--line);border-radius:16px;color:var(--muted);width:100%}
 figure.missing span{font-size:40px;font-weight:700}
 figure.missing small{font-size:24px;max-width:80%;text-align:center}
-mark.todo{background:var(--warn);color:#111;padding:0 .25em;border-radius:6px}
+mark.todo{background:var(--warn);color:var(--on-warn);padding:0 .25em;border-radius:6px}
 .team{list-style:none;padding:0;font-size:40px}
 .team li{display:flex;gap:24px;align-items:baseline}
 .team span{color:var(--muted);font-size:30px}
@@ -93,7 +113,7 @@ for (const [lang, deck] of Object.entries(slides)) {
 		.map((s, i) => slideHtml(s, i, total, deck.labels))
 		.join("\n");
 	const html = `<!doctype html><html lang="${deck.lang}"><head><meta charset="utf-8"><title>${esc(deck.deckTitle)}</title><style>${css}</style></head><body>${body}</body></html>`;
-	writeFileSync(resolve(out, `deck.${lang}.html`), html);
+	writeFileSync(resolve(out, `deck.${lang}${suffix}.html`), html);
 	for (const m of html.matchAll(/<mark class="todo">([^<]+)<\/mark>/g))
 		todos.push(`${lang}: ${m[1]}`);
 	for (const s of deck.slides)
@@ -115,9 +135,9 @@ if (!process.argv.includes("--no-pdf")) {
 	}
 	for (const lang of Object.keys(slides)) {
 		const page = await browser.newPage();
-		await page.goto(pathToFileURL(resolve(out, `deck.${lang}.html`)).href);
+		await page.goto(pathToFileURL(resolve(out, `deck.${lang}${suffix}.html`)).href);
 		await page.pdf({
-			path: resolve(out, `codesphere-pitch.${lang}.pdf`),
+			path: resolve(out, `codesphere-pitch.${lang}${suffix}.pdf`),
 			width: "1920px",
 			height: "1080px",
 			printBackground: true,

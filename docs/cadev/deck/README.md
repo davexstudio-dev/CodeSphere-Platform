@@ -8,6 +8,8 @@ node build.mjs            # out/deck.{fr,en}.html + out/codesphere-pitch.{fr,en}
 node build.mjs --no-pdf   # HTML seul
 ```
 
+Charte : jetons de `packages/ui/src/styles/globals.css` (terracotta, fonds chauds), police Outfit (OFL) intégrée depuis `assets/fonts/`. `node build.mjs --light` produit la variante crème (`*.light.*`).
+
 Chrome vient de Playwright (`apps/e2e`), de `CHROME_PATH` ou du Chrome installé. Aucune dépendance ajoutée.
 
 ## Avant de figer (13 nov.)
