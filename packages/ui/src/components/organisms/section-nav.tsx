@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@codesphere/ui/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type SectionNavItem = {
 	/** The id of the element the link scrolls to. */
@@ -16,13 +16,23 @@ type SectionNavProps = Omit<React.ComponentProps<"nav">, "children"> & {
 	items: readonly SectionNavItem[];
 };
 
+// Tailwind's `lg` breakpoint: below it the summary is a row of chips, from it a vertical list.
+const WIDE = "(min-width: 1024px)";
+// Where a section heading lands under the sticky bars (px from the top of the viewport): the site
+// bar (64) plus, below `lg` only, this component's own sticky row, minus a margin.
+const BAND_TOP_NARROW = 128;
+const BAND_TOP_WIDE = 88;
+
 /**
  * The summary of a long page: a row of chips on a small screen, a sticky list on a wide one, with
  * the section being read highlighted. The links are plain anchors, so they work without JavaScript;
- * only the highlight follows the scroll.
+ * only the highlight follows the scroll. On a small screen the row keeps the highlighted chip in
+ * view, hides the scrollbar and fades the edge where more chips wait.
  */
 function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 	const [active, setActive] = useState<string | null>(items[0]?.id ?? null);
+	const [fade, setFade] = useState({ start: false, end: false });
+	const list = useRef<HTMLUListElement>(null);
 
 	useEffect(() => {
 		const targets = items
@@ -31,7 +41,10 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 		if (targets.length === 0) {
 			return;
 		}
-		// A section is « current » while it crosses the band under the top of the viewport.
+		const top = window.matchMedia(WIDE).matches
+			? BAND_TOP_WIDE
+			: BAND_TOP_NARROW;
+		// A section is « current » while its heading crosses the band under the sticky bars.
 		const observer = new IntersectionObserver(
 			(entries) => {
 				const visible = entries
@@ -41,13 +54,56 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 					setActive(visible[0].target.id);
 				}
 			},
-			{ rootMargin: "-10% 0px -70% 0px" },
+			{ rootMargin: `-${top}px 0px -70% 0px` },
 		);
 		for (const target of targets) {
 			observer.observe(target);
 		}
 		return () => observer.disconnect();
 	}, [items]);
+
+	// Which edges of the row still hide chips: those get a fade.
+	useEffect(() => {
+		const row = list.current;
+		if (!row) {
+			return;
+		}
+		const update = () => {
+			const max = row.scrollWidth - row.clientWidth;
+			setFade({ start: row.scrollLeft > 4, end: row.scrollLeft < max - 4 });
+		};
+		update();
+		row.addEventListener("scroll", update, { passive: true });
+		window.addEventListener("resize", update);
+		return () => {
+			row.removeEventListener("scroll", update);
+			window.removeEventListener("resize", update);
+		};
+	}, []);
+
+	// Keep the highlighted chip in view. The row is scrolled itself, never with `scrollIntoView`:
+	// that would also scroll the page when the row is off screen.
+	useEffect(() => {
+		const row = list.current;
+		const chip =
+			active && row
+				? row.querySelector<HTMLElement>(`a[href="#${CSS.escape(active)}"]`)
+				: null;
+		if (!row || !chip || row.scrollWidth <= row.clientWidth) {
+			return;
+		}
+		const rowBox = row.getBoundingClientRect();
+		const chipBox = chip.getBoundingClientRect();
+		row.scrollTo({
+			left:
+				row.scrollLeft +
+				(chipBox.left - rowBox.left) -
+				(row.clientWidth - chipBox.width) / 2,
+			behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+				? "auto"
+				: "smooth",
+		});
+	}, [active]);
 
 	return (
 		<nav
@@ -59,14 +115,32 @@ function SectionNav({ title, items, className, ...props }: SectionNavProps) {
 			<p className="hidden font-medium text-2xs text-muted-foreground uppercase tracking-widest lg:block">
 				{title}
 			</p>
-			<ul className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 lg:mx-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-0 lg:pb-0">
+			<ul
+				ref={list}
+				style={
+					{
+						"--fade-start": fade.start ? "1.5rem" : "0px",
+						"--fade-end": fade.end ? "1.5rem" : "0px",
+					} as React.CSSProperties
+				}
+				className={cn(
+					// Row of chips below `lg`: scrolls sideways, no scrollbar, chips snap, edges fade.
+					"-mx-1 -my-1 flex snap-x snap-proximity gap-1.5 overflow-x-auto px-1 py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+					"[mask-image:linear-gradient(to_right,transparent,#000_var(--fade-start),#000_calc(100%-var(--fade-end)),transparent)]",
+					// Vertical list from `lg`.
+					"lg:mx-0 lg:my-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-0 lg:py-0 lg:[mask-image:none]",
+				)}
+			>
 				{items.map((item) => {
 					const current = active === item.id;
 					const share = item.progress?.total
 						? (item.progress.done / item.progress.total) * 100
 						: 0;
 					return (
-						<li key={item.id} className="shrink-0">
+						<li
+							key={item.id}
+							className="shrink-0 snap-start lg:snap-align-none"
+						>
 							<a
 								href={`#${item.id}`}
 								aria-current={current ? "location" : undefined}
